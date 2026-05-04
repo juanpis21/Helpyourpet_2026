@@ -20,11 +20,17 @@ const create_producto_dto_1 = require("./dto/create-producto.dto");
 const update_producto_dto_1 = require("./dto/update-producto.dto");
 const producto_entity_1 = require("./entities/producto.entity");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
+const platform_express_1 = require("@nestjs/platform-express");
+const multer_1 = require("multer");
+const path_1 = require("path");
 let ProductosController = class ProductosController {
     constructor(productosService) {
         this.productosService = productosService;
     }
-    create(createProductoDto) {
+    create(createProductoDto, file) {
+        if (file) {
+            createProductoDto.imagen = `/uploads/productos/${file.filename}`;
+        }
         return this.productosService.create(createProductoDto);
     }
     findAll() {
@@ -33,7 +39,10 @@ let ProductosController = class ProductosController {
     findOne(id) {
         return this.productosService.findOne(+id);
     }
-    update(id, updateProductoDto) {
+    update(id, updateProductoDto, file) {
+        if (file) {
+            updateProductoDto.imagen = `/uploads/productos/${file.filename}`;
+        }
         return this.productosService.update(+id, updateProductoDto);
     }
     remove(id) {
@@ -43,12 +52,31 @@ let ProductosController = class ProductosController {
 exports.ProductosController = ProductosController;
 __decorate([
     (0, common_1.Post)(),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('imagen', {
+        storage: (0, multer_1.diskStorage)({
+            destination: './uploads/productos',
+            filename: (req, file, cb) => {
+                const uniqueSuffix = Date.now() + '_' + Math.round(Math.random() * 1E9);
+                cb(null, `producto_${uniqueSuffix}${(0, path_1.extname)(file.originalname)}`);
+            },
+        }),
+        fileFilter: (req, file, cb) => {
+            if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
+                cb(new common_1.BadRequestException('Solo se permiten imágenes'), false);
+            }
+            else {
+                cb(null, true);
+            }
+        },
+    })),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
     (0, swagger_1.ApiOperation)({ summary: 'Crear un nuevo producto' }),
     (0, swagger_1.ApiResponse)({ status: 201, description: 'Producto creado exitosamente', type: producto_entity_1.Producto }),
     (0, swagger_1.ApiResponse)({ status: 409, description: 'El producto con este código de barras ya existe' }),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_producto_dto_1.CreateProductoDto]),
+    __metadata("design:paramtypes", [create_producto_dto_1.CreateProductoDto, Object]),
     __metadata("design:returntype", void 0)
 ], ProductosController.prototype, "create", null);
 __decorate([
@@ -72,14 +100,33 @@ __decorate([
 ], ProductosController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('imagen', {
+        storage: (0, multer_1.diskStorage)({
+            destination: './uploads/productos',
+            filename: (req, file, cb) => {
+                const uniqueSuffix = Date.now() + '_' + Math.round(Math.random() * 1E9);
+                cb(null, `producto_${uniqueSuffix}${(0, path_1.extname)(file.originalname)}`);
+            },
+        }),
+        fileFilter: (req, file, cb) => {
+            if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
+                cb(new common_1.BadRequestException('Solo se permiten imágenes'), false);
+            }
+            else {
+                cb(null, true);
+            }
+        },
+    })),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
     (0, swagger_1.ApiOperation)({ summary: 'Actualizar un producto' }),
     (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del producto' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Producto actualizado', type: producto_entity_1.Producto }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Producto no encontrado' }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_producto_dto_1.UpdateProductoDto]),
+    __metadata("design:paramtypes", [String, update_producto_dto_1.UpdateProductoDto, Object]),
     __metadata("design:returntype", void 0)
 ], ProductosController.prototype, "update", null);
 __decorate([

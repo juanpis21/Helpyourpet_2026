@@ -16,10 +16,10 @@ export class App {
   protected readonly title = signal('adso_3063267-angular');
 
   /** Rutas donde NO se muestra el navbar global */
-  private readonly noNavbarRoutes = ['/', '/login', '/register', '/recovery', '/inicio', '/perfil-usuario', '/tienda', '/admin'];
+  private readonly noNavbarRoutes = ['/', '/login', '/register', '/recovery', '/inicio', '/perfil-usuario', '/tienda', '/admin', '/super-admin'];
 
   /** Rutas donde NO se muestra el footer global */
-  private readonly noFooterRoutes = ['/', '/login', '/register', '/recovery', '/perfil-usuario', '/tienda', '/admin'];
+  private readonly noFooterRoutes = ['/', '/login', '/register', '/recovery', '/perfil-usuario', '/tienda', '/admin', '/super-admin'];
 
   get showNavbar(): boolean {
     return !this.noNavbarRoutes.includes(this.router.url);

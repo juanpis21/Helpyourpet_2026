@@ -21,6 +21,7 @@ import { Subscription } from 'rxjs';
 export class Tienda implements OnInit, OnDestroy {
   // Control de vistas: 'tiendas' | 'productos'
   vista: string = 'tiendas';
+  baseUrl: string = 'http://localhost:3000';
 
   // Modo oscuro
   modoOscuro: boolean = false;
@@ -154,7 +155,7 @@ export class Tienda implements OnInit, OnDestroy {
               precio: p.precioVenta,
               categoria: cat ? cat.nombre : 'General',
               categoriaId: p.categoriaId,
-              imagen: 'assets/IMG/default.png'
+              imagen: p.imagen ? this.baseUrl + p.imagen : 'assets/IMG/default.jpg'
             };
           });
       },

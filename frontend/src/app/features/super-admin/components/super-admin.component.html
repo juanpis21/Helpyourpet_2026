@@ -1,0 +1,370 @@
+<div class="sidebar-overlay" [class.active]="sidebarOpen" (click)="toggleSidebar()"></div>
+
+<div class="admin-layout" [ngClass]="{'sidebar-closed': !sidebarOpen}">
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" [class.active]="sidebarOpen">
+    <div class="sidebar-header">
+      <h3>HelpYourPet</h3>
+      <div class="user-profile">
+        <img [src]="getAdminProfileImage()" alt="Foto" class="profile-avatar">
+        <h5>Super Administrador</h5>
+        <p>{{ getAdminRoleName() | titlecase }}</p>
+      </div>
+    </div>
+
+    <ul class="nav-menu">
+      <li>
+        <a [class.active]="activeTab === 'dashboard'" (click)="setSection('dashboard')">
+          <i class="fas fa-chart-line"></i><span>Dashboard Maestro</span>
+        </a>
+      </li>
+      <li>
+        <a [class.active]="activeTab === 'roles'" (click)="setSection('roles')">
+          <i class="fas fa-user-tag"></i><span>Gestión de Roles</span>
+        </a>
+      </li>
+      <li>
+        <a [class.active]="activeTab === 'permissions'" (click)="setSection('permissions')">
+          <i class="fas fa-shield-alt"></i><span>Permisos y Módulos</span>
+        </a>
+      </li>
+      <li>
+        <a [class.active]="activeTab === 'users'" (click)="setSection('users')">
+          <i class="fas fa-users"></i><span>Todos los Usuarios</span>
+        </a>
+      </li>
+      <li>
+        <a [class.active]="activeTab === 'pets'" (click)="setSection('pets')">
+          <i class="fas fa-paw"></i><span>Todas las Mascotas</span>
+        </a>
+      </li>
+      <li>
+        <a [class.active]="activeTab === 'veterinarias'" (click)="setSection('veterinarias')">
+          <i class="fas fa-hospital"></i><span>Todas las Veterinarias</span>
+        </a>
+      </li>
+      <li>
+        <a [class.active]="activeTab === 'system'" (click)="setSection('system')">
+          <i class="fas fa-cogs"></i><span>Configuración Global</span>
+        </a>
+      </li>
+      <li class="separator">
+        <a class="logout-link" (click)="logout()">
+          <i class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- ===== CONTENIDO PRINCIPAL ===== -->
+  <main class="main-content">
+    
+    <!-- DASHBOARD MAESTRO -->
+    <section *ngIf="activeTab === 'dashboard'" class="content-section animate-in">
+      <div class="section-header">
+        <h1><i class="fas fa-chart-line"></i> Panel de Control Maestro</h1>
+        <div class="header-actions">
+          <button class="top-bar-btn" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="top-bar-btn" (click)="irAInicio()"><i class="fas fa-home"></i></button>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-users"></i></div>
+          <div class="stat-info">
+            <h3>Usuarios Totales</h3>
+            <p>{{ allUsers.length }}</p>
+          </div>
+        </div>
+        <div class="stat-card" style="--icon-bg: #e0f2fe;">
+          <div class="stat-icon"><i class="fas fa-paw"></i></div>
+          <div class="stat-info">
+            <h3>Mascotas</h3>
+            <p>{{ allPets.length }}</p>
+          </div>
+        </div>
+        <div class="stat-card" style="--icon-bg: #fef2f2;">
+          <div class="stat-icon"><i class="fas fa-hospital"></i></div>
+          <div class="stat-info">
+            <h3>Veterinarias</h3>
+            <p>{{ allVets.length }}</p>
+          </div>
+        </div>
+        <div class="stat-card" style="--icon-bg: #f0fdf4;">
+          <div class="stat-icon"><i class="fas fa-user-shield"></i></div>
+          <div class="stat-info">
+            <h3>Roles Definidos</h3>
+            <p>{{ roles.length }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h5><i class="fas fa-info-circle"></i> Estado del Sistema</h5>
+        </div>
+        <div class="card-body">
+          <p>Bienvenido al Panel de Super Administrador. Tienes acceso a la gestión crítica de roles, permisos y la base de datos global de la plataforma.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ROLES -->
+    <section *ngIf="activeTab === 'roles'" class="content-section animate-in">
+      <div class="section-header">
+        <h1><i class="fas fa-user-tag"></i> Gestión de Roles</h1>
+        <div class="header-actions">
+          <button class="btn-primary" (click)="openNewRoleModal()">
+            <i class="fas fa-plus"></i> Nuevo Rol
+          </button>
+          <button class="top-bar-btn" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h5><i class="fas fa-list"></i> Roles de Usuario</h5></div>
+        <div class="card-body">
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Descripción</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let role of roles">
+                  <td><strong>{{ role.name | uppercase }}</strong></td>
+                  <td>{{ role.description }}</td>
+                  <td>
+                    <div class="actions">
+                      <button class="btn-icon edit" (click)="editRole(role)"><i class="fas fa-edit"></i></button>
+                      <button class="btn-icon delete" (click)="deleteRole(role.id)"><i class="fas fa-trash"></i></button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PERMISSIONS -->
+    <section *ngIf="activeTab === 'permissions'" class="content-section animate-in">
+      <div class="section-header">
+        <h1><i class="fas fa-shield-alt"></i> Control de Permisos</h1>
+        <div class="header-actions">
+          <button class="top-bar-btn" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h5><i class="fas fa-key"></i> Asignación de Módulos por Rol</h5></div>
+        <div class="card-body">
+          <div class="role-selector mb-4">
+            <label>Seleccionar Rol:</label>
+            <select class="form-control" (change)="onRoleChange($event)">
+              <option value="">-- Elige un rol --</option>
+              <option *ngFor="let role of roles" [value]="role.id">{{ role.name | titlecase }}</option>
+            </select>
+          </div>
+
+          <div *ngIf="selectedRoleForModules" class="modules-grid animate-in">
+            <div *ngFor="let module of modules" class="module-item">
+              <div class="module-info">
+                <h6>{{ module.name | titlecase }}</h6>
+                <p>{{ module.description }}</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" [checked]="hasModule(module.name)" (change)="toggleModule(module.name)">
+                <span class="slider round"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- USERS -->
+    <section *ngIf="activeTab === 'users'" class="content-section animate-in">
+      <div class="section-header">
+        <h1><i class="fas fa-users"></i> Maestro de Usuarios</h1>
+        <div class="header-actions">
+          <button class="top-bar-btn" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h5><i class="fas fa-list"></i> Todos los Usuarios Registrados</h5></div>
+        <div class="card-body">
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Usuario</th>
+                  <th>Email</th>
+                  <th>Rol</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let user of allUsers">
+                  <td>
+                    <div class="user-info">
+                      <img [src]="user.avatar || 'assets/images/Default.png'" class="avatar-sm">
+                      <span>{{ user.username }}</span>
+                    </div>
+                  </td>
+                  <td>{{ user.email }}</td>
+                  <td><span class="badge">{{ user.role?.name || 'usuario' }}</span></td>
+                  <td>
+                    <span class="status-pill" [class.active]="user.isActive">
+                      {{ user.isActive ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PETS -->
+    <section *ngIf="activeTab === 'pets'" class="content-section animate-in">
+      <div class="section-header">
+        <h1><i class="fas fa-paw"></i> Maestro de Mascotas</h1>
+        <div class="header-actions">
+          <button class="top-bar-btn" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h5><i class="fas fa-list"></i> Censo Global de Mascotas</h5></div>
+        <div class="card-body">
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Mascota</th>
+                  <th>Especie</th>
+                  <th>Dueño</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let pet of allPets">
+                  <td>
+                    <div class="user-info">
+                      <img [src]="pet.foto || 'assets/images/Default.png'" class="avatar-sm">
+                      <span>{{ pet.name }}</span>
+                    </div>
+                  </td>
+                  <td>{{ pet.species }} / {{ pet.breed }}</td>
+                  <td>{{ pet.owner?.username || 'ID: ' + pet.ownerId }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VETS -->
+    <section *ngIf="activeTab === 'veterinarias'" class="content-section animate-in">
+      <div class="section-header">
+        <h1><i class="fas fa-hospital"></i> Maestro de Veterinarias</h1>
+        <div class="header-actions">
+          <button class="top-bar-btn" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h5><i class="fas fa-list"></i> Registro de Sedes</h5></div>
+        <div class="card-body">
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Dirección</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let vet of allVets">
+                  <td><strong>{{ vet.nombre }}</strong></td>
+                  <td>{{ vet.direccion }}</td>
+                  <td>
+                    <span class="status-pill" [class.active]="vet.isActive">
+                      {{ vet.isActive ? 'Activa' : 'Inactiva' }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SYSTEM -->
+    <section *ngIf="activeTab === 'system'" class="content-section animate-in">
+      <div class="section-header">
+        <h1><i class="fas fa-cogs"></i> Configuración Global</h1>
+        <div class="header-actions">
+          <button class="top-bar-btn" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h5><i class="fas fa-database"></i> Mantenimiento</h5></div>
+        <div class="card-body">
+          <div class="system-actions">
+            <button class="btn-secondary" (click)="seedInitialModules()">
+              <i class="fas fa-sync"></i> Regenerar Módulos y Roles Base
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Modales de Roles (Estilo Producto Admin) -->
+<div class="modal-overlay" *ngIf="showRoleModal" (click)="closeRoleModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ isEditingRole ? 'Editar Información del Rol' : 'Registrar Nuevo Rol' }}</h3>
+      <button class="close-btn" (click)="closeRoleModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Nombre del Rol *</label>
+          <input type="text" 
+                 name="roleName"
+                 [(ngModel)]="currentRole.name" 
+                 (input)="currentRole.name = $any($event.target).value"
+                 placeholder="Ej: COORDINADOR_VET" 
+                 maxlength="200">
+        </div>
+        <div class="form-group full">
+          <label>Descripción Detallada *</label>
+          <textarea [(ngModel)]="currentRole.description" rows="4" placeholder="Describe las responsabilidades y alcances de este rol en el sistema..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeRoleModal()">
+        <i class="fas fa-times"></i> Cancelar
+      </button>
+      <button class="btn-primary" (click)="saveRole()">
+        <i class="fas fa-save"></i> {{ isEditingRole ? 'Actualizar Rol' : 'Guardar Rol' }}
+      </button>
+    </div>
+  </div>
+</div>

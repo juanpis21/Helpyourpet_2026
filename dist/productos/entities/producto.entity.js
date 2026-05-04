@@ -129,13 +129,18 @@ __decorate([
     __metadata("design:type", String)
 ], Producto.prototype, "ubicacion", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({
-        description: 'Indica si el producto está activo',
-        example: true
-    }),
     (0, typeorm_1.Column)({ default: true }),
     __metadata("design:type", Boolean)
 ], Producto.prototype, "isActive", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'URL de la imagen del producto',
+        example: '/uploads/productos/producto_123.jpg',
+        required: false
+    }),
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Producto.prototype, "imagen", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'ID de la categoría del producto',

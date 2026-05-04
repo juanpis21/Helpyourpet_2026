@@ -15,4 +15,5 @@ export declare class UpdateProductoDto {
     isActive?: boolean;
     categoriaId?: number;
     veterinariaId?: number;
+    imagen?: string;
 }

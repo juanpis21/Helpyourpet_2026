@@ -20,6 +20,7 @@ export interface Producto {
   categoriaId: number;
   veterinariaId: number;
   veterinaria?: any;
+  imagen?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -48,11 +49,25 @@ export class ProductosService {
     return this.http.get<Producto>(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });
   }
 
-  create(producto: Partial<Producto>): Observable<Producto> {
+  create(producto: any): Observable<Producto> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+    });
+    
+    if (producto instanceof FormData) {
+      return this.http.post<Producto>(this.apiUrl, producto, { headers });
+    }
     return this.http.post<Producto>(this.apiUrl, producto, { headers: this.getAuthHeaders() });
   }
 
-  update(id: number, producto: Partial<Producto>): Observable<Producto> {
+  update(id: number, producto: any): Observable<Producto> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+    });
+
+    if (producto instanceof FormData) {
+      return this.http.patch<Producto>(`${this.apiUrl}/${id}`, producto, { headers });
+    }
     return this.http.patch<Producto>(`${this.apiUrl}/${id}`, producto, { headers: this.getAuthHeaders() });
   }
 

@@ -103,12 +103,16 @@ export class Producto {
   @Column({ length: 100, nullable: true })
   ubicacion?: string;
 
-  @ApiProperty({ 
-    description: 'Indica si el producto está activo', 
-    example: true 
-  })
   @Column({ default: true })
   isActive: boolean;
+
+  @ApiProperty({ 
+    description: 'URL de la imagen del producto', 
+    example: '/uploads/productos/producto_123.jpg',
+    required: false
+  })
+  @Column({ nullable: true })
+  imagen?: string;
 
   @ApiProperty({ 
     description: 'ID de la categoría del producto', 

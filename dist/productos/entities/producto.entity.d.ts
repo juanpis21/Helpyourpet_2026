@@ -14,6 +14,7 @@ export declare class Producto {
     lote?: string;
     ubicacion?: string;
     isActive: boolean;
+    imagen?: string;
     categoriaId: number;
     veterinariaId: number;
     veterinaria: Veterinaria;

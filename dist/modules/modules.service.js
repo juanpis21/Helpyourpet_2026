@@ -23,6 +23,10 @@ let ModulesService = class ModulesService {
         this.moduleRepository = moduleRepository;
         this.roleRepository = roleRepository;
     }
+    async onModuleInit() {
+        console.log('🚀 [ModulesService] Inicializando módulos y roles del sistema...');
+        await this.createInitialModules();
+    }
     async findAll() {
         return this.moduleRepository.find({
             relations: ['roles'],
@@ -49,21 +53,58 @@ let ModulesService = class ModulesService {
             { name: 'reporte', description: 'Módulo de reportes' },
             { name: 'calificacion', description: 'Módulo de calificaciones' },
             { name: 'veterinario', description: 'Módulo de veterinario' },
+            { name: 'usuarios', description: 'Módulo global de usuarios' },
+            { name: 'mascotas', description: 'Módulo global de mascotas' },
             { name: 'servicios', description: 'Módulo de servicios' },
             { name: 'pasarela-pagos', description: 'Módulo de pasarela de pagos' },
             { name: 'perfil-usuario', description: 'Módulo de perfil de usuario' },
             { name: 'perfil-veterinario', description: 'Módulo de perfil de veterinario' },
             { name: 'panel-admin', description: 'Módulo de panel de administrador' },
+            { name: 'super-admin', description: 'Módulo de panel de super administrador' },
             { name: 'recovery', description: 'Módulo de recuperación de contraseña' },
+            { name: 'Dashboard Maestro', description: 'Vista global de estadísticas' },
+            { name: 'Gestión de Roles', description: 'Administración de roles del sistema' },
+            { name: 'Permisos y Módulos', description: 'Configuración de acceso' },
+            { name: 'Todos los Usuarios', description: 'Listado maestro de usuarios' },
+            { name: 'Todas las Mascotas', description: 'Listado maestro de mascotas' },
+            { name: 'Todas las Veterinarias', description: 'Gestión de sedes' }
         ];
         const createdModules = [];
         for (const moduleData of modules) {
-            const existing = await this.moduleRepository.findOne({
+            let module = await this.moduleRepository.findOne({
                 where: { name: moduleData.name },
             });
-            if (!existing) {
-                const module = this.moduleRepository.create(moduleData);
-                createdModules.push(await this.moduleRepository.save(module));
+            if (!module) {
+                module = this.moduleRepository.create(moduleData);
+                module = await this.moduleRepository.save(module);
+            }
+            createdModules.push(module);
+        }
+        const rolesToCreate = [
+            { name: 'SUPERADMIN', description: 'Super Administrador con acceso total al sistema' },
+            { name: 'ADMIN', description: 'Administrador de veterinaria con acceso a gestión' },
+            { name: 'VETERINARIO', description: 'Personal médico veterinario' },
+            { name: 'USUARIO', description: 'Usuario estándar del sistema (dueño de mascota)' }
+        ];
+        for (const roleData of rolesToCreate) {
+            let role = await this.roleRepository.findOne({
+                where: [
+                    { name: roleData.name },
+                    { name: roleData.name.toLowerCase() }
+                ]
+            });
+            if (!role) {
+                role = this.roleRepository.create({
+                    name: roleData.name.toLowerCase(),
+                    description: roleData.description
+                });
+                role = await this.roleRepository.save(role);
+                console.log(`✅ [ModulesService] Rol creado: ${roleData.name}`);
+            }
+            if (role.name.toLowerCase() === 'superadmin') {
+                role.modules = createdModules;
+                await this.roleRepository.save(role);
+                console.log(`🔒 [ModulesService] Permisos totales asignados a: ${role.name}`);
             }
         }
         return createdModules;

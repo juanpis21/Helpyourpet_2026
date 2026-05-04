@@ -6,6 +6,7 @@ export interface Role {
   id: number;
   name: string;
   description: string;
+  modules?: any[];
 }
 
 @Injectable({
@@ -26,5 +27,17 @@ export class RolesService {
 
   getRoles(): Observable<Role[]> {
     return this.http.get<Role[]>(this.apiUrl, { headers: this.getAuthHeaders() });
+  }
+
+  create(role: Partial<Role>): Observable<Role> {
+    return this.http.post<Role>(this.apiUrl, role, { headers: this.getAuthHeaders() });
+  }
+
+  update(id: number, role: Partial<Role>): Observable<Role> {
+    return this.http.patch<Role>(`${this.apiUrl}/${id}`, role, { headers: this.getAuthHeaders() });
+  }
+
+  delete(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });
   }
 }

@@ -48,7 +48,7 @@ let ProductosService = class ProductosService {
     async findAll() {
         return this.productosRepository.find({
             relations: ['veterinaria'],
-            select: ['id', 'nombre', 'descripcion', 'codigoBarras', 'stockActual', 'stockMinimo', 'stockMaximo', 'precioCompra', 'precioVenta', 'fechaVencimiento', 'unidadMedida', 'lote', 'ubicacion', 'isActive', 'createdAt', 'updatedAt', 'categoriaId', 'veterinariaId', 'veterinaria']
+            select: ['id', 'nombre', 'descripcion', 'codigoBarras', 'stockActual', 'stockMinimo', 'stockMaximo', 'precioCompra', 'precioVenta', 'fechaVencimiento', 'unidadMedida', 'lote', 'ubicacion', 'isActive', 'imagen', 'createdAt', 'updatedAt', 'categoriaId', 'veterinariaId', 'veterinaria']
         });
     }
     async findOne(id) {

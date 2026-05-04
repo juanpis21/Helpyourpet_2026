@@ -13,6 +13,7 @@ import { PerfilVeterinario } from './features/perfil-veterinario/components/perf
 import { PerfilUsuario } from './features/perfil-usuario/components/perfil-usuario';
 import { PanelAdmin } from './features/panel-admin/components/panel-admin';
 import { AdminModulesComponent } from './features/admin-modules/components/admin-modules.component';
+import { SuperAdminComponent } from './features/super-admin/components/super-admin.component';
 import { PasarelaPagos } from './features/pasarela-pagos/components/pasarela-pagos';
 import { Servicios } from './features/servicios/components/servicios';
 import { permissionGuard } from './core/guards/permission.guard';
@@ -106,5 +107,11 @@ export const routes: Routes = [
     component: AdminModulesComponent,
     canActivate: [permissionGuard],
     data: { module: 'dashboard' }
+  },
+  { 
+    path: 'super-admin', 
+    component: SuperAdminComponent,
+    canActivate: [permissionGuard],
+    data: { module: 'super-admin' }
   }
 ];

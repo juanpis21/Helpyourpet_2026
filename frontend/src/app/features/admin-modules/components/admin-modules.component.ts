@@ -128,6 +128,11 @@ export class AdminModulesComponent implements OnInit {
 
   selectedFile: File | null = null;
   imagePreview: string | null = null;
+  
+  // Imagenes para Productos
+  selectedProductoFile: File | null = null;
+  productoImagePreview: string | null = null;
+
   baseUrl: string = 'http://localhost:3000';
 
   constructor(
@@ -315,6 +320,16 @@ export class AdminModulesComponent implements OnInit {
       this.selectedFile = file;
       const reader = new FileReader();
       reader.onload = () => this.imagePreview = reader.result as string;
+      reader.readAsDataURL(file);
+    }
+  }
+
+  onProductoFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedProductoFile = file;
+      const reader = new FileReader();
+      reader.onload = () => this.productoImagePreview = reader.result as string;
       reader.readAsDataURL(file);
     }
   }
@@ -516,6 +531,8 @@ export class AdminModulesComponent implements OnInit {
       veterinariaId: 0,
       isActive: true
     };
+    this.selectedProductoFile = null;
+    this.productoImagePreview = null;
   }
 
   guardarProducto(): void {
@@ -524,24 +541,29 @@ export class AdminModulesComponent implements OnInit {
       return;
     }
 
-    // Asegurar que los tipos sean correctos para el DTO del backend
-    const payload = {
-      ...this.newProducto,
-      categoriaId: Number(this.newProducto.categoriaId),
-      veterinariaId: Number(this.newProducto.veterinariaId),
-      stockActual: Number(this.newProducto.stockActual || 0),
-      stockMinimo: Number(this.newProducto.stockMinimo || 0),
-      precioCompra: Number(this.newProducto.precioCompra || 0),
-      precioVenta: Number(this.newProducto.precioVenta || 0),
-    };
+    // Usar FormData para permitir subida de imagen
+    const formData = new FormData();
+    formData.append('nombre', this.newProducto.nombre || '');
+    formData.append('descripcion', this.newProducto.descripcion || '');
+    formData.append('categoriaId', String(this.newProducto.categoriaId));
+    formData.append('veterinariaId', String(this.newProducto.veterinariaId));
+    formData.append('stockActual', String(this.newProducto.stockActual || 0));
+    formData.append('stockMinimo', String(this.newProducto.stockMinimo || 0));
+    formData.append('precioCompra', String(this.newProducto.precioCompra || 0));
+    formData.append('precioVenta', String(this.newProducto.precioVenta || 0));
+    formData.append('unidadMedida', this.newProducto.unidadMedida || 'unidades');
+    formData.append('isActive', String(this.newProducto.isActive ?? true));
 
-    // Limpiar campos opcionales vacíos
-    if (!payload.codigoBarras) delete payload.codigoBarras;
-    if (!payload.lote) delete payload.lote;
-    if (!payload.ubicacion) delete payload.ubicacion;
-    if (!payload.fechaVencimiento) delete payload.fechaVencimiento;
+    if (this.newProducto.codigoBarras) formData.append('codigoBarras', this.newProducto.codigoBarras);
+    if (this.newProducto.lote) formData.append('lote', this.newProducto.lote);
+    if (this.newProducto.ubicacion) formData.append('ubicacion', this.newProducto.ubicacion);
+    if (this.newProducto.fechaVencimiento) formData.append('fechaVencimiento', this.newProducto.fechaVencimiento);
 
-    this.productosService.create(payload).subscribe({
+    if (this.selectedProductoFile) {
+      formData.append('imagen', this.selectedProductoFile);
+    }
+
+    this.productosService.create(formData).subscribe({
       next: () => {
         this.closeAddProductoModal();
         this.cargarProductos();
@@ -564,37 +586,38 @@ export class AdminModulesComponent implements OnInit {
   closeEditProductoModal(): void {
     this.showEditProductoModal = false;
     this.editingProducto = {};
+    this.selectedProductoFile = null;
+    this.productoImagePreview = null;
   }
 
   guardarEdicionProducto(): void {
     if (!this.editingProducto.id) return;
 
-    // Limpiar objeto y asegurar tipos
+    // Usar FormData
+    const formData = new FormData();
     const raw = this.editingProducto as any;
-    const updateData = {
-      nombre: raw.nombre,
-      descripcion: raw.descripcion,
-      codigoBarras: raw.codigoBarras,
-      stockActual: Number(raw.stockActual),
-      stockMinimo: Number(raw.stockMinimo),
-      precioCompra: Number(raw.precioCompra),
-      precioVenta: Number(raw.precioVenta),
-      unidadMedida: raw.unidadMedida,
-      lote: raw.lote,
-      ubicacion: raw.ubicacion,
-      fechaVencimiento: raw.fechaVencimiento,
-      categoriaId: Number(raw.categoriaId),
-      veterinariaId: Number(raw.veterinariaId),
-      isActive: raw.isActive
-    };
+    
+    formData.append('nombre', raw.nombre);
+    formData.append('descripcion', raw.descripcion);
+    formData.append('categoriaId', String(raw.categoriaId));
+    formData.append('veterinariaId', String(raw.veterinariaId));
+    formData.append('stockActual', String(raw.stockActual));
+    formData.append('stockMinimo', String(raw.stockMinimo));
+    formData.append('precioCompra', String(raw.precioCompra));
+    formData.append('precioVenta', String(raw.precioVenta));
+    formData.append('unidadMedida', raw.unidadMedida);
+    formData.append('isActive', String(raw.isActive));
 
-    // Limpiar opcionales vacíos
-    if (!updateData.codigoBarras) delete updateData.codigoBarras;
-    if (!updateData.lote) delete updateData.lote;
-    if (!updateData.ubicacion) delete updateData.ubicacion;
-    if (!updateData.fechaVencimiento) delete updateData.fechaVencimiento;
+    if (raw.codigoBarras) formData.append('codigoBarras', raw.codigoBarras);
+    if (raw.lote) formData.append('lote', raw.lote);
+    if (raw.ubicacion) formData.append('ubicacion', raw.ubicacion);
+    if (raw.fechaVencimiento) formData.append('fechaVencimiento', raw.fechaVencimiento);
 
-    this.productosService.update(this.editingProducto.id, updateData).subscribe({
+    if (this.selectedProductoFile) {
+      formData.append('imagen', this.selectedProductoFile);
+    }
+
+    this.productosService.update(this.editingProducto.id, formData).subscribe({
       next: () => {
         this.closeEditProductoModal();
         this.cargarProductos();

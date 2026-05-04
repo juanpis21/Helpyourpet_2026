@@ -73,7 +73,13 @@ export class Login {
       return;
     }
     
-    // 2. Si es admin o administrador, va a /admin
+    // 2. Si es admin o administrador, va a /admin. Si es superadmin va a /super-admin
+    if (roleName === 'superadmin') {
+      console.log('✅ [Login] Rol superadmin detectado. Redirigiendo a /super-admin');
+      this.router.navigate(['/super-admin']);
+      return;
+    }
+
     if (roleName === 'admin' || roleName === 'administrador') {
       console.log('✅ [Login] Rol administrativo detectado. Redirigiendo a /admin');
       this.router.navigate(['/admin']);

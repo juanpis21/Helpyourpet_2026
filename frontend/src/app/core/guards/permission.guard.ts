@@ -12,15 +12,22 @@ export const permissionGuard: CanActivateFn = (route, state) => {
     return false;
   }
 
-  // 2. Obtenemos el nombre del módulo (con un fallback vacío si es undefined)
+  // 2. Obtenemos el nombre del módulo y el rol del usuario
   const requiredModule = route.data['module'] as string;
+  const user = authService.getCurrentUser();
+  const roleName = user?.role?.name?.toLowerCase() || '';
 
-  // 3. SI LA RUTA NO TIENE 'module' DEFINIDO, dejamos pasar
+  // 3. SI EL ROL ES SUPERADMIN, TIENE ACCESO TOTAL SIEMPRE
+  if (roleName === 'superadmin') {
+    return true;
+  }
+
+  // 4. SI LA RUTA NO TIENE 'module' DEFINIDO, dejamos pasar
   if (!requiredModule) {
     return true;
   }
 
-  // 4. Validamos permisos
+  // 5. Validamos permisos
   const hasAccess = authService.userModules().includes(requiredModule.toLowerCase());
 
   if (hasAccess) {

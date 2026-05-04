@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNumber, IsOptional, IsEnum, IsBoolean, IsDateString, Min, Max } from 'class-validator';
+import { Type } from 'class-transformer';
 import { UnidadMedida } from './create-producto.dto';
 
 export class UpdateProductoDto {
@@ -38,6 +39,7 @@ export class UpdateProductoDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
+  @Type(() => Number)
   stockActual?: number;
 
   @ApiProperty({ 
@@ -48,6 +50,7 @@ export class UpdateProductoDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
+  @Type(() => Number)
   stockMinimo?: number;
 
   @ApiProperty({ 
@@ -58,6 +61,7 @@ export class UpdateProductoDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
+  @Type(() => Number)
   stockMaximo?: number;
 
   @ApiProperty({ 
@@ -68,6 +72,7 @@ export class UpdateProductoDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
+  @Type(() => Number)
   precioCompra?: number;
 
   @ApiProperty({ 
@@ -78,6 +83,7 @@ export class UpdateProductoDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
+  @Type(() => Number)
   precioVenta?: number;
 
   @ApiProperty({ 
@@ -124,6 +130,7 @@ export class UpdateProductoDto {
   })
   @IsOptional()
   @IsBoolean()
+  @Type(() => Boolean)
   isActive?: boolean;
 
   @ApiProperty({ 
@@ -133,6 +140,7 @@ export class UpdateProductoDto {
   })
   @IsOptional()
   @IsNumber()
+  @Type(() => Number)
   categoriaId?: number;
 
   @ApiProperty({ 
@@ -142,5 +150,15 @@ export class UpdateProductoDto {
   })
   @IsOptional()
   @IsNumber()
+  @Type(() => Number)
   veterinariaId?: number;
+
+  @ApiProperty({ 
+    description: 'URL de la imagen del producto', 
+    required: false,
+    format: 'binary'
+  })
+  @IsOptional()
+  @IsString()
+  imagen?: string;
 }

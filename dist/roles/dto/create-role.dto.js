@@ -24,7 +24,7 @@ __decorate([
     }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MinLength)(2),
-    (0, class_validator_1.MaxLength)(50),
+    (0, class_validator_1.MaxLength)(200),
     __metadata("design:type", String)
 ], CreateRoleDto.prototype, "name", void 0);
 __decorate([

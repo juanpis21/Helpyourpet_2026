@@ -24,4 +24,5 @@ export declare class CreateProductoDto {
     isActive?: boolean;
     categoriaId: number;
     veterinariaId: number;
+    imagen?: string;
 }

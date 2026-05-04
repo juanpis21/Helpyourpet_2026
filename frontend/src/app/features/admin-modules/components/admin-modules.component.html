@@ -326,6 +326,7 @@
               <thead>
                 <tr>
                   <th>ID</th>
+                  <th>Imagen</th>
                   <th>Nombre</th>
                   <th>Categoría</th>
                   <th>Stock</th>
@@ -340,6 +341,12 @@
               <tbody>
                 <tr *ngFor="let prod of productos">
                   <td>{{ prod.id }}</td>
+                  <td>
+                    <div class="product-img-container">
+                      <img [src]="prod.imagen ? baseUrl + prod.imagen : 'assets/images/Default.png'" 
+                           [alt]="prod.nombre" class="product-thumb">
+                    </div>
+                  </td>
                   <td><strong>{{ prod.nombre }}</strong></td>
                   <td><span class="badge">{{ getCategoriaNombre(prod.categoriaId) }}</span></td>
                   <td>
@@ -939,6 +946,18 @@
             <input type="date" [(ngModel)]="newProducto.fechaVencimiento">
           </div>
           <div class="form-group full">
+            <label>Imagen del Producto</label>
+            <div class="file-upload-container">
+              <input type="file" (change)="onProductoFileSelected($event)" accept="image/*" id="fileAddProd">
+              <label for="fileAddProd" class="file-label">
+                <i class="fas fa-cloud-upload-alt"></i> Seleccionar Imagen
+              </label>
+              <div *ngIf="productoImagePreview" class="preview-container">
+                <img [src]="productoImagePreview" class="img-preview">
+              </div>
+            </div>
+          </div>
+          <div class="form-group full">
             <label>Descripción *</label>
             <textarea [(ngModel)]="newProducto.descripcion" rows="2"></textarea>
           </div>
@@ -1015,6 +1034,18 @@
           <div class="form-group">
             <label>Fecha Vencimiento</label>
             <input type="date" [(ngModel)]="editingProducto.fechaVencimiento">
+          </div>
+          <div class="form-group full">
+            <label>Imagen del Producto</label>
+            <div class="file-upload-container">
+              <input type="file" (change)="onProductoFileSelected($event)" accept="image/*" id="fileEditProd">
+              <label for="fileEditProd" class="file-label">
+                <i class="fas fa-cloud-upload-alt"></i> Cambiar Imagen
+              </label>
+              <div *ngIf="productoImagePreview || editingProducto.imagen" class="preview-container">
+                <img [src]="productoImagePreview || (baseUrl + editingProducto.imagen)" class="img-preview">
+              </div>
+            </div>
           </div>
           <div class="form-group full">
             <label>Descripción *</label>

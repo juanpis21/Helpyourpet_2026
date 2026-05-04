@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateProductoDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 const create_producto_dto_1 = require("./create-producto.dto");
 class UpdateProductoDto {
 }
@@ -55,6 +56,7 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
+    (0, class_transformer_1.Type)(() => Number),
     __metadata("design:type", Number)
 ], UpdateProductoDto.prototype, "stockActual", void 0);
 __decorate([
@@ -66,6 +68,7 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
+    (0, class_transformer_1.Type)(() => Number),
     __metadata("design:type", Number)
 ], UpdateProductoDto.prototype, "stockMinimo", void 0);
 __decorate([
@@ -77,6 +80,7 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
+    (0, class_transformer_1.Type)(() => Number),
     __metadata("design:type", Number)
 ], UpdateProductoDto.prototype, "stockMaximo", void 0);
 __decorate([
@@ -88,6 +92,7 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
+    (0, class_transformer_1.Type)(() => Number),
     __metadata("design:type", Number)
 ], UpdateProductoDto.prototype, "precioCompra", void 0);
 __decorate([
@@ -99,6 +104,7 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
+    (0, class_transformer_1.Type)(() => Number),
     __metadata("design:type", Number)
 ], UpdateProductoDto.prototype, "precioVenta", void 0);
 __decorate([
@@ -150,6 +156,7 @@ __decorate([
     }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsBoolean)(),
+    (0, class_transformer_1.Type)(() => Boolean),
     __metadata("design:type", Boolean)
 ], UpdateProductoDto.prototype, "isActive", void 0);
 __decorate([
@@ -160,6 +167,7 @@ __decorate([
     }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsNumber)(),
+    (0, class_transformer_1.Type)(() => Number),
     __metadata("design:type", Number)
 ], UpdateProductoDto.prototype, "categoriaId", void 0);
 __decorate([
@@ -170,6 +178,17 @@ __decorate([
     }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsNumber)(),
+    (0, class_transformer_1.Type)(() => Number),
     __metadata("design:type", Number)
 ], UpdateProductoDto.prototype, "veterinariaId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'URL de la imagen del producto',
+        required: false,
+        format: 'binary'
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateProductoDto.prototype, "imagen", void 0);
 //# sourceMappingURL=update-producto.dto.js.map
