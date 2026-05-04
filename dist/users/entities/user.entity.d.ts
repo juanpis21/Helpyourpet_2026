@@ -1,0 +1,31 @@
+import { Pet } from '../../pets/entities/pet.entity';
+import { Cita } from '../../citas/entities/cita.entity';
+import { PerfilVeterinario } from '../../perfiles-veterinarios/entities/perfil-veterinario.entity';
+import { HistorialCita } from '../../historial-citas/entities/historial-cita.entity';
+import { MovimientoInventario } from '../../movimientos/entities/movimiento-inventario.entity';
+import { Role } from '../../roles/entities/role.entity';
+export declare class User {
+    id: number;
+    username: string;
+    email: string;
+    password: string;
+    fullName: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    documentType: string;
+    documentNumber: string;
+    age: number;
+    address: string;
+    isActive: boolean;
+    avatar: string;
+    roleId: number;
+    role: Role;
+    pets: Pet[];
+    citas: Cita[];
+    historialCitas: HistorialCita[];
+    movimientosInventario: MovimientoInventario[];
+    perfilVeterinario: PerfilVeterinario;
+    createdAt: Date;
+    updatedAt: Date;
+}
