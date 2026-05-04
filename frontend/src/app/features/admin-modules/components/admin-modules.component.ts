@@ -809,13 +809,8 @@ export class AdminModulesComponent implements OnInit {
   }
 
   getAdminRoleName(): string {
-    const roleMap: { [key: number]: string } = {
-      1: 'Administrador',
-      2: 'Super Administrador',
-      3: 'Veterinario',
-      4: 'Usuario'
-    };
-    return roleMap[this.adminUser.roleId || 1] || 'Administrador';
+    const user = this.authService.getCurrentUser();
+    return user?.role?.name || 'Administrador';
   }
 
   cambiarContrasena(): void {

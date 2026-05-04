@@ -25,7 +25,6 @@ export class Login {
   ) {}
 
   onSubmit(): void {
-    console.log('Login attempt started with:', this.credentials.username);
     if (!this.credentials.username || !this.credentials.password) {
       this.errorMessage = 'Por favor, completa todos los campos';
       return;
@@ -57,38 +56,35 @@ export class Login {
   }
 
   private redirectByPermissions(): void {
-    console.log('🎯 [Login] Ejecutando redirectByPermissions');
-    
     const user = this.authService.getCurrentUser();
     const userModules = this.authService.userModules();
-    const roleName = user?.role?.name?.toLowerCase() || '';
+    const roleName = (user?.role?.name || '').toLowerCase().trim();
     
-    console.log('👤 [Login] Rol del usuario:', roleName);
-    console.log('🔍 [Login] Módulos del usuario:', userModules);
     
-    // 1. Prioridad: Si el rol es "usuario", siempre va a inicio
-    if (roleName === 'usuario') {
-      console.log('✅ [Login] Rol "usuario" detectado. Redirigiendo a /inicio');
-      this.router.navigate(['/inicio']);
-      return;
-    }
-    
-    // 2. Si es admin o administrador, va a /admin. Si es superadmin va a /super-admin
-    if (roleName === 'superadmin') {
-      console.log('✅ [Login] Rol superadmin detectado. Redirigiendo a /super-admin');
+    if (roleName === 'superadmin' || roleName === 'super-admin') {
       this.router.navigate(['/super-admin']);
       return;
     }
+    
+    // 2. Roles Administrativos
+    const isAdminRole = roleName === 'admin' || 
+                        roleName === 'administrador' || 
+                        roleName === 'administradora' ||
+                        roleName.includes('admin');
 
-    if (roleName === 'admin' || roleName === 'administrador') {
-      console.log('✅ [Login] Rol administrativo detectado. Redirigiendo a /admin');
+    if (isAdminRole) {
       this.router.navigate(['/admin']);
       return;
     }
 
-    // 3. Si es veterinario, redirigir a su perfil o inicio
-    if (roleName === 'veterinario') {
-      console.log('✅ [Login] Rol "veterinario" detectado. Redirigiendo a /inicio');
+    // 3. Veterinarios
+    if (roleName === 'veterinario' || roleName === 'veterinaria' || roleName === 'doctor') {
+      this.router.navigate(['/inicio']);
+      return;
+    }
+
+    // 4. Usuarios estándar
+    if (roleName === 'usuario' || roleName === 'cliente') {
       this.router.navigate(['/inicio']);
       return;
     }

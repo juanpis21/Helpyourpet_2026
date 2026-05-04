@@ -24,15 +24,12 @@
         </a>
       </li>
       <li>
-        <a [class.active]="activeTab === 'permissions'" (click)="setSection('permissions')">
-          <i class="fas fa-shield-alt"></i><span>Permisos y Módulos</span>
-        </a>
-      </li>
-      <li>
         <a [class.active]="activeTab === 'users'" (click)="setSection('users')">
           <i class="fas fa-users"></i><span>Todos los Usuarios</span>
         </a>
       </li>
+<!-- El apartado de permisos ha sido eliminado -->
+
       <li>
         <a [class.active]="activeTab === 'pets'" (click)="setSection('pets')">
           <i class="fas fa-paw"></i><span>Todas las Mascotas</span>
@@ -41,11 +38,6 @@
       <li>
         <a [class.active]="activeTab === 'veterinarias'" (click)="setSection('veterinarias')">
           <i class="fas fa-hospital"></i><span>Todas las Veterinarias</span>
-        </a>
-      </li>
-      <li>
-        <a [class.active]="activeTab === 'system'" (click)="setSection('system')">
-          <i class="fas fa-cogs"></i><span>Configuración Global</span>
         </a>
       </li>
       <li class="separator">
@@ -152,78 +144,63 @@
       </div>
     </section>
 
-    <!-- PERMISSIONS -->
-    <section *ngIf="activeTab === 'permissions'" class="content-section animate-in">
-      <div class="section-header">
-        <h1><i class="fas fa-shield-alt"></i> Control de Permisos</h1>
-        <div class="header-actions">
-          <button class="top-bar-btn" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header"><h5><i class="fas fa-key"></i> Asignación de Módulos por Rol</h5></div>
-        <div class="card-body">
-          <div class="role-selector mb-4">
-            <label>Seleccionar Rol:</label>
-            <select class="form-control" (change)="onRoleChange($event)">
-              <option value="">-- Elige un rol --</option>
-              <option *ngFor="let role of roles" [value]="role.id">{{ role.name | titlecase }}</option>
-            </select>
-          </div>
-
-          <div *ngIf="selectedRoleForModules" class="modules-grid animate-in">
-            <div *ngFor="let module of modules" class="module-item">
-              <div class="module-info">
-                <h6>{{ module.name | titlecase }}</h6>
-                <p>{{ module.description }}</p>
-              </div>
-              <label class="switch">
-                <input type="checkbox" [checked]="hasModule(module.name)" (change)="toggleModule(module.name)">
-                <span class="slider round"></span>
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- USERS -->
     <section *ngIf="activeTab === 'users'" class="content-section animate-in">
       <div class="section-header">
-        <h1><i class="fas fa-users"></i> Maestro de Usuarios</h1>
+        <h1>
+          <i class="fas fa-users"></i> Maestro de Usuarios 
+          <span class="count-pill">{{ allUsers.length }}</span>
+        </h1>
         <div class="header-actions">
           <button class="top-bar-btn" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-header"><h5><i class="fas fa-list"></i> Todos los Usuarios Registrados</h5></div>
+        <div class="card-header">
+          <h5><i class="fas fa-list"></i> Todos los Usuarios Registrados</h5>
+          <span class="results-count">Mostrando {{ allUsers.length }} registros</span>
+        </div>
         <div class="card-body">
           <div class="table-container">
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>Usuario</th>
+                  <th>Usuario / Nombre</th>
                   <th>Email</th>
+                  <th>Teléfono</th>
                   <th>Rol</th>
                   <th>Estado</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let user of allUsers">
                   <td>
                     <div class="user-info">
-                      <img [src]="user.avatar || 'assets/images/Default.png'" class="avatar-sm">
-                      <span>{{ user.username }}</span>
+                      <img [src]="getFullImageUrl(user.avatar)" class="avatar-sm">
+                      <div class="user-details">
+                        <span class="username">{{ user.username }}</span>
+                        <span class="fullname">{{ user.fullName || (user.firstName + ' ' + user.lastName) }}</span>
+                      </div>
                     </div>
                   </td>
                   <td>{{ user.email }}</td>
+                  <td>{{ user.phone || 'N/A' }}</td>
                   <td><span class="badge">{{ user.role?.name || 'usuario' }}</span></td>
                   <td>
                     <span class="status-pill" [class.active]="user.isActive">
                       {{ user.isActive ? 'Activo' : 'Inactivo' }}
                     </span>
+                  </td>
+                  <td>
+                    <button class="btn-icon" 
+                            [class.delete]="user.isActive" 
+                            [class.edit]="!user.isActive"
+                            (click)="$event.stopPropagation(); toggleUserStatus(user)"
+                            [title]="user.isActive ? 'Desactivar Usuario' : 'Activar Usuario'">
+                      <i class="fas" [ngClass]="user.isActive ? 'fa-user-slash' : 'fa-user-check'"></i>
+                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -258,7 +235,7 @@
                 <tr *ngFor="let pet of allPets">
                   <td>
                     <div class="user-info">
-                      <img [src]="pet.foto || 'assets/images/Default.png'" class="avatar-sm">
+                      <img [src]="getFullImageUrl(pet.foto)" class="avatar-sm">
                       <span>{{ pet.name }}</span>
                     </div>
                   </td>
@@ -305,27 +282,6 @@
                 </tr>
               </tbody>
             </table>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SYSTEM -->
-    <section *ngIf="activeTab === 'system'" class="content-section animate-in">
-      <div class="section-header">
-        <h1><i class="fas fa-cogs"></i> Configuración Global</h1>
-        <div class="header-actions">
-          <button class="top-bar-btn" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header"><h5><i class="fas fa-database"></i> Mantenimiento</h5></div>
-        <div class="card-body">
-          <div class="system-actions">
-            <button class="btn-secondary" (click)="seedInitialModules()">
-              <i class="fas fa-sync"></i> Regenerar Módulos y Roles Base
-            </button>
           </div>
         </div>
       </div>

@@ -54,8 +54,6 @@ export class AuthService {
     if (!role.modules) return [];
 
     const modules = role.modules.map((m: any) => m.name.toLowerCase().trim());
-    console.log('🔍 [AuthService] Módulos crudos:', role.modules);
-    console.log('🔍 [AuthService] Módulos procesados:', modules);
     return modules;
   });
 
@@ -70,8 +68,6 @@ export class AuthService {
           localStorage.setItem('access_token', response.access_token);
           localStorage.setItem('auth_status', JSON.stringify(response));
           this._authStatus.set(response);
-          console.log('✅ [AuthService] Login exitoso:', response.user.username);
-          console.log('🔐 [AuthService] Módulos del usuario:', this.userModules());
         } catch (e: any) {
           if (e.name === 'QuotaExceededError') {
             console.warn('⚠️ [AuthService] localStorage lleno, limpiando...');
@@ -142,7 +138,6 @@ export class AuthService {
       try {
         const parsed = JSON.parse(savedStatus);
         this._authStatus.set(parsed);
-        console.log('📦 [AuthService] Estado de autenticación restaurado desde storage');
       } catch (e) {
         console.error('❌ [AuthService] Error al restaurar estado:', e);
         localStorage.removeItem('auth_status');

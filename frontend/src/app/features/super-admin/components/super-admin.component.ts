@@ -92,9 +92,40 @@ export class SuperAdminComponent implements OnInit {
 
   setSection(section: string): void {
     this.activeTab = section;
+    if (section === 'users' || section === 'dashboard') {
+      this.loadGlobalData();
+    }
+  }
+
+  getFullImageUrl(path: string | null | undefined): string {
+    if (!path) return 'assets/images/Default.png';
+    if (path.startsWith('http')) return path;
+    return `http://localhost:3000${path}`;
+  }
+
+  toggleUserStatus(user: any): void {
+    const originalStatus = user.isActive;
+    const newStatus = !originalStatus;
+    
+    // Actualización optimista
+    user.isActive = newStatus;
+
+    this.usersService.updateUser(user.id, { isActive: newStatus }).subscribe({
+      next: (updatedUser) => {
+        console.log('✅ Estado actualizado en servidor:', updatedUser.username, updatedUser.isActive);
+        // Sincronizar el objeto local con la respuesta real del servidor sin recargar todo
+        Object.assign(user, updatedUser);
+      },
+      error: (err) => {
+        console.error(`❌ Error al cambiar estado:`, err);
+        user.isActive = originalStatus;
+        alert('No se pudo cambiar el estado. Revisa tu conexión.');
+      }
+    });
   }
 
   logout(): void {
+    console.log('🚪 [SuperAdmin] Cerrando sesión y destruyendo datos...');
     this.authService.logout();
     this.router.navigate(['/login']);
   }
@@ -105,7 +136,7 @@ export class SuperAdminComponent implements OnInit {
 
   getAdminRoleName(): string {
     const user = this.authService.getCurrentUser();
-    return user?.role?.name || 'Super Admin';
+    return user?.role?.name || 'Super Administrador';
   }
 
   getAdminProfileImage(): string {
