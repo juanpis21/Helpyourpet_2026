@@ -22,7 +22,7 @@ export class Login {
   constructor(
     private router: Router,
     private authService: AuthService
-  ) {}
+  ) { }
 
   onSubmit(): void {
     if (!this.credentials.username || !this.credentials.password) {
@@ -37,7 +37,7 @@ export class Login {
       next: (response) => {
         console.log('Login successful:', response);
         this.isLoading = false;
-        
+
         // Redirigir según permisos
         this.redirectByPermissions();
       },
@@ -59,18 +59,18 @@ export class Login {
     const user = this.authService.getCurrentUser();
     const userModules = this.authService.userModules();
     const roleName = (user?.role?.name || '').toLowerCase().trim();
-    
-    
+
+
     if (roleName === 'superadmin' || roleName === 'super-admin') {
       this.router.navigate(['/super-admin']);
       return;
     }
-    
+
     // 2. Roles Administrativos
-    const isAdminRole = roleName === 'admin' || 
-                        roleName === 'administrador' || 
-                        roleName === 'administradora' ||
-                        roleName.includes('admin');
+    const isAdminRole = roleName === 'admin' ||
+      roleName === 'administrador' ||
+      roleName === 'administradora' ||
+      roleName.includes('admin');
 
     if (isAdminRole) {
       this.router.navigate(['/admin']);
@@ -88,10 +88,10 @@ export class Login {
       this.router.navigate(['/inicio']);
       return;
     }
-    
+
     // 4. Fallback por módulos si no se detectó por nombre de rol
     const hasAdminAccess = userModules.includes('dashboard') || userModules.includes('panel-admin');
-    
+
     if (hasAdminAccess) {
       this.router.navigate(['/admin']);
     } else if (userModules.includes('inicio')) {

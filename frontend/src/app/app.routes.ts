@@ -100,7 +100,7 @@ export const routes: Routes = [
     path: 'panel-admin', 
     component: PanelAdmin,
     canActivate: [permissionGuard],
-    data: { module: 'panel-admin' }
+    data: { module: 'dashboard' }
   },
   { 
     path: 'admin', 
