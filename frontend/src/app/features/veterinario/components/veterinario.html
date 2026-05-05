@@ -1,1 +1,294 @@
-<p>veterinario works!</p>
+<div class="sidebar-overlay" [class.active]="sidebarOpen" (click)="toggleSidebar()"></div>
+
+<div class="admin-layout" [ngClass]="{'sidebar-closed': !sidebarOpen, 'dark-mode': darkMode}">
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" [class.active]="sidebarOpen">
+    <div class="sidebar-header">
+      <h3>HelpYourPet</h3>
+      <div class="user-profile">
+        <img [src]="vetUser?.imagen || 'assets/images/Default.png'" alt="Foto" class="profile-avatar">
+        <h5>{{ vetUser?.firstName }} {{ vetUser?.lastName }}</h5>
+        <p>Veterinario</p>
+      </div>
+    </div>
+
+    <ul class="nav-menu">
+      <li>
+        <a [class.active]="activeSection === 'dashboard'" (click)="setSection('dashboard')">
+          <i class="fas fa-home"></i><span>Panel Principal</span>
+        </a>
+      </li>
+      <li>
+        <a [class.active]="activeSection === 'mascotas'" (click)="setSection('mascotas')">
+          <i class="fas fa-paw"></i><span>Mascotas</span>
+        </a>
+      </li>
+      <li>
+        <a [class.active]="activeSection === 'citas'" (click)="setSection('citas')">
+          <i class="fas fa-calendar-check"></i><span>Citas Médicas</span>
+        </a>
+      </li>
+      <li>
+        <a [class.active]="activeSection === 'publicaciones'" (click)="setSection('publicaciones')">
+          <i class="fas fa-newspaper"></i><span>Publicaciones</span>
+        </a>
+      </li>
+      <li class="separator">
+        <a class="logout-link" (click)="logout()">
+          <i class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="main-content">
+    <header class="top-bar">
+      <button class="toggle-btn" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+      <div class="top-bar-right">
+        <button class="theme-btn" (click)="toggleDarkMode()">
+          <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+        </button>
+        <span class="date">{{ today | date:'fullDate' }}</span>
+      </div>
+    </header>
+
+    <!-- DASHBOARD -->
+    <section *ngIf="activeSection === 'dashboard'" class="content-section animate-in">
+      <div class="section-header">
+        <h1>Bienvenido, Dr. {{ vetUser?.firstName }}</h1>
+        <p>Aquí tienes un resumen de la actividad de hoy.</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card blue">
+          <div class="stat-icon"><i class="fas fa-paw"></i></div>
+          <div class="stat-info">
+            <h3>{{ mascotas.length }}</h3>
+            <p>Mascotas Totales</p>
+          </div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
+          <div class="stat-info">
+            <h3>{{ citas.length }}</h3>
+            <p>Citas Programadas</p>
+          </div>
+        </div>
+        <div class="stat-card purple">
+          <div class="stat-icon"><i class="fas fa-newspaper"></i></div>
+          <div class="stat-info">
+            <h3>{{ publicaciones.length }}</h3>
+            <p>Publicaciones</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MASCOTAS -->
+    <section *ngIf="activeSection === 'mascotas'" class="content-section animate-in">
+      <div class="section-header">
+        <h1><i class="fas fa-paw"></i> Gestión de Mascotas</h1>
+        <button class="btn-primary" (click)="openAddPetModal()">
+          <i class="fas fa-plus"></i> Registrar Mascota
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h5>Mascotas Registradas</h5></div>
+        <div class="card-body">
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Especie</th>
+                  <th>Raza</th>
+                  <th>Edad</th>
+                  <th>Dueño</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let m of mascotas">
+                  <td><strong>{{ m.name }}</strong></td>
+                  <td>{{ m.species }}</td>
+                  <td>{{ m.breed }}</td>
+                  <td>{{ m.age }} años</td>
+                  <td>{{ m.owner?.firstName }} {{ m.owner?.lastName }}</td>
+                  <td>
+                    <button class="btn-icon view"><i class="fas fa-eye"></i></button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CITAS -->
+    <section *ngIf="activeSection === 'citas'" class="content-section animate-in">
+      <div class="section-header">
+        <h1><i class="fas fa-calendar-check"></i> Agenda de Citas</h1>
+        <button class="btn-primary" (click)="showAddCitaModal = true">
+          <i class="fas fa-plus"></i> Nueva Cita
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Mascota</th>
+                  <th>Dueño</th>
+                  <th>Motivo</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let c of citas">
+                  <td>{{ c.fecha | date:'medium' }}</td>
+                  <td><strong>{{ c.pet?.name }}</strong></td>
+                  <td>{{ c.user?.firstName }} {{ c.user?.lastName }}</td>
+                  <td>{{ c.motivo }}</td>
+                  <td><span class="status-pill active">{{ c.estado }}</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PUBLICACIONES -->
+    <section *ngIf="activeSection === 'publicaciones'" class="content-section animate-in">
+      <div class="section-header">
+        <h1><i class="fas fa-newspaper"></i> Feed de Publicaciones</h1>
+      </div>
+
+      <div class="pub-grid">
+        <div *ngFor="let p of publicaciones" class="pub-card">
+          <img *ngIf="p.imagen" [src]="API_BASE + p.imagen" class="pub-img">
+          <div class="pub-content">
+            <p>{{ p.descripcion }}</p>
+            <div class="pub-footer">
+              <span><i class="fas fa-user"></i> {{ p.user?.firstName }}</span>
+              <span>{{ p.createdAt | date:'shortDate' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- MODAL AGREGAR MASCOTA -->
+<div class="modal-overlay" *ngIf="showAddPetModal" (click)="closeAddPetModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Registrar Nueva Mascota</h3>
+      <button class="close-btn" (click)="closeAddPetModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="pet-image-upload">
+        <div class="image-preview" [style.backgroundImage]="imagePreview ? 'url(' + imagePreview + ')' : 'url(assets/images/Default.png)'">
+        </div>
+        <label for="pet-photo" class="upload-btn">
+          <i class="fas fa-camera"></i> Subir Foto
+        </label>
+        <input type="file" id="pet-photo" (change)="onFileSelected($event)" accept="image/*" style="display: none;">
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Dueño (Usuario)</label>
+          <select [(ngModel)]="newPet.ownerId">
+            <option [ngValue]="null">Seleccione un usuario</option>
+            <option *ngFor="let u of usuarios" [ngValue]="u.id">{{ u.firstName }} {{ u.lastName }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" [(ngModel)]="newPet.name" placeholder="Ej: Firulais">
+        </div>
+        <div class="form-group">
+          <label>Especie</label>
+          <select [(ngModel)]="newPet.species">
+            <option value="">Seleccione especie</option>
+            <option value="Perro">Perro</option>
+            <option value="Gato">Gato</option>
+            <option value="Ave">Ave</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Raza</label>
+          <input type="text" [(ngModel)]="newPet.breed" placeholder="Ej: Labrador">
+        </div>
+        <div class="form-group">
+          <label>Género</label>
+          <select [(ngModel)]="newPet.gender">
+            <option value="M">Macho</option>
+            <option value="F">Hembra</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Edad (años)</label>
+          <input type="number" [(ngModel)]="newPet.age" min="0">
+        </div>
+        <div class="form-group">
+          <label>Color</label>
+          <input type="text" [(ngModel)]="newPet.color" placeholder="Ej: Dorado">
+        </div>
+        <div class="form-group">
+          <label>Peso (kg)</label>
+          <input type="number" [(ngModel)]="newPet.weight" min="0" step="0.1">
+        </div>
+        <div class="form-group full">
+          <label>Descripción / Notas Médicas</label>
+          <textarea [(ngModel)]="newPet.description" rows="3" placeholder="Antecedentes, alergias, etc."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeAddPetModal()">Cancelar</button>
+      <button class="btn-primary" (click)="registrarMascota()">Registrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NUEVA CITA -->
+<div class="modal-overlay" *ngIf="showAddCitaModal" (click)="showAddCitaModal = false">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Programar Cita</h3>
+      <button class="close-btn" (click)="showAddCitaModal = false">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Mascota</label>
+          <select [(ngModel)]="newCita.petId">
+            <option *ngFor="let m of mascotas" [ngValue]="m.id">{{ m.name }} ({{ m.owner?.nombres }})</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Fecha y Hora</label>
+          <input type="datetime-local" [(ngModel)]="newCita.fecha">
+        </div>
+        <div class="form-group full">
+          <label>Motivo</label>
+          <textarea [(ngModel)]="newCita.motivo"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="showAddCitaModal = false">Cancelar</button>
+      <button class="btn-primary" (click)="registrarCita()">Programar</button>
+    </div>
+  </div>
+</div>

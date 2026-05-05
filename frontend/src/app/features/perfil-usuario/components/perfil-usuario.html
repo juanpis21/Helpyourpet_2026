@@ -134,7 +134,7 @@
             <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
           </button>
           <button class="home-btn" (click)="irAInicio()"><i class="fas fa-home"></i></button>
-          <button class="btn-primary" (click)="openAddPetModal()"><i class="fas fa-plus"></i> Agregar Mascota</button>
+
         </div>
       </div>
 
@@ -155,7 +155,7 @@
               <th>Género</th>
               <th>Raza</th>
               <th>Peso (kg)</th>
-              <th>Acciones</th>
+
             </tr>
           </thead>
           <tbody>
@@ -172,12 +172,7 @@
               <td>{{ mascota.gender === 'M' ? 'Macho' : 'Hembra' }}</td>
               <td>{{ mascota.breed }}</td>
               <td>{{ mascota.weight }} kg</td>
-              <td>
-                <div class="action-buttons">
-                  <button class="btn-edit" (click)="openEditPetModal(mascota)"><i class="fas fa-edit"></i> Editar</button>
-                  <button class="btn-delete" (click)="eliminarMascota(mascota.id)"><i class="fas fa-trash"></i> Eliminar</button>
-                </div>
-              </td>
+
             </tr>
           </tbody>
         </table>
@@ -215,7 +210,7 @@
             <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
           </button>
           <button class="home-btn" (click)="irAInicio()"><i class="fas fa-home"></i></button>
-          <button class="btn-primary" (click)="irAInicio()"><i class="fas fa-plus"></i> Nueva Publicación</button>
+
         </div>
       </div>
 
@@ -332,175 +327,8 @@
           </div>
         </div>
       </div>
+
+
     </section>
   </main>
-</div>
-
-<!-- ===== MODAL AGREGAR MASCOTA ===== -->
-<div class="modal-overlay" *ngIf="showAddPetModal" (click)="closeAddPetModal()">
-  <div class="modal-box" (click)="$event.stopPropagation()">
-
-    <div class="modal-header">
-      <h3><i class="fas fa-plus"></i> Agregar Nueva Mascota</h3>
-      <button class="close-btn" (click)="closeAddPetModal()">
-        <i class="fas fa-times"></i>
-      </button>
-    </div>
-
-    <div class="modal-body">
-      <div class="form-grid">
-        <div class="form-group full-width">
-          <label>Nombre *</label>
-          <input type="text" [(ngModel)]="newPet.name" placeholder="Nombre de la mascota">
-        </div>
-
-        <div class="form-group">
-          <label>Especie *</label>
-          <select [(ngModel)]="newPet.species">
-            <option value="">Selecciona una especie</option>
-            <option value="Perro">Perro</option>
-            <option value="Gato">Gato</option>
-            <option value="Ave">Ave</option>
-            <option value="Pez">Pez</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Raza</label>
-          <input type="text" [(ngModel)]="newPet.breed" placeholder="Raza">
-        </div>
-
-        <div class="form-group">
-          <label>Edad (años) *</label>
-          <input type="number" [(ngModel)]="newPet.age" min="0" max="50" placeholder="0">
-        </div>
-
-        <div class="form-group">
-          <label>Género</label>
-          <select [(ngModel)]="newPet.gender">
-            <option value="M">Macho</option>
-            <option value="F">Hembra</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Color</label>
-          <input type="text" [(ngModel)]="newPet.color" placeholder="Color">
-        </div>
-
-        <div class="form-group">
-          <label>Peso (kg) *</label>
-          <input type="number" [(ngModel)]="newPet.weight" min="0.1" max="200" step="0.1" placeholder="0">
-        </div>
-
-        <div class="form-group full-width">
-          <label>Imagen de la mascota</label>
-          <label class="file-input-label">
-            <i class="fas fa-cloud-upload-alt"></i> Seleccionar imagen
-            <input type="file" accept="image/*" (change)="onPetImageSelected($event)" hidden>
-          </label>
-          <div *ngIf="newPetImagePreview" class="image-preview">
-            <img [src]="newPetImagePreview" alt="Preview" class="preview-img">
-            <button class="remove-image-btn" (click)="removeNewPetImage()"><i class="fas fa-times"></i></button>
-          </div>
-        </div>
-
-        <div class="form-group full-width">
-          <label>Descripción</label>
-          <textarea [(ngModel)]="newPet.description" rows="3" placeholder="Características, comportamiento..."></textarea>
-        </div>
-
-      </div>
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn-secondary" (click)="closeAddPetModal()">Cancelar</button>
-      <button class="btn-primary" (click)="guardarMascota()">Guardar Mascota</button>
-    </div>
-
-  </div>
-</div>
-<!-- ===== MODAL EDITAR MASCOTA ===== -->
-<div class="modal-overlay" *ngIf="showEditPetModal" (click)="closeEditPetModal()">
-  <div class="modal-box" (click)="$event.stopPropagation()">
-
-    <div class="modal-header">
-      <h3><i class="fas fa-edit"></i> Editar Mascota</h3>
-      <button class="close-btn" (click)="closeEditPetModal()">
-        <i class="fas fa-times"></i>
-      </button>
-    </div>
-
-    <div class="modal-body">
-      <div class="form-grid">
-        <div class="form-group full-width">
-          <label>Nombre *</label>
-          <input type="text" [(ngModel)]="editingPet.name" placeholder="Nombre de la mascota">
-        </div>
-
-        <div class="form-group">
-          <label>Especie *</label>
-          <select [(ngModel)]="editingPet.species">
-            <option value="">Selecciona una especie</option>
-            <option value="Perro">Perro</option>
-            <option value="Gato">Gato</option>
-            <option value="Ave">Ave</option>
-            <option value="Pez">Pez</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Raza</label>
-          <input type="text" [(ngModel)]="editingPet.breed" placeholder="Raza">
-        </div>
-
-        <div class="form-group">
-          <label>Edad (años) *</label>
-          <input type="number" [(ngModel)]="editingPet.age" min="0" max="50" placeholder="0">
-        </div>
-
-        <div class="form-group">
-          <label>Género</label>
-          <select [(ngModel)]="editingPet.gender">
-            <option value="M">Macho</option>
-            <option value="F">Hembra</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Color</label>
-          <input type="text" [(ngModel)]="editingPet.color" placeholder="Color">
-        </div>
-
-        <div class="form-group">
-          <label>Peso (kg) *</label>
-          <input type="number" [(ngModel)]="editingPet.weight" min="0.1" max="200" step="0.1" placeholder="0">
-        </div>
-
-        <div class="form-group full-width">
-          <label>Imagen de la mascota</label>
-          <label class="file-input-label">
-            <i class="fas fa-cloud-upload-alt"></i> Cambiar imagen
-            <input type="file" accept="image/*" (change)="onEditPetImageSelected($event)" hidden>
-          </label>
-          <div *ngIf="editingPetImagePreview" class="image-preview">
-            <img [src]="editingPetImagePreview" alt="Preview" class="preview-img">
-            <button class="remove-image-btn" (click)="removeEditPetImage()"><i class="fas fa-times"></i></button>
-          </div>
-        </div>
-
-        <div class="form-group full-width">
-          <label>Descripción</label>
-          <textarea [(ngModel)]="editingPet.description" rows="3" placeholder="Características, comportamiento..."></textarea>
-        </div>
-
-      </div>
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn-secondary" (click)="closeEditPetModal()">Cancelar</button>
-      <button class="btn-primary" (click)="guardarEdicionMascota()">Guardar Cambios</button>
-    </div>
-
-  </div>
 </div>

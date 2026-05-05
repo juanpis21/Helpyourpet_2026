@@ -73,12 +73,15 @@ export class PetsController {
     limits: { fileSize: 5 * 1024 * 1024 },
   }))
   async create(@Request() req, @Body() createPetDto: CreatePetDto, @UploadedFile() file?: Express.Multer.File) {
-    const { userId, roles } = req.user;
+    const userId = req.user.sub || req.user.userId;
+    const userRole = req.user.role;
     
     // Si NO es admin, superadmin ni veterinario, forzamos que el dueño sea él mismo
-    const rolesAutorizados = ['admin', 'superadmin', 'veterinario'];
-    const userRoles = roles || [];
-    const tienePermisoEspecial = userRoles.some(role => rolesAutorizados.includes(role));
+    const rolesAutorizados = ['admin', 'superadmin', 'veterinario', 'veterinaria', 'doctor'];
+    
+    // Verificamos si el rol es una cadena (singular) o un objeto con nombre
+    const roleName = typeof userRole === 'string' ? userRole : (userRole?.name || '');
+    const tienePermisoEspecial = rolesAutorizados.includes(roleName.toLowerCase());
     
     if (!tienePermisoEspecial) {
       console.log(`[SECURITY-PETS] Forzando ownerId ${userId} para el usuario ${req.user.username}`);

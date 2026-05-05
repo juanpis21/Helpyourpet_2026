@@ -172,10 +172,7 @@
       <div class="section-header">
         <h1><i class="fas fa-concierge-bell"></i> Gestión de Servicios</h1>
         <div class="header-actions">
-          <button class="btn-secondary" (click)="toggleFilter()">
-            <i class="fas" [ngClass]="showOnlyInactive ? 'fa-eye' : 'fa-eye-slash'"></i>
-            {{ showOnlyInactive ? 'Ver Todos' : 'Ver Inactivos' }}
-          </button>
+
           <button class="btn-primary" (click)="openAddServiceModal()">
             <i class="fas fa-plus"></i> Agregar Servicio
           </button>
@@ -202,11 +199,11 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let s of filteredServicios">
+                <tr *ngFor="let s of servicios">
                   <td>{{ s.id }}</td>
                   <td>
                     <div class="service-img-container">
-                      <img [src]="s.imagen ? baseUrl + s.imagen : 'assets/img/service-placeholder.png'" 
+                      <img [src]="s.imagen ? baseUrl + s.imagen : 'assets/IMG/default.jpg'" 
                            [alt]="s.nombre" class="service-thumb">
                     </div>
                   </td>
@@ -400,42 +397,49 @@
       </div>
 
       <div class="card">
-        <div class="table-responsive">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>Código</th>
-                <th>Nombre</th>
-                <th>Descripción</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let cat of categorias">
-                <td><strong>{{ cat.codigo }}</strong></td>
-                <td>{{ cat.nombre }}</td>
-                <td>{{ cat.descripcion || 'Sin descripción' }}</td>
-                <td>
-                  <span class="status-badge" [class.active]="cat.isActive">
-                    {{ cat.isActive ? 'Activa' : 'Inactiva' }}
-                  </span>
-                </td>
-                <td class="actions">
-                  <button class="btn-icon edit" (click)="openEditCategoriaModal(cat)" title="Editar">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button class="btn-icon toggle" (click)="toggleEstadoCategoria(cat)" 
-                          [title]="cat.isActive ? 'Desactivar' : 'Activar'">
-                    <i class="fas" [ngClass]="cat.isActive ? 'fa-eye-slash' : 'fa-eye'"></i>
-                  </button>
-                  <button class="btn-icon delete" (click)="eliminarCategoria(cat)" title="Eliminar">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="card-header">
+          <h5><i class="fas fa-layer-group"></i> Listado de Categorías</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Nombre</th>
+                  <th>Descripción</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let cat of categorias">
+                  <td><strong>{{ cat.codigo }}</strong></td>
+                  <td>{{ cat.nombre }}</td>
+                  <td>{{ cat.descripcion || 'Sin descripción' }}</td>
+                  <td>
+                    <span class="status-pill" [class.active]="cat.isActive">
+                      {{ cat.isActive ? 'Activa' : 'Inactiva' }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="actions">
+                      <button class="btn-icon edit" (click)="openEditCategoriaModal(cat)" title="Editar">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button class="btn-icon toggle" (click)="toggleEstadoCategoria(cat)" 
+                              [title]="cat.isActive ? 'Desactivar' : 'Activar'">
+                        <i class="fas" [ngClass]="cat.isActive ? 'fa-toggle-on' : 'fa-toggle-off'" [style.color]="cat.isActive ? '#2e7d32' : '#c62828'"></i>
+                      </button>
+                      <button class="btn-icon delete" (click)="eliminarCategoria(cat)" title="Eliminar">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </section>
@@ -574,17 +578,7 @@
 
       <!-- Seguridad -->
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
-        <div class="card">
-          <div class="card-header" style="background: #fff8e1; color: #f57f17; border-bottom: 1px solid #ffecb3;">
-            <h5><i class="fas fa-shield-alt"></i> Seguridad</h5>
-          </div>
-          <div class="card-body" style="text-align: center;">
-            <p>Se recomienda cambiar tu contraseña cada 3 meses.</p>
-            <button class="btn-secondary" style="border-color: #f57f17; color: #f57f17; background: white;" (click)="cambiarContrasena()">
-              <i class="fas fa-key"></i> Cambiar Contraseña
-            </button>
-          </div>
-        </div>
+
 
         <div class="card">
           <div class="card-header" style="background: #ffebee; color: #c62828; border-bottom: 1px solid #ffcdd2;">

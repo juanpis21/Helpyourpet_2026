@@ -28,10 +28,11 @@ let PetsController = class PetsController {
         this.petsService = petsService;
     }
     async create(req, createPetDto, file) {
-        const { userId, roles } = req.user;
-        const rolesAutorizados = ['admin', 'superadmin', 'veterinario'];
-        const userRoles = roles || [];
-        const tienePermisoEspecial = userRoles.some(role => rolesAutorizados.includes(role));
+        const userId = req.user.sub || req.user.userId;
+        const userRole = req.user.role;
+        const rolesAutorizados = ['admin', 'superadmin', 'veterinario', 'veterinaria', 'doctor'];
+        const roleName = typeof userRole === 'string' ? userRole : (userRole?.name || '');
+        const tienePermisoEspecial = rolesAutorizados.includes(roleName.toLowerCase());
         if (!tienePermisoEspecial) {
             console.log(`[SECURITY-PETS] Forzando ownerId ${userId} para el usuario ${req.user.username}`);
             createPetDto.ownerId = userId;

@@ -28,7 +28,7 @@ export class AdminModulesComponent implements OnInit {
   categorias: Categoria[] = [];
   roles: Role[] = [];
   isLoading: boolean = false;
-  showOnlyInactive: boolean = false;
+
 
   // Configuración Admin
   adminUser: any = {
@@ -198,16 +198,7 @@ export class AdminModulesComponent implements OnInit {
     });
   }
 
-  get filteredServicios(): Servicio[] {
-    if (this.showOnlyInactive) {
-      return this.servicios.filter(s => !s.isActive);
-    }
-    return this.servicios;
-  }
 
-  toggleFilter(): void {
-    this.showOnlyInactive = !this.showOnlyInactive;
-  }
 
   get filteredUsuarios(): any[] {
     if (!this.usuarios) return [];
