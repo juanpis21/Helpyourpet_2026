@@ -96,13 +96,13 @@ export const routes: Routes = [
     path: 'dashboard', 
     component: PanelAdmin,
     canActivate: [permissionGuard],
-    data: { module: 'dashboard' }
+    data: { module: 'panel-admin' }
   },
   { 
     path: 'panel-admin', 
     component: PanelAdmin,
     canActivate: [permissionGuard],
-    data: { module: 'dashboard' }
+    data: { module: 'panel-admin' }
   },
   { 
     path: 'admin', 

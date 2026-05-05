@@ -59,6 +59,9 @@ export class Login {
     const user = this.authService.getCurrentUser();
     const userModules = this.authService.userModules();
     const roleName = (user?.role?.name || '').toLowerCase().trim();
+    console.log('🔍 [DEBUG-REDIRECT] Analizando permisos para:', user?.username);
+    console.log('🎭 [DEBUG-REDIRECT] Rol:', roleName || 'SIN ROL');
+    console.log('📦 [DEBUG-REDIRECT] Módulos:', userModules);
 
     // 1. Verificar por roleId primero (más confiable)
     if (user?.roleId === 1) {
