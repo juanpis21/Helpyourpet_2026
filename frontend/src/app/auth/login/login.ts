@@ -60,13 +60,31 @@ export class Login {
     const userModules = this.authService.userModules();
     const roleName = (user?.role?.name || '').toLowerCase().trim();
 
+    // 1. Verificar por roleId primero (más confiable)
+    if (user?.roleId === 1) {
+      // Superadmin - redirigir a super-admin
+      this.router.navigate(['/super-admin']);
+      return;
+    }
 
+    if (user?.roleId === 2) {
+      // Admin - redirigir a admin
+      this.router.navigate(['/admin']);
+      return;
+    }
+
+    if (user?.roleId === 3) {
+      // Veterinario - redirigir a veterinario
+      this.router.navigate(['/veterinario']);
+      return;
+    }
+
+    // 2. Fallback por nombre de rol (si roleId no está disponible)
     if (roleName === 'superadmin' || roleName === 'super-admin') {
       this.router.navigate(['/super-admin']);
       return;
     }
 
-    // 2. Roles Administrativos
     const isAdminRole = roleName === 'admin' ||
       roleName === 'administrador' ||
       roleName === 'administradora' ||

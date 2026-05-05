@@ -5,7 +5,7 @@ import { AuthService } from '../services/auth.service';
 @Injectable({
   providedIn: 'root'
 })
-export class AdminGuard implements CanActivate {
+export class SuperAdminGuard implements CanActivate {
   constructor(
     private router: Router,
     private authService: AuthService
@@ -20,9 +20,9 @@ export class AdminGuard implements CanActivate {
       return false;
     }
 
-    // Verificar si es admin (roleId: 2) - NO incluir super admin
-    if (currentUser.roleId !== 2) {
-      this.router.navigate(['/inicio']); // Redirigir a inicio si no es admin
+    // Verificar si es superadmin (roleId: 1)
+    if (currentUser.roleId !== 1) {
+      this.router.navigate(['/inicio']); // Redirigir a inicio si no es superadmin
       return false;
     }
 

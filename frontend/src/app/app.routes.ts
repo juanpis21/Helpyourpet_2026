@@ -17,6 +17,8 @@ import { SuperAdminComponent } from './features/super-admin/components/super-adm
 import { PasarelaPagos } from './features/pasarela-pagos/components/pasarela-pagos';
 import { Servicios } from './features/servicios/components/servicios';
 import { permissionGuard } from './core/guards/permission.guard';
+import { SuperAdminGuard } from './core/guards/super-admin.guard';
+import { AdminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   { path: '', component: Login },
@@ -105,13 +107,13 @@ export const routes: Routes = [
   { 
     path: 'admin', 
     component: AdminModulesComponent,
-    canActivate: [permissionGuard],
+    canActivate: [AdminGuard],
     data: { module: 'dashboard' }
   },
   { 
     path: 'super-admin', 
     component: SuperAdminComponent,
-    canActivate: [permissionGuard],
+    canActivate: [SuperAdminGuard],
     data: { module: 'super-admin' }
   }
 ];
