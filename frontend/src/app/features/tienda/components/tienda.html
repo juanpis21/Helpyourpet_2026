@@ -1,69 +1,9 @@
-<!-- Font Awesome CDN -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<!-- Navbar (igual que inicio) -->
-<nav class="navbar">
-	<div class="navbar-container">
-		<!-- Logo + Nombre (izquierda) -->
-		<div class="brand-section">
-			<img src="assets/IMG/logo.png" alt="HelpYourPet" class="logo-img">
-			<span class="brand-name">HelpYourPet</span>
-		</div>
-
-		<!-- Botones derecha -->
-		<div class="nav-right-section">
-			<!-- Carrito -->
-			<button class="cart-nav-button" (click)="toggleCarrito()">
-				<i class="fas fa-shopping-cart"></i>
-				<span class="cart-badge" *ngIf="carrito.length > 0">{{ carrito.length }}</span>
-			</button>
-
-			<!-- Botón de perfil -->
-			<div class="profile-section">
-				<button class="profile-btn" (click)="profileMenuAbierto = !profileMenuAbierto"
-					aria-label="Menú de perfil">
-					<img src="assets/images/Default.png" alt="Perfil" class="profile-avatar">
-					<i class="fas fa-chevron-down profile-arrow"></i>
-				</button>
-
-				<!-- Menú desplegable de perfil -->
-				<div class="profile-dropdown" [class.active]="profileMenuAbierto">
-					<div class="dropdown-header">
-						<img src="assets/images/Default.png" alt="Perfil" class="dropdown-avatar">
-						<div class="dropdown-user-info">
-							<span class="dropdown-username">Usuario</span>
-						</div>
-					</div>
-					<nav class="dropdown-nav">
-						<a routerLink="/inicio" class="dropdown-item" (click)="profileMenuAbierto = false">
-							<i class="fas fa-home"></i>
-							<span>Inicio</span>
-						</a>
-						<a routerLink="/perfil-usuario" class="dropdown-item" (click)="profileMenuAbierto = false">
-							<i class="fas fa-user"></i>
-							<span>Mi Perfil</span>
-						</a>
-						<a routerLink="/adopcion" class="dropdown-item" (click)="profileMenuAbierto = false">
-							<i class="fas fa-heart"></i>
-							<span>Publicaciones</span>
-						</a>
-						<a routerLink="/sobre-nosotros" class="dropdown-item" (click)="profileMenuAbierto = false">
-							<i class="fas fa-users"></i>
-							<span>Sobre Nosotros</span>
-						</a>
-						<div class="dropdown-divider"></div>
-						<a routerLink="/login" class="dropdown-item logout" (click)="profileMenuAbierto = false">
-							<i class="fas fa-sign-out-alt"></i>
-							<span>Cerrar Sesión</span>
-						</a>
-					</nav>
-				</div>
-			</div>
-		</div>
-	</div>
-</nav>
-
-
+<!-- Botón de Carrito (Burbuja Flotante) -->
+<button class="cart-bubble" (click)="toggleCarrito()" aria-label="Ver Carrito">
+	<i class="fas fa-shopping-cart"></i>
+	<span class="cart-badge" *ngIf="carrito.length > 0">{{ carrito.length }}</span>
+</button>
 
 <!-- Sección de Selección de Tienda -->
 <section class="store-selection-section" id="storeSelection" *ngIf="vista === 'tiendas'">
@@ -323,10 +263,3 @@
 		</button>
 	</div>
 </div>
-<!-- Footer -->
-
-<!-- BOTÓN MODO OSCURO (Esquina inferior izquierda - igual que inicio) -->
-<button class="theme-toggle-bottom" (click)="toggleModoOscuro()"
-	[attr.aria-label]="modoOscuro ? 'Activar modo claro' : 'Activar modo oscuro'" [class.dark-mode]="modoOscuro">
-	<i class="fas" [ngClass]="modoOscuro ? 'fa-sun' : 'fa-moon'"></i>
-</button>

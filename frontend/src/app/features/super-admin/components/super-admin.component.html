@@ -24,12 +24,15 @@
         </a>
       </li>
       <li>
+        <a [class.active]="activeTab === 'permissions'" (click)="setSection('permissions')">
+          <i class="fas fa-shield-alt"></i><span>Permisos y Módulos</span>
+        </a>
+      </li>
+      <li>
         <a [class.active]="activeTab === 'users'" (click)="setSection('users')">
           <i class="fas fa-users"></i><span>Todos los Usuarios</span>
         </a>
       </li>
-<!-- El apartado de permisos ha sido eliminado -->
-
       <li>
         <a [class.active]="activeTab === 'pets'" (click)="setSection('pets')">
           <i class="fas fa-paw"></i><span>Todas las Mascotas</span>
@@ -38,6 +41,11 @@
       <li>
         <a [class.active]="activeTab === 'veterinarias'" (click)="setSection('veterinarias')">
           <i class="fas fa-hospital"></i><span>Todas las Veterinarias</span>
+        </a>
+      </li>
+      <li>
+        <a [class.active]="activeTab === 'system'" (click)="setSection('system')">
+          <i class="fas fa-cogs"></i><span>Configuración Global</span>
         </a>
       </li>
       <li class="separator">
@@ -107,10 +115,10 @@
       <div class="section-header">
         <h1><i class="fas fa-user-tag"></i> Gestión de Roles</h1>
         <div class="header-actions">
+          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
           <button class="btn-primary" (click)="openNewRoleModal()">
             <i class="fas fa-plus"></i> Nuevo Rol
           </button>
-          <button class="top-bar-btn" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
         </div>
       </div>
 
@@ -144,6 +152,8 @@
       </div>
     </section>
 
+
+
     <!-- USERS -->
     <section *ngIf="activeTab === 'users'" class="content-section animate-in">
       <div class="section-header">
@@ -152,7 +162,7 @@
           <span class="count-pill">{{ allUsers.length }}</span>
         </h1>
         <div class="header-actions">
-          <button class="top-bar-btn" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
         </div>
       </div>
 
@@ -215,7 +225,7 @@
       <div class="section-header">
         <h1><i class="fas fa-paw"></i> Maestro de Mascotas</h1>
         <div class="header-actions">
-          <button class="top-bar-btn" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
         </div>
       </div>
 
@@ -254,7 +264,7 @@
       <div class="section-header">
         <h1><i class="fas fa-hospital"></i> Maestro de Veterinarias</h1>
         <div class="header-actions">
-          <button class="top-bar-btn" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
         </div>
       </div>
 
@@ -282,6 +292,66 @@
                 </tr>
               </tbody>
             </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+
+    <!-- PERMISSIONS -->
+    <section *ngIf="activeTab === 'permissions'" class="content-section animate-in">
+      <div class="section-header">
+        <h1><i class="fas fa-shield-alt"></i> Control de Permisos</h1>
+        <div class="header-actions">
+          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h5><i class="fas fa-key"></i> Asignación de Módulos por Rol</h5></div>
+        <div class="card-body">
+          <div class="role-selector mb-4">
+            <label>Seleccionar Rol:</label>
+            <select class="form-control" (change)="onRoleChange($event)">
+              <option value="">-- Elige un rol --</option>
+              <option *ngFor="let role of roles" [value]="role.id">{{ role.name | titlecase }}</option>
+            </select>
+          </div>
+
+          <div *ngIf="selectedRoleForModules" class="modules-grid animate-in">
+            <div *ngFor="let module of modules" class="module-item">
+              <div class="module-info">
+                <h6>{{ module.name | titlecase }}</h6>
+                <p>{{ module.description }}</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" [checked]="hasModule(module.name)" (change)="toggleModule(module.name)">
+                <span class="slider round"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SYSTEM -->
+    <section *ngIf="activeTab === 'system'" class="content-section animate-in">
+      <div class="section-header">
+        <h1><i class="fas fa-cogs"></i> Configuración Global</h1>
+        <div class="header-actions">
+          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h5><i class="fas fa-database"></i> Mantenimiento</h5></div>
+        <div class="card-body">
+          <div class="system-actions">
+            <button class="btn-secondary" (click)="seedInitialModules()">
+              <i class="fas fa-sync"></i> Regenerar Módulos y Roles Base
+            </button>
           </div>
         </div>
       </div>

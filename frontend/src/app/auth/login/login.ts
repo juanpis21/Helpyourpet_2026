@@ -63,7 +63,6 @@ export class Login {
     console.log('🎭 [DEBUG-REDIRECT] Rol:', roleName || 'SIN ROL');
     console.log('📦 [DEBUG-REDIRECT] Módulos:', userModules);
 
-    // 1. Verificar por roleId primero (más confiable)
     if (user?.roleId === 1) {
       // Superadmin - redirigir a super-admin
       this.router.navigate(['/super-admin']);

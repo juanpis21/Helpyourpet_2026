@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -56,7 +56,8 @@ export class Tienda implements OnInit, OnDestroy {
     private veterinariasService: VeterinariasService,
     private productosService: ProductosService,
     private categoriasService: CategoriasService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   // Intervalo para el carrusel
@@ -100,6 +101,7 @@ export class Tienda implements OnInit, OnDestroy {
           horario: 'Lun-Sáb: 8:00 AM - 7:00 PM', // Placeholder
           estado: t.isActive ? 'Activo' : 'Cerrado'
         }));
+        this.cdr.detectChanges();
       },
       error: (error) => console.error('❌ Error al cargar tiendas:', error)
     });
@@ -135,7 +137,10 @@ export class Tienda implements OnInit, OnDestroy {
 
   cargarCategorias(): void {
     this.categoriasService.getAll().subscribe({
-      next: (data) => this.categorias = data,
+      next: (data) => {
+        this.categorias = data;
+        this.cdr.detectChanges();
+      },
       error: (err) => console.error('Error al cargar categorías:', err)
     });
   }
@@ -158,6 +163,7 @@ export class Tienda implements OnInit, OnDestroy {
               imagen: p.imagen ? this.baseUrl + p.imagen : 'assets/IMG/default.jpg'
             };
           });
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('❌ Error al cargar productos:', error);

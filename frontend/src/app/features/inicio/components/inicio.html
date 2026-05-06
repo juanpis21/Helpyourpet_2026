@@ -1,56 +1,3 @@
-<!-- NAVBAR ESTÁTICO - Estilo HelpYourPet -->
-<nav class="navbar">
-  <div class="navbar-container">
-    <!-- Logo + Nombre (izquierda) -->
-    <div class="brand-section">
-      <img src="assets/IMG/logo.png" alt="HelpYourPet" class="logo-img">
-      <span class="brand-name">HelpYourPet</span>
-    </div>
-
-    <!-- Botón de perfil (derecha) -->
-    <div class="profile-section">
-      <button class="profile-btn" (click)="toggleProfileMenu()" aria-label="Menú de perfil">
-        <img
-          [src]="usuarioLogueado?.avatar || 'assets/images/Default.png'"
-          alt="Perfil" class="profile-avatar">
-        <i class="fas fa-chevron-down profile-arrow"></i>
-      </button>
-      
-      <!-- Menú desplegable de perfil -->
-      <div class="profile-dropdown" [class.active]="profileMenuAbierto">
-        <div class="dropdown-header">
-          <img
-            [src]="usuarioLogueado?.avatar || 'assets/images/Default.png'"
-            alt="Perfil" class="dropdown-avatar">
-          <div class="dropdown-user-info">
-            <span class="dropdown-username">{{ usuarioLogueado?.nombre || 'Usuario' }}</span>
-            <span class="dropdown-email">{{ usuarioLogueado?.email || '' }}</span>
-          </div>
-        </div>
-        <nav class="dropdown-nav">
-          <a (click)="irAPerfil(); toggleProfileMenu()" class="dropdown-item">
-            <i class="fas fa-user"></i>
-            <span>Mi Perfil</span>
-          </a>
-          <a (click)="irATienda(); toggleProfileMenu()" class="dropdown-item">
-            <i class="fas fa-shopping-cart"></i>
-            <span>PetShop</span>
-          </a>
-          
-          <a (click)="irASobreNosotros(); toggleProfileMenu()" class="dropdown-item">
-            <i class="fas fa-users"></i>
-            <span>Sobre Nosotros</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a (click)="logout(); toggleProfileMenu()" class="dropdown-item logout">
-            <i class="fas fa-sign-out-alt"></i>
-            <span>Cerrar Sesión</span>
-          </a>
-        </nav>
-      </div>
-    </div>
-  </div>
-</nav>
 
 <!-- LAYOUT PRINCIPAL: Centrado -->
 <div class="layout-principal">
@@ -200,15 +147,3 @@
   </section>
 
 </div>
-
-<!-- BOTÓN SUBIR (Scroll to top) -->
-<button class="btn-scroll-top" [class.visible]="showScrollTop" (click)="scrollToTop()" aria-label="Volver arriba">
-  <i class="fas fa-arrow-up"></i>
-</button>
-
-<!-- BOTÓN MODO OSCURO (Esquina inferior izquierda) -->
-<button class="theme-toggle-bottom" (click)="toggleModoOscuro()"
-  [attr.aria-label]="modoOscuro ? 'Activar modo claro' : 'Activar modo oscuro'"
-  [class.dark-mode]="modoOscuro">
-  <i class="fas" [ngClass]="modoOscuro ? 'fa-sun' : 'fa-moon'"></i>
-</button>
