@@ -87,6 +87,10 @@ export class User {
   @ApiHideProperty()
   @OneToMany(() => Cita, cita => cita.usuario)
   citas: Cita[];
+  
+  @ApiHideProperty()
+  @OneToMany(() => Cita, cita => cita.veterinario)
+  citasAsignadas: Cita[];
 
   @ApiHideProperty()
   @OneToMany(() => HistorialCita, historialCita => historialCita.usuario)

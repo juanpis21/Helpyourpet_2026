@@ -15,7 +15,6 @@ const typeorm_1 = require("typeorm");
 const user_entity_1 = require("../../users/entities/user.entity");
 const perfil_veterinario_entity_1 = require("../../perfiles-veterinarios/entities/perfil-veterinario.entity");
 const emergencia_entity_1 = require("../../emergencias/entities/emergencia.entity");
-const cita_entity_1 = require("../../citas/entities/cita.entity");
 const module_entity_1 = require("../../modules/entities/module.entity");
 let Role = class Role {
 };
@@ -50,11 +49,6 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => emergencia_entity_1.Emergencia, emergencia => emergencia.veterinario),
     __metadata("design:type", Array)
 ], Role.prototype, "emergencias", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Citas asignadas a este rol', type: () => [cita_entity_1.Cita] }),
-    (0, typeorm_1.OneToMany)(() => cita_entity_1.Cita, cita => cita.veterinario),
-    __metadata("design:type", Array)
-], Role.prototype, "citas", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Módulos a los que este rol da acceso', type: () => [module_entity_1.Module] }),
     (0, typeorm_1.ManyToMany)(() => module_entity_1.Module, (module) => module.roles),

@@ -1,6 +1,5 @@
 import { User } from '../../users/entities/user.entity';
 import { Veterinaria } from '../../veterinarias/entities/veterinaria.entity';
-import { Cita } from '../../citas/entities/cita.entity';
 import { Role } from '../../roles/entities/role.entity';
 export declare class PerfilVeterinario {
     id: number;
@@ -14,7 +13,6 @@ export declare class PerfilVeterinario {
     usuario: User;
     rol: Role;
     veterinariaPrincipal?: Veterinaria;
-    citas: Cita[];
     isActive: boolean;
     createdAt: Date;
     updatedAt: Date;

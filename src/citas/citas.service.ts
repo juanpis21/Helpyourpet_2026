@@ -6,7 +6,6 @@ import { CreateCitaDto } from './dto/create-cita.dto';
 import { UpdateCitaDto } from './dto/update-cita.dto';
 import { UsersService } from '../users/users.service';
 import { PetsService } from '../pets/pets.service';
-import { RolesService } from '../roles/roles.service';
 import { HistorialCitasService } from '../historial-citas/historial-citas.service';
 
 @Injectable()
@@ -16,7 +15,6 @@ export class CitasService {
     private citasRepository: Repository<Cita>,
     private usersService: UsersService,
     private petsService: PetsService,
-    private rolesService: RolesService,
     @Inject(forwardRef(() => HistorialCitasService))
     private historialCitasService: HistorialCitasService,
   ) { }
@@ -43,6 +41,12 @@ export class CitasService {
       throw new ConflictException('La fecha de la cita debe ser futura');
     }
 
+    // Buscar el veterinario si se proporciona ID
+    let veterinario = null;
+    if (createCitaDto.idVeterinario) {
+      veterinario = await this.usersService.findOne(createCitaDto.idVeterinario);
+    }
+
     const existingCita = await this.citasRepository.findOne({
       where: {
         mascota: { id: createCitaDto.mascotaId },
@@ -60,6 +64,7 @@ export class CitasService {
       fechaHora,
       usuario,
       mascota,
+      veterinario,
     });
 
     const savedCita = await this.citasRepository.save(cita);
@@ -214,7 +219,7 @@ export class CitasService {
       cita.notas = updateCitaDto.notas;
     }
     if (updateCitaDto.idVeterinario !== undefined) {
-      const veterinario = await this.rolesService.findOne(updateCitaDto.idVeterinario);
+      const veterinario = await this.usersService.findOne(updateCitaDto.idVeterinario);
       if (!veterinario) {
         throw new NotFoundException(`Veterinario with ID ${updateCitaDto.idVeterinario} not found`);
       }

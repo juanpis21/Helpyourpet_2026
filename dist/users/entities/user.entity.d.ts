@@ -25,6 +25,7 @@ export declare class User {
     role: Role;
     pets: Pet[];
     citas: Cita[];
+    citasAsignadas: Cita[];
     historialCitas: HistorialCita[];
     movimientosInventario: MovimientoInventario[];
     perfilVeterinario: PerfilVeterinario;

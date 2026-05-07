@@ -19,14 +19,12 @@ const typeorm_2 = require("typeorm");
 const cita_entity_1 = require("./entities/cita.entity");
 const users_service_1 = require("../users/users.service");
 const pets_service_1 = require("../pets/pets.service");
-const roles_service_1 = require("../roles/roles.service");
 const historial_citas_service_1 = require("../historial-citas/historial-citas.service");
 let CitasService = class CitasService {
-    constructor(citasRepository, usersService, petsService, rolesService, historialCitasService) {
+    constructor(citasRepository, usersService, petsService, historialCitasService) {
         this.citasRepository = citasRepository;
         this.usersService = usersService;
         this.petsService = petsService;
-        this.rolesService = rolesService;
         this.historialCitasService = historialCitasService;
     }
     async create(createCitaDto) {
@@ -45,6 +43,10 @@ let CitasService = class CitasService {
         if (fechaHora <= new Date()) {
             throw new common_1.ConflictException('La fecha de la cita debe ser futura');
         }
+        let veterinario = null;
+        if (createCitaDto.idVeterinario) {
+            veterinario = await this.usersService.findOne(createCitaDto.idVeterinario);
+        }
         const existingCita = await this.citasRepository.findOne({
             where: {
                 mascota: { id: createCitaDto.mascotaId },
@@ -60,6 +62,7 @@ let CitasService = class CitasService {
             fechaHora,
             usuario,
             mascota,
+            veterinario,
         });
         const savedCita = await this.citasRepository.save(cita);
         await this.historialCitasService.registrarCreacionCita(savedCita.id, createCitaDto.usuarioId, `Se creó la cita para ${mascota.name} el ${fechaHora.toISOString()}`);
@@ -179,7 +182,7 @@ let CitasService = class CitasService {
             cita.notas = updateCitaDto.notas;
         }
         if (updateCitaDto.idVeterinario !== undefined) {
-            const veterinario = await this.rolesService.findOne(updateCitaDto.idVeterinario);
+            const veterinario = await this.usersService.findOne(updateCitaDto.idVeterinario);
             if (!veterinario) {
                 throw new common_1.NotFoundException(`Veterinario with ID ${updateCitaDto.idVeterinario} not found`);
             }
@@ -223,11 +226,10 @@ exports.CitasService = CitasService;
 exports.CitasService = CitasService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(cita_entity_1.Cita)),
-    __param(4, (0, common_1.Inject)((0, common_1.forwardRef)(() => historial_citas_service_1.HistorialCitasService))),
+    __param(3, (0, common_1.Inject)((0, common_1.forwardRef)(() => historial_citas_service_1.HistorialCitasService))),
     __metadata("design:paramtypes", [typeorm_2.Repository,
         users_service_1.UsersService,
         pets_service_1.PetsService,
-        roles_service_1.RolesService,
         historial_citas_service_1.HistorialCitasService])
 ], CitasService);
 //# sourceMappingURL=citas.service.js.map

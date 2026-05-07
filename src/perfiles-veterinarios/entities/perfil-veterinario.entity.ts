@@ -85,12 +85,6 @@ export class PerfilVeterinario {
   @ManyToOne(() => Veterinaria, veterinaria => veterinaria.veterinarios)
   veterinariaPrincipal?: Veterinaria;
 
-  @ApiProperty({ 
-    description: 'Citas asignadas', 
-    type: () => [Cita] 
-  })
-  @OneToMany(() => Cita, cita => cita.veterinario)
-  citas: Cita[];
 
   @ApiProperty({ 
     description: 'Indica si el perfil veterinario está activo', 

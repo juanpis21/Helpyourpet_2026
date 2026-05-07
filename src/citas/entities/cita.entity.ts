@@ -57,11 +57,11 @@ export class Cita {
 
   @ApiProperty({ 
     description: 'Veterinario asignado a la cita', 
-    type: () => Role,
+    type: () => User,
     required: false
   })
-  @ManyToOne(() => Role, role => role.citas)
-  veterinario: Role;
+  @ManyToOne(() => User, user => user.citasAsignadas)
+  veterinario: User;
 
   @ApiProperty({ 
     description: 'Mascota del paciente', 

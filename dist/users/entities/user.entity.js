@@ -122,6 +122,11 @@ __decorate([
 ], User.prototype, "citas", void 0);
 __decorate([
     (0, swagger_1.ApiHideProperty)(),
+    (0, typeorm_1.OneToMany)(() => cita_entity_1.Cita, cita => cita.veterinario),
+    __metadata("design:type", Array)
+], User.prototype, "citasAsignadas", void 0);
+__decorate([
+    (0, swagger_1.ApiHideProperty)(),
     (0, typeorm_1.OneToMany)(() => historial_cita_entity_1.HistorialCita, historialCita => historialCita.usuario),
     __metadata("design:type", Array)
 ], User.prototype, "historialCitas", void 0);

@@ -14,7 +14,6 @@ const swagger_1 = require("@nestjs/swagger");
 const typeorm_1 = require("typeorm");
 const user_entity_1 = require("../../users/entities/user.entity");
 const veterinaria_entity_1 = require("../../veterinarias/entities/veterinaria.entity");
-const cita_entity_1 = require("../../citas/entities/cita.entity");
 const role_entity_1 = require("../../roles/entities/role.entity");
 let PerfilVeterinario = class PerfilVeterinario {
 };
@@ -108,14 +107,6 @@ __decorate([
     (0, typeorm_1.ManyToOne)(() => veterinaria_entity_1.Veterinaria, veterinaria => veterinaria.veterinarios),
     __metadata("design:type", veterinaria_entity_1.Veterinaria)
 ], PerfilVeterinario.prototype, "veterinariaPrincipal", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        description: 'Citas asignadas',
-        type: () => [cita_entity_1.Cita]
-    }),
-    (0, typeorm_1.OneToMany)(() => cita_entity_1.Cita, cita => cita.veterinario),
-    __metadata("design:type", Array)
-], PerfilVeterinario.prototype, "citas", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'Indica si el perfil veterinario está activo',

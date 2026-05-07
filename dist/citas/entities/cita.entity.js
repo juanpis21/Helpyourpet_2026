@@ -14,7 +14,6 @@ const swagger_1 = require("@nestjs/swagger");
 const typeorm_1 = require("typeorm");
 const user_entity_1 = require("../../users/entities/user.entity");
 const pet_entity_1 = require("../../pets/entities/pet.entity");
-const role_entity_1 = require("../../roles/entities/role.entity");
 const historial_cita_entity_1 = require("../../historial-citas/entities/historial-cita.entity");
 let Cita = class Cita {
 };
@@ -76,11 +75,11 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'Veterinario asignado a la cita',
-        type: () => role_entity_1.Role,
+        type: () => user_entity_1.User,
         required: false
     }),
-    (0, typeorm_1.ManyToOne)(() => role_entity_1.Role, role => role.citas),
-    __metadata("design:type", role_entity_1.Role)
+    (0, typeorm_1.ManyToOne)(() => user_entity_1.User, user => user.citasAsignadas),
+    __metadata("design:type", user_entity_1.User)
 ], Cita.prototype, "veterinario", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({

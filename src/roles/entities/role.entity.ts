@@ -32,9 +32,6 @@ export class Role {
   @OneToMany(() => Emergencia, emergencia => emergencia.veterinario)
   emergencias: Emergencia[];
 
-  @ApiProperty({ description: 'Citas asignadas a este rol', type: () => [Cita] })
-  @OneToMany(() => Cita, cita => cita.veterinario)
-  citas: Cita[];
 
   @ApiProperty({ description: 'Módulos a los que este rol da acceso', type: () => [Module] })
   @ManyToMany(() => Module, (module) => module.roles)

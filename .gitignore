@@ -1,0 +1,13 @@
+node_modules/
+dist/
+target/
+*.log
+.env
+.metadata/
+.mvn/
+mvnw
+mvnw.cmd
+scratch/
+uploads/
+frontend/node_modules/
+frontend/dist/

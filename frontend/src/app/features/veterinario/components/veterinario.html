@@ -336,7 +336,7 @@
         <div class="form-group full">
           <label>Mascota</label>
           <select [(ngModel)]="newCita.petId">
-            <option *ngFor="let m of mascotas" [ngValue]="m.id">{{ m.name }} ({{ m.owner?.nombres }})</option>
+            <option *ngFor="let m of mascotas" [ngValue]="m.id">{{ m.name }} (Dueño: {{ m.owner?.firstName }} {{ m.owner?.lastName }})</option>
           </select>
         </div>
         <div class="form-group">

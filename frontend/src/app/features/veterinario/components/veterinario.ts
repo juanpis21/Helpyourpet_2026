@@ -269,13 +269,43 @@ export class Veterinario implements OnInit {
   }
 
   registrarCita(): void {
-    this.http.post(`${this.API_BASE}/citas`, this.newCita, this.getHeaders()).subscribe({
+    // 1. Encontrar la mascota seleccionada para obtener su dueño
+    const mascotaSeleccionada = this.mascotas.find(m => m.id === this.newCita.petId);
+    
+    if (!mascotaSeleccionada) {
+      alert('Por favor selecciona una mascota');
+      return;
+    }
+
+    if (!this.newCita.fecha || !this.newCita.motivo) {
+      alert('Por favor completa la fecha y el motivo');
+      return;
+    }
+
+    // 2. Construir el objeto con los nombres que el backend espera (CreateCitaDto)
+    const payload = {
+      fechaHora: this.newCita.fecha,
+      motivo: this.newCita.motivo,
+      usuarioId: mascotaSeleccionada.ownerId || mascotaSeleccionada.owner?.id,
+      mascotaId: this.newCita.petId,
+      idVeterinario: this.vetUser?.id, // Asignar automáticamente el veterinario logueado
+      estado: 'Programada'
+    };
+
+    console.log('📤 Enviando cita:', payload);
+
+    this.http.post(`${this.API_BASE}/citas`, payload, this.getHeaders()).subscribe({
       next: () => {
+        alert('✅ Cita programada con éxito');
         this.cargarCitas();
         this.showAddCitaModal = false;
         this.newCita = { fecha: '', motivo: '', userId: null, petId: null };
       },
-      error: (err) => console.error('Error al registrar cita:', err)
+      error: (err) => {
+        console.error('❌ Error al registrar cita:', err);
+        const msg = err.error?.message || 'Error desconocido';
+        alert('❌ Error al registrar cita: ' + (Array.isArray(msg) ? msg.join(', ') : msg));
+      }
     });
   }
 
