@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -18,6 +18,11 @@ export class Login {
   };
   isLoading = false;
   errorMessage = '';
+
+  @HostListener('window:keydown.enter')
+  handleKeyDown() {
+    this.onSubmit();
+  }
 
   constructor(
     private router: Router,
@@ -59,9 +64,6 @@ export class Login {
     const user = this.authService.getCurrentUser();
     const userModules = this.authService.userModules();
     const roleName = (user?.role?.name || '').toLowerCase().trim();
-    console.log('🔍 [DEBUG-REDIRECT] Analizando permisos para:', user?.username);
-    console.log('🎭 [DEBUG-REDIRECT] Rol:', roleName || 'SIN ROL');
-    console.log('📦 [DEBUG-REDIRECT] Módulos:', userModules);
 
     if (user?.roleId === 1) {
       // Superadmin - redirigir a super-admin

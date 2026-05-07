@@ -523,8 +523,4 @@ export class PerfilUsuario implements OnInit {
       });
     }
   }
-
-  cambiarContrasena(): void {
-    alert('Funcionalidad de cambio de contraseña próximamente disponible.');
-  }
 }
