@@ -17,6 +17,8 @@ export declare class User {
     documentNumber: string;
     age: number;
     address: string;
+    tieneCuenta: boolean;
+    createdById: number;
     isActive: boolean;
     avatar: string;
     roleId: number;

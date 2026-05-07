@@ -24,6 +24,11 @@
         </a>
       </li>
       <li>
+        <a [class.active]="activeSection === 'usuarios'" (click)="setSection('usuarios')">
+          <i class="fas fa-users"></i><span>Usuarios</span>
+        </a>
+      </li>
+      <li>
         <a [class.active]="activeSection === 'citas'" (click)="setSection('citas')">
           <i class="fas fa-calendar-check"></i><span>Citas Médicas</span>
         </a>
@@ -95,7 +100,9 @@
       </div>
 
       <div class="card">
-        <div class="card-header"><h5>Mascotas Registradas</h5></div>
+        <div class="card-header">
+          <h5>Mascotas Registradas</h5>
+        </div>
         <div class="card-body">
           <div class="table-container">
             <table class="data-table">
@@ -122,6 +129,61 @@
                 </tr>
               </tbody>
             </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- USUARIOS -->
+    <section *ngIf="activeSection === 'usuarios'" class="content-section animate-in">
+      <div class="section-header">
+        <h1><i class="fas fa-users"></i> Gestión de Usuarios</h1>
+        <button class="btn-primary" (click)="openAddUserModal()">
+          <i class="fas fa-user-plus"></i> Registrar Usuario
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Usuarios Registrados por el Veterinario</h2>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive" *ngIf="usuariosSinCuenta.length > 0">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Nombres</th>
+                  <th>Apellidos</th>
+                  <th>Tipo Doc.</th>
+                  <th>Número</th>
+                  <th>Teléfono</th>
+                  <th>Dirección</th>
+                  <th>Edad</th>
+                  <th>Tiene cuenta</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let user of usuariosSinCuenta">
+                  <td class="bold">{{ user.firstName }}</td>
+                  <td>{{ user.lastName }}</td>
+                  <td>{{ user.documentType }}</td>
+                  <td>{{ user.documentNumber }}</td>
+                  <td>{{ user.phone || 'N/A' }}</td>
+                  <td>{{ user.address || 'N/A' }}</td>
+                  <td>{{ user.age || 'N/A' }} años</td>
+                  <td>
+                    <span class="status-pill" [class.active]="user.tieneCuenta" [class.inactive]="!user.tieneCuenta">
+                      {{ user.tieneCuenta ? 'Sí' : 'No' }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="empty-state" *ngIf="usuariosSinCuenta.length === 0">
+            <i class="fas fa-users"></i>
+            <p>No hay usuarios registrados por este veterinario.</p>
           </div>
         </div>
       </div>
@@ -195,7 +257,8 @@
     </div>
     <div class="modal-body">
       <div class="pet-image-upload">
-        <div class="image-preview" [style.backgroundImage]="imagePreview ? 'url(' + imagePreview + ')' : 'url(assets/images/Default.png)'">
+        <div class="image-preview"
+          [style.backgroundImage]="imagePreview ? 'url(' + imagePreview + ')' : 'url(assets/images/Default.png)'">
         </div>
         <label for="pet-photo" class="upload-btn">
           <i class="fas fa-camera"></i> Subir Foto
@@ -289,6 +352,57 @@
     <div class="modal-footer">
       <button class="btn-secondary" (click)="showAddCitaModal = false">Cancelar</button>
       <button class="btn-primary" (click)="registrarCita()">Programar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REGISTRAR USUARIO -->
+<div class="modal-overlay" *ngIf="showAddUserModal" (click)="closeAddUserModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3><i class="fas fa-user-plus"></i> Registrar Nuevo Dueño</h3>
+      <button class="close-btn" (click)="closeAddUserModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nombres *</label>
+          <input type="text" [(ngModel)]="newUser.firstName" placeholder="Ej: Juan Carlos">
+        </div>
+        <div class="form-group">
+          <label>Apellidos *</label>
+          <input type="text" [(ngModel)]="newUser.lastName" placeholder="Ej: Pérez García">
+        </div>
+        <div class="form-group">
+          <label>Tipo de Documento *</label>
+          <select [(ngModel)]="newUser.documentType">
+            <option value="Cédula">Cédula</option>
+            <option value="Pasaporte">Pasaporte</option>
+            <option value="Tarjeta Identidad">Tarjeta Identidad</option>
+            <option value="Registro Civil">Registro Civil</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Número de Documento *</label>
+          <input type="text" [(ngModel)]="newUser.documentNumber" placeholder="Ej: 1003479364">
+        </div>
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="text" [(ngModel)]="newUser.phone" placeholder="Ej: 3222473364">
+        </div>
+        <div class="form-group">
+          <label>Edad</label>
+          <input type="number" [(ngModel)]="newUser.age" min="0">
+        </div>
+        <div class="form-group full">
+          <label>Dirección</label>
+          <input type="text" [(ngModel)]="newUser.address" placeholder="Ej: Calle 123 #45-67">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeAddUserModal()">Cancelar</button>
+      <button class="btn-primary" (click)="registrarUsuario()">Registrar</button>
     </div>
   </div>
 </div>

@@ -76,8 +76,8 @@ export class Login {
     }
 
     if (user?.roleId === 3) {
-      // Veterinario - redirigir a veterinario
-      this.router.navigate(['/veterinario']);
+      // Veterinario - Redirigir a inicio para que vea las publicaciones, pero el navbar se encargará de limitar su menú
+      this.router.navigate(['/inicio']);
       return;
     }
 

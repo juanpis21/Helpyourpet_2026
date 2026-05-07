@@ -27,17 +27,17 @@ __decorate([
     __metadata("design:type", Number)
 ], User.prototype, "id", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Nombre de usuario', example: 'juanp' }),
-    (0, typeorm_1.Column)({ unique: true }),
+    (0, swagger_1.ApiProperty)({ description: 'Nombre de usuario', example: 'juanp', required: false }),
+    (0, typeorm_1.Column)({ unique: true, nullable: true }),
     __metadata("design:type", String)
 ], User.prototype, "username", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Email del usuario', example: 'juan@example.com' }),
-    (0, typeorm_1.Column)({ unique: true }),
+    (0, swagger_1.ApiProperty)({ description: 'Email del usuario', example: 'juan@example.com', required: false }),
+    (0, typeorm_1.Column)({ unique: true, nullable: true }),
     __metadata("design:type", String)
 ], User.prototype, "email", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], User.prototype, "password", void 0);
 __decorate([
@@ -80,6 +80,16 @@ __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], User.prototype, "address", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '¿Tiene cuenta activa?', example: false }),
+    (0, typeorm_1.Column)({ default: false }),
+    __metadata("design:type", Boolean)
+], User.prototype, "tieneCuenta", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'ID del veterinario que creó este registro', required: false }),
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", Number)
+], User.prototype, "createdById", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Estado del usuario', example: true }),
     (0, typeorm_1.Column)({ default: true }),

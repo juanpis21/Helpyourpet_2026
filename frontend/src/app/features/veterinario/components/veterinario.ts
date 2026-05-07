@@ -56,6 +56,7 @@ export class Veterinario implements OnInit {
 
   // Modales y Formularios
   showAddPetModal: boolean = false;
+  showAddUserModal: boolean = false;
   showAddCitaModal: boolean = false;
   
   newPet: Mascota = {
@@ -70,6 +71,17 @@ export class Veterinario implements OnInit {
     ownerId: undefined
   };
 
+  newUser: any = {
+    firstName: '',
+    lastName: '',
+    documentType: 'Cédula',
+    documentNumber: '',
+    phone: '',
+    address: '',
+    age: 18
+  };
+
+  usuariosSinCuenta: any[] = [];
   selectedFile: File | null = null;
   imagePreview: string | null = null;
 
@@ -90,6 +102,7 @@ export class Veterinario implements OnInit {
   cargarDatos(): void {
     this.cargarMascotas();
     this.cargarUsuarios();
+    this.cargarUsuariosSinCuenta();
     this.cargarPublicaciones();
     this.cargarCitas();
   }
@@ -131,6 +144,53 @@ export class Veterinario implements OnInit {
         this.usuarios = data;
       },
       error: (err) => console.error('Error cargando usuarios:', err)
+    });
+  }
+
+  cargarUsuariosSinCuenta(): void {
+    this.userService.getUsuariosSinCuenta().subscribe({
+      next: (data) => {
+        this.usuariosSinCuenta = data;
+        console.log('👥 Usuarios sin cuenta cargados:', data.length);
+      },
+      error: (err) => console.error('Error cargando usuarios sin cuenta:', err)
+    });
+  }
+
+  openAddUserModal(): void {
+    this.showAddUserModal = true;
+  }
+
+  closeAddUserModal(): void {
+    this.showAddUserModal = false;
+    this.newUser = {
+      firstName: '',
+      lastName: '',
+      documentType: 'Cédula',
+      documentNumber: '',
+      phone: '',
+      address: '',
+      age: 18
+    };
+  }
+
+  registrarUsuario(): void {
+    if (!this.newUser.firstName || !this.newUser.lastName || !this.newUser.documentNumber) {
+      alert('Por favor complete los campos obligatorios (Nombres, Apellidos y Documento)');
+      return;
+    }
+
+    this.userService.registerUserByVet(this.newUser).subscribe({
+      next: (res) => {
+        alert('Usuario registrado con éxito');
+        this.cargarUsuarios(); // Para el select de mascotas
+        this.cargarUsuariosSinCuenta(); // Para la tabla de usuarios
+        this.closeAddUserModal();
+      },
+      error: (err) => {
+        console.error('Error al registrar usuario:', err);
+        alert('Error al registrar usuario: ' + (err.error?.message || err.message));
+      }
     });
   }
 

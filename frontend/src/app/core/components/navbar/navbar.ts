@@ -36,6 +36,8 @@ export class Navbar implements OnInit {
     const user = this.authService.getCurrentUser();
     if (user) {
       this.usuarioLogueado = {
+        id: user.id,
+        roleId: user.roleId,
         nombre: user.fullName || user.username || 'Usuario',
         email: user.email,
         avatar: user.avatar || 'assets/images/Default.png'
@@ -74,7 +76,11 @@ export class Navbar implements OnInit {
   }
 
   irAPerfil() {
-    this.router.navigate(['/perfil-usuario']);
+    if (this.usuarioLogueado?.roleId === 3) {
+      this.router.navigate(['/veterinario']);
+    } else {
+      this.router.navigate(['/perfil-usuario']);
+    }
   }
 
   irATienda() {

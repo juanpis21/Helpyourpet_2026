@@ -13,15 +13,15 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ApiProperty({ description: 'Nombre de usuario', example: 'juanp' })
-  @Column({ unique: true })
+  @ApiProperty({ description: 'Nombre de usuario', example: 'juanp', required: false })
+  @Column({ unique: true, nullable: true })
   username: string;
 
-  @ApiProperty({ description: 'Email del usuario', example: 'juan@example.com' })
-  @Column({ unique: true })
+  @ApiProperty({ description: 'Email del usuario', example: 'juan@example.com', required: false })
+  @Column({ unique: true, nullable: true })
   email: string;
 
-  @Column()
+  @Column({ nullable: true })
   password: string;
 
   @ApiProperty({ description: 'Nombre completo', example: 'Juan Pérez' })
@@ -55,6 +55,14 @@ export class User {
   @ApiProperty({ description: 'Dirección', example: 'Calle 123 #45-67', required: false })
   @Column({ nullable: true })
   address: string;
+
+  @ApiProperty({ description: '¿Tiene cuenta activa?', example: false })
+  @Column({ default: false })
+  tieneCuenta: boolean;
+
+  @ApiProperty({ description: 'ID del veterinario que creó este registro', required: false })
+  @Column({ nullable: true })
+  createdById: number;
 
   @ApiProperty({ description: 'Estado del usuario', example: true })
   @Column({ default: true })

@@ -27,14 +27,35 @@ let UsersService = class UsersService {
         this.permissionsService = permissionsService;
     }
     async create(createUserDto) {
-        const existingUser = await this.usersRepository.findOne({
+        const existingByUserOrEmail = await this.usersRepository.findOne({
             where: [
                 { username: createUserDto.username },
                 { email: createUserDto.email },
             ],
         });
-        if (existingUser) {
-            throw new common_1.ConflictException('Username or email already exists');
+        if (existingByUserOrEmail) {
+            throw new common_1.ConflictException('El nombre de usuario o correo electrónico ya está en uso.');
+        }
+        if (createUserDto.documentNumber) {
+            const existingPreRegistered = await this.usersRepository.findOne({
+                where: {
+                    documentNumber: createUserDto.documentNumber,
+                    tieneCuenta: false
+                }
+            });
+            if (existingPreRegistered) {
+                console.log('🔄 Vinculando cuenta pre-registrada para:', createUserDto.documentNumber);
+                const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+                const updatedUser = Object.assign(existingPreRegistered, {
+                    ...createUserDto,
+                    password: hashedPassword,
+                    tieneCuenta: true,
+                    isActive: true
+                });
+                const savedUser = await this.usersRepository.save(updatedUser);
+                await this.permissionsService.createDefaultPermissions(savedUser.id);
+                return savedUser;
+            }
         }
         const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
         let roleId = createUserDto.roleId;
@@ -49,10 +70,40 @@ let UsersService = class UsersService {
             ...createUserDto,
             password: hashedPassword,
             roleId,
+            tieneCuenta: true
         });
         const savedUser = await this.usersRepository.save(user);
         await this.permissionsService.createDefaultPermissions(savedUser.id);
         return savedUser;
+    }
+    async registerByVeterinario(registerDto, createdById) {
+        const existingUser = await this.usersRepository.findOne({
+            where: { documentNumber: registerDto.documentNumber },
+            relations: ['role']
+        });
+        if (existingUser) {
+            console.log('User already exists with document number:', registerDto.documentNumber);
+            return existingUser;
+        }
+        const user = this.usersRepository.create({
+            ...registerDto,
+            roleId: 4,
+            tieneCuenta: false,
+            createdById,
+            isActive: true,
+            fullName: `${registerDto.firstName} ${registerDto.lastName}`
+        });
+        return this.usersRepository.save(user);
+    }
+    async findUsuariosByVeterinario(createdById) {
+        console.log('🔍 Buscando todos los usuarios registrados por vet ID:', createdById);
+        const users = await this.usersRepository.find({
+            where: { roleId: 4, createdById },
+            relations: ['role'],
+            select: ['id', 'firstName', 'lastName', 'fullName', 'phone', 'documentType', 'documentNumber', 'age', 'address', 'tieneCuenta', 'createdAt', 'createdById']
+        });
+        console.log(`✅ Usuarios encontrados: ${users.length}`);
+        return users;
     }
     async findAll() {
         return this.usersRepository.find({
