@@ -9,11 +9,12 @@ import { VeterinariasService } from '../../../core/services/veterinarias.service
 import { ProductosService } from '../../../core/services/productos.service';
 import { CategoriasService } from '../../../core/services/categorias.service';
 import { Subscription } from 'rxjs';
+import { Navbar } from '../../../core/components/navbar/navbar';
 
 @Component({
   selector: 'app-tienda',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, Navbar],
   templateUrl: './tienda.html',
   styleUrl: './tienda.scss',
   encapsulation: ViewEncapsulation.None,

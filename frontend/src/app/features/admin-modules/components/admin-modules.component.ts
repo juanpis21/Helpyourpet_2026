@@ -93,7 +93,7 @@ export class AdminModulesComponent implements OnInit {
     duracionMinutos: 30,
     requiereCita: true,
     descripcion: '',
-    veterinariaId: 1
+    veterinariaId: 0
   };
 
   editingService: Partial<Servicio> = {};
@@ -299,7 +299,7 @@ export class AdminModulesComponent implements OnInit {
       duracionMinutos: 30,
       requiereCita: true,
       descripcion: '',
-      veterinariaId: 1
+      veterinariaId: 0
     };
     this.selectedFile = null;
     this.imagePreview = null;
@@ -326,8 +326,8 @@ export class AdminModulesComponent implements OnInit {
   }
 
   guardarServicio(): void {
-    if (!this.newService.nombre || !this.newService.tipoServicio || this.newService.precioBase === undefined) {
-      alert('Por favor, completa los campos obligatorios');
+    if (!this.newService.nombre || !this.newService.tipoServicio || this.newService.precioBase === undefined || !this.newService.veterinariaId) {
+      alert('Por favor, completa los campos obligatorios y selecciona una veterinaria');
       return;
     }
 

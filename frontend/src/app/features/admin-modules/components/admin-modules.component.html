@@ -621,6 +621,13 @@
             <label>Precio *</label>
             <input type="number" [(ngModel)]="newService.precioBase">
           </div>
+          <div class="form-group">
+            <label>Veterinaria *</label>
+            <select [(ngModel)]="newService.veterinariaId">
+              <option [ngValue]="0">Seleccionar Veterinaria</option>
+              <option *ngFor="let vet of veterinarias" [ngValue]="vet.id">{{ vet.nombre }}</option>
+            </select>
+          </div>
           <div class="form-group full">
             <label>Imagen del Servicio</label>
             <div class="file-upload-container">
@@ -670,6 +677,12 @@
           <div class="form-group">
             <label>Precio *</label>
             <input type="number" [(ngModel)]="editingService.precioBase">
+          </div>
+          <div class="form-group">
+            <label>Veterinaria *</label>
+            <select [(ngModel)]="editingService.veterinariaId">
+              <option *ngFor="let vet of veterinarias" [ngValue]="vet.id">{{ vet.nombre }}</option>
+            </select>
           </div>
           <div class="form-group full">
             <label>Imagen del Servicio</label>
