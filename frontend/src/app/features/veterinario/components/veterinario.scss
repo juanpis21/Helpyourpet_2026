@@ -111,6 +111,13 @@
   .card-body { padding: 1.5rem; }
 }
 
+.btn-icon {
+  width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: none; cursor: pointer; transition: var(--transition);
+  &.view { color: var(--primary-color); background: rgba(29, 57, 118, 0.1); }
+  &.edit { color: #f59e0b; background: rgba(245, 158, 11, 0.1); }
+  &:hover { transform: scale(1.1); }
+}
+
 .data-table {
   width: 100%; border-collapse: collapse;
   th { text-align: left; padding: 1rem; background: #f8fafc; color: var(--text-secondary); font-weight: 600; border-bottom: 1px solid var(--border-color); }
@@ -150,6 +157,25 @@
 }
 
 .bold { font-weight: 600; color: var(--primary-color); }
+
+.gender-pill {
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-block;
+  &.female { background: #fce7f3; color: #9d174d; }
+  &.male { background: #e0f2fe; color: #0369a1; }
+}
+
+.description-cell {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
 
 .modal-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px);
@@ -203,3 +229,34 @@
 
 .animate-in { animation: slideUp 0.4s ease-out; }
 @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ===== CONFIG LAYOUT ===== */
+.config-layout { display: flex; gap: 1.5rem; }
+.config-photo { text-align: center; min-width: 120px; }
+.config-avatar { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #9BC3E8; box-shadow: var(--shadow-sm); margin-bottom: 0.5rem; }
+.photo-hint { font-size: 0.7rem; color: var(--text-secondary); margin: 0.3rem 0; }
+.config-form { flex: 1; }
+.form-actions { margin-top: 1rem; text-align: center; }
+
+/* ===== PUBLICACIONES GRID ===== */
+.publicaciones-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+.publicacion-card {
+  background: var(--bg-card); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-sm); transition: var(--transition); position: relative;
+  &:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+  .publicacion-image { width: 100%; height: 200px; overflow: hidden; .pub-img { width: 100%; height: 100%; object-fit: cover; } }
+  .publicacion-content { padding: 1rem; .pub-descripcion { margin: 0 0 0.75rem 0; color: var(--text-primary); font-size: 0.95rem; line-height: 1.5; }
+    .pub-meta { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.85rem;
+      .pub-date, .pub-likes { display: flex; align-items: center; gap: 0.3rem; } } }
+  .publicacion-actions { position: absolute; top: 0.5rem; right: 0.5rem;
+    .btn-delete-small { width: 32px; height: 32px; border-radius: 50%; background: rgba(239, 68, 68, 0.9); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition);
+      &:hover { background: #dc2626; transform: scale(1.1); } } }
+}
+
+/* ===== DANGER ZONE ===== */
+.danger-zone-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem; }
+.card-danger { border-color: #F5A3A8; }
+.card-header.danger { background: #F5A3A8 !important; h6 { color: #721C24 !important; margin: 0; } }
+.btn-danger { background: transparent; border: 2px solid var(--accent-color); color: var(--accent-color); border-radius: 8px; padding: 0.5rem 1rem; font-weight: 500; cursor: pointer; transition: var(--transition); display: inline-flex; align-items: center; gap: 0.3rem;
+  &:hover { background: var(--accent-color); color: white; transform: translateY(-2px); } }
+.btn-outline.small { font-size: 0.75rem; padding: 0.25rem 0.6rem; background: transparent; border: 2px solid var(--primary-color); color: var(--primary-color); border-radius: 8px; cursor: pointer; transition: var(--transition);
+  &:hover { background: var(--primary-color); color: white; } }

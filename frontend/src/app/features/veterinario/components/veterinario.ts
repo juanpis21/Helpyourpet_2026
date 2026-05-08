@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
 import { UsersService } from '../../../core/services/users.service';
+import { ThemeService } from '../../../core/services/theme.service';
+import { PublicacionesService } from '../../inicio/services/publicaciones.service';
 
 interface Mascota {
   id?: number;
@@ -29,6 +31,20 @@ interface Cita {
   petId: number;
 }
 
+interface Usuario {
+  id: number;
+  nombres: string;
+  apellidos: string;
+  correo: string;
+  telefono: string;
+  edad: number;
+  tipoDocumento: string;
+  numDocumento: string;
+  direccion: string;
+  imagen: string;
+  roleId?: number;
+}
+
 @Component({
   selector: 'app-veterinario',
   standalone: true,
@@ -41,6 +57,8 @@ export class Veterinario implements OnInit {
   private userService = inject(UsersService);
   private http = inject(HttpClient);
   private router = inject(Router);
+  private themeService = inject(ThemeService);
+  private publicacionesService = inject(PublicacionesService);
 
   activeSection: string = 'dashboard';
   sidebarOpen: boolean = true;
@@ -54,10 +72,44 @@ export class Veterinario implements OnInit {
   publicaciones: any[] = [];
   citas: any[] = [];
 
+  usuario: Usuario = {
+    id: 0, nombres: '', apellidos: '', correo: '', telefono: '',
+    edad: 0, direccion: '', tipoDocumento: '', numDocumento: '',
+    imagen: '', roleId: undefined
+  };
+
+  // Profile image handling
+  selectedProfileFile: File | null = null;
+  profileImagePreview: string | null = null;
+
   // Modales y Formularios
   showAddPetModal: boolean = false;
   showAddUserModal: boolean = false;
   showAddCitaModal: boolean = false;
+  showEditPetModal: boolean = false;
+  showEditUserModal: boolean = false;
+  
+  editingUser: any = {
+    firstName: '',
+    lastName: '',
+    documentType: '',
+    documentNumber: '',
+    phone: '',
+    address: '',
+    age: 18
+  };
+  
+  editingPet: Mascota = {
+    name: '',
+    species: '',
+    breed: '',
+    age: 0,
+    gender: 'M',
+    color: '',
+    weight: 0,
+    description: '',
+    ownerId: undefined
+  };
   
   newPet: Mascota = {
     name: '',
@@ -96,7 +148,125 @@ export class Veterinario implements OnInit {
 
   ngOnInit(): void {
     this.vetUser = this.authService.getCurrentUser();
-    this.cargarDatos();
+    this.darkMode = this.themeService.isDarkMode;
+    this.themeService.darkMode$.subscribe(dark => this.darkMode = dark);
+    
+    if (this.vetUser) {
+      this.loadUserProfile();
+      this.cargarDatos();
+      this.cargarPublicacionesUsuario();
+    }
+  }
+
+  loadUserProfile(): void {
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser) {
+      const avatar = currentUser.avatar || '';
+      this.usuario = {
+        id: currentUser.id,
+        nombres: currentUser.firstName || '',
+        apellidos: currentUser.lastName || '',
+        correo: currentUser.email || '',
+        telefono: currentUser.phone || '',
+        edad: currentUser.age || 0,
+        direccion: currentUser.address || '',
+        tipoDocumento: currentUser.documentType || '',
+        numDocumento: currentUser.documentNumber || '',
+        imagen: avatar && avatar.startsWith('/uploads/') ? `http://localhost:3000${avatar}` : avatar,
+        roleId: currentUser.roleId
+      };
+    }
+  }
+
+  cargarPublicacionesUsuario(): void {
+    if (this.vetUser && this.vetUser.id) {
+      this.publicacionesService.getPublicacionesPorAutor(this.vetUser.id).subscribe({
+        next: (publicaciones) => {
+          this.publicaciones = publicaciones.map(pub => ({
+            ...pub,
+            imagen: pub.imagen && pub.imagen.startsWith('/uploads/') ? `http://localhost:3000${pub.imagen}` : pub.imagen
+          }));
+        },
+        error: (err) => console.error('Error al cargar publicaciones:', err)
+      });
+    }
+  }
+
+  eliminarPublicacion(id: number): void {
+    if (confirm('¿Estás seguro de que quieres eliminar esta publicación?')) {
+      this.publicacionesService.eliminarPublicacion(id).subscribe({
+        next: () => {
+          this.cargarPublicacionesUsuario();
+          alert('Publicación eliminada exitosamente');
+        },
+        error: (err) => alert('Error al eliminar publicación: ' + (err.error?.message || err.message))
+      });
+    }
+  }
+
+  onProfileImageSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedProfileFile = file;
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.profileImagePreview = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  guardarPerfil(): void {
+    if (!this.vetUser) return;
+
+    const formData = new FormData();
+    formData.append('firstName', this.usuario.nombres);
+    formData.append('lastName', this.usuario.apellidos);
+    formData.append('email', this.usuario.correo);
+    formData.append('phone', this.usuario.telefono || '');
+    formData.append('age', String(this.usuario.edad || ''));
+    formData.append('address', this.usuario.direccion || '');
+    formData.append('documentType', this.usuario.tipoDocumento || '');
+    formData.append('documentNumber', this.usuario.numDocumento || '');
+    if (this.selectedProfileFile) {
+      formData.append('avatar', this.selectedProfileFile, this.selectedProfileFile.name);
+    }
+
+    this.userService.updateUser(this.vetUser.id, formData).subscribe({
+      next: (response) => {
+        this.authService.updateCurrentUser(response);
+        this.vetUser = response;
+        this.selectedProfileFile = null;
+        alert('Perfil actualizado correctamente');
+      },
+      error: (error) => alert('Error al actualizar el perfil: ' + (error.error?.message || error.message))
+    });
+  }
+
+  eliminarCuenta(): void {
+    if (this.vetUser && confirm('¿Estás seguro de que deseas desactivar tu cuenta?')) {
+      this.userService.deleteUser(this.vetUser.id).subscribe({
+        next: () => {
+          alert('Cuenta desactivada exitosamente.');
+          this.cerrarSesion();
+        },
+        error: (error) => alert('Error al eliminar la cuenta: ' + (error.error?.message || error.message))
+      });
+    }
+  }
+
+  cerrarSesion(): void {
+    this.authService.logout();
+    this.themeService.setDarkMode(false);
+    this.router.navigate(['/login']);
+  }
+
+  irATienda(): void {
+    this.router.navigate(['/tienda']);
+  }
+
+  irAInicio(): void {
+    this.router.navigate(['/inicio']);
   }
 
   cargarDatos(): void {
@@ -194,6 +364,35 @@ export class Veterinario implements OnInit {
     });
   }
 
+  openEditUserModal(user: any): void {
+    this.editingUser = { ...user };
+    this.showEditUserModal = true;
+  }
+
+  closeEditUserModal(): void {
+    this.showEditUserModal = false;
+    this.editingUser = {
+      firstName: '', lastName: '', documentType: '', 
+      documentNumber: '', phone: '', address: '', age: 18
+    };
+  }
+
+  actualizarUsuario(): void {
+    if (!this.editingUser.id) return;
+    
+    this.http.patch(`${this.API_BASE}/users/${this.editingUser.id}`, this.editingUser, this.getHeaders()).subscribe({
+      next: () => {
+        alert('Usuario actualizado con éxito');
+        this.cargarUsuariosSinCuenta();
+        this.closeEditUserModal();
+      },
+      error: (err) => {
+        console.error('Error al actualizar usuario:', err);
+        alert('Error al actualizar usuario: ' + (err.error?.message || err.message));
+      }
+    });
+  }
+
   openAddPetModal(): void {
     this.showAddPetModal = true;
   }
@@ -255,7 +454,52 @@ export class Veterinario implements OnInit {
       },
       error: (err) => {
         console.error('Error al registrar mascota:', err);
-        alert('Error al registrar mascota: ' + (err.error?.message || err.message));
+      }
+    });
+  }
+
+  openEditPetModal(pet: any): void {
+    this.editingPet = { ...pet };
+    this.showEditPetModal = true;
+    this.imagePreview = pet.foto ? `${this.API_BASE}${pet.foto}` : null;
+  }
+
+  closeEditPetModal(): void {
+    this.showEditPetModal = false;
+    this.editingPet = {
+      name: '', species: '', breed: '', age: 0, gender: 'M',
+      color: '', weight: 0, description: '', ownerId: undefined
+    };
+    this.selectedFile = null;
+    this.imagePreview = null;
+  }
+
+  actualizarMascota(): void {
+    if (!this.editingPet.id) return;
+
+    const formData = new FormData();
+    formData.append('name', this.editingPet.name);
+    formData.append('species', this.editingPet.species);
+    formData.append('breed', this.editingPet.breed || '');
+    formData.append('age', String(this.editingPet.age));
+    formData.append('gender', this.editingPet.gender);
+    formData.append('color', this.editingPet.color);
+    formData.append('weight', String(this.editingPet.weight));
+    formData.append('description', this.editingPet.description || '');
+
+    if (this.selectedFile) {
+      formData.append('foto', this.selectedFile);
+    }
+
+    this.http.patch(`${this.API_BASE}/pets/${this.editingPet.id}`, formData, this.getHeaders()).subscribe({
+      next: () => {
+        alert('Mascota actualizada con éxito');
+        this.cargarMascotas();
+        this.closeEditPetModal();
+      },
+      error: (err) => {
+        console.error('Error al actualizar mascota:', err);
+        alert('Error al actualizar mascota: ' + (err.error?.message || err.message));
       }
     });
   }

@@ -35,11 +35,16 @@
       </li>
       <li>
         <a [class.active]="activeSection === 'publicaciones'" (click)="setSection('publicaciones')">
-          <i class="fas fa-newspaper"></i><span>Publicaciones</span>
+          <i class="fas fa-heart"></i><span>Mis publicaciones</span>
+        </a>
+      </li>
+      <li>
+        <a [class.active]="activeSection === 'configuracion'" (click)="setSection('configuracion')">
+          <i class="fas fa-cog"></i><span>Configuración</span>
         </a>
       </li>
       <li class="separator">
-        <a class="logout-link" (click)="logout()">
+        <a (click)="cerrarSesion()" class="logout-link">
           <i class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span>
         </a>
       </li>
@@ -112,6 +117,10 @@
                   <th>Especie</th>
                   <th>Raza</th>
                   <th>Edad</th>
+                  <th>Género</th>
+                  <th>Color</th>
+                  <th>Peso</th>
+                  <th>Descripción</th>
                   <th>Dueño</th>
                   <th>Acciones</th>
                 </tr>
@@ -122,9 +131,23 @@
                   <td>{{ m.species }}</td>
                   <td>{{ m.breed }}</td>
                   <td>{{ m.age }} años</td>
+                  <td>
+                    <span class="gender-pill" [class.female]="m.gender === 'F'" [class.male]="m.gender === 'M'">
+                      {{ m.gender === 'F' ? 'Hembra' : 'Macho' }}
+                    </span>
+                  </td>
+                  <td>{{ m.color }}</td>
+                  <td>{{ m.weight }} kg</td>
+                  <td>
+                    <div class="description-cell" [title]="m.description">
+                      {{ m.description || 'Sin descripción' }}
+                    </div>
+                  </td>
                   <td>{{ m.owner?.firstName }} {{ m.owner?.lastName }}</td>
                   <td>
-                    <button class="btn-icon view"><i class="fas fa-eye"></i></button>
+                    <button class="btn-icon edit" (click)="openEditPetModal(m)">
+                      <i class="fas fa-pencil-alt"></i>
+                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -160,6 +183,7 @@
                   <th>Dirección</th>
                   <th>Edad</th>
                   <th>Tiene cuenta</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -175,6 +199,11 @@
                     <span class="status-pill" [class.active]="user.tieneCuenta" [class.inactive]="!user.tieneCuenta">
                       {{ user.tieneCuenta ? 'Sí' : 'No' }}
                     </span>
+                  </td>
+                  <td>
+                    <button class="btn-icon edit" (click)="openEditUserModal(user)">
+                      <i class="fas fa-pencil-alt"></i>
+                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -226,21 +255,111 @@
       </div>
     </section>
 
-    <!-- PUBLICACIONES -->
+    <!-- MIS PUBLICACIONES -->
     <section *ngIf="activeSection === 'publicaciones'" class="content-section animate-in">
       <div class="section-header">
-        <h1><i class="fas fa-newspaper"></i> Feed de Publicaciones</h1>
+        <h1><i class="fas fa-heart"></i> Mis Publicaciones</h1>
       </div>
 
-      <div class="pub-grid">
-        <div *ngFor="let p of publicaciones" class="pub-card">
-          <img *ngIf="p.imagen" [src]="API_BASE + p.imagen" class="pub-img">
-          <div class="pub-content">
-            <p>{{ p.descripcion }}</p>
-            <div class="pub-footer">
-              <span><i class="fas fa-user"></i> {{ p.user?.firstName }}</span>
-              <span>{{ p.createdAt | date:'shortDate' }}</span>
+      <div *ngIf="publicaciones.length === 0" class="empty-state large">
+        <i class="fas fa-heart"></i>
+        <h3>No has publicado nada aún</h3>
+        <p>¡Comparte algo con la comunidad! 🐾</p>
+      </div>
+
+      <div *ngIf="publicaciones.length > 0" class="publicaciones-grid">
+        <div *ngFor="let pub of publicaciones" class="publicacion-card">
+          <div *ngIf="pub.imagen" class="publicacion-image">
+            <img [src]="pub.imagen" [alt]="pub.descripcion" class="pub-img">
+          </div>
+          <div class="publicacion-content">
+            <p class="pub-descripcion">{{ pub.descripcion }}</p>
+            <div class="pub-meta">
+              <span class="pub-date"><i class="fas fa-calendar"></i> {{ pub.createdAt | date:'medium' }}</span>
+              <span class="pub-likes"><i class="fas fa-heart"></i> {{ pub.likes || 0 }}</span>
             </div>
+          </div>
+          <div class="publicacion-actions">
+            <button class="btn-delete-small" (click)="eliminarPublicacion(pub.id)"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONFIGURACIÓN -->
+    <section *ngIf="activeSection === 'configuracion'" class="content-section animate-in">
+      <div class="section-header">
+        <h1><i class="fas fa-cog"></i> Configuración de Perfil</h1>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h5><i class="fas fa-user-edit"></i> Información Personal</h5></div>
+        <div class="card-body">
+          <div class="config-layout">
+            <div class="config-photo">
+              <img [src]="profileImagePreview || (usuario.imagen || 'assets/images/Default.png')"
+                alt="Foto de perfil" class="config-avatar">
+              <p class="photo-hint">JPG, PNG</p>
+              <label class="btn-outline small">
+                <i class="fas fa-upload"></i> Cambiar
+                <input type="file" accept="image/*" (change)="onProfileImageSelected($event)" hidden>
+              </label>
+            </div>
+
+            <div class="config-form">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Nombres</label>
+                  <input type="text" [(ngModel)]="usuario.nombres" placeholder="Ingresa tus nombres">
+                </div>
+                <div class="form-group">
+                  <label>Apellidos</label>
+                  <input type="text" [(ngModel)]="usuario.apellidos" placeholder="Ingresa tus apellidos">
+                </div>
+                <div class="form-group">
+                  <label>Edad</label>
+                  <input type="number" [(ngModel)]="usuario.edad" placeholder="Tu edad">
+                </div>
+                <div class="form-group">
+                  <label>Correo Electrónico</label>
+                  <input type="email" [(ngModel)]="usuario.correo" placeholder="correo@ejemplo.com">
+                </div>
+                <div class="form-group">
+                  <label>Dirección</label>
+                  <input type="text" [(ngModel)]="usuario.direccion" placeholder="Ingresa tu dirección">
+                </div>
+                <div class="form-group">
+                  <label>Teléfono</label>
+                  <input type="tel" [(ngModel)]="usuario.telefono" placeholder="+57 123 456 7890">
+                </div>
+                <div class="form-group">
+                  <label>Tipo Documento</label>
+                  <select [(ngModel)]="usuario.tipoDocumento">
+                    <option value="Cédula">Cédula</option>
+                    <option value="Pasaporte">Pasaporte</option>
+                    <option value="Cédula Extranjería">Cédula Extranjería</option>
+                    <option value="Registro Civil">Registro Civil</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Número Documento</label>
+                  <input type="text" [(ngModel)]="usuario.numDocumento" placeholder="Número de documento">
+                </div>
+              </div>
+              <div class="form-actions">
+                <button class="btn-primary" (click)="guardarPerfil()"><i class="fas fa-save"></i> Guardar Cambios</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="danger-zone-grid">
+        <div class="card card-danger">
+          <div class="card-header danger"><h6><i class="fas fa-exclamation-triangle"></i> Zona de Peligro</h6></div>
+          <div class="card-body center">
+            <p>Desactivación de cuenta</p>
+            <button class="btn-danger" (click)="eliminarCuenta()"><i class="fas fa-user-slash"></i> Desactivar Cuenta</button>
           </div>
         </div>
       </div>
@@ -403,6 +522,127 @@
     <div class="modal-footer">
       <button class="btn-secondary" (click)="closeAddUserModal()">Cancelar</button>
       <button class="btn-primary" (click)="registrarUsuario()">Registrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR MASCOTA -->
+<div class="modal-overlay" *ngIf="showEditPetModal" (click)="closeEditPetModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3><i class="fas fa-pencil-alt"></i> Editar Mascota: {{ editingPet.name }}</h3>
+      <button class="close-btn" (click)="closeEditPetModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="pet-image-upload">
+        <div class="image-preview"
+          [style.backgroundImage]="imagePreview ? 'url(' + imagePreview + ')' : 'url(assets/images/Default.png)'">
+        </div>
+        <label for="pet-photo-edit" class="upload-btn">
+          <i class="fas fa-camera"></i> Cambiar Foto
+        </label>
+        <input type="file" id="pet-photo-edit" (change)="onFileSelected($event)" style="display: none;">
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nombre *</label>
+          <input type="text" [(ngModel)]="editingPet.name">
+        </div>
+        <div class="form-group">
+          <label>Especie *</label>
+          <select [(ngModel)]="editingPet.species">
+            <option value="Perro">Perro</option>
+            <option value="Gato">Gato</option>
+            <option value="Ave">Ave</option>
+            <option value="Roedor">Roedor</option>
+            <option value="Reptil">Reptil</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Raza</label>
+          <input type="text" [(ngModel)]="editingPet.breed">
+        </div>
+        <div class="form-group">
+          <label>Género</label>
+          <select [(ngModel)]="editingPet.gender">
+            <option value="M">Macho</option>
+            <option value="F">Hembra</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Edad (años)</label>
+          <input type="number" [(ngModel)]="editingPet.age" min="0">
+        </div>
+        <div class="form-group">
+          <label>Color</label>
+          <input type="text" [(ngModel)]="editingPet.color">
+        </div>
+        <div class="form-group">
+          <label>Peso (kg)</label>
+          <input type="number" [(ngModel)]="editingPet.weight" min="0" step="0.1">
+        </div>
+        <div class="form-group full">
+          <label>Descripción / Notas Médicas</label>
+          <textarea [(ngModel)]="editingPet.description" rows="3"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeEditPetModal()">Cancelar</button>
+      <button class="btn-primary" (click)="actualizarMascota()">Guardar Cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR USUARIO -->
+<div class="modal-overlay" *ngIf="showEditUserModal" (click)="closeEditUserModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3><i class="fas fa-pencil-alt"></i> Editar Usuario: {{ editingUser.firstName }}</h3>
+      <button class="close-btn" (click)="closeEditUserModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nombres *</label>
+          <input type="text" [(ngModel)]="editingUser.firstName">
+        </div>
+        <div class="form-group">
+          <label>Apellidos *</label>
+          <input type="text" [(ngModel)]="editingUser.lastName">
+        </div>
+        <div class="form-group">
+          <label>Tipo de Documento *</label>
+          <select [(ngModel)]="editingUser.documentType">
+            <option value="Cédula">Cédula</option>
+            <option value="Pasaporte">Pasaporte</option>
+            <option value="Cédula Extranjería">Cédula Extranjería</option>
+            <option value="Registro Civil">Registro Civil</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Número de Documento *</label>
+          <input type="text" [(ngModel)]="editingUser.documentNumber">
+        </div>
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="text" [(ngModel)]="editingUser.phone">
+        </div>
+        <div class="form-group">
+          <label>Edad</label>
+          <input type="number" [(ngModel)]="editingUser.age" min="0">
+        </div>
+        <div class="form-group full">
+          <label>Dirección</label>
+          <input type="text" [(ngModel)]="editingUser.address">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeEditUserModal()">Cancelar</button>
+      <button class="btn-primary" (click)="actualizarUsuario()">Guardar Cambios</button>
     </div>
   </div>
 </div>
