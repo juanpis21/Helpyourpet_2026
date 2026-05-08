@@ -6,6 +6,7 @@ import { finalize, timeout } from 'rxjs/operators';
 import { RecoveryService } from '../../core/services/recovery.service';
 import { UsersService } from '../../core/services/users.service';
 import { AuthService } from '../../core/services/auth.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-recovery',
@@ -125,9 +126,14 @@ export class Recovery implements OnInit {
       )
       .subscribe({
         next: () => {
-          this.message = '✅ Se ha enviado un enlace a tu correo electrónico. Por favor, revísalo para continuar.';
-          this.messageType = 'success';
           this.solicitudExitosa = true;
+          Swal.fire({
+            icon: 'info',
+            title: 'Correo enviado',
+            text: 'Revisa tu correo electrónico. Te enviamos un enlace para recuperar tu contraseña.',
+            confirmButtonColor: '#272c8b',
+            confirmButtonText: 'Entendido'
+          });
         },
         error: (error) => {
           this.message = '❌ Error: ' + (error.error?.message || 'No se pudo procesar la solicitud.');

@@ -3,6 +3,7 @@ import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsersService } from '../../core/services/users.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-register',
@@ -108,6 +109,17 @@ export class Register {
       return;
     }
 
+    if (!this.formData.edad || this.formData.edad < 18) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Edad no permitida',
+        text: 'Debes ser mayor de 18 años para registrarte.',
+        confirmButtonColor: '#272c8b',
+        confirmButtonText: 'Entendido'
+      });
+      return;
+    }
+
     this.isSubmitting = true;
 
     // Mapear datos del formulario al DTO del backend
@@ -130,8 +142,15 @@ export class Register {
     this.usersService.createUser(userDto).subscribe({
       next: (response) => {
         this.isSubmitting = false;
-        alert('✅ Usuario registrado exitosamente. Por favor, inicia sesión.');
-        this.router.navigate(['/login']);
+        Swal.fire({
+          icon: 'success',
+          title: '¡Registro exitoso!',
+          text: '✅ Usuario registrado exitosamente. Por favor, inicia sesión.',
+          confirmButtonColor: '#272c8b',
+          confirmButtonText: 'Ir al login'
+        }).then(() => {
+          this.router.navigate(['/login']);
+        });
       },
       error: (error) => {
         this.isSubmitting = false;

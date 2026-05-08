@@ -22,14 +22,16 @@ export class App {
   private readonly noFooterRoutes = ['/', '/login', '/register', '/recovery', '/perfil-usuario', '/admin', '/super-admin', '/veterinario'];
 
   get showNavbar(): boolean {
-    return !this.noNavbarRoutes.includes(this.router.url);
+    const url = this.router.url.split('?')[0];
+    return !this.noNavbarRoutes.includes(url);
   }
 
   get showFooter(): boolean {
-    return !this.noFooterRoutes.includes(this.router.url);
+    const url = this.router.url.split('?')[0];
+    return !this.noFooterRoutes.includes(url);
   }
 
   get showLayout(): boolean {
     return this.showNavbar;
   }
-}
+}

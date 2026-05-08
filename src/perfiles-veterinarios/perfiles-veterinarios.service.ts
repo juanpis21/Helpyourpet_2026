@@ -62,16 +62,16 @@ export class PerfilesVeterinariosService {
 
   async findAll(): Promise<PerfilVeterinario[]> {
     return this.perfilesVeterinariosRepository.find({ 
-      relations: ['usuario', 'veterinariaPrincipal', 'citas'],
-      select: ['id', 'especialidad', 'matricula', 'aniosExperiencia', 'universidad', 'telefonoProfesional', 'emailProfesional', 'biografia', 'isActive', 'createdAt', 'updatedAt', 'usuario', 'veterinariaPrincipal', 'citas']
+      relations: ['usuario', 'veterinariaPrincipal'],
+      select: ['id', 'especialidad', 'matricula', 'aniosExperiencia', 'universidad', 'telefonoProfesional', 'emailProfesional', 'biografia', 'isActive', 'createdAt', 'updatedAt', 'usuario', 'veterinariaPrincipal']
     });
   }
 
   async findOne(id: number): Promise<PerfilVeterinario> {
     const perfilVeterinario = await this.perfilesVeterinariosRepository.findOne({
       where: { id },
-      relations: ['usuario', 'veterinariaPrincipal', 'citas'],
-      select: ['id', 'especialidad', 'matricula', 'aniosExperiencia', 'universidad', 'telefonoProfesional', 'emailProfesional', 'biografia', 'isActive', 'createdAt', 'updatedAt', 'usuario', 'veterinariaPrincipal', 'citas']
+      relations: ['usuario', 'veterinariaPrincipal'],
+      select: ['id', 'especialidad', 'matricula', 'aniosExperiencia', 'universidad', 'telefonoProfesional', 'emailProfesional', 'biografia', 'isActive', 'createdAt', 'updatedAt', 'usuario', 'veterinariaPrincipal']
     });
 
     if (!perfilVeterinario) {
@@ -194,8 +194,8 @@ export class PerfilesVeterinariosService {
     // Devolver el perfil veterinario actualizado con relaciones desde la base de datos
     const updatedPerfilVeterinario = await this.perfilesVeterinariosRepository.findOne({
       where: { id: perfilVeterinario.id },
-      relations: ['usuario', 'veterinariaPrincipal', 'citas'],
-      select: ['id', 'especialidad', 'matricula', 'aniosExperiencia', 'universidad', 'telefonoProfesional', 'emailProfesional', 'biografia', 'isActive', 'createdAt', 'updatedAt', 'usuario', 'veterinariaPrincipal', 'citas']
+      relations: ['usuario', 'veterinariaPrincipal'],
+      select: ['id', 'especialidad', 'matricula', 'aniosExperiencia', 'universidad', 'telefonoProfesional', 'emailProfesional', 'biografia', 'isActive', 'createdAt', 'updatedAt', 'usuario', 'veterinariaPrincipal']
     });
 
     return updatedPerfilVeterinario;
