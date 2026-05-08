@@ -6,8 +6,8 @@
     <div class="sidebar-header">
       <h3>HelpYourPet</h3>
       <div class="user-profile">
-        <img [src]="adminProfilePreview || adminUser.imagen || 'assets/images/Default.png'" 
-             alt="Foto" class="profile-avatar">
+        <img [src]="adminProfilePreview || adminUser.imagen || 'assets/images/Default.png'" alt="Foto"
+          class="profile-avatar">
         <h5>{{ adminUser.nombres }}</h5>
         <p>{{ getAdminRoleName() }}</p>
       </div>
@@ -109,7 +109,8 @@
           <h5><i class="fas fa-info-circle"></i> Resumen del Sistema</h5>
         </div>
         <div class="card-body">
-          <p>Bienvenido al sistema de administración centralizado. Desde aquí puedes gestionar los módulos críticos de la plataforma.</p>
+          <p>Bienvenido al sistema de administración centralizado. Desde aquí puedes gestionar los módulos críticos de
+            la plataforma.</p>
         </div>
       </div>
     </section>
@@ -155,9 +156,12 @@
                   </td>
                   <td>
                     <div class="actions">
-                      <button class="btn-icon edit" (click)="openEditUserModal(user)" title="Editar"><i class="fas fa-edit"></i></button>
-                      <button class="btn-icon toggle" (click)="toggleEstadoUsuario(user)" [title]="user.isActive ? 'Desactivar' : 'Activar'">
-                        <i class="fas" [ngClass]="user.isActive ? 'fa-ban' : 'fa-check-circle'" [style.color]="user.isActive ? '#ef4444' : '#22c55e'"></i>
+                      <button class="btn-icon edit" (click)="openEditUserModal(user)" title="Editar"><i
+                          class="fas fa-edit"></i></button>
+                      <button class="btn-icon toggle" (click)="toggleEstadoUsuario(user)"
+                        [title]="user.isActive ? 'Desactivar' : 'Activar'">
+                        <i class="fas" [ngClass]="user.isActive ? 'fa-ban' : 'fa-check-circle'"
+                          [style.color]="user.isActive ? '#ef4444' : '#22c55e'"></i>
                       </button>
                     </div>
                   </td>
@@ -205,8 +209,8 @@
                   <td>{{ s.id }}</td>
                   <td>
                     <div class="service-img-container">
-                      <img [src]="s.imagen ? baseUrl + s.imagen : 'assets/IMG/default.jpg'" 
-                           [alt]="s.nombre" class="service-thumb">
+                      <img [src]="s.imagen ? baseUrl + s.imagen : 'assets/IMG/default.jpg'" [alt]="s.nombre"
+                        class="service-thumb">
                     </div>
                   </td>
                   <td><strong>{{ s.nombre }}</strong></td>
@@ -219,9 +223,12 @@
                   </td>
                   <td>
                     <div class="actions">
-                      <button class="btn-icon edit" (click)="openEditServiceModal(s)" title="Editar"><i class="fas fa-edit"></i></button>
-                      <button class="btn-icon toggle" (click)="toggleEstadoServicio(s)" [title]="s.isActive ? 'Desactivar' : 'Activar'">
-                        <i class="fas" [ngClass]="s.isActive ? 'fa-toggle-on' : 'fa-toggle-off'" [style.color]="s.isActive ? '#2e7d32' : '#c62828'"></i>
+                      <button class="btn-icon edit" (click)="openEditServiceModal(s)" title="Editar"><i
+                          class="fas fa-edit"></i></button>
+                      <button class="btn-icon toggle" (click)="toggleEstadoServicio(s)"
+                        [title]="s.isActive ? 'Desactivar' : 'Activar'">
+                        <i class="fas" [ngClass]="s.isActive ? 'fa-toggle-on' : 'fa-toggle-off'"
+                          [style.color]="s.isActive ? '#2e7d32' : '#c62828'"></i>
                       </button>
                     </div>
                   </td>
@@ -279,15 +286,18 @@
                   </td>
                   <td>
                     <div class="actions">
-                      <button class="btn-icon toggle" (click)="toggleEstadoVeterinaria(vet)" [title]="vet.isActive ? 'Desactivar' : 'Activar'">
-                        <i class="fas" [ngClass]="vet.isActive ? 'fa-toggle-on' : 'fa-toggle-off'" [style.color]="vet.isActive ? '#2e7d32' : '#c62828'"></i>
+                      <button class="btn-icon toggle" (click)="toggleEstadoVeterinaria(vet)"
+                        [title]="vet.isActive ? 'Desactivar' : 'Activar'">
+                        <i class="fas" [ngClass]="vet.isActive ? 'fa-toggle-on' : 'fa-toggle-off'"
+                          [style.color]="vet.isActive ? '#2e7d32' : '#c62828'"></i>
                       </button>
                     </div>
                   </td>
                 </tr>
                 <tr *ngIf="veterinarias.length === 0">
                   <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
-                    <i class="fas fa-hospital" style="font-size: 2rem; margin-bottom: 0.5rem; display: block; opacity: 0.4;"></i>
+                    <i class="fas fa-hospital"
+                      style="font-size: 2rem; margin-bottom: 0.5rem; display: block; opacity: 0.4;"></i>
                     No hay veterinarias registradas
                   </td>
                 </tr>
@@ -337,14 +347,15 @@
                   <td>{{ prod.id }}</td>
                   <td>
                     <div class="product-img-container">
-                      <img [src]="prod.imagen ? baseUrl + prod.imagen : 'assets/images/Default.png'" 
-                           [alt]="prod.nombre" class="product-thumb">
+                      <img [src]="prod.imagen ? baseUrl + prod.imagen : 'assets/images/Default.png'" [alt]="prod.nombre"
+                        class="product-thumb">
                     </div>
                   </td>
                   <td><strong>{{ prod.nombre }}</strong></td>
                   <td><span class="badge">{{ getCategoriaNombre(prod.categoriaId) }}</span></td>
                   <td>
-                    <span [style.color]="prod.stockActual <= prod.stockMinimo ? '#c62828' : '#2e7d32'" style="font-weight: 600;">
+                    <span [style.color]="prod.stockActual <= prod.stockMinimo ? '#c62828' : '#2e7d32'"
+                      style="font-weight: 600;">
                       {{ prod.stockActual }}
                     </span>
                     <small style="opacity: 0.6;"> / mín: {{ prod.stockMinimo }}</small>
@@ -360,17 +371,22 @@
                   </td>
                   <td>
                     <div class="actions">
-                      <button class="btn-icon edit" (click)="openEditProductoModal(prod)" title="Editar"><i class="fas fa-edit"></i></button>
-                      <button class="btn-icon toggle" (click)="toggleEstadoProducto(prod)" [title]="prod.isActive ? 'Desactivar' : 'Activar'">
-                        <i class="fas" [ngClass]="prod.isActive ? 'fa-toggle-on' : 'fa-toggle-off'" [style.color]="prod.isActive ? '#2e7d32' : '#c62828'"></i>
+                      <button class="btn-icon edit" (click)="openEditProductoModal(prod)" title="Editar"><i
+                          class="fas fa-edit"></i></button>
+                      <button class="btn-icon toggle" (click)="toggleEstadoProducto(prod)"
+                        [title]="prod.isActive ? 'Desactivar' : 'Activar'">
+                        <i class="fas" [ngClass]="prod.isActive ? 'fa-toggle-on' : 'fa-toggle-off'"
+                          [style.color]="prod.isActive ? '#2e7d32' : '#c62828'"></i>
                       </button>
-                      <button class="btn-icon delete" (click)="eliminarProducto(prod)" title="Eliminar"><i class="fas fa-trash"></i></button>
+                      <button class="btn-icon delete" (click)="eliminarProducto(prod)" title="Eliminar"><i
+                          class="fas fa-trash"></i></button>
                     </div>
                   </td>
                 </tr>
                 <tr *ngIf="productos.length === 0">
                   <td colspan="10" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
-                    <i class="fas fa-boxes" style="font-size: 2rem; margin-bottom: 0.5rem; display: block; opacity: 0.4;"></i>
+                    <i class="fas fa-boxes"
+                      style="font-size: 2rem; margin-bottom: 0.5rem; display: block; opacity: 0.4;"></i>
                     No hay productos registrados
                   </td>
                 </tr>
@@ -424,9 +440,10 @@
                       <button class="btn-icon edit" (click)="openEditCategoriaModal(cat)" title="Editar">
                         <i class="fas fa-edit"></i>
                       </button>
-                      <button class="btn-icon toggle" (click)="toggleEstadoCategoria(cat)" 
-                              [title]="cat.isActive ? 'Desactivar' : 'Activar'">
-                        <i class="fas" [ngClass]="cat.isActive ? 'fa-toggle-on' : 'fa-toggle-off'" [style.color]="cat.isActive ? '#2e7d32' : '#c62828'"></i>
+                      <button class="btn-icon toggle" (click)="toggleEstadoCategoria(cat)"
+                        [title]="cat.isActive ? 'Desactivar' : 'Activar'">
+                        <i class="fas" [ngClass]="cat.isActive ? 'fa-toggle-on' : 'fa-toggle-off'"
+                          [style.color]="cat.isActive ? '#2e7d32' : '#c62828'"></i>
                       </button>
                       <button class="btn-icon delete" (click)="eliminarCategoria(cat)" title="Eliminar">
                         <i class="fas fa-trash"></i>
@@ -472,15 +489,18 @@
               </thead>
               <tbody>
                 <tr *ngFor="let prod of productos">
-                  <td><code style="background: var(--bg-body); padding: 2px 6px; border-radius: 4px;">{{ prod.codigoBarras || 'N/A' }}</code></td>
+                  <td><code
+                      style="background: var(--bg-body); padding: 2px 6px; border-radius: 4px;">{{ prod.codigoBarras || 'N/A' }}</code>
+                  </td>
                   <td><strong>{{ prod.nombre }}</strong></td>
                   <td><span class="badge">{{ getCategoriaNombre(prod.categoriaId) }}</span></td>
                   <td>
                     <div style="display: flex; align-items: center; gap: 8px;">
-                      <div style="width: 8px; height: 8px; border-radius: 50%;" 
-                           [style.background]="prod.stockActual <= prod.stockMinimo ? '#c62828' : '#2e7d32'">
+                      <div style="width: 8px; height: 8px; border-radius: 50%;"
+                        [style.background]="prod.stockActual <= prod.stockMinimo ? '#c62828' : '#2e7d32'">
                       </div>
-                      <span [style.color]="prod.stockActual <= prod.stockMinimo ? '#c62828' : 'inherit'" style="font-weight: 600;">
+                      <span [style.color]="prod.stockActual <= prod.stockMinimo ? '#c62828' : 'inherit'"
+                        style="font-weight: 600;">
                         {{ prod.stockActual }} {{ prod.unidadMedida }}
                       </span>
                     </div>
@@ -525,8 +545,8 @@
             <!-- Columna de Foto -->
             <div class="profile-photo-column">
               <div class="profile-photo-wrapper">
-                <img [src]="adminProfilePreview || adminUser.imagen || 'assets/images/Default.png'" 
-                     alt="Avatar" class="profile-main-img">
+                <img [src]="adminProfilePreview || adminUser.imagen || 'assets/images/Default.png'" alt="Avatar"
+                  class="profile-main-img">
                 <label class="photo-upload-overlay">
                   <i class="fas fa-camera"></i>
                   <input type="file" (change)="onAdminProfileImageSelected($event)" accept="image/*" hidden>
@@ -586,7 +606,8 @@
             <div class="form-group" style="margin-bottom: 1.5rem;">
               <label><i class="fas fa-lock"></i> Nueva Contraseña</label>
               <div style="position: relative;">
-                <input type="password" [(ngModel)]="newPassword" name="newPassword" placeholder="Mínimo 8 caracteres" style="width: 100%;">
+                <input type="password" [(ngModel)]="newPassword" name="newPassword" placeholder="Mínimo 8 caracteres"
+                  style="width: 100%;">
               </div>
             </div>
             <button class="btn-secondary" style="width: 100%; justify-content: center;" (click)="cambiarPassword()">
@@ -598,13 +619,16 @@
 
         <div class="card">
           <div class="card-header" style="background: #fef2f2 !important;">
-            <h5 style="color: #991b1b;"><i class="fas fa-exclamation-triangle"></i> Zona de Peligro</h5>
+            <h5 style="color: #a81111;"><i class="fas fa-exclamation-triangle"></i> Desactivación de cuenta</h5>
           </div>
-          <div class="card-body" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 1.5rem; padding: 2rem;">
+          <div class="card-body"
+            style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 1.5rem; padding: 2rem;">
             <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">
-              La desactivación de cuenta es una acción reversible solo por un Super Admin.
+              La desactivación de cuenta es una acción reversible.
             </p>
-            <button class="btn-icon delete" style="width: auto; padding: 0.6rem 1.5rem; border-radius: 8px; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;" (click)="eliminarCuentaAdmin()">
+            <button class="btn-icon delete"
+              style="width: auto; padding: 0.6rem 1.5rem; border-radius: 8px; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;"
+              (click)="eliminarCuentaAdmin()">
               <i class="fas fa-user-slash"></i> Desactivar mi Cuenta
             </button>
           </div>
@@ -844,7 +868,8 @@
           </div>
           <div class="form-group full">
             <label>Descripción</label>
-            <textarea [(ngModel)]="newVeterinaria.descripcion" rows="3" placeholder="Descripción de la veterinaria y sus servicios..."></textarea>
+            <textarea [(ngModel)]="newVeterinaria.descripcion" rows="3"
+              placeholder="Descripción de la veterinaria y sus servicios..."></textarea>
           </div>
         </div>
       </div>
@@ -942,19 +967,19 @@
           </div>
           <div class="form-group">
             <label>Stock Actual *</label>
-            <input type="number" [(ngModel)]="newProducto.stockActual">
+            <input type="number" [(ngModel)]="newProducto.stockActual" min="0">
           </div>
           <div class="form-group">
             <label>Stock Mínimo *</label>
-            <input type="number" [(ngModel)]="newProducto.stockMinimo">
+            <input type="number" [(ngModel)]="newProducto.stockMinimo" min="0">
           </div>
           <div class="form-group">
             <label>Precio Compra *</label>
-            <input type="number" [(ngModel)]="newProducto.precioCompra">
+            <input type="number" [(ngModel)]="newProducto.precioCompra" min="0">
           </div>
           <div class="form-group">
             <label>Precio Venta *</label>
-            <input type="number" [(ngModel)]="newProducto.precioVenta">
+            <input type="number" [(ngModel)]="newProducto.precioVenta" min="0">
           </div>
           <div class="form-group">
             <label>Lote</label>
@@ -1032,19 +1057,19 @@
           </div>
           <div class="form-group">
             <label>Stock Actual *</label>
-            <input type="number" [(ngModel)]="editingProducto.stockActual">
+            <input type="number" [(ngModel)]="editingProducto.stockActual" min="0">
           </div>
           <div class="form-group">
             <label>Stock Mínimo *</label>
-            <input type="number" [(ngModel)]="editingProducto.stockMinimo">
+            <input type="number" [(ngModel)]="editingProducto.stockMinimo" min="0">
           </div>
           <div class="form-group">
             <label>Precio Compra *</label>
-            <input type="number" [(ngModel)]="editingProducto.precioCompra">
+            <input type="number" [(ngModel)]="editingProducto.precioCompra" min="0">
           </div>
           <div class="form-group">
             <label>Precio Venta *</label>
-            <input type="number" [(ngModel)]="editingProducto.precioVenta">
+            <input type="number" [(ngModel)]="editingProducto.precioVenta" min="0">
           </div>
           <div class="form-group">
             <label>Lote</label>
@@ -1088,29 +1113,32 @@
         <div class="form-grid">
           <!-- Vista Previa de Color -->
           <div class="form-group full" style="margin-bottom: 0.5rem;">
-            <div [style.background]="newCategoria.color" 
-                 style="height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);">
-              <i class="fas fa-tags" style="font-size: 2rem; color: white; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));"></i>
+            <div [style.background]="newCategoria.color"
+              style="height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);">
+              <i class="fas fa-tags"
+                style="font-size: 2rem; color: white; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));"></i>
             </div>
           </div>
-          
+
           <div class="form-group full">
             <label>Nombre de Categoría *</label>
             <input type="text" [(ngModel)]="newCategoria.nombre" placeholder="Ej: Alimentos">
           </div>
-          
+
           <div class="form-group">
             <label>Código Interno *</label>
             <input type="text" [(ngModel)]="newCategoria.codigo" placeholder="Ej: CAT-001">
           </div>
           <div class="form-group">
             <label>Color Distintivo</label>
-            <input type="color" [(ngModel)]="newCategoria.color" style="height: 45px; width: 100%; cursor: pointer; padding: 2px; border-radius: 8px;">
+            <input type="color" [(ngModel)]="newCategoria.color"
+              style="height: 45px; width: 100%; cursor: pointer; padding: 2px; border-radius: 8px;">
           </div>
-          
+
           <div class="form-group full">
             <label>Descripción</label>
-            <textarea [(ngModel)]="newCategoria.descripcion" placeholder="Escribe una breve descripción..." rows="3"></textarea>
+            <textarea [(ngModel)]="newCategoria.descripcion" placeholder="Escribe una breve descripción..."
+              rows="3"></textarea>
           </div>
         </div>
       </div>
@@ -1120,7 +1148,7 @@
       </div>
     </div>
   </div>
-   <!-- Modal Editar Categoría -->
+  <!-- Modal Editar Categoría -->
   <div class="modal-overlay" *ngIf="showEditCategoriaModal" (click)="closeEditCategoriaModal()">
     <div class="modal-box" (click)="$event.stopPropagation()">
       <div class="modal-header">
@@ -1131,9 +1159,10 @@
         <div class="form-grid">
           <!-- Vista Previa de Color -->
           <div class="form-group full" style="margin-bottom: 0.5rem;">
-            <div [style.background]="editingCategoria.color" 
-                 style="height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);">
-              <i class="fas fa-tags" style="font-size: 2rem; color: white; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));"></i>
+            <div [style.background]="editingCategoria.color"
+              style="height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);">
+              <i class="fas fa-tags"
+                style="font-size: 2rem; color: white; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));"></i>
             </div>
           </div>
 
@@ -1141,16 +1170,17 @@
             <label>Nombre *</label>
             <input type="text" [(ngModel)]="editingCategoria.nombre">
           </div>
-          
+
           <div class="form-group">
             <label>Código *</label>
             <input type="text" [(ngModel)]="editingCategoria.codigo">
           </div>
           <div class="form-group">
             <label>Color Distintivo</label>
-            <input type="color" [(ngModel)]="editingCategoria.color" style="height: 45px; width: 100%; cursor: pointer; padding: 2px; border-radius: 8px;">
+            <input type="color" [(ngModel)]="editingCategoria.color"
+              style="height: 45px; width: 100%; cursor: pointer; padding: 2px; border-radius: 8px;">
           </div>
-          
+
           <div class="form-group full">
             <label>Descripción</label>
             <textarea [(ngModel)]="editingCategoria.descripcion" rows="3"></textarea>

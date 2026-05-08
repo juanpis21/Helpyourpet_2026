@@ -384,19 +384,20 @@ export class PerfilUsuario implements OnInit {
   }
 
   eliminarMascota(id: number): void {
-    if (confirm('¿Estás seguro de que quieres eliminar esta mascota?')) {
+    if (confirm('¿Estás seguro de que quieres desactivar esta mascota?')) {
+      // Optimistic update: ocultar de la lista local
       this.mascotas = this.mascotas.filter(m => m.id !== id);
 
-      this.mascotasService.deleteMascota(id).subscribe({
+      this.mascotasService.updateMascota(id, { isActive: false }).subscribe({
         next: () => {
-          console.log('✅ Mascota eliminada exitosamente');
+          console.log('✅ Mascota desactivada exitosamente');
           this.cargarMascotasUsuario();
-          alert('✅ Mascota eliminada exitosamente');
+          alert('✅ Mascota desactivada exitosamente');
         },
         error: (err) => {
-          console.error('❌ Error al eliminar mascota:', err);
-          this.cargarMascotasUsuario();
-          alert('❌ Error al eliminar la mascota: ' + (err.error?.message || 'Error desconocido'));
+          console.error('❌ Error al desactivar mascota:', err);
+          this.cargarMascotasUsuario(); // Revertir si falla
+          alert('❌ Error al desactivar la mascota: ' + (err.error?.message || 'Error desconocido'));
         }
       });
     }

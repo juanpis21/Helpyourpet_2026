@@ -815,8 +815,9 @@ export class AdminModulesComponent implements OnInit {
 
     this.usersService.updateUser(currentUser.id, formData).subscribe({
       next: () => {
-        alert('✅ Contraseña actualizada correctamente en la base de datos');
+        alert('✅ Contraseña actualizada correctamente. Por seguridad, debes iniciar sesión de nuevo.');
         this.newPassword = '';
+        this.logout(); // Cerrar sesión tras cambiar contraseña
       },
       error: (err) => {
         const errorMsg = err.error?.message;
@@ -841,10 +842,10 @@ export class AdminModulesComponent implements OnInit {
       if (currentUser) {
         this.usersService.deleteUser(currentUser.id).subscribe({
           next: () => {
-            alert('Cuenta desactivada exitosamente.');
+            alert('✅ Cuenta desactivada exitosamente.');
             this.logout();
           },
-          error: (err) => alert('Error al desactivar cuenta: ' + (err.error?.message || err.message))
+          error: (err) => alert('❌ Error al desactivar cuenta: ' + (err.error?.message || err.message))
         });
       }
     }
