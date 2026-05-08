@@ -192,11 +192,20 @@
   padding: 2rem;
   transition: all 0.3s ease;
   background: var(--bg-body);
+  z-index: 1;
 }
 
 .sidebar-closed .main-content {
   left: 0;
   width: 100%;
+}
+
+/* En resoluciones grandes, asegurar que el contenido principal siempre esté posicionado correctamente */
+@media (min-width: 993px) {
+  .main-content {
+    left: 250px !important;
+    width: calc(100% - 250px) !important;
+  }
 }
 
 .section-header {
@@ -548,7 +557,7 @@
   width: 42px;
   height: 42px;
   border-radius: 12px;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -579,7 +588,7 @@
     &.active { transform: translateX(0); }
   }
   .main-content { 
-    margin-left: 0; 
+    left: 0; 
     width: 100%; 
     padding: 1rem;
   }
