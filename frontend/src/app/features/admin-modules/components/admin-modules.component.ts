@@ -44,6 +44,7 @@ export class AdminModulesComponent implements OnInit {
   };
   adminProfilePreview: string | null = null;
   selectedAdminFile: File | null = null;
+  newPassword: string = '';
 
   // Modales Usuarios
   showAddUserModal: boolean = false;
@@ -795,6 +796,32 @@ export class AdminModulesComponent implements OnInit {
       error: (error) => {
         alert('❌ Error al actualizar el perfil: ' + (error.error?.message || 'Error desconocido'));
         console.error('Update profile error:', error);
+      }
+    });
+  }
+
+  cambiarPassword(): void {
+    if (!this.newPassword || this.newPassword.length < 6) {
+      alert('⚠️ La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) return;
+
+    // Usar FormData para que sea compatible con el interceptor del backend
+    const formData = new FormData();
+    formData.append('password', this.newPassword);
+
+    this.usersService.updateUser(currentUser.id, formData).subscribe({
+      next: () => {
+        alert('✅ Contraseña actualizada correctamente en la base de datos');
+        this.newPassword = '';
+      },
+      error: (err) => {
+        const errorMsg = err.error?.message;
+        const detail = Array.isArray(errorMsg) ? errorMsg.join(', ') : errorMsg;
+        alert('❌ Error al cambiar la contraseña: ' + (detail || err.message));
       }
     });
   }

@@ -205,11 +205,17 @@ export class UsersService {
     }
 
     if (updateUserDto.password) {
-      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+      console.log(`🔐 [UsersService] Solicitud de cambio de contraseña para usuario ID: ${id}`);
+      const hashedPassword = await bcrypt.hash(updateUserDto.password, 10);
+      const updateResult = await this.usersRepository.update(id, { password: hashedPassword });
+      console.log(`✅ [UsersService] Resultado de actualización de password:`, updateResult.affected > 0 ? 'EXITOSO' : 'FALLIDO');
+      delete updateUserDto.password;
     }
 
-    Object.assign(user, updateUserDto);
-    await this.usersRepository.save(user);
+    if (Object.keys(updateUserDto).length > 0) {
+      console.log(`📝 [UsersService] Actualizando otros campos para usuario ID: ${id}`);
+      await this.usersRepository.update(id, updateUserDto);
+    }
 
     const updatedUser = await this.usersRepository.findOne({
       where: { id: user.id },

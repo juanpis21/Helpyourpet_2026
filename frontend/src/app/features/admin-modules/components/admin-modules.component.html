@@ -132,20 +132,22 @@
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>ID</th>
+                  <th>Usuario</th>
                   <th>Nombre</th>
-                  <th>Email</th>
-                  <th>Rol</th>
+                  <th>Apellido</th>
+                  <th>Teléfono</th>
+                  <th>Dirección</th>
                   <th>Estado</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let user of filteredUsuarios">
-                  <td>{{ user.id }}</td>
-                  <td>{{ user.firstName }} {{ user.lastName }}</td>
-                  <td>{{ user.email }}</td>
-                  <td><span class="badge">{{ getRolesString(user) }}</span></td>
+                  <td><strong>{{ user.username }}</strong></td>
+                  <td>{{ user.firstName }}</td>
+                  <td>{{ user.lastName }}</td>
+                  <td>{{ user.phone || 'N/A' }}</td>
+                  <td>{{ user.address || 'N/A' }}</td>
                   <td>
                     <span class="status-pill" [class.active]="user.isActive">
                       {{ user.isActive ? 'Activo' : 'Inactivo' }}
@@ -239,9 +241,6 @@
       <div class="section-header">
         <h1><i class="fas fa-hospital"></i> Gestión de Veterinarias</h1>
         <div class="header-actions">
-          <button class="btn-primary" (click)="openAddVeterinariaModal()">
-            <i class="fas fa-plus"></i> Registrar Veterinaria
-          </button>
           <button class="top-bar-btn" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
         </div>
       </div>
@@ -280,11 +279,9 @@
                   </td>
                   <td>
                     <div class="actions">
-                      <button class="btn-icon edit" (click)="openEditVeterinariaModal(vet)" title="Editar"><i class="fas fa-edit"></i></button>
                       <button class="btn-icon toggle" (click)="toggleEstadoVeterinaria(vet)" [title]="vet.isActive ? 'Desactivar' : 'Activar'">
                         <i class="fas" [ngClass]="vet.isActive ? 'fa-toggle-on' : 'fa-toggle-off'" [style.color]="vet.isActive ? '#2e7d32' : '#c62828'"></i>
                       </button>
-                      <button class="btn-icon delete" (click)="eliminarVeterinaria(vet)" title="Eliminar"><i class="fas fa-trash"></i></button>
                     </div>
                   </td>
                 </tr>
@@ -524,49 +521,49 @@
           <h5><i class="fas fa-user-edit"></i> Información Personal</h5>
         </div>
         <div class="card-body">
-          <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
-            <!-- Foto -->
-            <div style="flex: 1; min-width: 200px; text-align: center; border-right: 1px solid var(--border-color); padding-right: 2rem;">
-              <div style="position: relative; display: inline-block;">
+          <div class="profile-settings-layout">
+            <!-- Columna de Foto -->
+            <div class="profile-photo-column">
+              <div class="profile-photo-wrapper">
                 <img [src]="adminProfilePreview || adminUser.imagen || 'assets/images/Default.png'" 
-                     alt="Avatar" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent-color);">
-                <label style="position: absolute; bottom: 5px; right: 5px; background: var(--accent-color); color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+                     alt="Avatar" class="profile-main-img">
+                <label class="photo-upload-overlay">
                   <i class="fas fa-camera"></i>
                   <input type="file" (change)="onAdminProfileImageSelected($event)" accept="image/*" hidden>
                 </label>
               </div>
-              <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-secondary);">Tamaño recomendado: 500x500px</p>
+              <p class="photo-hint">Tamaño recomendado: 500x500px</p>
             </div>
 
-            <!-- Form -->
-            <div style="flex: 3; min-width: 300px;">
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+            <!-- Columna de Datos (Grid de 2 columnas) -->
+            <div class="profile-data-column">
+              <div class="form-grid">
                 <div class="form-group">
-                  <label>Nombres</label>
+                  <label><i class="fas fa-user"></i> Nombres</label>
                   <input type="text" [(ngModel)]="adminUser.nombres" placeholder="Tus nombres">
                 </div>
                 <div class="form-group">
-                  <label>Apellidos</label>
+                  <label><i class="fas fa-user-tag"></i> Apellidos</label>
                   <input type="text" [(ngModel)]="adminUser.apellidos" placeholder="Tus apellidos">
                 </div>
                 <div class="form-group">
-                  <label>Correo Electrónico</label>
+                  <label><i class="fas fa-envelope"></i> Correo Electrónico</label>
                   <input type="email" [(ngModel)]="adminUser.correo" placeholder="admin@ejemplo.com">
                 </div>
                 <div class="form-group">
-                  <label>Teléfono</label>
+                  <label><i class="fas fa-phone"></i> Teléfono</label>
                   <input type="text" [(ngModel)]="adminUser.telefono" placeholder="Número de contacto">
                 </div>
                 <div class="form-group">
-                  <label>Dirección</label>
-                  <input type="text" [(ngModel)]="adminUser.direccion" placeholder="Dirección de residencia">
-                </div>
-                <div class="form-group">
-                  <label>Número Documento</label>
+                  <label><i class="fas fa-id-card"></i> Número Documento</label>
                   <input type="text" [(ngModel)]="adminUser.numDocumento" placeholder="ID / Cédula">
                 </div>
+                <div class="form-group">
+                  <label><i class="fas fa-map-marker-alt"></i> Dirección</label>
+                  <input type="text" [(ngModel)]="adminUser.direccion" placeholder="Dirección de residencia">
+                </div>
               </div>
-              <div style="margin-top: 2rem; display: flex; justify-content: flex-end;">
+              <div class="form-actions">
                 <button class="btn-primary" (click)="guardarPerfilAdmin()">
                   <i class="fas fa-save"></i> Guardar Cambios
                 </button>
@@ -576,17 +573,38 @@
         </div>
       </div>
 
-      <!-- Seguridad -->
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+        <!-- Card de Seguridad -->
+        <div class="card">
+          <div class="card-header" style="background: linear-gradient(90deg, #374151 0%, #111827 100%) !important;">
+            <h5><i class="fas fa-shield-alt"></i> Seguridad y Acceso</h5>
+          </div>
+          <div class="card-body">
+            <p style="margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.9rem;">
+              Protege tu cuenta actualizando tu contraseña regularmente.
+            </p>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label><i class="fas fa-lock"></i> Nueva Contraseña</label>
+              <div style="position: relative;">
+                <input type="password" [(ngModel)]="newPassword" name="newPassword" placeholder="Mínimo 8 caracteres" style="width: 100%;">
+              </div>
+            </div>
+            <button class="btn-secondary" style="width: 100%; justify-content: center;" (click)="cambiarPassword()">
+              <i class="fas fa-key"></i> Cambiar Contraseña
+            </button>
+          </div>
+        </div>
 
 
         <div class="card">
-          <div class="card-header" style="background: #ffebee; color: #c62828; border-bottom: 1px solid #ffcdd2;">
-            <h5><i class="fas fa-exclamation-triangle"></i> Zona de Peligro</h5>
+          <div class="card-header" style="background: #fef2f2 !important;">
+            <h5 style="color: #991b1b;"><i class="fas fa-exclamation-triangle"></i> Zona de Peligro</h5>
           </div>
-          <div class="card-body" style="text-align: center;">
-            <p>La desactivación de cuenta es una acción reversible por un Super Admin.</p>
-            <button class="btn-secondary" style="border-color: #c62828; color: #c62828; background: white;" (click)="eliminarCuentaAdmin()">
+          <div class="card-body" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 1.5rem; padding: 2rem;">
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">
+              La desactivación de cuenta es una acción reversible solo por un Super Admin.
+            </p>
+            <button class="btn-icon delete" style="width: auto; padding: 0.6rem 1.5rem; border-radius: 8px; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;" (click)="eliminarCuentaAdmin()">
               <i class="fas fa-user-slash"></i> Desactivar mi Cuenta
             </button>
           </div>
@@ -621,7 +639,7 @@
             <label>Precio *</label>
             <input type="number" [(ngModel)]="newService.precioBase">
           </div>
-          <div class="form-group">
+          <div class="form-group full">
             <label>Veterinaria *</label>
             <select [(ngModel)]="newService.veterinariaId">
               <option [ngValue]="0">Seleccionar Veterinaria</option>
@@ -678,7 +696,7 @@
             <label>Precio *</label>
             <input type="number" [(ngModel)]="editingService.precioBase">
           </div>
-          <div class="form-group">
+          <div class="form-group full">
             <label>Veterinaria *</label>
             <select [(ngModel)]="editingService.veterinariaId">
               <option *ngFor="let vet of veterinarias" [ngValue]="vet.id">{{ vet.nombre }}</option>
@@ -766,30 +784,24 @@
         <form (submit)="$event.preventDefault(); guardarEdicionUsuario()">
           <div class="form-grid">
             <div class="form-group">
-              <label>Usuario</label>
-              <input type="text" [(ngModel)]="editingUser.username" name="username">
-            </div>
-            <div class="form-group">
-              <label>Email</label>
-              <input type="email" [(ngModel)]="editingUser.email" name="email">
-            </div>
-            <div class="form-group">
               <label>Nombre</label>
-              <input type="text" [(ngModel)]="editingUser.firstName" name="firstName">
+              <input type="text" [(ngModel)]="editingUser.firstName" name="firstName" placeholder="Nombre">
             </div>
             <div class="form-group">
               <label>Apellido</label>
-              <input type="text" [(ngModel)]="editingUser.lastName" name="lastName">
+              <input type="text" [(ngModel)]="editingUser.lastName" name="lastName" placeholder="Apellido">
             </div>
             <div class="form-group">
-              <label>Nueva Contraseña (opcional)</label>
-              <input type="password" [(ngModel)]="editingUser.password" name="password" placeholder="Dejar en blanco para no cambiar">
+              <label>Usuario</label>
+              <input type="text" [(ngModel)]="editingUser.username" name="username" placeholder="Nombre de usuario">
             </div>
             <div class="form-group">
-              <label>Rol</label>
-              <select [(ngModel)]="editingUser.roleId" name="roleId">
-                <option *ngFor="let role of roles" [ngValue]="role.id">{{ role.name | titlecase }}</option>
-              </select>
+              <label>Teléfono</label>
+              <input type="text" [(ngModel)]="editingUser.phone" name="phone" placeholder="Número de teléfono">
+            </div>
+            <div class="form-group full">
+              <label>Dirección</label>
+              <input type="text" [(ngModel)]="editingUser.address" name="address" placeholder="Dirección de residencia">
             </div>
           </div>
         </form>
@@ -1066,101 +1078,88 @@
       </div>
     </div>
   </div>
-
-  <!-- Modal Agregar Categoría -->
-  <div class="modal-backdrop" *ngIf="showAddCategoriaModal">
-    <div class="modal-content">
+  <div class="modal-overlay" *ngIf="showAddCategoriaModal" (click)="closeAddCategoriaModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>Registrar Nueva Categoría</h2>
+        <h3>Registrar Nueva Categoría</h3>
         <button class="close-btn" (click)="closeAddCategoriaModal()">&times;</button>
       </div>
       <div class="modal-body">
-        <form (ngSubmit)="guardarCategoria()">
-          <div class="modal-flex">
-            <!-- Lado Visual (Decorativo/Color) -->
-            <div class="modal-image-col">
-              <div class="image-upload-wrapper" [style.background]="newCategoria.color" 
-                   style="display: flex; align-items: center; justify-content: center; border-radius: 20px;">
-                <i class="fas fa-tags" style="font-size: 4rem; color: white; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));"></i>
-              </div>
-              <div class="form-group" style="margin-top: 1.5rem;">
-                <label>Color Distintivo</label>
-                <input type="color" [(ngModel)]="newCategoria.color" name="color" style="height: 50px; cursor: pointer;">
-              </div>
-            </div>
-
-            <!-- Datos -->
-            <div class="modal-data-col">
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Nombre de Categoría</label>
-                  <input type="text" [(ngModel)]="newCategoria.nombre" name="nombre" placeholder="Ej: Alimentos" required>
-                </div>
-                <div class="form-group">
-                  <label>Código Interno</label>
-                  <input type="text" [(ngModel)]="newCategoria.codigo" name="codigo" placeholder="Ej: CAT-001" required>
-                </div>
-                <div class="form-group full-width">
-                  <label>Descripción</label>
-                  <textarea [(ngModel)]="newCategoria.descripcion" name="descripcion" placeholder="Escribe una breve descripción..." rows="4"></textarea>
-                </div>
-              </div>
+        <div class="form-grid">
+          <!-- Vista Previa de Color -->
+          <div class="form-group full" style="margin-bottom: 0.5rem;">
+            <div [style.background]="newCategoria.color" 
+                 style="height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);">
+              <i class="fas fa-tags" style="font-size: 2rem; color: white; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));"></i>
             </div>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn-secondary" (click)="closeAddCategoriaModal()">Cancelar</button>
-            <button type="submit" class="btn-primary">Registrar Categoría</button>
+          
+          <div class="form-group full">
+            <label>Nombre de Categoría *</label>
+            <input type="text" [(ngModel)]="newCategoria.nombre" placeholder="Ej: Alimentos">
           </div>
-        </form>
+          
+          <div class="form-group">
+            <label>Código Interno *</label>
+            <input type="text" [(ngModel)]="newCategoria.codigo" placeholder="Ej: CAT-001">
+          </div>
+          <div class="form-group">
+            <label>Color Distintivo</label>
+            <input type="color" [(ngModel)]="newCategoria.color" style="height: 45px; width: 100%; cursor: pointer; padding: 2px; border-radius: 8px;">
+          </div>
+          
+          <div class="form-group full">
+            <label>Descripción</label>
+            <textarea [(ngModel)]="newCategoria.descripcion" placeholder="Escribe una breve descripción..." rows="3"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeAddCategoriaModal()">Cancelar</button>
+        <button class="btn-primary" (click)="guardarCategoria()">Registrar Categoría</button>
       </div>
     </div>
   </div>
-
-  <!-- Modal Editar Categoría -->
-  <div class="modal-backdrop" *ngIf="showEditCategoriaModal">
-    <div class="modal-content">
+   <!-- Modal Editar Categoría -->
+  <div class="modal-overlay" *ngIf="showEditCategoriaModal" (click)="closeEditCategoriaModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>Editar Categoría</h2>
+        <h3>Editar Categoría</h3>
         <button class="close-btn" (click)="closeEditCategoriaModal()">&times;</button>
       </div>
       <div class="modal-body">
-        <form (ngSubmit)="guardarEdicionCategoria()">
-          <div class="modal-flex">
-            <!-- Lado Visual -->
-            <div class="modal-image-col">
-              <div class="image-upload-wrapper" [style.background]="editingCategoria.color" 
-                   style="display: flex; align-items: center; justify-content: center; border-radius: 20px;">
-                <i class="fas fa-tags" style="font-size: 4rem; color: white; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));"></i>
-              </div>
-              <div class="form-group" style="margin-top: 1.5rem;">
-                <label>Color Distintivo</label>
-                <input type="color" [(ngModel)]="editingCategoria.color" name="color" style="height: 50px; cursor: pointer;">
-              </div>
+        <div class="form-grid">
+          <!-- Vista Previa de Color -->
+          <div class="form-group full" style="margin-bottom: 0.5rem;">
+            <div [style.background]="editingCategoria.color" 
+                 style="height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);">
+              <i class="fas fa-tags" style="font-size: 2rem; color: white; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));"></i>
             </div>
+          </div>
 
-            <!-- Datos -->
-            <div class="modal-data-col">
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Nombre</label>
-                  <input type="text" [(ngModel)]="editingCategoria.nombre" name="nombre" required>
-                </div>
-                <div class="form-group">
-                  <label>Código</label>
-                  <input type="text" [(ngModel)]="editingCategoria.codigo" name="codigo" required>
-                </div>
-                <div class="form-group full-width">
-                  <label>Descripción</label>
-                  <textarea [(ngModel)]="editingCategoria.descripcion" name="descripcion" rows="4"></textarea>
-                </div>
-              </div>
-            </div>
+          <div class="form-group full">
+            <label>Nombre *</label>
+            <input type="text" [(ngModel)]="editingCategoria.nombre">
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn-secondary" (click)="closeEditCategoriaModal()">Cancelar</button>
-            <button type="submit" class="btn-primary">Guardar Cambios</button>
+          
+          <div class="form-group">
+            <label>Código *</label>
+            <input type="text" [(ngModel)]="editingCategoria.codigo">
           </div>
-        </form>
+          <div class="form-group">
+            <label>Color Distintivo</label>
+            <input type="color" [(ngModel)]="editingCategoria.color" style="height: 45px; width: 100%; cursor: pointer; padding: 2px; border-radius: 8px;">
+          </div>
+          
+          <div class="form-group full">
+            <label>Descripción</label>
+            <textarea [(ngModel)]="editingCategoria.descripcion" rows="3"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeEditCategoriaModal()">Cancelar</button>
+        <button class="btn-primary" (click)="guardarEdicionCategoria()">Guardar Cambios</button>
       </div>
     </div>
   </div>
