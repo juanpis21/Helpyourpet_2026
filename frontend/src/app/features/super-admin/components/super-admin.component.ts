@@ -66,7 +66,7 @@ export class SuperAdminComponent implements OnInit {
 
   loadGlobalData(): void {
     this.usersService.getAllUsers().subscribe({
-      next: (users) => this.allUsers = users,
+      next: (users) => this.allUsers = users.filter(user => user.role?.name === 'admin' || user.roleId === 2),
       error: (err) => console.error('Error loading all users:', err)
     });
 

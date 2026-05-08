@@ -49,6 +49,7 @@ interface User {
   address: string;
   isActive: boolean;
   roleId?: number;
+  role?: { id: number; name: string; description: string };
   createdAt: string;
   updatedAt: string;
 }
