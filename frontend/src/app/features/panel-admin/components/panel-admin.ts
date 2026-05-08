@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { UsersService } from '../../../core/services/users.service';
 import { MascotasService, Mascota } from '../../perfil-usuario/services/mascotas.service';
 
 @Component({
   selector: 'app-panel-admin',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './panel-admin.html',
   styleUrl: './panel-admin.scss',
 })
@@ -18,6 +19,8 @@ export class PanelAdmin implements OnInit {
     mascotasRegistradas: 0,
     veterinariasActivas: 0
   };
+
+  usuarioAEditar: any = null;
 
   constructor(
     private usersService: UsersService,
@@ -95,10 +98,36 @@ export class PanelAdmin implements OnInit {
   }
 
   modalAbierto: string | null = null;
-  abrirModal(id: string): void {
+  abrirModal(id: string, user: any = null): void {
     this.modalAbierto = id;
+    if (user) {
+      this.usuarioAEditar = { ...user };
+    }
   }
   cerrarModal(): void {
     this.modalAbierto = null;
+    this.usuarioAEditar = null;
+  }
+
+  guardarUsuario(): void {
+    if (!this.usuarioAEditar) return;
+    
+    const id = this.usuarioAEditar.id;
+    const payload = {
+      username: this.usuarioAEditar.username,
+      firstName: this.usuarioAEditar.firstName,
+      lastName: this.usuarioAEditar.lastName,
+      phone: this.usuarioAEditar.phone,
+      address: this.usuarioAEditar.address
+    };
+
+    this.usersService.updateUser(id, payload).subscribe({
+      next: () => {
+        this.cargarUsuarios();
+        this.cerrarModal();
+        alert('Usuario actualizado exitosamente');
+      },
+      error: (err) => alert('Error al actualizar usuario: ' + err.message)
+    });
   }
 }

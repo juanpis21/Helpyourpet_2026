@@ -743,6 +743,10 @@ body {
 	animation: fadeIn 0.3s ease;
 }
 
+.modal.active, .modale.active {
+	display: block;
+}
+
 .modal-content {
 	background: linear-gradient(135deg, var(--surface-color) 0%, var(--hover-color) 100%);
 	margin: 5% auto;
