@@ -1,14 +1,15 @@
 <div class="sidebar-overlay" [class.active]="sidebarOpen" (click)="toggleSidebar()"></div>
 
-<div class="admin-layout" [ngClass]="{'sidebar-closed': !sidebarOpen, 'dark-mode': darkMode}">
+<div class="perfil-layout" [ngClass]="{'sidebar-closed': !sidebarOpen, 'dark-mode': darkMode}">
   <!-- ===== SIDEBAR ===== -->
-  <aside class="sidebar" [class.active]="sidebarOpen">
+  <nav class="sidebar" [class.active]="sidebarOpen">
     <div class="sidebar-header">
       <h3>HelpYourPet</h3>
       <div class="user-profile">
-        <img [src]="vetUser?.imagen || 'assets/images/Default.png'" alt="Foto" class="profile-avatar">
-        <h5>{{ vetUser?.firstName }} {{ vetUser?.lastName }}</h5>
-        <p>Veterinario</p>
+        <img [src]="profileImagePreview || (usuario.imagen || 'assets/images/Default.png')"
+          alt="Foto de perfil" class="profile-avatar">
+        <h5>{{ usuario.nombres }} {{ usuario.apellidos }}</h5>
+        <p>{{ getRoleName() | titlecase }}</p>
       </div>
     </div>
 
@@ -49,25 +50,22 @@
         </a>
       </li>
     </ul>
-  </aside>
+  </nav>
 
   <!-- ===== MAIN CONTENT ===== -->
   <main class="main-content">
-    <header class="top-bar">
-      <button class="toggle-btn" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
-      <div class="top-bar-right">
-        <button class="theme-btn" (click)="toggleDarkMode()">
-          <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
-        </button>
-        <span class="date">{{ today | date:'fullDate' }}</span>
-      </div>
-    </header>
 
     <!-- DASHBOARD -->
     <section *ngIf="activeSection === 'dashboard'" class="content-section animate-in">
       <div class="section-header">
-        <h1>Bienvenido, Dr. {{ vetUser?.firstName }}</h1>
-        <p>Aquí tienes un resumen de la actividad de hoy.</p>
+        <h1><i class="fas fa-home"></i> Bienvenido, Dr. {{ usuario.nombres }}</h1>
+        <div class="header-actions">
+          <button class="menu-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="theme-btn" (click)="toggleDarkMode()">
+            <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
+          <button class="home-btn" (click)="irAInicio()"><i class="fas fa-home"></i></button>
+        </div>
       </div>
 
       <div class="stats-grid">
@@ -99,9 +97,16 @@
     <section *ngIf="activeSection === 'mascotas'" class="content-section animate-in">
       <div class="section-header">
         <h1><i class="fas fa-paw"></i> Gestión de Mascotas</h1>
-        <button class="btn-primary" (click)="openAddPetModal()">
-          <i class="fas fa-plus"></i> Registrar Mascota
-        </button>
+        <div class="header-actions">
+          <button class="btn-primary" (click)="openAddPetModal()">
+            <i class="fas fa-plus"></i> Registrar Mascota
+          </button>
+          <button class="menu-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="theme-btn" (click)="toggleDarkMode()">
+            <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
+          <button class="home-btn" (click)="irAInicio()"><i class="fas fa-home"></i></button>
+        </div>
       </div>
 
       <div class="card">
@@ -161,14 +166,21 @@
     <section *ngIf="activeSection === 'usuarios'" class="content-section animate-in">
       <div class="section-header">
         <h1><i class="fas fa-users"></i> Gestión de Usuarios</h1>
-        <button class="btn-primary" (click)="openAddUserModal()">
-          <i class="fas fa-user-plus"></i> Registrar Usuario
-        </button>
+        <div class="header-actions">
+          <button class="btn-primary" (click)="openAddUserModal()">
+            <i class="fas fa-user-plus"></i> Registrar Usuario
+          </button>
+          <button class="menu-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="theme-btn" (click)="toggleDarkMode()">
+            <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
+          <button class="home-btn" (click)="irAInicio()"><i class="fas fa-home"></i></button>
+        </div>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <h2>Usuarios Registrados por el Veterinario</h2>
+          <h5>Usuarios Registrados por el Veterinario</h5>
         </div>
         <div class="card-body">
           <div class="table-responsive" *ngIf="usuariosSinCuenta.length > 0">
@@ -222,9 +234,16 @@
     <section *ngIf="activeSection === 'citas'" class="content-section animate-in">
       <div class="section-header">
         <h1><i class="fas fa-calendar-check"></i> Agenda de Citas</h1>
-        <button class="btn-primary" (click)="showAddCitaModal = true">
-          <i class="fas fa-plus"></i> Nueva Cita
-        </button>
+        <div class="header-actions">
+          <button class="btn-primary" (click)="showAddCitaModal = true">
+            <i class="fas fa-plus"></i> Nueva Cita
+          </button>
+          <button class="menu-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="theme-btn" (click)="toggleDarkMode()">
+            <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
+          <button class="home-btn" (click)="irAInicio()"><i class="fas fa-home"></i></button>
+        </div>
       </div>
 
       <div class="card">
@@ -259,6 +278,13 @@
     <section *ngIf="activeSection === 'publicaciones'" class="content-section animate-in">
       <div class="section-header">
         <h1><i class="fas fa-heart"></i> Mis Publicaciones</h1>
+        <div class="header-actions">
+          <button class="menu-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="theme-btn" (click)="toggleDarkMode()">
+            <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
+          <button class="home-btn" (click)="irAInicio()"><i class="fas fa-home"></i></button>
+        </div>
       </div>
 
       <div *ngIf="publicaciones.length === 0" class="empty-state large">
@@ -290,6 +316,13 @@
     <section *ngIf="activeSection === 'configuracion'" class="content-section animate-in">
       <div class="section-header">
         <h1><i class="fas fa-cog"></i> Configuración de Perfil</h1>
+        <div class="header-actions">
+          <button class="menu-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="theme-btn" (click)="toggleDarkMode()">
+            <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
+          <button class="home-btn" (click)="irAInicio()"><i class="fas fa-home"></i></button>
+        </div>
       </div>
 
       <div class="card">
@@ -375,18 +408,18 @@
       <button class="close-btn" (click)="closeAddPetModal()">&times;</button>
     </div>
     <div class="modal-body">
-      <div class="pet-image-upload">
-        <div class="image-preview"
+      <div class="pet-image-upload compact">
+        <div class="image-preview small"
           [style.backgroundImage]="imagePreview ? 'url(' + imagePreview + ')' : 'url(assets/images/Default.png)'">
         </div>
-        <label for="pet-photo" class="upload-btn">
+        <label for="pet-photo" class="upload-btn small">
           <i class="fas fa-camera"></i> Subir Foto
         </label>
         <input type="file" id="pet-photo" (change)="onFileSelected($event)" accept="image/*" style="display: none;">
       </div>
 
       <div class="form-grid">
-        <div class="form-group full">
+        <div class="form-group">
           <label>Dueño (Usuario)</label>
           <select [(ngModel)]="newPet.ownerId">
             <option [ngValue]="null">Seleccione un usuario</option>

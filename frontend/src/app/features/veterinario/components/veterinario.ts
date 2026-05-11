@@ -286,7 +286,17 @@ export class Veterinario implements OnInit {
   }
 
   toggleDarkMode(): void {
-    this.darkMode = !this.darkMode;
+    this.themeService.toggleDarkMode();
+  }
+
+  getRoleName(): string {
+    const roleMap: { [key: number]: string } = {
+      1: 'Administrador',
+      2: 'Super Administrador',
+      3: 'Veterinario',
+      4: 'Usuario'
+    };
+    return roleMap[this.usuario.roleId || 3] || 'Veterinario';
   }
 
   private getHeaders() {
