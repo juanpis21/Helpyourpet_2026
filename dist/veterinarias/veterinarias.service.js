@@ -39,13 +39,15 @@ let VeterinariasService = class VeterinariasService {
     }
     async findAll() {
         return this.veterinariasRepository.find({
-            select: ['id', 'nombre', 'direccion', 'telefono', 'email', 'descripcion', 'rut', 'isActive', 'createdAt', 'updatedAt']
+            relations: ['admin'],
+            select: ['id', 'nombre', 'direccion', 'telefono', 'email', 'descripcion', 'rut', 'isActive', 'adminId', 'createdAt', 'updatedAt']
         });
     }
     async findOne(id) {
         const veterinaria = await this.veterinariasRepository.findOne({
             where: { id },
-            select: ['id', 'nombre', 'direccion', 'telefono', 'email', 'descripcion', 'rut', 'isActive', 'createdAt', 'updatedAt']
+            relations: ['admin'],
+            select: ['id', 'nombre', 'direccion', 'telefono', 'email', 'descripcion', 'rut', 'isActive', 'adminId', 'createdAt', 'updatedAt']
         });
         if (!veterinaria) {
             throw new common_1.NotFoundException(`Veterinaria with ID ${id} not found`);
@@ -79,6 +81,9 @@ let VeterinariasService = class VeterinariasService {
         }
         if (updateVeterinariaDto.isActive !== undefined) {
             veterinaria.isActive = updateVeterinariaDto.isActive;
+        }
+        if (updateVeterinariaDto.adminId !== undefined) {
+            veterinaria.adminId = updateVeterinariaDto.adminId;
         }
         return this.veterinariasRepository.save(veterinaria);
     }

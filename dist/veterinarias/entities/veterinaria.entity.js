@@ -15,6 +15,7 @@ const typeorm_1 = require("typeorm");
 const perfil_veterinario_entity_1 = require("../../perfiles-veterinarios/entities/perfil-veterinario.entity");
 const emergencia_entity_1 = require("../../emergencias/entities/emergencia.entity");
 const producto_entity_1 = require("../../productos/entities/producto.entity");
+const user_entity_1 = require("../../users/entities/user.entity");
 let Veterinaria = class Veterinaria {
 };
 exports.Veterinaria = Veterinaria;
@@ -102,6 +103,20 @@ __decorate([
     (0, typeorm_1.Column)({ default: true }),
     __metadata("design:type", Boolean)
 ], Veterinaria.prototype, "isActive", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'ID del administrador asociado a la veterinaria',
+        example: 1,
+        required: false
+    }),
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", Number)
+], Veterinaria.prototype, "adminId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => user_entity_1.User, { nullable: true }),
+    (0, typeorm_1.JoinColumn)({ name: 'adminId' }),
+    __metadata("design:type", user_entity_1.User)
+], Veterinaria.prototype, "admin", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'Fecha de creación del registro',

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsBoolean, IsEmail, MinLength, MaxLength } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsEmail, MinLength, MaxLength, IsNumber } from 'class-validator';
 
 export class UpdateVeterinariaDto {
   @ApiProperty({ 
@@ -74,4 +74,13 @@ export class UpdateVeterinariaDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @ApiProperty({ 
+    description: 'ID del administrador asociado a la veterinaria', 
+    example: 1,
+    required: false
+  })
+  @IsOptional()
+  @IsNumber()
+  adminId?: number;
 }

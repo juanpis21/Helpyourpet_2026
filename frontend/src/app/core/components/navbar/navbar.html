@@ -28,7 +28,7 @@
           </div>
         </div>
         <nav class="dropdown-nav">
-          <a *ngIf="!isInicio && usuarioLogueado?.roleId !== 3" (click)="irAInicio(); toggleProfileMenu()" class="dropdown-item">
+          <a *ngIf="!isInicio && hasAccess('inicio')" (click)="irAInicio(); toggleProfileMenu()" class="dropdown-item">
             <i class="fas fa-home"></i>
             <span>Inicio</span>
           </a>
@@ -36,12 +36,12 @@
             <i class="fas fa-user"></i>
             <span>Mi Perfil</span>
           </a>
-          <a *ngIf="usuarioLogueado?.roleId !== 3" (click)="irATienda(); toggleProfileMenu()" class="dropdown-item">
+          <a *ngIf="hasAccess('tienda')" (click)="irATienda(); toggleProfileMenu()" class="dropdown-item">
             <i class="fas fa-shopping-cart"></i>
             <span>PetShop</span>
           </a>
           
-          <a *ngIf="usuarioLogueado?.roleId !== 3" (click)="irASobreNosotros(); toggleProfileMenu()" class="dropdown-item">
+          <a *ngIf="hasAccess('sobre-nosotros')" (click)="irASobreNosotros(); toggleProfileMenu()" class="dropdown-item">
             <i class="fas fa-users"></i>
             <span>Sobre Nosotros</span>
           </a>

@@ -249,6 +249,9 @@
         <h1><i class="fas fa-hospital"></i> Maestro de Veterinarias</h1>
         <div class="header-actions">
           <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="btn-primary" (click)="openAddVeterinariaModal()">
+            <i class="fas fa-plus"></i> Registrar Veterinaria
+          </button>
         </div>
       </div>
 
@@ -260,18 +263,34 @@
               <thead>
                 <tr>
                   <th>Nombre</th>
+                  <th>Administrador</th>
                   <th>Dirección</th>
+                  <th>Teléfono</th>
                   <th>Estado</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let vet of allVets">
                   <td><strong>{{ vet.nombre }}</strong></td>
+                  <td>
+                    <div class="user-info" *ngIf="vet.admin">
+                      <img [src]="getFullImageUrl(vet.admin.avatar)" class="avatar-sm">
+                      <span>{{ vet.admin.username }}</span>
+                    </div>
+                    <span class="text-secondary" *ngIf="!vet.admin">Sin asignar</span>
+                  </td>
                   <td>{{ vet.direccion }}</td>
+                  <td>{{ vet.telefono }}</td>
                   <td>
                     <span class="status-pill" [class.active]="vet.isActive">
                       {{ vet.isActive ? 'Activa' : 'Inactiva' }}
                     </span>
+                  </td>
+                  <td>
+                    <div class="actions">
+                      <button class="btn-icon edit" (click)="openEditVeterinariaModal(vet)"><i class="fas fa-edit"></i></button>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -375,6 +394,108 @@
       <button class="btn-primary" (click)="saveRole()">
         <i class="fas fa-save"></i> {{ isEditingRole ? 'Actualizar Rol' : 'Guardar Rol' }}
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modales de Veterinarias -->
+<div class="modal-overlay" *ngIf="showAddVeterinariaModal" (click)="closeAddVeterinariaModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Registrar Veterinaria</h3>
+      <button class="close-btn" (click)="closeAddVeterinariaModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Nombre *</label>
+          <input type="text" [(ngModel)]="newVeterinaria.nombre" placeholder="Ej: Clínica Veterinaria San Francisco">
+        </div>
+        <div class="form-group">
+          <label>NIT / RUT *</label>
+          <input type="text" [(ngModel)]="newVeterinaria.rut" placeholder="Ej: 76.123.456-7">
+        </div>
+        <div class="form-group">
+          <label>Teléfono *</label>
+          <input type="tel" [(ngModel)]="newVeterinaria.telefono" placeholder="Ej: +57 300 123 4567">
+        </div>
+        <div class="form-group full">
+          <label>Dirección *</label>
+          <input type="text" [(ngModel)]="newVeterinaria.direccion" placeholder="Ej: Calle Principal #123">
+        </div>
+        <div class="form-group full">
+          <label>Correo Electrónico *</label>
+          <input type="email" [(ngModel)]="newVeterinaria.email" placeholder="Ej: contacto@veterinaria.com">
+        </div>
+        <div class="form-group full">
+          <label>Descripción</label>
+          <textarea [(ngModel)]="newVeterinaria.descripcion" rows="2"
+            placeholder="Descripción de la veterinaria..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Administrador Responsable</label>
+          <select [(ngModel)]="newVeterinaria.adminId" class="form-control">
+            <option [ngValue]="undefined">-- Seleccionar Administrador --</option>
+            <option *ngFor="let admin of allUsers" [ngValue]="admin.id">
+              {{ admin.username }} ({{ admin.fullName || admin.firstName }})
+            </option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeAddVeterinariaModal()">Cancelar</button>
+      <button class="btn-primary" (click)="guardarVeterinaria()">Registrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showEditVeterinariaModal" (click)="closeEditVeterinariaModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Editar Veterinaria</h3>
+      <button class="close-btn" (click)="closeEditVeterinariaModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Nombre *</label>
+          <input type="text" [(ngModel)]="editingVeterinaria.nombre">
+        </div>
+        <div class="form-group">
+          <label>NIT / RUT *</label>
+          <input type="text" [(ngModel)]="editingVeterinaria.rut">
+        </div>
+        <div class="form-group">
+          <label>Teléfono *</label>
+          <input type="tel" [(ngModel)]="editingVeterinaria.telefono">
+        </div>
+        <div class="form-group full">
+          <label>Dirección *</label>
+          <input type="text" [(ngModel)]="editingVeterinaria.direccion">
+        </div>
+        <div class="form-group full">
+          <label>Correo Electrónico *</label>
+          <input type="email" [(ngModel)]="editingVeterinaria.email">
+        </div>
+        <div class="form-group full">
+          <label>Descripción</label>
+          <textarea [(ngModel)]="editingVeterinaria.descripcion" rows="2"></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Administrador Responsable</label>
+          <select [(ngModel)]="editingVeterinaria.adminId" class="form-control">
+            <option [ngValue]="undefined">-- Seleccionar Administrador --</option>
+            <option *ngFor="let admin of allUsers" [ngValue]="admin.id">
+              {{ admin.username }} ({{ admin.fullName || admin.firstName }})
+            </option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeEditVeterinariaModal()">Cancelar</button>
+      <button class="btn-primary" (click)="guardarEdicionVeterinaria()">Guardar Cambios</button>
     </div>
   </div>
 </div>

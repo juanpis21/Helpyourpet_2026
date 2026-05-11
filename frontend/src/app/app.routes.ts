@@ -11,14 +11,11 @@ import { Calificacion } from './features/calificacion/components/calificacion';
 import { Veterinario } from './features/veterinario/components/veterinario';
 import { PerfilVeterinario } from './features/perfil-veterinario/components/perfil-veterinario';
 import { PerfilUsuario } from './features/perfil-usuario/components/perfil-usuario';
-import { PanelAdmin } from './features/panel-admin/components/panel-admin';
 import { AdminModulesComponent } from './features/admin-modules/components/admin-modules.component';
 import { SuperAdminComponent } from './features/super-admin/components/super-admin.component';
 import { PasarelaPagos } from './features/pasarela-pagos/components/pasarela-pagos';
 import { Servicios } from './features/servicios/components/servicios';
 import { permissionGuard } from './core/guards/permission.guard';
-import { SuperAdminGuard } from './core/guards/super-admin.guard';
-import { AdminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   { path: '', component: Login },
@@ -93,27 +90,15 @@ export const routes: Routes = [
     data: { module: 'perfil-veterinario' }
   },
   { 
-    path: 'dashboard', 
-    component: PanelAdmin,
-    canActivate: [permissionGuard],
-    data: { module: 'panel-admin' }
-  },
-  { 
-    path: 'panel-admin', 
-    component: PanelAdmin,
-    canActivate: [permissionGuard],
-    data: { module: 'panel-admin' }
-  },
-  { 
     path: 'admin', 
     component: AdminModulesComponent,
-    canActivate: [AdminGuard],
+    canActivate: [permissionGuard],
     data: { module: 'dashboard' }
   },
   { 
     path: 'super-admin', 
     component: SuperAdminComponent,
-    canActivate: [SuperAdminGuard],
+    canActivate: [permissionGuard],
     data: { module: 'super-admin' }
   }
 ];

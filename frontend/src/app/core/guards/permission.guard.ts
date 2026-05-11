@@ -11,27 +11,25 @@ export const permissionGuard: CanActivateFn = (route, state) => {
     return false;
   }
 
-  const requiredModule = route.data['module'] as string;
+  const requiredModule = (route.data['module'] as string) || '';
   const user = authService.getCurrentUser();
-  const roleName = user?.role?.name?.toLowerCase() || '';
-
-  if (roleName === 'superadmin') {
-    return true;
-  }
-
-  if (!requiredModule) {
-    return true;
-  }
-
+  const roleId = Number(user?.roleId || user?.role?.id);
+  const roleName = user?.role?.name?.toLowerCase().trim() || '';
   const userModules = authService.userModules();
+
+  const isDashboardAccess = requiredModule.toLowerCase() === 'dashboard';
+  const isAdmin = roleId === 2 || roleName === 'admin';
   const hasAccess = userModules.includes(requiredModule.toLowerCase());
 
-  if (hasAccess) {
+  if (hasAccess || (isDashboardAccess && isAdmin) || roleName === 'superadmin') {
     return true;
   }
 
   if (userModules.length > 0) {
-    router.navigate([`/${userModules[0]}`]);
+    // Evitar redirección automática al primer módulo si es sensible, priorizar inicio o admin
+    const defaultRoute = userModules.includes('inicio') ? 'inicio' : 
+                        (userModules.includes('dashboard') || userModules.includes('admin') ? 'admin' : userModules[0]);
+    router.navigate([`/${defaultRoute}`]);
   } else {
     router.navigate(['/login']);
   }
