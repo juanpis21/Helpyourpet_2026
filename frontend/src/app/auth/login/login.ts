@@ -61,65 +61,46 @@ export class Login {
   }
 
   private redirectByPermissions(): void {
-    const user = this.authService.getCurrentUser();
     const userModules = this.authService.userModules();
-    const roleName = (user?.role?.name || '').toLowerCase().trim();
+    const user = this.authService.getCurrentUser();
+    
+    // Extraer ID y Nombre del rol de forma robusta
+    const roleId = Number(user?.roleId || user?.role?.id);
+    const roleName = user?.role?.name?.toLowerCase().trim() || '';
+    
+    console.log('DEBUG REDIRECT:', { 
+      roleId, 
+      roleName, 
+      modules: userModules,
+      hasDashboard: userModules.includes('dashboard'),
+      hasAdmin: userModules.includes('admin')
+    });
 
-    if (user?.roleId === 1) {
-      // Superadmin - redirigir a super-admin
+    // 1. SuperAdministrador
+    if (roleId === 1 || roleName === 'superadmin' || roleName === 'super-admin') {
       this.router.navigate(['/super-admin']);
       return;
     }
 
-    if (user?.roleId === 2) {
-      // Admin - redirigir a admin
+    // 2. Administrador
+    const hasAdminModules = userModules.includes('admin') || 
+                            userModules.includes('dashboard');
+                            
+    if (roleId === 2 || roleName === 'admin' || roleName === 'administrador' || hasAdminModules) {
       this.router.navigate(['/admin']);
       return;
     }
 
-    if (user?.roleId === 3) {
-      // Veterinario - Redirigir a inicio para que vea las publicaciones, pero el navbar se encargará de limitar su menú
+    // 3. Usuarios estándar / Veterinarios / Otros con acceso a inicio
+    if (userModules.includes('inicio') || roleId === 3 || roleId === 4) {
       this.router.navigate(['/inicio']);
       return;
     }
 
-    // 2. Fallback por nombre de rol (si roleId no está disponible)
-    if (roleName === 'superadmin' || roleName === 'super-admin') {
-      this.router.navigate(['/super-admin']);
-      return;
-    }
-
-    const isAdminRole = roleName === 'admin' ||
-      roleName === 'administrador' ||
-      roleName === 'administradora' ||
-      roleName.includes('admin');
-
-    if (isAdminRole) {
-      this.router.navigate(['/admin']);
-      return;
-    }
-
-    // 3. Veterinarios
-    if (roleName === 'veterinario' || roleName === 'veterinaria' || roleName === 'doctor') {
-      this.router.navigate(['/veterinario']);
-      return;
-    }
-
-    // 4. Usuarios estándar
-    if (roleName === 'usuario' || roleName === 'cliente') {
-      this.router.navigate(['/inicio']);
-      return;
-    }
-
-    // 4. Fallback por módulos si no se detectó por nombre de rol
-    const hasAdminAccess = userModules.includes('dashboard') || userModules.includes('panel-admin');
-
-    if (hasAdminAccess) {
-      this.router.navigate(['/admin']);
-    } else if (userModules.includes('inicio')) {
-      this.router.navigate(['/inicio']);
-    } else if (userModules.length > 0) {
-      this.router.navigate([`/${userModules[0]}`]);
+    // Fallback: Primer módulo disponible
+    if (userModules.length > 0) {
+      const target = userModules[0] === 'super-admin' ? 'inicio' : userModules[0];
+      this.router.navigate([`/${target}`]);
     } else {
       this.router.navigate(['/login']);
     }

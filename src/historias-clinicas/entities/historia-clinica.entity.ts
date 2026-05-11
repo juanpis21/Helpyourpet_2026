@@ -1,63 +1,45 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn, CreateDateColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
 import { Pet } from '../../pets/entities/pet.entity';
-import { Role } from '../../roles/entities/role.entity';
-import { Veterinaria } from '../../veterinarias/entities/veterinaria.entity';
-import { User } from '../../users/entities/user.entity';
 
 @Entity('historias_clinicas')
 export class HistoriaClinica {
   @ApiProperty({ description: 'ID de la Historia Clínica', example: 1 })
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: 'id_historia' })
   id: number;
 
-  @ApiProperty({ description: 'Diagnóstico general médico', example: 'Paciente sano, controles al día.' })
-  @Column({ type: 'text', nullable: true })
-  diagnostico: string;
-
-  @ApiProperty({ description: 'Historial de tratamientos activos o pasados' })
-  @Column({ type: 'text', nullable: true })
-  tratamiento: string;
-
-  @ApiProperty({ description: 'Última fecha de actualización del expediente' })
-  @UpdateDateColumn()
-  fecha: Date;
-  
-  @ApiProperty({ description: 'Fecha de apertura del expediente' })
-  @CreateDateColumn()
-  createdAt: Date;
-
-  // RELACIONES ---
-
-  @ApiProperty({ description: 'El paciente (mascota). Solo 1 paciente puede tener 1 historia.' })
-  @Column({ name: 'mascotaId', unique: true })
+  @ApiProperty({ description: 'ID de la mascota', example: 1 })
+  @Column({ name: 'id_mascota', unique: true })
   mascotaId: number;
 
-  @OneToOne(() => Pet, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'mascotaId' })
+  @ManyToOne(() => Pet, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'id_mascota' })
   mascota: Pet;
 
-  @ApiProperty({ description: 'El último Veterinario que modificó este registro' })
-  @Column({ name: 'veterinarioId' })
-  veterinarioId: number;
+  @ApiProperty({ description: 'Alergias conocidas', example: 'Alérgica al amoxiland' })
+  @Column({ type: 'text', nullable: true })
+  alergias: string;
 
-  @ManyToOne(() => Role)
-  @JoinColumn({ name: 'veterinarioId' })
-  veterinario: Role;
+  @ApiProperty({ description: 'Antecedentes médicos', example: 'Cirugía de cadera 2024' })
+  @Column({ type: 'text', nullable: true })
+  antecedentes: string;
 
-  @ApiProperty({ description: 'Clínica responsable del expediente' })
-  @Column({ name: 'veterinariaId' })
-  veterinariaId: number;
+  @ApiProperty({ description: 'Vacunas aplicadas', example: 'Rabia, Parvovirus, Moquillo' })
+  @Column({ type: 'text', nullable: true })
+  vacunas: string;
 
-  @ManyToOne(() => Veterinaria)
-  @JoinColumn({ name: 'veterinariaId' })
-  veterinaria: Veterinaria;
+  @ApiProperty({ description: '¿Está esterilizado/a?', example: false })
+  @Column({ type: 'boolean', default: false })
+  esterilizado: boolean;
 
-  @ApiProperty({ description: 'Dueño de la mascota en el momento del registro' })
-  @Column({ name: 'usuarioId' })
-  usuarioId: number;
+  @ApiProperty({ description: 'Observaciones generales', example: 'Paciente tranquilo' })
+  @Column({ type: 'text', nullable: true })
+  observaciones_generales: string;
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'usuarioId' })
-  usuario: User;
+  @ApiProperty({ description: 'Fecha de apertura del expediente' })
+  @CreateDateColumn({ name: 'fecha_apertura', type: 'date' })
+  fechaApertura: Date;
+
+  @OneToMany('ConsultaMedica', 'historiaClinica')
+  consultas: any[];
 }

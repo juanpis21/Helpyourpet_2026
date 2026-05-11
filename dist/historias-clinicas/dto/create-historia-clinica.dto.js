@@ -12,43 +12,45 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateHistoriaClinicaDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 class CreateHistoriaClinicaDto {
 }
 exports.CreateHistoriaClinicaDto = CreateHistoriaClinicaDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 1, description: 'ID de la mascota (Paciente)' }),
+    (0, swagger_1.ApiProperty)({ example: 1, description: 'ID de la mascota' }),
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.IsNotEmpty)(),
+    (0, class_transformer_1.Transform)(({ value }) => Number(value)),
     __metadata("design:type", Number)
 ], CreateHistoriaClinicaDto.prototype, "mascotaId", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 4, description: 'ID del Veterinario responsable de la apertura' }),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    __metadata("design:type", Number)
-], CreateHistoriaClinicaDto.prototype, "veterinarioId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 1, description: 'ID de la veterinaria' }),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    __metadata("design:type", Number)
-], CreateHistoriaClinicaDto.prototype, "veterinariaId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 2, description: 'ID del dueño de la mascota' }),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    __metadata("design:type", Number)
-], CreateHistoriaClinicaDto.prototype, "usuarioId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 'Sano. Primera revisión de cachorro. Sin anomalías.' }),
+    (0, swagger_1.ApiProperty)({ example: 'Polen, amoxiciland', required: false }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
-], CreateHistoriaClinicaDto.prototype, "diagnostico", void 0);
+], CreateHistoriaClinicaDto.prototype, "alergias", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'Desparasitación estándar (Drontal).' }),
+    (0, swagger_1.ApiProperty)({ example: 'Cirugía de cadera 2024', required: false }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
-], CreateHistoriaClinicaDto.prototype, "tratamiento", void 0);
+], CreateHistoriaClinicaDto.prototype, "antecedentes", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Rabia 2025, Parvovirus 2025', required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateHistoriaClinicaDto.prototype, "vacunas", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: false, required: false }),
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], CreateHistoriaClinicaDto.prototype, "esterilizado", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Paciente dócil, sin problemas de comportamiento', required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateHistoriaClinicaDto.prototype, "observaciones_generales", void 0);
 //# sourceMappingURL=create-historia-clinica.dto.js.map

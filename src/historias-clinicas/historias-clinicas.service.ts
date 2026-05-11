@@ -1,109 +1,106 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { HistoriaClinica } from './entities/historia-clinica.entity';
+import { ConsultaMedica } from './entities/consulta-medica.entity';
 import { CreateHistoriaClinicaDto } from './dto/create-historia-clinica.dto';
 import { UpdateHistoriaClinicaDto } from './dto/update-historia-clinica.dto';
+import { CreateConsultaMedicaDto } from './dto/create-consulta-medica.dto';
 import { PetsService } from '../pets/pets.service';
-import { RolesService } from '../roles/roles.service';
-import { VeterinariasService } from '../veterinarias/veterinarias.service';
-import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class HistoriasClinicasService {
   constructor(
     @InjectRepository(HistoriaClinica)
-    private historiaClinicaRepository: Repository<HistoriaClinica>,
+    private historiaRepo: Repository<HistoriaClinica>,
+    @InjectRepository(ConsultaMedica)
+    private consultaRepo: Repository<ConsultaMedica>,
     private petsService: PetsService,
-    private rolesService: RolesService,
-    private veterinariasService: VeterinariasService,
-    private usersService: UsersService,
   ) {}
 
-  async create(createDto: CreateHistoriaClinicaDto): Promise<HistoriaClinica> {
-    // 1. Verificación Fuerte: ¿Esta mascota ya tiene un expediente OneToOne?
-    const existing = await this.historiaClinicaRepository.findOne({
-      where: { mascotaId: createDto.mascotaId }
+  // ─── HISTORIA CLÍNICA ────────────────────────────────────────────────────────
+
+  async findOrCreateByMascota(mascotaId: number): Promise<HistoriaClinica> {
+    const existing = await this.historiaRepo.findOne({
+      where: { mascotaId },
+      relations: ['mascota', 'mascota.owner', 'consultas'],
     });
+    if (existing) return existing;
 
-    if (existing) {
-      throw new ConflictException(`La mascota con ID ${createDto.mascotaId} ya posee una Historia Clínica. Actualice el fólder existente.`);
-    }
+    // Verificar que la mascota exista
+    await this.petsService.findOne(mascotaId);
 
-    // 2. Validar relaciones foráneas
-    await this.petsService.findOne(createDto.mascotaId);
-    await this.rolesService.findOne(createDto.veterinarioId);
-    await this.veterinariasService.findOne(createDto.veterinariaId);
-    await this.usersService.findOne(createDto.usuarioId);
+    const nueva = this.historiaRepo.create({ mascotaId });
+    return this.historiaRepo.save(nueva);
+  }
 
-    const nuevaHistoria = this.historiaClinicaRepository.create(createDto);
-    return this.historiaClinicaRepository.save(nuevaHistoria);
+  async findByMascota(mascotaId: number): Promise<HistoriaClinica | null> {
+    return this.historiaRepo.findOne({
+      where: { mascotaId },
+      relations: ['mascota', 'mascota.owner', 'consultas'],
+      order: { fechaApertura: 'DESC' } as any,
+    });
+  }
+
+  async create(dto: CreateHistoriaClinicaDto): Promise<HistoriaClinica> {
+    await this.petsService.findOne(dto.mascotaId);
+    const historia = this.historiaRepo.create(dto);
+    return this.historiaRepo.save(historia);
   }
 
   async findAll(): Promise<HistoriaClinica[]> {
-    return this.historiaClinicaRepository.find({
-      relations: ['mascota', 'veterinario', 'veterinaria', 'usuario'],
-      order: { fecha: 'DESC' }
+    return this.historiaRepo.find({
+      relations: ['mascota', 'mascota.owner', 'consultas'],
+      order: { fechaApertura: 'DESC' } as any,
     });
   }
 
   async findOne(id: number): Promise<HistoriaClinica> {
-    const historia = await this.historiaClinicaRepository.findOne({
+    const historia = await this.historiaRepo.findOne({
       where: { id },
-      relations: ['mascota', 'veterinario', 'veterinaria', 'usuario']
+      relations: ['mascota', 'mascota.owner', 'consultas'],
     });
-
     if (!historia) {
-      throw new NotFoundException(`El expediente maestro con ID ${id} no existe.`);
+      throw new NotFoundException(`Historia clínica con ID ${id} no encontrada.`);
     }
     return historia;
   }
 
-  async findByMascota(mascotaId: number): Promise<HistoriaClinica> {
-    const historia = await this.historiaClinicaRepository.findOne({
-      where: { mascotaId },
-      relations: ['veterinario', 'veterinaria', 'usuario']
-    });
-
-    if (!historia) {
-      throw new NotFoundException(`Aún no se ha aperturado un expediente maestro para el paciente ID ${mascotaId}`);
-    }
-    return historia;
-  }
-
-  async update(id: number, updateDto: UpdateHistoriaClinicaDto): Promise<HistoriaClinica> {
+  async update(id: number, dto: UpdateHistoriaClinicaDto): Promise<HistoriaClinica> {
     const historia = await this.findOne(id);
-
-    // Si cambian de veterinario o veterinaria y es distinto al de base, validamos
-    if (updateDto.veterinarioId && updateDto.veterinarioId !== historia.veterinarioId) {
-      await this.rolesService.findOne(updateDto.veterinarioId);
-      historia.veterinarioId = updateDto.veterinarioId;
-    }
-    if (updateDto.veterinariaId && updateDto.veterinariaId !== historia.veterinariaId) {
-      await this.veterinariasService.findOne(updateDto.veterinariaId);
-      historia.veterinariaId = updateDto.veterinariaId;
-    }
-
-    // Lógica inteligente para Diagnósticos y Tratamientos acumulativos
-    if (updateDto.appendMode) {
-      const ts = new Date().toLocaleDateString('es-ES');
-      if (updateDto.diagnostico) {
-         historia.diagnostico = (historia.diagnostico ? historia.diagnostico + '\n\n' : '') + `[${ts}] ` + updateDto.diagnostico;
-      }
-      if (updateDto.tratamiento) {
-         historia.tratamiento = (historia.tratamiento ? historia.tratamiento + '\n\n' : '') + `[${ts}] ` + updateDto.tratamiento;
-      }
-    } else {
-      // Reemplazo normal
-      if (updateDto.diagnostico !== undefined) historia.diagnostico = updateDto.diagnostico;
-      if (updateDto.tratamiento !== undefined) historia.tratamiento = updateDto.tratamiento;
-    }
-
-    return this.historiaClinicaRepository.save(historia);
+    Object.assign(historia, dto);
+    return this.historiaRepo.save(historia);
   }
 
   async remove(id: number): Promise<void> {
     const historia = await this.findOne(id);
-    await this.historiaClinicaRepository.delete(historia.id); // Usamos delete para mejor performance
+    await this.historiaRepo.delete(historia.id);
+  }
+
+  // ─── CONSULTAS MÉDICAS ───────────────────────────────────────────────────────
+
+  async createConsulta(dto: CreateConsultaMedicaDto): Promise<ConsultaMedica> {
+    // Asegurar que la historia existe
+    await this.findOne(dto.historiaId);
+    const consulta = this.consultaRepo.create(dto);
+    return this.consultaRepo.save(consulta);
+  }
+
+  async findConsultasByHistoria(historiaId: number): Promise<ConsultaMedica[]> {
+    return this.consultaRepo.find({
+      where: { historiaId },
+      order: { fechaConsulta: 'DESC' },
+    });
+  }
+
+  async findOneConsulta(id: number): Promise<ConsultaMedica> {
+    const consulta = await this.consultaRepo.findOne({ where: { id } });
+    if (!consulta) throw new NotFoundException(`Consulta con ID ${id} no encontrada.`);
+    return consulta;
+  }
+
+  async removeConsulta(id: number): Promise<void> {
+    await this.findOneConsulta(id);
+    await this.consultaRepo.delete(id);
   }
 }

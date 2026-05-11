@@ -1,8 +1,8 @@
 export declare class CreateHistoriaClinicaDto {
     mascotaId: number;
-    veterinarioId: number;
-    veterinariaId: number;
-    usuarioId: number;
-    diagnostico?: string;
-    tratamiento?: string;
+    alergias?: string;
+    antecedentes?: string;
+    vacunas?: string;
+    esterilizado?: boolean;
+    observaciones_generales?: string;
 }

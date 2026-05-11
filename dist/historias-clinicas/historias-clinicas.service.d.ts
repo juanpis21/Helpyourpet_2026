@@ -1,22 +1,24 @@
 import { Repository } from 'typeorm';
 import { HistoriaClinica } from './entities/historia-clinica.entity';
+import { ConsultaMedica } from './entities/consulta-medica.entity';
 import { CreateHistoriaClinicaDto } from './dto/create-historia-clinica.dto';
 import { UpdateHistoriaClinicaDto } from './dto/update-historia-clinica.dto';
+import { CreateConsultaMedicaDto } from './dto/create-consulta-medica.dto';
 import { PetsService } from '../pets/pets.service';
-import { RolesService } from '../roles/roles.service';
-import { VeterinariasService } from '../veterinarias/veterinarias.service';
-import { UsersService } from '../users/users.service';
 export declare class HistoriasClinicasService {
-    private historiaClinicaRepository;
+    private historiaRepo;
+    private consultaRepo;
     private petsService;
-    private rolesService;
-    private veterinariasService;
-    private usersService;
-    constructor(historiaClinicaRepository: Repository<HistoriaClinica>, petsService: PetsService, rolesService: RolesService, veterinariasService: VeterinariasService, usersService: UsersService);
-    create(createDto: CreateHistoriaClinicaDto): Promise<HistoriaClinica>;
+    constructor(historiaRepo: Repository<HistoriaClinica>, consultaRepo: Repository<ConsultaMedica>, petsService: PetsService);
+    findOrCreateByMascota(mascotaId: number): Promise<HistoriaClinica>;
+    findByMascota(mascotaId: number): Promise<HistoriaClinica | null>;
+    create(dto: CreateHistoriaClinicaDto): Promise<HistoriaClinica>;
     findAll(): Promise<HistoriaClinica[]>;
     findOne(id: number): Promise<HistoriaClinica>;
-    findByMascota(mascotaId: number): Promise<HistoriaClinica>;
-    update(id: number, updateDto: UpdateHistoriaClinicaDto): Promise<HistoriaClinica>;
+    update(id: number, dto: UpdateHistoriaClinicaDto): Promise<HistoriaClinica>;
     remove(id: number): Promise<void>;
+    createConsulta(dto: CreateConsultaMedicaDto): Promise<ConsultaMedica>;
+    findConsultasByHistoria(historiaId: number): Promise<ConsultaMedica[]>;
+    findOneConsulta(id: number): Promise<ConsultaMedica>;
+    removeConsulta(id: number): Promise<void>;
 }

@@ -45,6 +45,7 @@ import { EventosModule } from './eventos/eventos.module';
 import { Evento } from './eventos/entities/evento.entity';
 import { HistoriasClinicasModule } from './historias-clinicas/historias-clinicas.module';
 import { HistoriaClinica } from './historias-clinicas/entities/historia-clinica.entity';
+import { ConsultaMedica } from './historias-clinicas/entities/consulta-medica.entity';
 import { ReportesMaltratoModule } from './reportes-maltrato/reportes-maltrato.module';
 import { ReporteMaltrato } from './reportes-maltrato/entities/reporte-maltrato.entity';
 import { TokenRecuperacionModule } from './token-recuperacion/token-recuperacion.module';
@@ -75,7 +76,7 @@ import { MonitoringModule } from './monitoring/monitoring.module';
         username: configService.get<string>('database.username'),
         password: configService.get<string>('database.password'),
         database: configService.get<string>('database.database'),
-        entities: [User, Role, Pet, Veterinaria, Cita, PerfilVeterinario, Emergencia, HistorialCita, Producto, Categoria, MovimientoInventario, Proveedor, Servicio, Calificacion, Carrito, CarritoProducto, Venta, DetalleVenta, Notificacion, Evento, HistoriaClinica, ReporteMaltrato, TokenRecuperacion, Publicacion, Permission, ModuleEntity],
+        entities: [User, Role, Pet, Veterinaria, Cita, PerfilVeterinario, Emergencia, HistorialCita, Producto, Categoria, MovimientoInventario, Proveedor, Servicio, Calificacion, Carrito, CarritoProducto, Venta, DetalleVenta, Notificacion, Evento, HistoriaClinica, ConsultaMedica, ReporteMaltrato, TokenRecuperacion, Publicacion, Permission, ModuleEntity],
         synchronize: configService.get<boolean>('database.synchronize'),
         logging: configService.get<boolean>('database.logging'),
       }),

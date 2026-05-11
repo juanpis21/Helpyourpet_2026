@@ -1,9 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany, OneToOne } from 'typeorm';
+import { Column, Entity, ManyToMany, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany, OneToOne, ManyToOne, JoinColumn } from 'typeorm';
 import { Pet } from '../../pets/entities/pet.entity';
 import { PerfilVeterinario } from '../../perfiles-veterinarios/entities/perfil-veterinario.entity';
 import { Emergencia } from '../../emergencias/entities/emergencia.entity';
 import { Producto } from '../../productos/entities/producto.entity';
+import { User } from '../../users/entities/user.entity';
 
 @Entity('veterinarias')
 export class Veterinaria {
@@ -79,6 +80,18 @@ export class Veterinaria {
   })
   @Column({ default: true })
   isActive: boolean;
+
+  @ApiProperty({ 
+    description: 'ID del administrador asociado a la veterinaria', 
+    example: 1,
+    required: false
+  })
+  @Column({ nullable: true })
+  adminId: number;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: 'adminId' })
+  admin: User;
 
   @ApiProperty({ 
     description: 'Fecha de creación del registro', 

@@ -6,4 +6,5 @@ export declare class UpdateVeterinariaDto {
     rut?: string;
     descripcion?: string;
     isActive?: boolean;
+    adminId?: number;
 }

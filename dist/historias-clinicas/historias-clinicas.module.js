@@ -12,25 +12,20 @@ const typeorm_1 = require("@nestjs/typeorm");
 const historias_clinicas_service_1 = require("./historias-clinicas.service");
 const historias_clinicas_controller_1 = require("./historias-clinicas.controller");
 const historia_clinica_entity_1 = require("./entities/historia-clinica.entity");
+const consulta_medica_entity_1 = require("./entities/consulta-medica.entity");
 const pets_module_1 = require("../pets/pets.module");
-const roles_module_1 = require("../roles/roles.module");
-const veterinarias_module_1 = require("../veterinarias/veterinarias.module");
-const users_module_1 = require("../users/users.module");
 let HistoriasClinicasModule = class HistoriasClinicasModule {
 };
 exports.HistoriasClinicasModule = HistoriasClinicasModule;
 exports.HistoriasClinicasModule = HistoriasClinicasModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([historia_clinica_entity_1.HistoriaClinica]),
+            typeorm_1.TypeOrmModule.forFeature([historia_clinica_entity_1.HistoriaClinica, consulta_medica_entity_1.ConsultaMedica]),
             pets_module_1.PetsModule,
-            roles_module_1.RolesModule,
-            veterinarias_module_1.VeterinariasModule,
-            users_module_1.UsersModule
         ],
         controllers: [historias_clinicas_controller_1.HistoriasClinicasController],
         providers: [historias_clinicas_service_1.HistoriasClinicasService],
-        exports: [historias_clinicas_service_1.HistoriasClinicasService]
+        exports: [historias_clinicas_service_1.HistoriasClinicasService],
     })
 ], HistoriasClinicasModule);
 //# sourceMappingURL=historias-clinicas.module.js.map

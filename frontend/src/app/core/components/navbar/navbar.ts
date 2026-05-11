@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ThemeService } from '../../services/theme.service';
@@ -17,6 +17,8 @@ export class Navbar implements OnInit {
   modoOscuro = false;
   usuarioLogueado: any = null;
   showScrollTop = false;
+
+  public userModules = inject(AuthService).userModules;
 
   constructor(
     private themeService: ThemeService,
@@ -37,12 +39,16 @@ export class Navbar implements OnInit {
     if (user) {
       this.usuarioLogueado = {
         id: user.id,
-        roleId: user.roleId,
+        roleId: Number(user.roleId || user.role?.id),
         nombre: user.fullName || user.username || 'Usuario',
         email: user.email,
         avatar: user.avatar || 'assets/images/Default.png'
       };
     }
+  }
+
+  hasAccess(module: string): boolean {
+    return this.userModules().includes(module.toLowerCase());
   }
 
   toggleMenu(event: Event) {
@@ -71,12 +77,16 @@ export class Navbar implements OnInit {
     return this.router.url === '/inicio';
   }
 
+  get isVeterinario(): boolean {
+    return this.usuarioLogueado?.roleId === 3;
+  }
+
   irAInicio() {
     this.router.navigate(['/inicio']);
   }
 
   irAPerfil() {
-    if (this.usuarioLogueado?.roleId === 3) {
+    if (this.hasAccess('veterinario')) {
       this.router.navigate(['/veterinario']);
     } else {
       this.router.navigate(['/perfil-usuario']);

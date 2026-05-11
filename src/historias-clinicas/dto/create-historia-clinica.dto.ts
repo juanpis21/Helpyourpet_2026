@@ -1,36 +1,36 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class CreateHistoriaClinicaDto {
-  @ApiProperty({ example: 1, description: 'ID de la mascota (Paciente)' })
+  @ApiProperty({ example: 1, description: 'ID de la mascota' })
   @IsNumber()
   @IsNotEmpty()
+  @Transform(({ value }) => Number(value))
   mascotaId: number;
 
-  @ApiProperty({ example: 4, description: 'ID del Veterinario responsable de la apertura' })
-  @IsNumber()
-  @IsNotEmpty()
-  veterinarioId: number;
-
-  @ApiProperty({ example: 1, description: 'ID de la veterinaria' })
-  @IsNumber()
-  @IsNotEmpty()
-  veterinariaId: number;
-
-  // El sistema derivaría el usuarioId automáticamente leyendo a quién le pertenece la mascota, 
-  // pero lo exponemos en DTO por si un Admin lo ingresa forzadamente.
-  @ApiProperty({ example: 2, description: 'ID del dueño de la mascota' })
-  @IsNumber()
-  @IsNotEmpty()
-  usuarioId: number;
-
-  @ApiProperty({ example: 'Sano. Primera revisión de cachorro. Sin anomalías.' })
+  @ApiProperty({ example: 'Polen, amoxiciland', required: false })
   @IsString()
   @IsOptional()
-  diagnostico?: string;
+  alergias?: string;
 
-  @ApiProperty({ example: 'Desparasitación estándar (Drontal).' })
+  @ApiProperty({ example: 'Cirugía de cadera 2024', required: false })
   @IsString()
   @IsOptional()
-  tratamiento?: string;
+  antecedentes?: string;
+
+  @ApiProperty({ example: 'Rabia 2025, Parvovirus 2025', required: false })
+  @IsString()
+  @IsOptional()
+  vacunas?: string;
+
+  @ApiProperty({ example: false, required: false })
+  @IsBoolean()
+  @IsOptional()
+  esterilizado?: boolean;
+
+  @ApiProperty({ example: 'Paciente dócil, sin problemas de comportamiento', required: false })
+  @IsString()
+  @IsOptional()
+  observaciones_generales?: string;
 }

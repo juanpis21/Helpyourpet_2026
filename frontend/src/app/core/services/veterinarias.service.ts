@@ -11,6 +11,8 @@ export interface Veterinaria {
   rut: string;
   descripcion?: string;
   isActive: boolean;
+  adminId?: number;
+  admin?: any;
   createdAt?: string;
   updatedAt?: string;
 }

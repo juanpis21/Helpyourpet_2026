@@ -40,6 +40,11 @@
         </a>
       </li>
       <li>
+        <a [class.active]="activeSection === 'historias'" (click)="setSection('historias')">
+          <i class="fas fa-notes-medical"></i><span>Historias Clínicas</span>
+        </a>
+      </li>
+      <li>
         <a [class.active]="activeSection === 'configuracion'" (click)="setSection('configuracion')">
           <i class="fas fa-cog"></i><span>Configuración</span>
         </a>
@@ -397,6 +402,209 @@
         </div>
       </div>
     </section>
+
+    <!-- ===== HISTORIAS CLÍNICAS ===== -->
+    <section *ngIf="activeSection === 'historias'" class="content-section animate-in">
+      <div class="section-header">
+        <h1><i class="fas fa-notes-medical"></i> Historias Clínicas</h1>
+        <div class="header-actions">
+          <button class="menu-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="theme-btn" (click)="toggleDarkMode()">
+            <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
+          <button class="home-btn" (click)="irAInicio()"><i class="fas fa-home"></i></button>
+        </div>
+      </div>
+
+      <!-- PASO 1: Selección de Dueño y Mascota -->
+      <div class="card hc-selector-card" *ngIf="!historiaActual">
+        <div class="card-header"><h5><i class="fas fa-search"></i> Buscar Paciente</h5></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label><i class="fas fa-user"></i> Seleccionar Dueño</label>
+              <select [(ngModel)]="hcSelectedOwnerId" (change)="onOwnerChange()">
+                <option [ngValue]="null">-- Seleccione un dueño --</option>
+                <option *ngFor="let u of usuarios" [ngValue]="u.id">
+                  {{ u.firstName }} {{ u.lastName }}
+                </option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-paw"></i> Seleccionar Mascota</label>
+              <select [(ngModel)]="hcSelectedPetId" [disabled]="!hcMascotasFiltradas.length">
+                <option [ngValue]="null">-- Seleccione una mascota --</option>
+                <option *ngFor="let m of hcMascotasFiltradas" [ngValue]="m.id">
+                  {{ m.name }} ({{ m.species }})
+                </option>
+              </select>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn-primary" (click)="abrirHistoriaClinica()" [disabled]="!hcSelectedPetId">
+              <i class="fas fa-folder-open"></i> Abrir Historia Clínica
+            </button>
+          </div>
+          <div *ngIf="hcLoading" class="hc-loading">
+            <i class="fas fa-spinner fa-spin"></i> Cargando...
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 2-3: Vista de la Historia Clínica (hoja médica) -->
+      <div *ngIf="historiaActual" class="hc-container">
+
+        <!-- Barra de acciones -->
+        <div class="hc-topbar">
+          <button class="btn-secondary" (click)="cerrarHistoria()">
+            <i class="fas fa-arrow-left"></i> Volver
+          </button>
+          <div class="hc-topbar-title">
+            <i class="fas fa-paw"></i>
+            <strong>{{ historiaActual.mascota?.name }}</strong>
+            <span class="badge-especie">{{ historiaActual.mascota?.species }}</span>
+          </div>
+          <button class="btn-primary" (click)="showNuevaConsultaModal = true">
+            <i class="fas fa-plus-circle"></i> Nueva Consulta
+          </button>
+        </div>
+
+        <!-- Hoja clínica — datos fijos -->
+        <div class="hc-sheet">
+          <div class="hc-sheet-header">
+            <div class="hc-sheet-logo"><i class="fas fa-heartbeat"></i></div>
+            <div class="hc-sheet-title-block">
+              <h2>Historia Clínica Veterinaria</h2>
+              <p>HelpYourPet · Expediente #{{ historiaActual.id }}</p>
+            </div>
+            <div class="hc-sheet-fecha">
+              Apertura: {{ historiaActual.fechaApertura | date:'dd/MM/yyyy' }}
+            </div>
+          </div>
+
+          <!-- Datos del paciente -->
+          <div class="hc-patient-banner">
+            <div class="hc-patient-img">
+              <img [src]="historiaActual.mascota?.foto ? (API_BASE + historiaActual.mascota.foto) : 'assets/images/Default.png'"
+                   alt="Foto mascota">
+            </div>
+            <div class="hc-patient-info">
+              <h3>{{ historiaActual.mascota?.name }}</h3>
+              <div class="hc-info-grid">
+                <span><strong>Especie:</strong> {{ historiaActual.mascota?.species }}</span>
+                <span><strong>Raza:</strong> {{ historiaActual.mascota?.breed }}</span>
+                <span><strong>Edad:</strong> {{ historiaActual.mascota?.age }} años</span>
+                <span><strong>Género:</strong> {{ historiaActual.mascota?.gender === 'F' ? 'Hembra' : 'Macho' }}</span>
+                <span><strong>Color:</strong> {{ historiaActual.mascota?.color }}</span>
+                <span><strong>Dueño:</strong> {{ historiaActual.mascota?.owner?.firstName }} {{ historiaActual.mascota?.owner?.lastName }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Datos médicos fijos (editables) -->
+          <div class="hc-fixed-data">
+            <div class="hc-fixed-row">
+              <div class="hc-fixed-field" [class.editing]="hcEditando">
+                <label><i class="fas fa-allergies"></i> Alergias</label>
+                <p *ngIf="!hcEditando">{{ historiaActual.alergias || 'No registradas' }}</p>
+                <textarea *ngIf="hcEditando" [(ngModel)]="hcEditForm.alergias" rows="2"></textarea>
+              </div>
+              <div class="hc-fixed-field" [class.editing]="hcEditando">
+                <label><i class="fas fa-history"></i> Antecedentes</label>
+                <p *ngIf="!hcEditando">{{ historiaActual.antecedentes || 'Sin antecedentes' }}</p>
+                <textarea *ngIf="hcEditando" [(ngModel)]="hcEditForm.antecedentes" rows="2"></textarea>
+              </div>
+              <div class="hc-fixed-field" [class.editing]="hcEditando">
+                <label><i class="fas fa-syringe"></i> Vacunas</label>
+                <p *ngIf="!hcEditando">{{ historiaActual.vacunas || 'Sin registro' }}</p>
+                <textarea *ngIf="hcEditando" [(ngModel)]="hcEditForm.vacunas" rows="2"></textarea>
+              </div>
+              <div class="hc-fixed-field small" [class.editing]="hcEditando">
+                <label><i class="fas fa-cut"></i> Esterilizado/a</label>
+                <span *ngIf="!hcEditando" class="status-pill" [class.active]="historiaActual.esterilizado" [class.inactive]="!historiaActual.esterilizado">
+                  {{ historiaActual.esterilizado ? 'Sí' : 'No' }}
+                </span>
+                <select *ngIf="hcEditando" [(ngModel)]="hcEditForm.esterilizado">
+                  <option [ngValue]="true">Sí</option>
+                  <option [ngValue]="false">No</option>
+                </select>
+              </div>
+            </div>
+            <div class="hc-fixed-field full" [class.editing]="hcEditando">
+              <label><i class="fas fa-clipboard"></i> Observaciones Generales</label>
+              <p *ngIf="!hcEditando">{{ historiaActual.observaciones_generales || 'Sin observaciones' }}</p>
+              <textarea *ngIf="hcEditando" [(ngModel)]="hcEditForm.observaciones_generales" rows="3"></textarea>
+            </div>
+            <div class="hc-edit-actions">
+              <button *ngIf="!hcEditando" class="btn-outline small" (click)="iniciarEdicionHistoria()">
+                <i class="fas fa-pencil-alt"></i> Editar datos fijos
+              </button>
+              <ng-container *ngIf="hcEditando">
+                <button class="btn-primary small-btn" (click)="guardarEdicionHistoria()">
+                  <i class="fas fa-save"></i> Guardar
+                </button>
+                <button class="btn-secondary small-btn" (click)="hcEditando = false">
+                  Cancelar
+                </button>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+
+        <!-- PASO 4: Listado cronológico de consultas -->
+        <div class="hc-consultas-section">
+          <h3 class="hc-consultas-title">
+            <i class="fas fa-book-medical"></i> Consultas Médicas
+            <span class="badge-count">{{ consultasActuales.length }}</span>
+          </h3>
+
+          <div *ngIf="consultasActuales.length === 0" class="empty-state">
+            <i class="fas fa-stethoscope"></i>
+            <p>Aún no hay consultas registradas. Presiona <strong>Nueva Consulta</strong> para comenzar.</p>
+          </div>
+
+          <div class="hc-consulta-card" *ngFor="let c of consultasActuales; let i = index">
+            <div class="hc-consulta-header">
+              <span class="hc-consulta-num">Consulta #{{ consultasActuales.length - i }}</span>
+              <span class="hc-consulta-date"><i class="fas fa-calendar-alt"></i> {{ c.fechaConsulta | date:'dd/MM/yyyy HH:mm' }}</span>
+              <button class="btn-icon-danger" (click)="eliminarConsulta(c.id)" title="Eliminar consulta">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+            <div class="hc-consulta-body">
+              <div class="hc-consulta-vitals">
+                <span *ngIf="c.peso"><i class="fas fa-weight"></i> {{ c.peso }} kg</span>
+                <span *ngIf="c.temperatura"><i class="fas fa-thermometer-half"></i> {{ c.temperatura }} °C</span>
+              </div>
+              <div class="hc-consulta-grid">
+                <div class="hc-consulta-field" *ngIf="c.motivoConsulta">
+                  <label>Motivo</label><p>{{ c.motivoConsulta }}</p>
+                </div>
+                <div class="hc-consulta-field" *ngIf="c.sintomas">
+                  <label>Síntomas</label><p>{{ c.sintomas }}</p>
+                </div>
+                <div class="hc-consulta-field" *ngIf="c.diagnostico">
+                  <label>Diagnóstico</label><p>{{ c.diagnostico }}</p>
+                </div>
+                <div class="hc-consulta-field" *ngIf="c.tratamiento">
+                  <label>Tratamiento</label><p>{{ c.tratamiento }}</p>
+                </div>
+                <div class="hc-consulta-field" *ngIf="c.medicamentos">
+                  <label>Medicamentos</label><p>{{ c.medicamentos }}</p>
+                </div>
+                <div class="hc-consulta-field" *ngIf="c.observaciones">
+                  <label>Observaciones</label><p>{{ c.observaciones }}</p>
+                </div>
+                <div class="hc-consulta-field" *ngIf="c.proximaCita">
+                  <label><i class="fas fa-calendar-check"></i> Próxima cita</label>
+                  <p class="proxima-cita-badge">{{ c.proximaCita | date:'dd/MM/yyyy' }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 </div>
 
@@ -679,3 +887,68 @@
     </div>
   </div>
 </div>
+
+<!-- MODAL NUEVA CONSULTA MÉDICA -->
+<div class="modal-overlay" *ngIf="showNuevaConsultaModal" (click)="showNuevaConsultaModal = false">
+  <div class="modal-box modal-consulta" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3><i class="fas fa-stethoscope"></i> Nueva Consulta Médica</h3>
+      <button class="close-btn" (click)="showNuevaConsultaModal = false">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="consulta-paciente-info">
+        <i class="fas fa-paw"></i>
+        <strong>{{ historiaActual?.mascota?.name }}</strong>
+        <span>{{ historiaActual?.mascota?.species }}</span>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label><i class="fas fa-calendar-alt"></i> Fecha y Hora</label>
+          <input type="datetime-local" [(ngModel)]="nuevaConsulta.fechaConsulta">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-weight"></i> Peso (kg)</label>
+          <input type="number" [(ngModel)]="nuevaConsulta.peso" step="0.1" min="0" placeholder="Ej: 12.5">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-thermometer-half"></i> Temperatura (°C)</label>
+          <input type="number" [(ngModel)]="nuevaConsulta.temperatura" step="0.1" min="35" max="43" placeholder="Ej: 38.5">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-question-circle"></i> Motivo de Consulta</label>
+          <input type="text" [(ngModel)]="nuevaConsulta.motivoConsulta" placeholder="Ej: Control de rutina">
+        </div>
+        <div class="form-group full">
+          <label><i class="fas fa-heartbeat"></i> Síntomas</label>
+          <textarea [(ngModel)]="nuevaConsulta.sintomas" rows="2" placeholder="Describa los síntomas observados..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label><i class="fas fa-search-plus"></i> Diagnóstico</label>
+          <textarea [(ngModel)]="nuevaConsulta.diagnostico" rows="2" placeholder="Diagnóstico clínico..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label><i class="fas fa-prescription-bottle-alt"></i> Tratamiento</label>
+          <textarea [(ngModel)]="nuevaConsulta.tratamiento" rows="2" placeholder="Plan de tratamiento indicado..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label><i class="fas fa-pills"></i> Medicamentos</label>
+          <textarea [(ngModel)]="nuevaConsulta.medicamentos" rows="2" placeholder="Medicamentos recetados con dosis..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label><i class="fas fa-clipboard-check"></i> Observaciones</label>
+          <textarea [(ngModel)]="nuevaConsulta.observaciones" rows="2" placeholder="Observaciones adicionales..."></textarea>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-calendar-check"></i> Próxima Cita</label>
+          <input type="date" [(ngModel)]="nuevaConsulta.proximaCita">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="showNuevaConsultaModal = false">Cancelar</button>
+      <button class="btn-primary" (click)="guardarNuevaConsulta()">
+        <i class="fas fa-save"></i> Guardar Consulta
+      </button>
+    </div>
+  </div>
+</div>

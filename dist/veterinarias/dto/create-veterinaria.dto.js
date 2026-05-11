@@ -85,4 +85,14 @@ __decorate([
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], CreateVeterinariaDto.prototype, "isActive", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'ID del administrador asociado a la veterinaria',
+        example: 1,
+        required: false
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], CreateVeterinariaDto.prototype, "adminId", void 0);
 //# sourceMappingURL=create-veterinaria.dto.js.map

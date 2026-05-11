@@ -54,6 +54,7 @@ const eventos_module_1 = require("./eventos/eventos.module");
 const evento_entity_1 = require("./eventos/entities/evento.entity");
 const historias_clinicas_module_1 = require("./historias-clinicas/historias-clinicas.module");
 const historia_clinica_entity_1 = require("./historias-clinicas/entities/historia-clinica.entity");
+const consulta_medica_entity_1 = require("./historias-clinicas/entities/consulta-medica.entity");
 const reportes_maltrato_module_1 = require("./reportes-maltrato/reportes-maltrato.module");
 const reporte_maltrato_entity_1 = require("./reportes-maltrato/entities/reporte-maltrato.entity");
 const token_recuperacion_module_1 = require("./token-recuperacion/token-recuperacion.module");
@@ -87,7 +88,7 @@ exports.AppModule = AppModule = __decorate([
                     username: configService.get('database.username'),
                     password: configService.get('database.password'),
                     database: configService.get('database.database'),
-                    entities: [user_entity_1.User, role_entity_1.Role, pet_entity_1.Pet, veterinaria_entity_1.Veterinaria, cita_entity_1.Cita, perfil_veterinario_entity_1.PerfilVeterinario, emergencia_entity_1.Emergencia, historial_cita_entity_1.HistorialCita, producto_entity_1.Producto, categoria_entity_1.Categoria, movimiento_inventario_entity_1.MovimientoInventario, proveedor_entity_1.Proveedor, servicio_entity_1.Servicio, calificacion_entity_1.Calificacion, carrito_entity_1.Carrito, carrito_producto_entity_1.CarritoProducto, venta_entity_1.Venta, detalle_venta_entity_1.DetalleVenta, notificacion_entity_1.Notificacion, evento_entity_1.Evento, historia_clinica_entity_1.HistoriaClinica, reporte_maltrato_entity_1.ReporteMaltrato, token_recuperacion_entity_1.TokenRecuperacion, publicacion_entity_1.Publicacion, permission_entity_1.Permission, module_entity_1.Module],
+                    entities: [user_entity_1.User, role_entity_1.Role, pet_entity_1.Pet, veterinaria_entity_1.Veterinaria, cita_entity_1.Cita, perfil_veterinario_entity_1.PerfilVeterinario, emergencia_entity_1.Emergencia, historial_cita_entity_1.HistorialCita, producto_entity_1.Producto, categoria_entity_1.Categoria, movimiento_inventario_entity_1.MovimientoInventario, proveedor_entity_1.Proveedor, servicio_entity_1.Servicio, calificacion_entity_1.Calificacion, carrito_entity_1.Carrito, carrito_producto_entity_1.CarritoProducto, venta_entity_1.Venta, detalle_venta_entity_1.DetalleVenta, notificacion_entity_1.Notificacion, evento_entity_1.Evento, historia_clinica_entity_1.HistoriaClinica, consulta_medica_entity_1.ConsultaMedica, reporte_maltrato_entity_1.ReporteMaltrato, token_recuperacion_entity_1.TokenRecuperacion, publicacion_entity_1.Publicacion, permission_entity_1.Permission, module_entity_1.Module],
                     synchronize: configService.get('database.synchronize'),
                     logging: configService.get('database.logging'),
                 }),

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -59,6 +59,7 @@ export class Veterinario implements OnInit {
   private router = inject(Router);
   private themeService = inject(ThemeService);
   private publicacionesService = inject(PublicacionesService);
+  private cdr = inject(ChangeDetectorRef);
 
   activeSection: string = 'dashboard';
   sidebarOpen: boolean = true;
@@ -88,6 +89,31 @@ export class Veterinario implements OnInit {
   showAddCitaModal: boolean = false;
   showEditPetModal: boolean = false;
   showEditUserModal: boolean = false;
+
+  // ─── HISTORIAS CLÍNICAS ─────────────────────────────────────────
+  showNuevaConsultaModal: boolean = false;
+  historiaActual: any = null;
+  consultasActuales: any[] = [];
+  hcSelectedOwnerId: number | null = null;
+  hcSelectedPetId: number | null = null;
+  hcMascotasFiltradas: any[] = [];
+  hcLoading: boolean = false;
+  hcEditando: boolean = false;
+  hcEditForm: any = {};
+
+  nuevaConsulta: any = {
+    fechaConsulta: '',
+    peso: null,
+    temperatura: null,
+    motivoConsulta: '',
+    sintomas: '',
+    diagnostico: '',
+    tratamiento: '',
+    medicamentos: '',
+    observaciones: '',
+    proximaCita: ''
+  };
+  // ────────────────────────────────────────────────────────────────
   
   editingUser: any = {
     firstName: '',
@@ -575,4 +601,110 @@ export class Veterinario implements OnInit {
     this.authService.logout();
     this.router.navigate(['/login']);
   }
+
+  // ─── HISTORIAS CLÍNICAS ─────────────────────────────────────────
+
+  onOwnerChange(): void {
+    this.hcSelectedPetId = null;
+    this.hcMascotasFiltradas = this.mascotas.filter(
+      (m: any) => m.ownerId === this.hcSelectedOwnerId || m.owner?.id === this.hcSelectedOwnerId
+    );
+  }
+
+  abrirHistoriaClinica(): void {
+    if (!this.hcSelectedPetId) return;
+    this.hcLoading = true;
+    this.cdr.detectChanges();
+    const token = localStorage.getItem('access_token');
+    const headers = { Authorization: `Bearer ${token}` };
+    this.http.get<any>(`${this.API_BASE}/historias-clinicas/mascota/${this.hcSelectedPetId}`, { headers })
+      .subscribe({
+        next: (historia) => {
+          this.historiaActual = historia;
+          this.consultasActuales = historia.consultas || [];
+          this.hcLoading = false;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error cargando historia:', err);
+          this.hcLoading = false;
+          this.cdr.detectChanges();
+          alert('Error al cargar la historia clínica: ' + (err.error?.message || err.message));
+        }
+      });
+  }
+
+  cerrarHistoria(): void {
+    this.historiaActual = null;
+    this.consultasActuales = [];
+    this.hcSelectedOwnerId = null;
+    this.hcSelectedPetId = null;
+    this.hcMascotasFiltradas = [];
+    this.hcEditando = false;
+  }
+
+  iniciarEdicionHistoria(): void {
+    this.hcEditForm = {
+      alergias: this.historiaActual.alergias || '',
+      antecedentes: this.historiaActual.antecedentes || '',
+      vacunas: this.historiaActual.vacunas || '',
+      esterilizado: this.historiaActual.esterilizado ?? false,
+      observaciones_generales: this.historiaActual.observaciones_generales || ''
+    };
+    this.hcEditando = true;
+  }
+
+  guardarEdicionHistoria(): void {
+    const token = localStorage.getItem('access_token');
+    const headers = { Authorization: `Bearer ${token}` };
+    this.http.patch<any>(`${this.API_BASE}/historias-clinicas/${this.historiaActual.id}`, this.hcEditForm, { headers })
+      .subscribe({
+        next: (updated) => {
+          Object.assign(this.historiaActual, updated);
+          this.hcEditando = false;
+        },
+        error: (err) => alert('Error al guardar: ' + (err.error?.message || err.message))
+      });
+  }
+
+  guardarNuevaConsulta(): void {
+    if (!this.historiaActual) return;
+    const token = localStorage.getItem('access_token');
+    const headers = { Authorization: `Bearer ${token}` };
+    const payload = {
+      ...this.nuevaConsulta,
+      historiaId: this.historiaActual.id,
+      peso: this.nuevaConsulta.peso ? Number(this.nuevaConsulta.peso) : undefined,
+      temperatura: this.nuevaConsulta.temperatura ? Number(this.nuevaConsulta.temperatura) : undefined,
+      fechaConsulta: this.nuevaConsulta.fechaConsulta || undefined,
+      proximaCita: this.nuevaConsulta.proximaCita || undefined
+    };
+    this.http.post<any>(`${this.API_BASE}/historias-clinicas/consultas`, payload, { headers })
+      .subscribe({
+        next: (consulta) => {
+          this.consultasActuales.unshift(consulta);
+          this.showNuevaConsultaModal = false;
+          this.nuevaConsulta = {
+            fechaConsulta: '', peso: null, temperatura: null,
+            motivoConsulta: '', sintomas: '', diagnostico: '',
+            tratamiento: '', medicamentos: '', observaciones: '', proximaCita: ''
+          };
+        },
+        error: (err) => alert('Error al guardar consulta: ' + (err.error?.message || err.message))
+      });
+  }
+
+  eliminarConsulta(id: number): void {
+    if (!confirm('¿Eliminar esta consulta?')) return;
+    const token = localStorage.getItem('access_token');
+    const headers = { Authorization: `Bearer ${token}` };
+    this.http.delete(`${this.API_BASE}/historias-clinicas/consultas/${id}`, { headers })
+      .subscribe({
+        next: () => {
+          this.consultasActuales = this.consultasActuales.filter(c => c.id !== id);
+        },
+        error: (err) => alert('Error al eliminar: ' + (err.error?.message || err.message))
+      });
+  }
+  // ────────────────────────────────────────────────────────────────
 }

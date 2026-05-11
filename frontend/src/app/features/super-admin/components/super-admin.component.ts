@@ -41,6 +41,20 @@ export class SuperAdminComponent implements OnInit {
   isEditingRole: boolean = false;
   currentRole: Partial<Role> = {};
 
+  showAddVeterinariaModal: boolean = false;
+  showEditVeterinariaModal: boolean = false;
+  newVeterinaria: Partial<Veterinaria> = {
+    nombre: '',
+    direccion: '',
+    telefono: '',
+    email: '',
+    rut: '',
+    descripcion: '',
+    isActive: true,
+    adminId: undefined
+  };
+  editingVeterinaria: Partial<Veterinaria> = {};
+
   // Inject Router
   private router = inject(Router);
 
@@ -290,5 +304,66 @@ export class SuperAdminComponent implements OnInit {
         error: (err) => console.error('Error seeding modules:', err)
       });
     }
+  }
+
+  // ===== VETERINARIAS CRUD =====
+  openAddVeterinariaModal(): void {
+    this.showAddVeterinariaModal = true;
+  }
+
+  closeAddVeterinariaModal(): void {
+    this.showAddVeterinariaModal = false;
+    this.newVeterinaria = {
+      nombre: '',
+      direccion: '',
+      telefono: '',
+      email: '',
+      rut: '',
+      descripcion: '',
+      isActive: true,
+      adminId: undefined
+    };
+  }
+
+  guardarVeterinaria(): void {
+    if (!this.newVeterinaria.nombre || !this.newVeterinaria.direccion || !this.newVeterinaria.telefono || !this.newVeterinaria.email || !this.newVeterinaria.rut) {
+      alert('Por favor, completa los campos obligatorios');
+      return;
+    }
+
+    this.veterinariasService.create(this.newVeterinaria).subscribe({
+      next: () => {
+        this.closeAddVeterinariaModal();
+        this.loadGlobalData();
+        alert('Veterinaria registrada correctamente');
+      },
+      error: (err) => alert('Error al registrar veterinaria: ' + (err.error?.message || err.message))
+    });
+  }
+
+  openEditVeterinariaModal(vet: Veterinaria): void {
+    this.editingVeterinaria = { ...vet };
+    this.showEditVeterinariaModal = true;
+  }
+
+  closeEditVeterinariaModal(): void {
+    this.showEditVeterinariaModal = false;
+    this.editingVeterinaria = {};
+  }
+
+  guardarEdicionVeterinaria(): void {
+    if (!this.editingVeterinaria.id || !this.editingVeterinaria.nombre || !this.editingVeterinaria.direccion) {
+      alert('Por favor, completa los campos obligatorios');
+      return;
+    }
+
+    this.veterinariasService.update(this.editingVeterinaria.id, this.editingVeterinaria).subscribe({
+      next: () => {
+        this.closeEditVeterinariaModal();
+        this.loadGlobalData();
+        alert('Veterinaria actualizada correctamente');
+      },
+      error: (err) => alert('Error al actualizar veterinaria: ' + (err.error?.message || err.message))
+    });
   }
 }
