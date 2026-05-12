@@ -43,6 +43,7 @@ export class SuperAdminComponent implements OnInit {
 
   showAddVeterinariaModal: boolean = false;
   showEditVeterinariaModal: boolean = false;
+  showNewAdminModal: boolean = false;
   newVeterinaria: Partial<Veterinaria> = {
     nombre: '',
     direccion: '',
@@ -54,6 +55,19 @@ export class SuperAdminComponent implements OnInit {
     adminId: undefined
   };
   editingVeterinaria: Partial<Veterinaria> = {};
+  newAdmin: any = {
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    documentType: '',
+    documentNumber: '',
+    address: '',
+    age: null,
+    roleId: undefined,
+    password: '',
+    confirmPassword: ''
+  };
 
   // Inject Router
   private router = inject(Router);
@@ -364,6 +378,121 @@ export class SuperAdminComponent implements OnInit {
         alert('Veterinaria actualizada correctamente');
       },
       error: (err) => alert('Error al actualizar veterinaria: ' + (err.error?.message || err.message))
+    });
+  }
+
+  // ===== NUEVO ADMINISTRADOR =====
+  openNewAdminModal(): void {
+    this.newAdmin = {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      documentType: '',
+      documentNumber: '',
+      address: '',
+      age: null,
+      roleId: undefined,
+      password: '',
+      confirmPassword: ''
+    };
+    this.showNewAdminModal = true;
+  }
+
+  closeNewAdminModal(): void {
+    this.showNewAdminModal = false;
+    this.newAdmin = {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      documentType: '',
+      documentNumber: '',
+      address: '',
+      age: null,
+      roleId: undefined,
+      password: '',
+      confirmPassword: ''
+    };
+  }
+
+  saveNewAdmin(): void {
+    // Validaciones
+    if (!this.newAdmin.firstName || !this.newAdmin.lastName || !this.newAdmin.email || 
+        !this.newAdmin.documentType || !this.newAdmin.documentNumber || 
+        !this.newAdmin.age || !this.newAdmin.roleId || !this.newAdmin.password || !this.newAdmin.confirmPassword) {
+      alert('Por favor, completa todos los campos obligatorios');
+      return;
+    }
+
+    if (this.newAdmin.firstName.length < 2 || this.newAdmin.lastName.length < 2) {
+      alert('El nombre y apellido deben tener al menos 2 caracteres');
+      return;
+    }
+
+    if (this.newAdmin.password.length < 6) {
+      alert('La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+
+    if (this.newAdmin.password !== this.newAdmin.confirmPassword) {
+      alert('Las contraseñas no coinciden');
+      return;
+    }
+
+    if (this.newAdmin.age < 18) {
+      alert('El administrador debe ser mayor de 18 años');
+      return;
+    }
+
+    if (this.newAdmin.documentNumber.length < 5) {
+      alert('El número de documento debe tener al menos 5 caracteres');
+      return;
+    }
+
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.newAdmin.email)) {
+      alert('Por favor, ingresa un correo electrónico válido');
+      return;
+    }
+
+    // Generar username automáticamente basado en nombre y apellido
+    const firstName = this.newAdmin.firstName.trim().toLowerCase();
+    const lastName = this.newAdmin.lastName.trim().toLowerCase();
+    const username = `${firstName}.${lastName}`;
+
+    // Preparar el payload para enviar al backend
+    const adminPayload = {
+      username: username,
+      firstName: this.newAdmin.firstName.trim(),
+      lastName: this.newAdmin.lastName.trim(),
+      email: this.newAdmin.email.trim().toLowerCase(),
+      phone: this.newAdmin.phone?.trim() || null,
+      documentType: this.newAdmin.documentType,
+      documentNumber: this.newAdmin.documentNumber.trim(),
+      address: this.newAdmin.address?.trim() || null,
+      age: parseInt(this.newAdmin.age),
+      roleId: this.newAdmin.roleId,
+      password: this.newAdmin.password,
+      isActive: true
+    };
+
+    console.log('📦 Enviando datos de nuevo administrador:', adminPayload);
+
+    // Llamar al servicio para crear el usuario
+    this.usersService.createUser(adminPayload).subscribe({
+      next: (response) => {
+        console.log('✅ Administrador creado exitosamente:', response);
+        this.closeNewAdminModal();
+        this.loadGlobalData(); // Recargar la lista de administradores
+        alert('Administrador creado correctamente');
+      },
+      error: (err) => {
+        console.error('❌ Error al crear administrador:', err);
+        const errorMessage = err.error?.message || err.message || 'Error desconocido';
+        alert('Error al crear administrador: ' + errorMessage);
+      }
     });
   }
 }
