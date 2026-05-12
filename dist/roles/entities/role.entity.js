@@ -13,7 +13,6 @@ exports.Role = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const typeorm_1 = require("typeorm");
 const user_entity_1 = require("../../users/entities/user.entity");
-const perfil_veterinario_entity_1 = require("../../perfiles-veterinarios/entities/perfil-veterinario.entity");
 const emergencia_entity_1 = require("../../emergencias/entities/emergencia.entity");
 const module_entity_1 = require("../../modules/entities/module.entity");
 let Role = class Role {
@@ -39,11 +38,6 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => user_entity_1.User, user => user.role),
     __metadata("design:type", Array)
 ], Role.prototype, "users", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Perfiles veterinarios con este rol', type: () => [perfil_veterinario_entity_1.PerfilVeterinario] }),
-    (0, typeorm_1.OneToMany)(() => perfil_veterinario_entity_1.PerfilVeterinario, perfilVeterinario => perfilVeterinario.rol),
-    __metadata("design:type", Array)
-], Role.prototype, "perfilesVeterinarios", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Emergencias atendidas con este rol', type: () => [emergencia_entity_1.Emergencia] }),
     (0, typeorm_1.OneToMany)(() => emergencia_entity_1.Emergencia, emergencia => emergencia.veterinario),

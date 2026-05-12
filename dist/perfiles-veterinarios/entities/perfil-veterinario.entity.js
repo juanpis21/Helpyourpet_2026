@@ -14,7 +14,6 @@ const swagger_1 = require("@nestjs/swagger");
 const typeorm_1 = require("typeorm");
 const user_entity_1 = require("../../users/entities/user.entity");
 const veterinaria_entity_1 = require("../../veterinarias/entities/veterinaria.entity");
-const role_entity_1 = require("../../roles/entities/role.entity");
 let PerfilVeterinario = class PerfilVeterinario {
 };
 exports.PerfilVeterinario = PerfilVeterinario;
@@ -95,10 +94,6 @@ __decorate([
     (0, typeorm_1.JoinColumn)(),
     __metadata("design:type", user_entity_1.User)
 ], PerfilVeterinario.prototype, "usuario", void 0);
-__decorate([
-    (0, typeorm_1.ManyToOne)(() => role_entity_1.Role, role => role.perfilesVeterinarios),
-    __metadata("design:type", role_entity_1.Role)
-], PerfilVeterinario.prototype, "rol", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'Veterinaria principal donde trabaja',

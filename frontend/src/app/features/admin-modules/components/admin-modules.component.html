@@ -35,6 +35,11 @@
         </a>
       </li>
       <li>
+        <a [class.active]="activeSection === 'veterinarios'" (click)="setSection('veterinarios')">
+          <i class="fas fa-user-md"></i><span>Veterinarios</span>
+        </a>
+      </li>
+      <li>
         <a [class.active]="activeSection === 'productos'" (click)="setSection('productos')">
           <i class="fas fa-box"></i><span>Productos</span>
         </a>
@@ -299,6 +304,79 @@
                     <i class="fas fa-hospital"
                       style="font-size: 2rem; margin-bottom: 0.5rem; display: block; opacity: 0.4;"></i>
                     No hay veterinarias registradas
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VETERINARIOS -->
+    <section *ngIf="activeSection === 'veterinarios'" class="content-section">
+      <div class="section-header">
+        <h1><i class="fas fa-user-md"></i> Gestión de Veterinarios</h1>
+        <div class="header-actions">
+          <button class="btn-primary" (click)="openAddVeterinarioModal()">
+            <i class="fas fa-plus"></i> Agregar Veterinario
+          </button>
+          <button class="top-bar-btn" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h5><i class="fas fa-list"></i> Veterinarios Registrados</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Usuario</th>
+                  <th>Nombre Completo</th>
+                  <th>Especialidad</th>
+                  <th>Matrícula</th>
+                  <th>Email Profesional</th>
+                  <th>Veterinaria</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let vet of veterinarios">
+                  <td>{{ vet.id }}</td>
+                  <td><strong>{{ vet.usuario?.username || 'N/A' }}</strong></td>
+                  <td>{{ vet.usuario?.firstName || '' }} {{ vet.usuario?.lastName || '' }}</td>
+                  <td><span class="badge">{{ vet.especialidad }}</span></td>
+                  <td>{{ vet.matricula }}</td>
+                  <td>{{ vet.emailProfesional || vet.usuario?.email || 'N/A' }}</td>
+                  <td>{{ vet.veterinariaPrincipal?.nombre || 'Sin asignar' }}</td>
+                  <td>
+                    <span class="status-pill" [class.active]="vet.isActive">
+                      {{ vet.isActive ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="actions">
+                      <button class="btn-icon edit" (click)="openEditVeterinarioModal(vet)" title="Editar">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button class="btn-icon toggle" (click)="toggleEstadoVeterinario(vet)"
+                        [title]="vet.isActive ? 'Desactivar' : 'Activar'">
+                        <i class="fas" [ngClass]="vet.isActive ? 'fa-toggle-on' : 'fa-toggle-off'"
+                          [style.color]="vet.isActive ? '#2e7d32' : '#c62828'"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr *ngIf="veterinarios.length === 0">
+                  <td colspan="9" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                    <i class="fas fa-user-md"
+                      style="font-size: 2rem; margin-bottom: 0.5rem; display: block; opacity: 0.4;"></i>
+                    No hay veterinarios registrados
                   </td>
                 </tr>
               </tbody>
@@ -1194,3 +1272,250 @@
     </div>
   </div>
 </div>
+
+  <!-- Modales de Veterinarios -->
+  <div class="modal-overlay" *ngIf="showAddVeterinarioModal" (click)="closeAddVeterinarioModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3><i class="fas fa-user-md"></i> Registrar Nuevo Veterinario</h3>
+        <button class="close-btn" (click)="closeAddVeterinarioModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 1.5rem;">
+          <h4 style="color: var(--primary); margin-bottom: 0.5rem;">
+            <i class="fas fa-info-circle"></i> Información de Usuario
+          </h4>
+          <p style="color: var(--text-secondary); font-size: 0.9rem;">
+            Complete los datos para crear la cuenta de usuario del veterinario.
+          </p>
+        </div>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label><i class="fas fa-user"></i> Nombre de Usuario *</label>
+            <input type="text" [(ngModel)]="newVeterinario.username" placeholder="ej: dr_perez">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-envelope"></i> Email Personal *</label>
+            <input type="email" [(ngModel)]="newVeterinario.email" placeholder="veterinario@ejemplo.com">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-lock"></i> Contraseña *</label>
+            <input type="password" [(ngModel)]="newVeterinario.password" placeholder="Mínimo 6 caracteres">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-id-card"></i> Tipo Documento</label>
+            <select [(ngModel)]="newVeterinario.documentType">
+              <option value="">Seleccionar</option>
+              <option value="Cédula">Cédula</option>
+              <option value="Pasaporte">Pasaporte</option>
+              <option value="Cédula Extranjería">Cédula Extranjería</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-hashtag"></i> Número Documento</label>
+            <input type="text" [(ngModel)]="newVeterinario.documentNumber" placeholder="123456789">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-phone"></i> Teléfono Personal</label>
+            <input type="text" [(ngModel)]="newVeterinario.phone" placeholder="+1234567890">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-user"></i> Nombres *</label>
+            <input type="text" [(ngModel)]="newVeterinario.firstName" placeholder="Juan Carlos">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-user"></i> Apellidos *</label>
+            <input type="text" [(ngModel)]="newVeterinario.lastName" placeholder="Pérez García">
+          </div>
+          <div class="form-group full">
+            <label><i class="fas fa-map-marker-alt"></i> Dirección</label>
+            <input type="text" [(ngModel)]="newVeterinario.address" placeholder="Calle 123 #45-67">
+          </div>
+        </div>
+
+        <div style="margin: 2rem 0; padding: 1rem 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+          <h4 style="color: var(--primary); margin-bottom: 0.5rem;">
+            <i class="fas fa-stethoscope"></i> Información Profesional
+          </h4>
+          <p style="color: var(--text-secondary); font-size: 0.9rem;">
+            Complete los datos profesionales del veterinario.
+          </p>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label><i class="fas fa-graduation-cap"></i> Especialidad *</label>
+            <input type="text" [(ngModel)]="newVeterinario.especialidad" placeholder="Medicina General Canina">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-certificate"></i> Matrícula Profesional *</label>
+            <input type="text" [(ngModel)]="newVeterinario.matricula" placeholder="MV-2023-1234">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-clock"></i> Años de Experiencia</label>
+            <input type="number" [(ngModel)]="newVeterinario.aniosExperiencia" min="0" placeholder="5">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-university"></i> Universidad</label>
+            <input type="text" [(ngModel)]="newVeterinario.universidad" placeholder="Universidad Nacional">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-phone-alt"></i> Teléfono Profesional</label>
+            <input type="text" [(ngModel)]="newVeterinario.telefonoProfesional" placeholder="+1234567890">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-envelope"></i> Email Profesional</label>
+            <input type="email" [(ngModel)]="newVeterinario.emailProfesional" placeholder="dr@clinica.com">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-hospital"></i> Veterinaria Principal</label>
+            <select [(ngModel)]="newVeterinario.veterinariaPrincipalId">
+              <option [ngValue]="0">Seleccionar Veterinaria</option>
+              <option *ngFor="let vet of veterinarias" [ngValue]="vet.id">{{ vet.nombre }}</option>
+            </select>
+          </div>
+          <!-- El rol se asigna automáticamente como veterinario -->
+          <input type="hidden" [(ngModel)]="newVeterinario.roleId">
+          <div class="form-group full">
+            <label><i class="fas fa-file-medical"></i> Biografía Profesional</label>
+            <textarea [(ngModel)]="newVeterinario.biografia" rows="3" 
+              placeholder="Describe tu experiencia y especialidades..."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeAddVeterinarioModal()">
+          <i class="fas fa-times"></i> Cancelar
+        </button>
+        <button class="btn-primary" (click)="guardarVeterinario()">
+          <i class="fas fa-save"></i> Registrar Veterinario
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" *ngIf="showEditVeterinarioModal" (click)="closeEditVeterinarioModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3><i class="fas fa-user-md"></i> Editar Veterinario</h3>
+        <button class="close-btn" (click)="closeEditVeterinarioModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 1.5rem;">
+          <h4 style="color: var(--primary); margin-bottom: 0.5rem;">
+            <i class="fas fa-info-circle"></i> Información de Usuario
+          </h4>
+          <p style="color: var(--text-secondary); font-size: 0.9rem;">
+            Modifique los datos de la cuenta de usuario del veterinario.
+          </p>
+        </div>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label><i class="fas fa-user"></i> Nombre de Usuario</label>
+            <input type="text" [(ngModel)]="editingUsuario.username" readonly>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-envelope"></i> Email Personal</label>
+            <input type="email" [(ngModel)]="editingUsuario.email">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-lock"></i> Nueva Contraseña</label>
+            <input type="password" [(ngModel)]="editingUsuario.password" placeholder="Dejar vacío si no cambia">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-id-card"></i> Tipo Documento</label>
+            <select [(ngModel)]="editingUsuario.documentType">
+              <option value="">Seleccionar</option>
+              <option value="Cédula">Cédula</option>
+              <option value="Pasaporte">Pasaporte</option>
+              <option value="Cédula Extranjería">Cédula Extranjería</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-hashtag"></i> Número Documento</label>
+            <input type="text" [(ngModel)]="editingUsuario.documentNumber">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-phone"></i> Teléfono Personal</label>
+            <input type="text" [(ngModel)]="editingUsuario.phone">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-user"></i> Nombres</label>
+            <input type="text" [(ngModel)]="editingUsuario.firstName">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-user"></i> Apellidos</label>
+            <input type="text" [(ngModel)]="editingUsuario.lastName">
+          </div>
+          <div class="form-group full">
+            <label><i class="fas fa-map-marker-alt"></i> Dirección</label>
+            <input type="text" [(ngModel)]="editingUsuario.address">
+          </div>
+        </div>
+
+        <div style="margin: 2rem 0; padding: 1rem 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+          <h4 style="color: var(--primary); margin-bottom: 0.5rem;">
+            <i class="fas fa-stethoscope"></i> Información Profesional
+          </h4>
+          <p style="color: var(--text-secondary); font-size: 0.9rem;">
+            Modifique los datos profesionales del veterinario.
+          </p>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label><i class="fas fa-graduation-cap"></i> Especialidad</label>
+            <input type="text" [(ngModel)]="editingVeterinario.especialidad">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-certificate"></i> Matrícula Profesional</label>
+            <input type="text" [(ngModel)]="editingVeterinario.matricula">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-clock"></i> Años de Experiencia</label>
+            <input type="number" [(ngModel)]="editingVeterinario.aniosExperiencia" min="0">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-university"></i> Universidad</label>
+            <input type="text" [(ngModel)]="editingVeterinario.universidad">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-phone-alt"></i> Teléfono Profesional</label>
+            <input type="text" [(ngModel)]="editingVeterinario.telefonoProfesional">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-envelope"></i> Email Profesional</label>
+            <input type="email" [(ngModel)]="editingVeterinario.emailProfesional">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-hospital"></i> Veterinaria Principal</label>
+            <select [(ngModel)]="editingVeterinario.veterinariaPrincipalId">
+              <option [ngValue]="0">Seleccionar Veterinaria</option>
+              <option *ngFor="let vet of veterinarias" [ngValue]="vet.id">{{ vet.nombre }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-toggle-on"></i> Estado</label>
+            <select [(ngModel)]="editingVeterinario.isActive">
+              <option [ngValue]="true">Activo</option>
+              <option [ngValue]="false">Inactivo</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label><i class="fas fa-file-medical"></i> Biografía Profesional</label>
+            <textarea [(ngModel)]="editingVeterinario.biografia" rows="3"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeEditVeterinarioModal()">
+          <i class="fas fa-times"></i> Cancelar
+        </button>
+        <button class="btn-primary" (click)="guardarEdicionVeterinario()">
+          <i class="fas fa-save"></i> Actualizar Veterinario
+        </button>
+      </div>
+    </div>
+  </div>
