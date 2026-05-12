@@ -89,9 +89,31 @@ export class PublicacionesController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Actualizar una publicación' })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('imagen', {
+    storage: diskStorage({
+      destination: './uploads/publicaciones',
+      filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '_' + Math.round(Math.random() * 1E9);
+        const ext = extname(file.originalname);
+        cb(null, `pub_${uniqueSuffix}${ext}`);
+      },
+    }),
+    fileFilter: (req, file, cb) => {
+      if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
+        cb(new BadRequestException('Solo se permiten imágenes (jpg, jpeg, png, gif, webp)'), false);
+      } else {
+        cb(null, true);
+      }
+    },
+    limits: { fileSize: 5 * 1024 * 1024 },
+  }))
   @ApiResponse({ status: 200, description: 'Publicación actualizada', type: Publicacion })
   @ApiResponse({ status: 404, description: 'Publicación no encontrada' })
-  async update(@Param('id') id: string, @Body() updatePublicacionDto: UpdatePublicacionDto) {
+  async update(@Param('id') id: string, @Body() updatePublicacionDto: UpdatePublicacionDto, @UploadedFile() file?: Express.Multer.File) {
+    if (file) {
+      updatePublicacionDto.imagen = `/uploads/publicaciones/${file.filename}`;
+    }
     return await this.publicacionesService.update(+id, updatePublicacionDto);
   }
 

@@ -592,10 +592,74 @@ export class Veterinario implements OnInit {
   }
 
   // Lógica de Publicaciones
+  showEditPublicacionModal = false;
+  editingPublicacion: any = {};
+  publicacionImagePreview: string | null = null;
+  selectedPublicacionFile: File | null = null;
+
   cargarPublicaciones(): void {
     this.http.get<any[]>(`${this.API_BASE}/publicaciones`, this.getHeaders()).subscribe({
       next: (data) => this.publicaciones = data,
       error: (err) => console.error('Error cargando publicaciones:', err)
+    });
+  }
+
+  openEditPublicacionModal(pub: any): void {
+    this.editingPublicacion = { ...pub };
+    this.showEditPublicacionModal = true;
+    if (pub.imagen) {
+      if (pub.imagen.startsWith('http') || pub.imagen.startsWith('assets/')) {
+        this.publicacionImagePreview = pub.imagen;
+      } else {
+        this.publicacionImagePreview = `${this.API_BASE}${pub.imagen}`;
+      }
+    } else {
+      this.publicacionImagePreview = null;
+    }
+  }
+
+  closeEditPublicacionModal(): void {
+    this.showEditPublicacionModal = false;
+    this.editingPublicacion = {};
+    this.selectedPublicacionFile = null;
+    this.publicacionImagePreview = null;
+  }
+
+  onPublicacionFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedPublicacionFile = file;
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.publicacionImagePreview = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  actualizarPublicacion(): void {
+    if (!this.editingPublicacion.id || !this.editingPublicacion.descripcion) {
+      alert('Por favor complete los campos obligatorios (Descripción).');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('descripcion', this.editingPublicacion.descripcion);
+
+    if (this.selectedPublicacionFile) {
+      formData.append('imagen', this.selectedPublicacionFile);
+    }
+
+    this.http.patch(`${this.API_BASE}/publicaciones/${this.editingPublicacion.id}`, formData, this.getHeaders()).subscribe({
+      next: () => {
+        alert('Publicación actualizada con éxito');
+        this.cargarPublicaciones();
+        this.closeEditPublicacionModal();
+      },
+      error: (err) => {
+        console.error('Error al actualizar publicación:', err);
+        alert('Error al actualizar publicación: ' + (err.error?.message || err.message));
+      }
     });
   }
 
@@ -669,7 +733,15 @@ export class Veterinario implements OnInit {
       });
   }
 
+  minDateTimeStr: string = '';
+  minDateStr: string = '';
+
   abrirNuevaConsulta(): void {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    this.minDateTimeStr = now.toISOString().slice(0, 16);
+    this.minDateStr = now.toISOString().split('T')[0];
+
     this.nuevaConsulta = {
       fechaConsulta: '', peso: null, temperatura: null,
       motivoConsulta: '', sintomas: '', diagnostico: '',
@@ -679,6 +751,11 @@ export class Veterinario implements OnInit {
   }
 
   editarConsulta(consulta: any): void {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    this.minDateTimeStr = now.toISOString().slice(0, 16);
+    this.minDateStr = now.toISOString().split('T')[0];
+
     this.nuevaConsulta = { ...consulta };
     if (this.nuevaConsulta.fechaConsulta) {
       this.nuevaConsulta.fechaConsulta = new Date(this.nuevaConsulta.fechaConsulta).toISOString().slice(0, 16);
@@ -691,6 +768,33 @@ export class Veterinario implements OnInit {
 
   guardarNuevaConsulta(): void {
     if (!this.historiaActual) return;
+    
+    // Validación de fecha para consultas
+    const now = new Date().getTime();
+    
+    if (this.nuevaConsulta.fechaConsulta) {
+      const selectedDate = new Date(this.nuevaConsulta.fechaConsulta).getTime();
+      if (selectedDate < now - 60000) { // Margen de 1 minuto
+        alert('La fecha y hora de la consulta no puede ser en el pasado.');
+        return;
+      }
+    }
+
+    if (this.nuevaConsulta.proximaCita) {
+      // Para fecha sin hora, comparamos con el inicio del día de hoy
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      // Parsear la fecha seleccionada (viene en formato YYYY-MM-DD)
+      const [year, month, day] = this.nuevaConsulta.proximaCita.split('-');
+      const selectedNextDate = new Date(Number(year), Number(month) - 1, Number(day));
+      
+      if (selectedNextDate.getTime() < today.getTime()) {
+        alert('La fecha de la próxima cita no puede ser en el pasado.');
+        return;
+      }
+    }
+
     const token = localStorage.getItem('access_token');
     const headers = { Authorization: `Bearer ${token}` };
     const payload = {

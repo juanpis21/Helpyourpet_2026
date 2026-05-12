@@ -6,8 +6,8 @@
     <div class="sidebar-header">
       <h3>HelpYourPet</h3>
       <div class="user-profile">
-        <img [src]="profileImagePreview || (usuario.imagen || 'assets/images/Default.png')"
-          alt="Foto de perfil" class="profile-avatar">
+        <img [src]="profileImagePreview || (usuario.imagen || 'assets/images/Default.png')" alt="Foto de perfil"
+          class="profile-avatar">
         <h5>{{ usuario.nombres }} {{ usuario.apellidos }}</h5>
         <p>{{ getRoleName() | titlecase }}</p>
       </div>
@@ -311,7 +311,8 @@
             </div>
           </div>
           <div class="publicacion-actions">
-            <button class="btn-delete-small" (click)="eliminarPublicacion(pub.id)"><i class="fas fa-trash"></i></button>
+            <button class="btn-edit-small" (click)="openEditPublicacionModal(pub)" title="Editar Publicación"><i class="fas fa-pencil-alt"></i></button>
+            <button class="btn-delete-small" (click)="eliminarPublicacion(pub.id)" title="Eliminar Publicación"><i class="fas fa-trash"></i></button>
           </div>
         </div>
       </div>
@@ -331,12 +332,14 @@
       </div>
 
       <div class="card">
-        <div class="card-header"><h5><i class="fas fa-user-edit"></i> Información Personal</h5></div>
+        <div class="card-header">
+          <h5><i class="fas fa-user-edit"></i> Información Personal</h5>
+        </div>
         <div class="card-body">
           <div class="config-layout">
             <div class="config-photo">
-              <img [src]="profileImagePreview || (usuario.imagen || 'assets/images/Default.png')"
-                alt="Foto de perfil" class="config-avatar">
+              <img [src]="profileImagePreview || (usuario.imagen || 'assets/images/Default.png')" alt="Foto de perfil"
+                class="config-avatar">
               <p class="photo-hint">JPG, PNG</p>
               <label class="btn-outline small">
                 <i class="fas fa-upload"></i> Cambiar
@@ -385,7 +388,8 @@
                 </div>
               </div>
               <div class="form-actions">
-                <button class="btn-primary" (click)="guardarPerfil()"><i class="fas fa-save"></i> Guardar Cambios</button>
+                <button class="btn-primary" (click)="guardarPerfil()"><i class="fas fa-save"></i> Guardar
+                  Cambios</button>
               </div>
             </div>
           </div>
@@ -394,10 +398,13 @@
 
       <div class="danger-zone-grid">
         <div class="card card-danger">
-          <div class="card-header danger"><h6><i class="fas fa-exclamation-triangle"></i> Zona de Peligro</h6></div>
+          <div class="card-header danger">
+            <h6><i class="fas fa-exclamation-triangle"></i> Zona de Peligro</h6>
+          </div>
           <div class="card-body center">
             <p>Desactivación de cuenta</p>
-            <button class="btn-danger" (click)="eliminarCuenta()"><i class="fas fa-user-slash"></i> Desactivar Cuenta</button>
+            <button class="btn-danger" (click)="eliminarCuenta()"><i class="fas fa-user-slash"></i> Desactivar
+              Cuenta</button>
           </div>
         </div>
       </div>
@@ -418,7 +425,9 @@
 
       <!-- PASO 1: Selección de Dueño y Mascota -->
       <div class="card hc-selector-card" *ngIf="!historiaActual">
-        <div class="card-header"><h5><i class="fas fa-search"></i> Buscar Paciente</h5></div>
+        <div class="card-header">
+          <h5><i class="fas fa-search"></i> Buscar Paciente</h5>
+        </div>
         <div class="card-body">
           <div class="form-grid">
             <div class="form-group">
@@ -485,8 +494,9 @@
           <!-- Datos del paciente -->
           <div class="hc-patient-banner">
             <div class="hc-patient-img">
-              <img [src]="historiaActual.mascota?.foto ? (API_BASE + historiaActual.mascota.foto) : 'assets/images/Default.png'"
-                   alt="Foto mascota">
+              <img
+                [src]="historiaActual.mascota?.foto ? (API_BASE + historiaActual.mascota.foto) : 'assets/images/Default.png'"
+                alt="Foto mascota">
             </div>
             <div class="hc-patient-info">
               <h3>{{ historiaActual.mascota?.name }}</h3>
@@ -496,7 +506,8 @@
                 <span><strong>Edad:</strong> {{ historiaActual.mascota?.age }} años</span>
                 <span><strong>Género:</strong> {{ historiaActual.mascota?.gender === 'F' ? 'Hembra' : 'Macho' }}</span>
                 <span><strong>Color:</strong> {{ historiaActual.mascota?.color }}</span>
-                <span><strong>Dueño:</strong> {{ historiaActual.mascota?.owner?.firstName }} {{ historiaActual.mascota?.owner?.lastName }}</span>
+                <span><strong>Dueño:</strong> {{ historiaActual.mascota?.owner?.firstName }} {{
+                  historiaActual.mascota?.owner?.lastName }}</span>
               </div>
             </div>
           </div>
@@ -521,7 +532,8 @@
               </div>
               <div class="hc-fixed-field small" [class.editing]="hcEditando">
                 <label><i class="fas fa-cut"></i> Esterilizado/a</label>
-                <span *ngIf="!hcEditando" class="status-pill" [class.active]="historiaActual.esterilizado" [class.inactive]="!historiaActual.esterilizado">
+                <span *ngIf="!hcEditando" class="status-pill" [class.active]="historiaActual.esterilizado"
+                  [class.inactive]="!historiaActual.esterilizado">
                   {{ historiaActual.esterilizado ? 'Sí' : 'No' }}
                 </span>
                 <select *ngIf="hcEditando" [(ngModel)]="hcEditForm.esterilizado">
@@ -566,7 +578,8 @@
           <div class="hc-consulta-card" *ngFor="let c of consultasActuales; let i = index">
             <div class="hc-consulta-header">
               <span class="hc-consulta-num">Consulta #{{ consultasActuales.length - i }}</span>
-              <span class="hc-consulta-date"><i class="fas fa-calendar-alt"></i> {{ c.fechaConsulta | date:'dd/MM/yyyy HH:mm' }}</span>
+              <span class="hc-consulta-date"><i class="fas fa-calendar-alt"></i> {{ c.fechaConsulta | date:'dd/MM/yyyy
+                HH:mm' }}</span>
               <button class="btn-icon-primary" (click)="editarConsulta(c)" title="Editar consulta">
                 <i class="fas fa-edit"></i>
               </button>
@@ -578,22 +591,28 @@
               </div>
               <div class="hc-consulta-grid">
                 <div class="hc-consulta-field" *ngIf="c.motivoConsulta">
-                  <label>Motivo</label><p>{{ c.motivoConsulta }}</p>
+                  <label>Motivo</label>
+                  <p>{{ c.motivoConsulta }}</p>
                 </div>
                 <div class="hc-consulta-field" *ngIf="c.sintomas">
-                  <label>Síntomas</label><p>{{ c.sintomas }}</p>
+                  <label>Síntomas</label>
+                  <p>{{ c.sintomas }}</p>
                 </div>
                 <div class="hc-consulta-field" *ngIf="c.diagnostico">
-                  <label>Diagnóstico</label><p>{{ c.diagnostico }}</p>
+                  <label>Diagnóstico</label>
+                  <p>{{ c.diagnostico }}</p>
                 </div>
                 <div class="hc-consulta-field" *ngIf="c.tratamiento">
-                  <label>Tratamiento</label><p>{{ c.tratamiento }}</p>
+                  <label>Tratamiento</label>
+                  <p>{{ c.tratamiento }}</p>
                 </div>
                 <div class="hc-consulta-field" *ngIf="c.medicamentos">
-                  <label>Medicamentos</label><p>{{ c.medicamentos }}</p>
+                  <label>Medicamentos</label>
+                  <p>{{ c.medicamentos }}</p>
                 </div>
                 <div class="hc-consulta-field" *ngIf="c.observaciones">
-                  <label>Observaciones</label><p>{{ c.observaciones }}</p>
+                  <label>Observaciones</label>
+                  <p>{{ c.observaciones }}</p>
                 </div>
                 <div class="hc-consulta-field" *ngIf="c.proximaCita">
                   <label><i class="fas fa-calendar-check"></i> Próxima cita</label>
@@ -696,7 +715,8 @@
         <div class="form-group full">
           <label>Mascota</label>
           <select [(ngModel)]="newCita.petId">
-            <option *ngFor="let m of mascotas" [ngValue]="m.id">{{ m.name }} (Dueño: {{ m.owner?.firstName }} {{ m.owner?.lastName }})</option>
+            <option *ngFor="let m of mascotas" [ngValue]="m.id">{{ m.name }} (Dueño: {{ m.owner?.firstName }} {{
+              m.owner?.lastName }})</option>
           </select>
         </div>
         <div class="form-group">
@@ -786,7 +806,7 @@
       </div>
 
       <div class="form-grid">
-        <div class="form-group full">
+        <div class="form-group">
           <label>Dueño (Usuario) *</label>
           <select [(ngModel)]="editingPet.ownerId">
             <option [ngValue]="null">Seleccione un usuario</option>
@@ -899,7 +919,8 @@
 <div class="modal-overlay" *ngIf="showNuevaConsultaModal" (click)="showNuevaConsultaModal = false">
   <div class="modal-box modal-consulta" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h3><i class="fas fa-stethoscope"></i> {{ nuevaConsulta.id ? 'Editar Consulta Médica' : 'Nueva Consulta Médica' }}</h3>
+      <h3><i class="fas fa-stethoscope"></i> {{ nuevaConsulta.id ? 'Editar Consulta Médica' : 'Nueva Consulta Médica' }}
+      </h3>
       <button class="close-btn" (click)="showNuevaConsultaModal = false">&times;</button>
     </div>
     <div class="modal-body">
@@ -911,7 +932,7 @@
       <div class="form-grid">
         <div class="form-group">
           <label><i class="fas fa-calendar-alt"></i> Fecha y Hora</label>
-          <input type="datetime-local" [(ngModel)]="nuevaConsulta.fechaConsulta">
+          <input type="datetime-local" [(ngModel)]="nuevaConsulta.fechaConsulta" [min]="minDateTimeStr">
         </div>
         <div class="form-group">
           <label><i class="fas fa-weight"></i> Peso (kg)</label>
@@ -919,7 +940,8 @@
         </div>
         <div class="form-group">
           <label><i class="fas fa-thermometer-half"></i> Temperatura (°C)</label>
-          <input type="number" [(ngModel)]="nuevaConsulta.temperatura" step="0.1" min="35" max="43" placeholder="Ej: 38.5">
+          <input type="number" [(ngModel)]="nuevaConsulta.temperatura" step="0.1" min="35" max="43"
+            placeholder="Ej: 38.5">
         </div>
         <div class="form-group">
           <label><i class="fas fa-question-circle"></i> Motivo de Consulta</label>
@@ -927,7 +949,8 @@
         </div>
         <div class="form-group full">
           <label><i class="fas fa-heartbeat"></i> Síntomas</label>
-          <textarea [(ngModel)]="nuevaConsulta.sintomas" rows="2" placeholder="Describa los síntomas observados..."></textarea>
+          <textarea [(ngModel)]="nuevaConsulta.sintomas" rows="2"
+            placeholder="Describa los síntomas observados..."></textarea>
         </div>
         <div class="form-group full">
           <label><i class="fas fa-search-plus"></i> Diagnóstico</label>
@@ -935,19 +958,22 @@
         </div>
         <div class="form-group full">
           <label><i class="fas fa-prescription-bottle-alt"></i> Tratamiento</label>
-          <textarea [(ngModel)]="nuevaConsulta.tratamiento" rows="2" placeholder="Plan de tratamiento indicado..."></textarea>
+          <textarea [(ngModel)]="nuevaConsulta.tratamiento" rows="2"
+            placeholder="Plan de tratamiento indicado..."></textarea>
         </div>
         <div class="form-group full">
           <label><i class="fas fa-pills"></i> Medicamentos</label>
-          <textarea [(ngModel)]="nuevaConsulta.medicamentos" rows="2" placeholder="Medicamentos recetados con dosis..."></textarea>
+          <textarea [(ngModel)]="nuevaConsulta.medicamentos" rows="2"
+            placeholder="Medicamentos recetados con dosis..."></textarea>
         </div>
         <div class="form-group full">
           <label><i class="fas fa-clipboard-check"></i> Observaciones</label>
-          <textarea [(ngModel)]="nuevaConsulta.observaciones" rows="2" placeholder="Observaciones adicionales..."></textarea>
+          <textarea [(ngModel)]="nuevaConsulta.observaciones" rows="2"
+            placeholder="Observaciones adicionales..."></textarea>
         </div>
         <div class="form-group">
           <label><i class="fas fa-calendar-check"></i> Próxima Cita</label>
-          <input type="date" [(ngModel)]="nuevaConsulta.proximaCita">
+          <input type="date" [(ngModel)]="nuevaConsulta.proximaCita" [min]="minDateStr">
         </div>
       </div>
     </div>
@@ -958,4 +984,36 @@
       </button>
     </div>
   </div>
-</div>
+</div>
+
+<!-- MODAL EDITAR PUBLICACION -->
+<div class="modal-overlay" *ngIf="showEditPublicacionModal" (click)="closeEditPublicacionModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3><i class="fas fa-pencil-alt"></i> Editar Publicación</h3>
+      <button class="close-btn" (click)="closeEditPublicacionModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="pub-image-upload">
+        <div class="pub-image-preview"
+          [style.backgroundImage]="publicacionImagePreview ? 'url(' + publicacionImagePreview + ')' : 'url(assets/images/Default.png)'">
+        </div>
+        <label for="pub-photo-edit" class="upload-btn">
+          <i class="fas fa-camera"></i> Cambiar Foto
+        </label>
+        <input type="file" id="pub-photo-edit" (change)="onPublicacionFileSelected($event)" style="display: none;" accept="image/*">
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Descripción *</label>
+          <textarea [(ngModel)]="editingPublicacion.descripcion" rows="4"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-primary" (click)="closeEditPublicacionModal()">Cancelar</button>
+      <button class="btn-primary" (click)="actualizarPublicacion()">Guardar Cambios</button>
+    </div>
+  </div>
+</div>
