@@ -34,17 +34,32 @@ export class PublicacionesService {
   }
 
   async findAll(): Promise<Publicacion[]> {
-    return this.publicacionesRepository.find({ 
-      where: { isActive: true },
-      order: { createdAt: 'DESC' }
-    });
+    console.log('Backend: Buscando todas las publicaciones activas...');
+    
+    // Log para depuración: contar inactivas
+    const inactiveCount = await this.publicacionesRepository.count({ where: { isActive: false } });
+    if (inactiveCount > 0) {
+      console.log(`Backend: Hay ${inactiveCount} publicaciones inactivas que no se mostrarán.`);
+    }
+
+    const pubs = await this.publicacionesRepository.createQueryBuilder('publicacion')
+      .leftJoinAndSelect('publicacion.autor', 'autor')
+      .where('publicacion.isActive = :isActive', { isActive: true })
+      .orderBy('publicacion.createdAt', 'DESC')
+      .getMany();
+    
+    console.log(`Backend: Se encontraron ${pubs.length} publicaciones activas en total.`);
+    return pubs;
   }
 
   async findByAutor(autorId: number): Promise<Publicacion[]> {
-    return this.publicacionesRepository.find({ 
-      where: { autorId, isActive: true },
-      order: { createdAt: 'DESC' }
-    });
+    console.log(`Backend: Buscando publicaciones para el autor ${autorId}...`);
+    return this.publicacionesRepository.createQueryBuilder('publicacion')
+      .leftJoinAndSelect('publicacion.autor', 'autor')
+      .where('publicacion.autorId = :autorId', { autorId })
+      .andWhere('publicacion.isActive = :isActive', { isActive: true })
+      .orderBy('publicacion.createdAt', 'DESC')
+      .getMany();
   }
 
   async findOne(id: number): Promise<Publicacion> {

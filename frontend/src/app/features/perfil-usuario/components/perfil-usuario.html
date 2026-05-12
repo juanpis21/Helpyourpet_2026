@@ -74,101 +74,41 @@
       <!-- Dashboard de Estadísticas -->
       <div class="dashboard-stats">
         <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon pets">
+          <div class="stat-card stat-card--pets" (click)="cambiarSeccion('mascotas')">
+            <div class="stat-icon-wrapper pets">
               <i class="fas fa-paw"></i>
             </div>
             <div class="stat-content">
               <h3 class="stat-number">{{ mascotas.length }}</h3>
               <p class="stat-label">Mascotas Registradas</p>
             </div>
+            <div class="stat-footer">
+              <span><i class="fas fa-arrow-right"></i> Ver mascotas</span>
+            </div>
           </div>
-          <div class="stat-card">
-            <div class="stat-icon purchases">
+          <div class="stat-card stat-card--purchases" (click)="cambiarSeccion('compras')">
+            <div class="stat-icon-wrapper purchases">
               <i class="fas fa-shopping-cart"></i>
             </div>
             <div class="stat-content">
               <h3 class="stat-number">0</h3>
               <p class="stat-label">Compras Realizadas</p>
             </div>
+            <div class="stat-footer">
+              <span><i class="fas fa-arrow-right"></i> Ver compras</span>
+            </div>
           </div>
-          <div class="stat-card">
-            <div class="stat-icon posts">
+          <div class="stat-card stat-card--posts" (click)="cambiarSeccion('adopciones')">
+            <div class="stat-icon-wrapper posts">
               <i class="fas fa-heart"></i>
             </div>
             <div class="stat-content">
               <h3 class="stat-number">{{ publicaciones.length }}</h3>
               <p class="stat-label">Publicaciones</p>
             </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon medical">
-              <i class="fas fa-file-medical"></i>
+            <div class="stat-footer">
+              <span><i class="fas fa-arrow-right"></i> Ver publicaciones</span>
             </div>
-            <div class="stat-content">
-              <h3 class="stat-number">{{ getTotalHistorialRegistros() }}</h3>
-              <p class="stat-label">Registros Médicos</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Preview mascotas -->
-      <div class="card">
-        <div class="card-header">
-          <h5><i class="fas fa-paw"></i> Mis Mascotas</h5>
-        </div>
-        <div class="card-body">
-          <div *ngIf="mascotas.length === 0" class="empty-state">
-            <i class="fas fa-paw"></i>
-            <p>No tienes mascotas registradas aún.</p>
-          </div>
-          <div class="pets-grid" *ngIf="mascotas.length > 0">
-            <div *ngFor="let mascota of mascotas" class="pet-card">
-              <div class="pet-image-container">
-                <img *ngIf="mascota.foto" [src]="mascota.foto && mascota.foto.startsWith('/uploads/') ? 'http://localhost:3000' + mascota.foto : mascota.foto" [alt]="mascota.name" class="pet-image">
-                <div *ngIf="!mascota.foto" class="pet-image-placeholder">
-                  <i class="fas fa-paw"></i>
-                </div>
-              </div>
-              <div class="pet-info">
-                <h5 class="pet-name">{{ mascota.name }}</h5>
-                <div class="pet-details">
-                  <div class="pet-detail"><i class="fas fa-paw"></i><span>{{ mascota.species }}</span></div>
-                  <div class="pet-detail"><i class="fas fa-calendar"></i><span>{{ mascota.age }} años</span></div>
-                  <div class="pet-detail" *ngIf="mascota.breed"><i class="fas fa-dna"></i><span>{{ mascota.breed }}</span></div>
-                  <div class="pet-detail" *ngIf="mascota.weight"><i class="fas fa-weight"></i><span>{{ mascota.weight }} kg</span></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Preview compras -->
-      <div class="card">
-        <div class="card-header">
-          <h5><i class="fas fa-shopping-cart"></i> Mis Compras</h5>
-        </div>
-        <div class="card-body">
-          <div class="empty-state">
-            <i class="fas fa-shopping-cart"></i>
-            <p>No tienes compras registradas.</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Preview adopciones -->
-      <div class="card">
-        <div class="card-header">
-          <h5><i class="fas fa-heart"></i> Mis publicaciones</h5>
-        </div>
-        <div class="card-body">
-          <div class="empty-state">
-            <i class="fas fa-heart"></i>
-            <h3>No has publicado mascotas en publicación</h3>
-            <p>¡Ayuda a encontrar un hogar a una mascota que necesite amor! 🐾</p>
-            <button class="btn-primary large" (click)="irATienda()"><i class="fas fa-plus"></i> Publicar Primera Mascota</button>
           </div>
         </div>
       </div>
@@ -205,6 +145,7 @@
               <th>Género</th>
               <th>Raza</th>
               <th>Peso (kg)</th>
+              <th>Acciones</th>
 
             </tr>
           </thead>

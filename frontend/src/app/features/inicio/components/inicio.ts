@@ -99,7 +99,9 @@ export class Inicio implements OnInit {
         this.usuarioLogueado = {
           nombre: user.fullName || user.username || 'Usuario',
           email: user.email,
-          avatar: user.avatar || 'assets/images/Default.png'
+          avatar: user.avatar 
+            ? (user.avatar.startsWith('/uploads/') ? `http://localhost:3000${user.avatar}` : user.avatar) 
+            : 'assets/images/Default.png'
         };
       } else if (this.authService.isLoggedIn()) {
         try {
@@ -109,7 +111,9 @@ export class Inicio implements OnInit {
             this.usuarioLogueado = {
               nombre: reloadedUser.fullName || reloadedUser.username || 'Usuario',
               email: reloadedUser.email,
-              avatar: reloadedUser.avatar || 'assets/images/Default.png'
+              avatar: reloadedUser.avatar 
+                ? (reloadedUser.avatar.startsWith('/uploads/') ? `http://localhost:3000${reloadedUser.avatar}` : reloadedUser.avatar) 
+                : 'assets/images/Default.png'
             };
           }
         } catch (error) {
@@ -129,18 +133,23 @@ export class Inicio implements OnInit {
 
   private async cargarPublicaciones(): Promise<void> {
     return new Promise((resolve) => {
-
-      // Only load real user publications
-      const currentUser = this.authService.getCurrentUser();
-      if (currentUser && currentUser.id) {
-        this.publicacionesService.getPublicacionesPorAutor(currentUser.id).subscribe({
-          next: (publicaciones) => {
-            this.publicaciones = publicaciones.map(pub => ({
+      console.log('Frontend: Solicitando todas las publicaciones...');
+      this.publicacionesService.getPublicaciones().subscribe({
+        next: (publicaciones) => {
+          console.log('Frontend: Publicaciones recibidas del backend:', publicaciones);
+          this.publicaciones = publicaciones.map(pub => {
+            const autor = pub.autor;
+            if (!autor) {
+              console.warn(`Publicación ID ${pub.id} no tiene autor asociado.`);
+            }
+            return {
               id: pub.id,
-              autorId: pub.autorId || currentUser.id,
+              autorId: pub.autorId,
               usuario: {
-                nombre: `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() || currentUser.username || 'Usuario',
-                avatar: currentUser.avatar || 'assets/images/Default.png'
+                nombre: autor ? (autor.fullName || `${autor.firstName || ''} ${autor.lastName || ''}`.trim() || autor.username || 'Usuario') : 'Usuario',
+                avatar: autor?.avatar 
+                  ? (autor.avatar.startsWith('/uploads/') ? `http://localhost:3000${autor.avatar}` : autor.avatar)
+                  : 'assets/images/Default.png'
               },
               contenido: pub.descripcion,
               imagen: pub.imagen && pub.imagen.startsWith('/uploads/') ? `http://localhost:3000${pub.imagen}` : pub.imagen,
@@ -150,21 +159,17 @@ export class Inicio implements OnInit {
               compartidos: 0,
               likedByUser: false,
               mostrarComentarios: false
-            }));
-            console.log('✅ Publicaciones del usuario cargadas:', publicaciones.length);
-          },
-          error: (err) => {
-            console.error('❌ Error al cargar publicaciones del usuario:', err);
-            // Don't load dummy posts, keep empty array
-            this.publicaciones = [];
-          }
-        }).add(() => {
-          resolve();
-        });
-      } else {
-        this.publicaciones = [];
+            };
+          });
+          console.log(`Frontend: ${this.publicaciones.length} publicaciones mapeadas y listas para mostrar.`);
+        },
+        error: (err) => {
+          console.error('Frontend: ❌ Error al cargar todas las publicaciones:', err);
+          this.publicaciones = [];
+        }
+      }).add(() => {
         resolve();
-      }
+      });
     });
   }
 
