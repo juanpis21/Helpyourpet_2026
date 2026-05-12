@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { ThemeService } from '../../../core/services/theme.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { PublicacionesService } from '../services/publicaciones.service';
+import { PreloaderComponent } from '../../../shared/components/preloader/preloader';
 
 interface Publicacion {
   id: number;
@@ -41,7 +42,7 @@ interface Comentario {
 @Component({
   selector: 'app-inicio',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, PreloaderComponent],
   templateUrl: './inicio.html',
   styleUrls: ['./inicio.scss']
 })
@@ -57,6 +58,8 @@ export class Inicio implements OnInit {
   showScrollTop: boolean = false;
   nuevoComentario: { [key: number]: string } = {};
   currentPlaceholder: string = '';
+
+  // Preloader is now self-managed by PreloaderComponent
 
   private placeholders = [
     '¿Qué travesura hizo hoy tu mascota? 😏',
@@ -81,139 +84,88 @@ export class Inicio implements OnInit {
   }
 
   ngOnInit(): void {
-    const user = this.authService.currentUser();
-    if (user) {
-      this.usuarioLogueado = {
-        nombre: user.fullName || user.username || 'Usuario',
-        email: user.email,
-        avatar: user.avatar || 'assets/images/Default.png'
-      };
-    } else if (this.authService.isLoggedIn()) {
-      // Si hay token pero no hay usuario, recargar desde el backend
-      this.authService.reloadUser().then(() => {
-        const reloadedUser = this.authService.currentUser();
-        if (reloadedUser) {
-          this.usuarioLogueado = {
-            nombre: reloadedUser.fullName || reloadedUser.username || 'Usuario',
-            email: reloadedUser.email,
-            avatar: reloadedUser.avatar || 'assets/images/Default.png'
-          };
-        }
-      });
-    } else {
-      this.usuarioLogueado = null;
-    }
-    this.currentPlaceholder = this.getRandomPlaceholder();
-    this.cargarPublicaciones();
-    this.modoOscuro = this.themeService.isDarkMode;
-    this.themeService.darkMode$.subscribe(dark => this.modoOscuro = dark);
+    this.initializeInicio();
   }
 
-  cargarPublicaciones(): void {
-    this.publicacionesService.getPublicaciones().subscribe({
-      next: (publicacionesBackend) => {
-        // Mapear las publicaciones del backend al formato del frontend
-        this.publicaciones = publicacionesBackend.map(pub => ({
-          id: pub.id,
-          autorId: pub.autorId,
-          usuario: {
-            nombre: pub.autor?.fullName || pub.autor?.username || 'Usuario',
-            avatar: pub.autor?.avatar || 'assets/images/Default.png'
+  private async initializeInicio(): Promise<void> {
+    try {
+      // Set up theme first
+      this.modoOscuro = this.themeService.isDarkMode;
+      this.themeService.darkMode$.subscribe(dark => this.modoOscuro = dark);
+
+      // Load user data
+      const user = this.authService.currentUser();
+      if (user) {
+        this.usuarioLogueado = {
+          nombre: user.fullName || user.username || 'Usuario',
+          email: user.email,
+          avatar: user.avatar || 'assets/images/Default.png'
+        };
+      } else if (this.authService.isLoggedIn()) {
+        try {
+          await this.authService.reloadUser();
+          const reloadedUser = this.authService.currentUser();
+          if (reloadedUser) {
+            this.usuarioLogueado = {
+              nombre: reloadedUser.fullName || reloadedUser.username || 'Usuario',
+              email: reloadedUser.email,
+              avatar: reloadedUser.avatar || 'assets/images/Default.png'
+            };
+          }
+        } catch (error) {
+          console.error('Error al recargar usuario:', error);
+        }
+      }
+
+      this.currentPlaceholder = this.getRandomPlaceholder();
+
+      // Load real publications
+      await this.cargarPublicaciones();
+    } catch (error) {
+      console.error('Error al inicializar inicio:', error);
+    }
+  }
+
+
+  private async cargarPublicaciones(): Promise<void> {
+    return new Promise((resolve) => {
+
+      // Only load real user publications
+      const currentUser = this.authService.getCurrentUser();
+      if (currentUser && currentUser.id) {
+        this.publicacionesService.getPublicacionesPorAutor(currentUser.id).subscribe({
+          next: (publicaciones) => {
+            this.publicaciones = publicaciones.map(pub => ({
+              id: pub.id,
+              autorId: pub.autorId || currentUser.id,
+              usuario: {
+                nombre: `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() || currentUser.username || 'Usuario',
+                avatar: currentUser.avatar || 'assets/images/Default.png'
+              },
+              contenido: pub.descripcion,
+              imagen: pub.imagen && pub.imagen.startsWith('/uploads/') ? `http://localhost:3000${pub.imagen}` : pub.imagen,
+              fecha: new Date(pub.createdAt),
+              likes: pub.likes || 0,
+              comentarios: [],
+              compartidos: 0,
+              likedByUser: false,
+              mostrarComentarios: false
+            }));
+            console.log('✅ Publicaciones del usuario cargadas:', publicaciones.length);
           },
-          contenido: pub.descripcion,
-          imagen: pub.imagen && pub.imagen.startsWith('/uploads/') ? `http://localhost:3000${pub.imagen}` : pub.imagen,
-          fecha: new Date(pub.createdAt),
-          likes: pub.likes || 0,
-          comentarios: [],
-          compartidos: 0,
-          likedByUser: false,
-          mostrarComentarios: false
-        }));
-      },
-      error: (err) => {
-        console.error('Error al cargar publicaciones:', err);
-        // Cargar publicaciones de ejemplo si falla
-        this.cargarPublicacionesDeEjemplo();
+          error: (err) => {
+            console.error('❌ Error al cargar publicaciones del usuario:', err);
+            // Don't load dummy posts, keep empty array
+            this.publicaciones = [];
+          }
+        }).add(() => {
+          resolve();
+        });
+      } else {
+        this.publicaciones = [];
+        resolve();
       }
     });
-  }
-
-  cargarPublicacionesDeEjemplo(): void {
-    // Publicaciones de ejemplo
-    this.publicaciones = [
-      {
-        id: 1,
-        usuario: {
-          nombre: 'María García',
-          avatar: 'https://ui-avatars.com/api/?name=Maria+Garcia&background=4ade80&color=fff'
-        },
-        contenido: '¡Mi perro Max disfrutando del parque hoy! 🐶 🌳',
-        imagen: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600',
-        fecha: new Date(Date.now() - 2 * 60 * 60 * 1000),
-        likes: 24,
-        comentarios: [
-          {
-            id: 1,
-            usuario: {
-              nombre: 'Carlos Pérez',
-              avatar: 'https://ui-avatars.com/api/?name=Carlos+Perez&background=3b82f6&color=fff'
-            },
-            contenido: '¡Qué lindo! 😍',
-            fecha: new Date(Date.now() - 1 * 60 * 60 * 1000)
-          }
-        ],
-        compartidos: 3,
-        likedByUser: false,
-        mostrarComentarios: false
-      },
-      {
-        id: 2,
-        usuario: {
-          nombre: 'Juan Martínez',
-          avatar: 'https://ui-avatars.com/api/?name=Juan+Martinez&background=f59e0b&color=fff'
-        },
-        contenido: 'Recordatorio: Vacunación gratuita este sábado en la Clínica Veterinaria Central 💉',
-        fecha: new Date(Date.now() - 5 * 60 * 60 * 1000),
-        likes: 45,
-        comentarios: [],
-        compartidos: 12,
-        likedByUser: true,
-        mostrarComentarios: false
-      },
-      {
-        id: 3,
-        usuario: {
-          nombre: 'Ana Rodríguez',
-          avatar: 'https://ui-avatars.com/api/?name=Ana+Rodriguez&background=ec4899&color=fff'
-        },
-        contenido: 'Tips para el cuidado dental de tu gato: 1) Cepillar los dientes al menos 2 veces por semana 2) Usar pasta dental especial para gatos 3) Visitar al veterinario cada 6 meses 🐱✨',
-        fecha: new Date(Date.now() - 8 * 60 * 60 * 1000),
-        likes: 67,
-        comentarios: [
-          {
-            id: 1,
-            usuario: {
-              nombre: 'Laura Sánchez',
-              avatar: 'https://ui-avatars.com/api/?name=Laura+Sanchez&background=8b5cf6&color=fff'
-            },
-            contenido: '¡Muy útil! Mi gato odia el cepillo pero voy a intentarlo 😅',
-            fecha: new Date(Date.now() - 7 * 60 * 60 * 1000)
-          },
-          {
-            id: 2,
-            usuario: {
-              nombre: 'Pedro López',
-              avatar: 'https://ui-avatars.com/api/?name=Pedro+Lopez&background=06b6d4&color=fff'
-            },
-            contenido: 'Gracias por los consejos Ana! 👏',
-            fecha: new Date(Date.now() - 6 * 60 * 60 * 1000)
-          }
-        ],
-        compartidos: 23,
-        likedByUser: false,
-        mostrarComentarios: false
-      }
-    ];
   }
 
   toggleMenu(): void {
@@ -345,59 +297,51 @@ export class Inicio implements OnInit {
 
   getTiempoTranscurrido(fecha: Date): string {
     const ahora = new Date();
-    const diff = ahora.getTime() - new Date(fecha).getTime();
-    const minutos = Math.floor(diff / 60000);
-    const horas = Math.floor(minutos / 60);
-    const dias = Math.floor(horas / 24);
+    const diffMs = ahora.getTime() - fecha.getTime();
+    const diffSegundos = Math.floor(diffMs / 1000);
+    const diffMinutos = Math.floor(diffSegundos / 60);
+    const diffHoras = Math.floor(diffMinutos / 60);
+    const diffDias = Math.floor(diffHoras / 24);
 
-    if (dias > 0) return `Hace ${dias} día${dias > 1 ? 's' : ''}`;
-    if (horas > 0) return `Hace ${horas} hora${horas > 1 ? 's' : ''}`;
-    if (minutos > 0) return `Hace ${minutos} minuto${minutos > 1 ? 's' : ''}`;
-    return 'Ahora';
+    if (diffSegundos < 60) {
+      return 'ahora mismo';
+    } else if (diffMinutos < 60) {
+      return `hace ${diffMinutos} minuto${diffMinutos !== 1 ? 's' : ''}`;
+    } else if (diffHoras < 24) {
+      return `hace ${diffHoras} hora${diffHoras !== 1 ? 's' : ''}`;
+    } else if (diffDias < 7) {
+      return `hace ${diffDias} día${diffDias !== 1 ? 's' : ''}`;
+    } else {
+      return fecha.toLocaleDateString('es-ES', {
+        day: 'numeric',
+        month: 'short',
+        year: fecha.getFullYear() !== ahora.getFullYear() ? 'numeric' : undefined
+      });
+    }
   }
 
   getUser(): any {
-    // Obtener usuario real del localStorage a través del AuthService
-    const user = this.authService.getCurrentUser();
-    if (user) {
-      return {
-        nombre: user.fullName || user.username || 'Usuario',
-        email: user.email,
-        avatar: user.avatar || 'assets/images/Default.png'
-      };
-    }
-    return {
-      nombre: 'Usuario',
-      email: '',
-      avatar: 'assets/images/Default.png'
-    };
+    return this.usuarioLogueado;
   }
 
   logout(): void {
     this.authService.logout();
-    this.menuAbierto = false;
-    this.usuarioLogueado = null;
-    this.themeService.setDarkMode(false);
     this.router.navigate(['/login']);
   }
 
   irAPerfil(): void {
-    this.menuAbierto = false;
-    this.router.navigate(['/perfil-usuario']);
+    this.router.navigate(['/perfil']);
   }
 
   irATienda(): void {
-    this.menuAbierto = false;
     this.router.navigate(['/tienda']);
   }
 
   irAAdopciones(): void {
-    this.menuAbierto = false;
     this.router.navigate(['/adopcion']);
   }
 
   irASobreNosotros(): void {
-    this.menuAbierto = false;
     this.router.navigate(['/sobre-nosotros']);
   }
 
@@ -407,6 +351,9 @@ export class Inicio implements OnInit {
   }
 
   scrollToTop(): void {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   }
 }

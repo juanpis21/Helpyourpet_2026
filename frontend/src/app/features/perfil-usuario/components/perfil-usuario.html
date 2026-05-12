@@ -26,6 +26,11 @@
         </a>
       </li>
       <li>
+        <a [class.active]="seccionActiva === 'historial'" (click)="cambiarSeccion('historial')">
+          <i class="fas fa-file-medical"></i><span>Historial Clínico</span>
+        </a>
+      </li>
+      <li>
         <a [class.active]="seccionActiva === 'compras'" (click)="cambiarSeccion('compras')">
           <i class="fas fa-shopping-cart"></i><span>Mis Compras</span>
         </a>
@@ -48,6 +53,9 @@
     </ul>
   </nav>
 
+  <!-- PRELOADER ANIMADO -->
+  <app-preloader></app-preloader>
+
   <!-- ===== CONTENIDO PRINCIPAL ===== -->
   <main class="main-content">
     <!-- ===== DASHBOARD ===== -->
@@ -60,6 +68,48 @@
             <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
           </button>
           <button class="home-btn" (click)="irAInicio()"><i class="fas fa-home"></i></button>
+        </div>
+      </div>
+
+      <!-- Dashboard de Estadísticas -->
+      <div class="dashboard-stats">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon pets">
+              <i class="fas fa-paw"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-number">{{ mascotas.length }}</h3>
+              <p class="stat-label">Mascotas Registradas</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon purchases">
+              <i class="fas fa-shopping-cart"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-number">0</h3>
+              <p class="stat-label">Compras Realizadas</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon posts">
+              <i class="fas fa-heart"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-number">{{ publicaciones.length }}</h3>
+              <p class="stat-label">Publicaciones</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon medical">
+              <i class="fas fa-file-medical"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-number">{{ getTotalHistorialRegistros() }}</h3>
+              <p class="stat-label">Registros Médicos</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -181,6 +231,99 @@
             </tr>
           </tbody>
         </table>
+      </div>
+    </section>
+
+    <!-- ===== HISTORIAL CLÍNICO ===== -->
+    <section *ngIf="seccionActiva === 'historial'" class="content-section animate-in">
+      <div class="section-header">
+        <h1><i class="fas fa-file-medical"></i> Historial Clínico</h1>
+        <div class="header-actions">
+          <button class="menu-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="theme-btn" (click)="toggleDarkMode()">
+            <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
+          <button class="home-btn" (click)="irAInicio()"><i class="fas fa-home"></i></button>
+        </div>
+      </div>
+
+      <!-- Selector de mascota -->
+      <div class="historial-selector" *ngIf="mascotas.length > 0">
+        <label class="selector-label"><i class="fas fa-paw"></i> Selecciona una mascota:</label>
+        <select [(ngModel)]="mascotaSeleccionadaHistorial" (ngModelChange)="onMascotaHistorialChange()" class="mascota-select">
+          <option [ngValue]="null">-- Seleccionar mascota --</option>
+          <option *ngFor="let m of mascotas" [ngValue]="m.id">{{ m.name }} ({{ m.species }})</option>
+        </select>
+      </div>
+
+      <!-- Sin mascotas -->
+      <div *ngIf="mascotas.length === 0" class="empty-state large">
+        <i class="fas fa-file-medical"></i>
+        <h4>No tienes mascotas registradas</h4>
+        <p>Registra una mascota primero para ver su historial clínico.</p>
+      </div>
+
+      <!-- Sin mascota seleccionada -->
+      <div *ngIf="mascotas.length > 0 && !mascotaSeleccionadaHistorial" class="empty-state large">
+        <i class="fas fa-hand-pointer"></i>
+        <h4>Selecciona una mascota</h4>
+        <p>Elige una mascota del selector para ver su historial clínico.</p>
+      </div>
+
+      <!-- Historial clínico con timeline -->
+      <div *ngIf="mascotaSeleccionadaHistorial" class="historial-content">
+        <div class="historial-header-bar">
+          <h3 class="historial-pet-name"><i class="fas fa-stethoscope"></i> Historial de {{ getNombreMascotaSeleccionada() }}</h3>
+          <button class="btn-primary" (click)="openAddHistorialModal()">
+            <i class="fas fa-plus"></i> Agregar Registro
+          </button>
+        </div>
+
+        <!-- Sin registros -->
+        <div *ngIf="historialClinico.length === 0" class="empty-state large">
+          <i class="fas fa-notes-medical"></i>
+          <h4>Sin registros clínicos</h4>
+          <p>Aún no hay registros en el historial clínico de esta mascota.</p>
+        </div>
+
+        <!-- Timeline de registros -->
+        <div *ngIf="historialClinico.length > 0" class="timeline">
+          <div *ngFor="let registro of historialClinico" class="timeline-item">
+            <div class="timeline-marker" [ngClass]="'marker-' + registro.tipo"></div>
+            <div class="timeline-card">
+              <div class="timeline-card-header">
+                <div class="timeline-tipo">
+                  <i [ngClass]="getHistorialIcon(registro.tipo)"></i>
+                  <span class="tipo-badge" [ngClass]="'badge-' + registro.tipo">{{ getHistorialTipoLabel(registro.tipo) }}</span>
+                </div>
+                <span class="timeline-fecha"><i class="fas fa-calendar-alt"></i> {{ registro.fecha | date:'dd/MM/yyyy' }}</span>
+              </div>
+              <div class="timeline-card-body">
+                <div class="timeline-detail" *ngIf="registro.veterinario">
+                  <i class="fas fa-user-md"></i>
+                  <span><strong>Veterinario:</strong> {{ registro.veterinario }}</span>
+                </div>
+                <div class="timeline-detail" *ngIf="registro.diagnostico">
+                  <i class="fas fa-clipboard-list"></i>
+                  <span><strong>Diagnóstico:</strong> {{ registro.diagnostico }}</span>
+                </div>
+                <div class="timeline-detail" *ngIf="registro.tratamiento">
+                  <i class="fas fa-pills"></i>
+                  <span><strong>Tratamiento:</strong> {{ registro.tratamiento }}</span>
+                </div>
+                <div class="timeline-detail" *ngIf="registro.notas">
+                  <i class="fas fa-sticky-note"></i>
+                  <span><strong>Notas:</strong> {{ registro.notas }}</span>
+                </div>
+              </div>
+              <div class="timeline-card-actions">
+                <button class="btn-delete-small" (click)="eliminarHistorial(registro.id)" title="Eliminar registro">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -316,12 +459,35 @@
 
       <!-- Zona de Peligro -->
       <div class="danger-zone-grid">
-
         <div class="card card-danger">
           <div class="card-header danger"><h6><i class="fas fa-exclamation-triangle"></i> Zona de Peligro</h6></div>
           <div class="card-body center">
             <p>Desactivación de cuenta</p>
             <button class="btn-danger" (click)="eliminarCuenta()"><i class="fas fa-user-slash"></i> Desactivar Cuenta</button>
+          </div>
+        </div>
+
+        <!-- Tarjeta de Cambio de Contraseña -->
+        <div class="card">
+          <div class="card-header"><h6><i class="fas fa-key"></i> Cambiar Contraseña</h6></div>
+          <div class="card-body">
+            <div class="password-form">
+              <div class="form-group">
+                <label>Contraseña Actual</label>
+                <input type="password" [(ngModel)]="passwordData.currentPassword" placeholder="Ingresa tu contraseña actual">
+              </div>
+              <div class="form-group">
+                <label>Nueva Contraseña</label>
+                <input type="password" [(ngModel)]="passwordData.newPassword" placeholder="Ingresa la nueva contraseña">
+              </div>
+              <div class="form-group">
+                <label>Confirmar Nueva Contraseña</label>
+                <input type="password" [(ngModel)]="passwordData.confirmPassword" placeholder="Confirma la nueva contraseña">
+              </div>
+              <div class="form-actions">
+                <button class="btn-primary" (click)="actualizarPassword()"><i class="fas fa-save"></i> Actualizar Contraseña</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -331,86 +497,62 @@
   </main>
 </div>
 
-<!-- ===== MODAL AGREGAR MASCOTA ===== -->
-<div class="modal-overlay" *ngIf="showAddPetModal" (click)="closeAddPetModal()">
+<!-- ===== MODAL AGREGAR HISTORIAL CLÍNICO ===== -->
+<div class="modal-overlay" *ngIf="showAddHistorialModal" (click)="closeAddHistorialModal()">
   <div class="modal-box" (click)="$event.stopPropagation()">
 
     <div class="modal-header">
-      <h3><i class="fas fa-plus"></i> Agregar Nueva Mascota</h3>
-      <button class="close-btn" (click)="closeAddPetModal()">
+      <h3><i class="fas fa-notes-medical"></i> Agregar Registro Clínico</h3>
+      <button class="close-btn" (click)="closeAddHistorialModal()">
         <i class="fas fa-times"></i>
       </button>
     </div>
 
     <div class="modal-body">
       <div class="form-grid">
-        <div class="form-group full-width">
-          <label>Nombre *</label>
-          <input type="text" [(ngModel)]="newPet.name" placeholder="Nombre de la mascota">
+        <div class="form-group">
+          <label>Fecha *</label>
+          <input type="date" [(ngModel)]="newHistorial.fecha">
         </div>
 
         <div class="form-group">
-          <label>Especie *</label>
-          <select [(ngModel)]="newPet.species">
-            <option value="">Selecciona una especie</option>
-            <option value="Perro">Perro</option>
-            <option value="Gato">Gato</option>
-            <option value="Ave">Ave</option>
-            <option value="Pez">Pez</option>
+          <label>Tipo *</label>
+          <select [(ngModel)]="newHistorial.tipo">
+            <option value="">Selecciona un tipo</option>
+            <option value="vacuna">Vacuna</option>
+            <option value="consulta">Consulta General</option>
+            <option value="cirugia">Cirugía</option>
+            <option value="desparasitacion">Desparasitación</option>
+            <option value="emergencia">Emergencia</option>
+            <option value="control">Control</option>
           </select>
         </div>
 
-        <div class="form-group">
-          <label>Raza</label>
-          <input type="text" [(ngModel)]="newPet.breed" placeholder="Raza">
-        </div>
-
-        <div class="form-group">
-          <label>Edad (años) *</label>
-          <input type="number" [(ngModel)]="newPet.age" min="0" max="50" placeholder="0">
-        </div>
-
-        <div class="form-group">
-          <label>Género</label>
-          <select [(ngModel)]="newPet.gender">
-            <option value="M">Macho</option>
-            <option value="F">Hembra</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Color</label>
-          <input type="text" [(ngModel)]="newPet.color" placeholder="Color">
-        </div>
-
-        <div class="form-group">
-          <label>Peso (kg) *</label>
-          <input type="number" [(ngModel)]="newPet.weight" min="0.1" max="200" step="0.1" placeholder="0">
+        <div class="form-group full-width">
+          <label>Veterinario</label>
+          <input type="text" [(ngModel)]="newHistorial.veterinario" placeholder="Nombre del veterinario">
         </div>
 
         <div class="form-group full-width">
-          <label>Imagen de la mascota</label>
-          <label class="file-input-label">
-            <i class="fas fa-cloud-upload-alt"></i> Seleccionar imagen
-            <input type="file" accept="image/*" (change)="onPetImageSelected($event)" hidden>
-          </label>
-          <div *ngIf="newPetImagePreview" class="image-preview">
-            <img [src]="newPetImagePreview" alt="Preview" class="preview-img">
-            <button class="remove-image-btn" (click)="removeNewPetImage()"><i class="fas fa-times"></i></button>
-          </div>
+          <label>Diagnóstico</label>
+          <input type="text" [(ngModel)]="newHistorial.diagnostico" placeholder="Diagnóstico realizado">
         </div>
 
         <div class="form-group full-width">
-          <label>Descripción</label>
-          <textarea [(ngModel)]="newPet.description" rows="3" placeholder="Características, comportamiento..."></textarea>
+          <label>Tratamiento</label>
+          <input type="text" [(ngModel)]="newHistorial.tratamiento" placeholder="Tratamiento aplicado">
         </div>
 
+        <div class="form-group full-width">
+          <label>Notas adicionales</label>
+          <textarea [(ngModel)]="newHistorial.notas" rows="3" placeholder="Observaciones, recomendaciones..."></textarea>
+        </div>
       </div>
     </div>
 
     <div class="modal-footer">
-      <button class="btn-secondary" (click)="closeAddPetModal()">Cancelar</button>
-      <button class="btn-primary" (click)="guardarMascota()">Guardar Mascota</button>
+      <button class="btn-secondary" (click)="closeAddHistorialModal()">Cancelar</button>
+      <button class="btn-primary" (click)="guardarHistorial()"><i class="fas fa-save"></i> Guardar Registro</button>
     </div>
 
   </div>

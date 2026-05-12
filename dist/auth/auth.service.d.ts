@@ -15,4 +15,5 @@ export declare class AuthService {
     validateUser(username: string, password: string): Promise<any>;
     login(loginDto: LoginDto): Promise<AuthResponse>;
     checkStatus(user: any): Promise<AuthResponse>;
+    verifyPassword(userId: number, password: string): Promise<boolean>;
 }

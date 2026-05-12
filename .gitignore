@@ -1,5 +1,6 @@
 node_modules/
 dist/
+*.tsbuildinfo
 target/
 *.log
 .env
@@ -11,3 +12,4 @@ scratch/
 uploads/
 frontend/node_modules/
 frontend/dist/
+

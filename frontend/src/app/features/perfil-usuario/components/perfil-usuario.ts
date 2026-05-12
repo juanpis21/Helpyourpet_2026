@@ -7,6 +7,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { UsersService } from '../../../core/services/users.service';
 import { MascotasService } from '../services/mascotas.service';
 import { PublicacionesService } from '../../inicio/services/publicaciones.service';
+import { PreloaderComponent } from '../../../shared/components/preloader/preloader';
 
 interface Mascota {
   id: number;
@@ -38,10 +39,21 @@ interface Usuario {
   roleId?: number;
 }
 
+interface HistorialClinico {
+  id: number;
+  petId: number;
+  fecha: string;
+  tipo: string;
+  veterinario: string;
+  diagnostico: string;
+  tratamiento: string;
+  notas: string;
+}
+
 @Component({
   selector: 'app-perfil-usuario',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, PreloaderComponent],
   templateUrl: './perfil-usuario.html',
   styleUrl: './perfil-usuario.scss'
 })
@@ -49,6 +61,7 @@ export class PerfilUsuario implements OnInit {
   seccionActiva = 'dashboard';
   sidebarAbierto = false;
   darkMode = false;
+
 
   usuario: Usuario = {
     id: 1,
@@ -101,8 +114,29 @@ export class PerfilUsuario implements OnInit {
   profileImagePreview: string | null = null;
 
   // Pet image handling
-  selectedPetImage: File | null = null;
+  selectedPetFile: File | null = null;
   petImagePreview: string | null = null;
+
+  // Historial clínico
+  historialClinico: HistorialClinico[] = [];
+  mascotaSeleccionadaHistorial: number | null = null;
+  showAddHistorialModal = false;
+  newHistorial: any = {
+    fecha: '',
+    tipo: '',
+    veterinario: '',
+    diagnostico: '',
+    tratamiento: '',
+    notas: ''
+  };
+  // Password update data
+  passwordData = {
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  };
+
+  private historialIdCounter = 1;
 
   constructor(
     private router: Router, 
@@ -117,79 +151,123 @@ export class PerfilUsuario implements OnInit {
     this.darkMode = this.themeService.isDarkMode;
     this.themeService.darkMode$.subscribe(dark => this.darkMode = dark);
 
-    const currentUser = this.authService.getCurrentUser();
-    if (currentUser) {
-      this.loadUserProfile();
-      this.cargarMascotasUsuario();
-      this.cargarPublicacionesUsuario();
-    } else if (this.authService.isLoggedIn()) {
-      // Si hay token pero no hay usuario, recargar desde el backend
-      this.authService.reloadUser().then(() => {
-        this.loadUserProfile();
-        this.cargarMascotasUsuario();
-        this.cargarPublicacionesUsuario();
-      });
-    } else {
-      this.router.navigate(['/login']);
-    }
+    this.initializeUserData();
   }
 
-  loadUserProfile(): void {
-    const currentUser = this.authService.getCurrentUser();
-    console.log('[PerfilUsuario] Usuario cargado desde auth:', currentUser);
-    if (currentUser) {
-      const avatar = currentUser.avatar || '';
-      this.usuario = {
-        id: currentUser.id,
-        nombres: currentUser.firstName || '',
-        apellidos: currentUser.lastName || '',
-        correo: currentUser.email || '',
-        telefono: currentUser.phone || '',
-        edad: currentUser.age || 0,
-        direccion: currentUser.address || '',
-        tipoDocumento: currentUser.documentType || '',
-        numDocumento: currentUser.documentNumber || '',
-        imagen: avatar && avatar.startsWith('/uploads/') ? `http://localhost:3000${avatar}` : avatar,
-        roleId: currentUser.roleId
-      };
-    }
-  }
-
-
-  cargarMascotasUsuario(): void {
-    const currentUser = this.authService.getCurrentUser();
-    if (currentUser && currentUser.id) {
-      this.mascotasService.getMascotasByUsuario(currentUser.id).subscribe({
-        next: (mascotas) => {
-          this.mascotas = mascotas.map(m => ({
-            ...m,
-            foto: m.foto && m.foto.startsWith('/uploads/') ? `http://localhost:3000${m.foto}` : m.foto
-          }));
-          console.log('✅ Mascotas del usuario cargadas:', mascotas.length);
-        },
-        error: (err) => {
-          console.error('❌ Error al cargar mascotas del usuario:', err);
+  private async initializeUserData(): Promise<void> {
+    try {
+      const currentUser = this.authService.getCurrentUser();
+      
+      if (currentUser) {
+        // User already exists in auth service
+        await Promise.all([
+          this.loadUserProfile(),
+          this.cargarMascotasUsuario(),
+          this.cargarPublicacionesUsuario()
+        ]);
+      } else if (this.authService.isLoggedIn()) {
+        // Try to reload user from backend
+        try {
+          await this.authService.reloadUser();
+          const userAfterReload = this.authService.getCurrentUser();
+          if (userAfterReload) {
+            await Promise.all([
+              this.loadUserProfile(),
+              this.cargarMascotasUsuario(),
+              this.cargarPublicacionesUsuario()
+            ]);
+          } else {
+            this.router.navigate(['/login']);
+            return;
+          }
+        } catch (error) {
+          console.error('❌ Error al recargar usuario:', error);
+          this.router.navigate(['/login']);
+          return;
         }
-      });
+      } else {
+        this.router.navigate(['/login']);
+        return;
+      }
+    } catch (error) {
+      console.error('❌ Error al inicializar datos del usuario:', error);
     }
   }
 
-  cargarPublicacionesUsuario(): void {
-    const currentUser = this.authService.getCurrentUser();
-    if (currentUser && currentUser.id) {
-      this.publicacionesService.getPublicacionesPorAutor(currentUser.id).subscribe({
-        next: (publicaciones) => {
-          this.publicaciones = publicaciones.map(pub => ({
-            ...pub,
-            imagen: pub.imagen && pub.imagen.startsWith('/uploads/') ? `http://localhost:3000${pub.imagen}` : pub.imagen
-          }));
-          console.log('✅ Publicaciones del usuario cargadas:', publicaciones.length);
-        },
-        error: (err) => {
-          console.error('❌ Error al cargar publicaciones del usuario:', err);
-        }
-      });
-    }
+
+  private async loadUserProfile(): Promise<void> {
+    return new Promise((resolve) => {
+      const currentUser = this.authService.getCurrentUser();
+      console.log('[PerfilUsuario] Usuario cargado desde auth:', currentUser);
+      if (currentUser) {
+        const avatar = currentUser.avatar || '';
+        this.usuario = {
+          id: currentUser.id,
+          nombres: currentUser.firstName || '',
+          apellidos: currentUser.lastName || '',
+          correo: currentUser.email || '',
+          telefono: currentUser.phone || '',
+          edad: currentUser.age || 0,
+          direccion: currentUser.address || '',
+          tipoDocumento: currentUser.documentType || '',
+          numDocumento: currentUser.documentNumber || '',
+          imagen: avatar && avatar.startsWith('/uploads/') ? `http://localhost:3000${avatar}` : avatar,
+          roleId: currentUser.roleId
+        };
+      }
+      resolve();
+    });
+  }
+
+
+  private async cargarMascotasUsuario(): Promise<void> {
+    return new Promise((resolve) => {
+      const currentUser = this.authService.getCurrentUser();
+      if (currentUser && currentUser.id) {
+        this.mascotasService.getMascotasByUsuario(currentUser.id).subscribe({
+          next: (mascotas) => {
+            this.mascotas = mascotas.map(m => ({
+              ...m,
+              foto: m.foto && m.foto.startsWith('/uploads/') ? `http://localhost:3000${m.foto}` : m.foto
+            }));
+            console.log('✅ Mascotas del usuario cargadas:', mascotas.length);
+          },
+          error: (err) => {
+            console.error('❌ Error al cargar mascotas del usuario:', err);
+            // Don't show error to user, just log it
+          }
+        }).add(() => {
+          resolve();
+        });
+      } else {
+        resolve();
+      }
+    });
+  }
+
+  private async cargarPublicacionesUsuario(): Promise<void> {
+    return new Promise((resolve) => {
+      const currentUser = this.authService.getCurrentUser();
+      if (currentUser && currentUser.id) {
+        this.publicacionesService.getPublicacionesPorAutor(currentUser.id).subscribe({
+          next: (publicaciones) => {
+            this.publicaciones = publicaciones.map(pub => ({
+              ...pub,
+              imagen: pub.imagen && pub.imagen.startsWith('/uploads/') ? `http://localhost:3000${pub.imagen}` : pub.imagen
+            }));
+            console.log('✅ Publicaciones del usuario cargadas:', publicaciones.length);
+          },
+          error: (err) => {
+            console.error('❌ Error al cargar publicaciones del usuario:', err);
+            // Don't show error to user, just log it
+          }
+        }).add(() => {
+          resolve();
+        });
+      } else {
+        resolve();
+      }
+    });
   }
 
   eliminarPublicacion(id: number): void {
@@ -425,7 +503,6 @@ export class PerfilUsuario implements OnInit {
     }
   }
 
-  selectedPetFile: File | null = null;
   selectedEditPetFile: File | null = null;
 
   // Métodos para manejar imagen de mascota
@@ -523,5 +600,192 @@ export class PerfilUsuario implements OnInit {
         }
       });
     }
+  }
+
+  // ===== HISTORIAL CLÍNICO =====
+
+  onMascotaHistorialChange(): void {
+    if (this.mascotaSeleccionadaHistorial) {
+      this.cargarHistorial(this.mascotaSeleccionadaHistorial);
+    } else {
+      this.historialClinico = [];
+    }
+  }
+
+  cargarHistorial(petId: number): void {
+    // Cargar desde localStorage (datos locales por ahora)
+    const key = `historial_${petId}`;
+    const saved = localStorage.getItem(key);
+    if (saved) {
+      try {
+        this.historialClinico = JSON.parse(saved);
+        // Actualizar el counter para evitar IDs duplicados
+        const maxId = this.historialClinico.reduce((max, h) => Math.max(max, h.id), 0);
+        this.historialIdCounter = maxId + 1;
+      } catch {
+        this.historialClinico = [];
+      }
+    } else {
+      this.historialClinico = [];
+    }
+  }
+
+  guardarHistorialEnStorage(): void {
+    if (this.mascotaSeleccionadaHistorial) {
+      const key = `historial_${this.mascotaSeleccionadaHistorial}`;
+      localStorage.setItem(key, JSON.stringify(this.historialClinico));
+    }
+  }
+
+  getNombreMascotaSeleccionada(): string {
+    const mascota = this.mascotas.find(m => m.id === this.mascotaSeleccionadaHistorial);
+    return mascota?.name || 'Mascota';
+  }
+
+  openAddHistorialModal(): void {
+    const today = new Date();
+    this.newHistorial = {
+      fecha: today.toISOString().split('T')[0],
+      tipo: '',
+      veterinario: '',
+      diagnostico: '',
+      tratamiento: '',
+      notas: ''
+    };
+    this.showAddHistorialModal = true;
+  }
+
+  closeAddHistorialModal(): void {
+    this.showAddHistorialModal = false;
+  }
+
+  guardarHistorial(): void {
+    if (!this.newHistorial.fecha || !this.newHistorial.tipo) {
+      alert('Completa la fecha y el tipo de registro.');
+      return;
+    }
+
+    const registro: HistorialClinico = {
+      id: this.historialIdCounter++,
+      petId: this.mascotaSeleccionadaHistorial!,
+      fecha: this.newHistorial.fecha,
+      tipo: this.newHistorial.tipo,
+      veterinario: this.newHistorial.veterinario,
+      diagnostico: this.newHistorial.diagnostico,
+      tratamiento: this.newHistorial.tratamiento,
+      notas: this.newHistorial.notas
+    };
+
+    this.historialClinico.unshift(registro);
+    this.guardarHistorialEnStorage();
+    this.showAddHistorialModal = false;
+    alert('✅ Registro clínico guardado exitosamente');
+  }
+
+  eliminarHistorial(id: number): void {
+    if (confirm('¿Estás seguro de eliminar este registro clínico?')) {
+      this.historialClinico = this.historialClinico.filter(h => h.id !== id);
+      this.guardarHistorialEnStorage();
+    }
+  }
+
+  getHistorialIcon(tipo: string): string {
+    const icons: { [key: string]: string } = {
+      'vacuna': 'fas fa-syringe',
+      'consulta': 'fas fa-stethoscope',
+      'cirugia': 'fas fa-procedures',
+      'desparasitacion': 'fas fa-bug',
+      'emergencia': 'fas fa-ambulance',
+      'control': 'fas fa-heartbeat'
+    };
+    return icons[tipo] || 'fas fa-file-medical';
+  }
+
+  getHistorialTipoLabel(tipo: string): string {
+    const labels: { [key: string]: string } = {
+      'vacuna': 'Vacuna',
+      'consulta': 'Consulta General',
+      'cirugia': 'Cirugía',
+      'desparasitacion': 'Desparasitación',
+      'emergencia': 'Emergencia',
+      'control': 'Control'
+    };
+    return labels[tipo] || tipo;
+  }
+
+  // ===== PASSWORD UPDATE =====
+  
+  getTotalHistorialRegistros(): number {
+    let total = 0;
+    this.mascotas.forEach(mascota => {
+      const key = `historial_${mascota.id}`;
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        try {
+          const historial = JSON.parse(saved);
+          total += historial.length;
+        } catch {
+          // Ignore parsing errors
+        }
+      }
+    });
+    return total;
+  }
+
+  actualizarPassword(): void {
+    // Validaciones
+    if (!this.passwordData.currentPassword || !this.passwordData.newPassword || !this.passwordData.confirmPassword) {
+      alert('❌ Todos los campos de contraseña son obligatorios');
+      return;
+    }
+
+    if (this.passwordData.newPassword !== this.passwordData.confirmPassword) {
+      alert('❌ Las contraseñas nuevas no coinciden');
+      return;
+    }
+
+    if (this.passwordData.newPassword.length < 6) {
+      alert('❌ La nueva contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) {
+      alert('❌ No hay usuario autenticado');
+      return;
+    }
+
+    // Verificar contraseña actual primero
+    this.authService.verifyCurrentPassword(currentUser.id, this.passwordData.currentPassword).subscribe({
+      next: (isValid) => {
+        if (!isValid) {
+          alert('❌ La contraseña actual es incorrecta');
+          return;
+        }
+
+        // Actualizar contraseña
+        this.usersService.updateUser(currentUser.id, {
+          password: this.passwordData.newPassword
+        }).subscribe({
+          next: () => {
+            alert('✅ Contraseña actualizada exitosamente');
+            // Limpiar formulario
+            this.passwordData = {
+              currentPassword: '',
+              newPassword: '',
+              confirmPassword: ''
+            };
+          },
+          error: (err) => {
+            console.error('❌ Error al actualizar contraseña:', err);
+            alert('❌ Error al actualizar la contraseña: ' + (err.error?.message || 'Error desconocido'));
+          }
+        });
+      },
+      error: (err) => {
+        console.error('❌ Error al verificar contraseña actual:', err);
+        alert('❌ Error al verificar la contraseña actual');
+      }
+    });
   }
 }

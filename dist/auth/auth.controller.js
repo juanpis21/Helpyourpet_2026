@@ -18,6 +18,7 @@ const swagger_1 = require("@nestjs/swagger");
 const auth_service_1 = require("./auth.service");
 const login_dto_1 = require("./dto/login.dto");
 const public_decorator_1 = require("./decorators/public.decorator");
+const jwt_auth_guard_1 = require("./guards/jwt-auth.guard");
 let AuthController = class AuthController {
     constructor(authService) {
         this.authService = authService;
@@ -27,6 +28,9 @@ let AuthController = class AuthController {
     }
     async checkStatus(req) {
         return this.authService.checkStatus(req.user);
+    }
+    async verifyPassword(verifyPasswordDto) {
+        return this.authService.verifyPassword(verifyPasswordDto.userId, verifyPasswordDto.password);
     }
 };
 exports.AuthController = AuthController;
@@ -83,6 +87,18 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "checkStatus", null);
+__decorate([
+    (0, common_1.Post)('verify-password'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Verificar contraseña actual del usuario' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Contraseña verificada', type: Boolean }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Contraseña incorrecta' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "verifyPassword", null);
 exports.AuthController = AuthController = __decorate([
     (0, swagger_1.ApiTags)('auth'),
     (0, common_1.Controller)('auth'),
