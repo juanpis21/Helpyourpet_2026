@@ -59,7 +59,7 @@ interface HistorialClinico {
 })
 export class PerfilUsuario implements OnInit {
   seccionActiva = 'dashboard';
-  sidebarAbierto = false;
+  sidebarAbierto = true;
   darkMode = false;
 
 

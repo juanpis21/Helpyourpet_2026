@@ -245,7 +245,7 @@
   width: 42px;
   height: 42px;
   border-radius: 12px;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -654,10 +654,8 @@
     transform: translateX(-100%); 
     &.active { transform: translateX(0); }
   }
-  .sidebar-overlay.active { display: block; }
   .main-content { 
-    left: 0;
-    margin-left: 0; 
+    left: 0; 
     width: 100%; 
     padding: 1rem;
   }

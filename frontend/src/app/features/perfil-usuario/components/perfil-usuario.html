@@ -1,7 +1,7 @@
 <!-- Overlay para cerrar sidebar en móviles -->
 <div class="sidebar-overlay" [class.active]="sidebarAbierto" (click)="cerrarSidebar()"></div>
 
-<div class="perfil-layout">
+<div class="perfil-layout" [class.sidebar-closed]="!sidebarAbierto">
   <!-- ===== SIDEBAR ===== -->
   <nav class="sidebar" [class.active]="sidebarAbierto">
     <div class="sidebar-header">
