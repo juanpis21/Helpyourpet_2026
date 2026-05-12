@@ -10,11 +10,12 @@ import { ProductosService } from '../../../core/services/productos.service';
 import { CategoriasService } from '../../../core/services/categorias.service';
 import { Subscription } from 'rxjs';
 import { Navbar } from '../../../core/components/navbar/navbar';
+import { PreloaderComponent } from '../../../shared/components/preloader/preloader';
 
 @Component({
   selector: 'app-tienda',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, Navbar],
+  imports: [CommonModule, FormsModule, RouterModule, Navbar, PreloaderComponent],
   templateUrl: './tienda.html',
   styleUrl: './tienda.scss',
   encapsulation: ViewEncapsulation.None,
@@ -49,6 +50,7 @@ export class Tienda implements OnInit, OnDestroy {
 
   // Carrito
   carritoVisible: boolean = false;
+
 
   constructor(
     private http: HttpClient, 

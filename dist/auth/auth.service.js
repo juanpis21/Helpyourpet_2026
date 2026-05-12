@@ -64,6 +64,20 @@ let AuthService = class AuthService {
             user: userWithRoles,
         };
     }
+    async verifyPassword(userId, password) {
+        try {
+            const user = await this.usersService.findOne(userId);
+            if (!user || !user.password) {
+                return false;
+            }
+            const isPasswordValid = await bcrypt.compare(password, user.password);
+            return isPasswordValid;
+        }
+        catch (error) {
+            console.error('❌ [AuthService] Error al verificar contraseña:', error);
+            return false;
+        }
+    }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([

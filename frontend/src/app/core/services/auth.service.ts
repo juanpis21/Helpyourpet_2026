@@ -189,4 +189,11 @@ export class AuthService {
       this.logout();
     }
   }
+
+  verifyCurrentPassword(userId: number, currentPassword: string): Observable<boolean> {
+    return this.http.post<boolean>(`${this.apiUrl}/verify-password`, {
+      userId,
+      password: currentPassword
+    });
+  }
 }

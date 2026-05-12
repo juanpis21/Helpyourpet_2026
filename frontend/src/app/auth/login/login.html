@@ -1,3 +1,41 @@
+<!-- PRELOADER ANIMADO POST-LOGIN -->
+<div *ngIf="showPreloader" class="preloader-overlay" [class.fade-out]="preloaderFadingOut">
+  <div class="preloader-content">
+    <!-- Círculos orbitales decorativos -->
+    <div class="orbital-ring ring-1"></div>
+    <div class="orbital-ring ring-2"></div>
+    <div class="orbital-ring ring-3"></div>
+
+    <!-- Logo central con patita -->
+    <div class="preloader-logo">
+      <div class="paw-container">
+        <i class="fas fa-paw paw-icon"></i>
+      </div>
+    </div>
+
+    <!-- Texto de bienvenida -->
+    <div class="preloader-text">
+      <h2 class="welcome-title">¡Bienvenido!</h2>
+      <p class="welcome-subtitle">Preparando tu experiencia...</p>
+    </div>
+
+    <!-- Barra de progreso -->
+    <div class="progress-bar-container">
+      <div class="progress-bar-fill"></div>
+    </div>
+
+    <!-- Huellas decorativas flotantes -->
+    <div class="floating-paws">
+      <i class="fas fa-paw float-paw p1"></i>
+      <i class="fas fa-paw float-paw p2"></i>
+      <i class="fas fa-paw float-paw p3"></i>
+      <i class="fas fa-paw float-paw p4"></i>
+      <i class="fas fa-paw float-paw p5"></i>
+      <i class="fas fa-paw float-paw p6"></i>
+    </div>
+  </div>
+</div>
+
 <div class="login-container">
 
     <!-- LADO IZQUIERDO -->
@@ -48,10 +86,6 @@
             >
                 {{ isLoading ? 'Iniciando sesión...' : 'Iniciar sesión' }}
             </button>
-
-            <div *ngIf="errorMessage" class="error-message">
-                {{ errorMessage }}
-            </div>
 
             <a class="forgot" routerLink="/recovery">¿Olvidaste tu contraseña?</a>
 

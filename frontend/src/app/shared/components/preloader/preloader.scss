@@ -1,0 +1,96 @@
+.preloader-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+    opacity: 1;
+    visibility: visible;
+
+    &.fade-out {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+:host-context(body.dark-mode) .preloader-overlay {
+    background: #0f172a;
+}
+
+.preloader-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.elegant-logo {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: transparent;
+    border: 2px solid #258e48;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: gentlePulse 1.5s infinite ease-in-out;
+
+    i {
+        font-size: 2.2rem;
+        color: #258e48;
+    }
+}
+
+.elegant-text {
+    h2 {
+        font-family: 'Baloo 2', sans-serif;
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+        letter-spacing: 0.5px;
+        animation: fadeIn 0.8s ease-out;
+    }
+}
+
+:host-context(body.dark-mode) .elegant-text h2 {
+    color: #e2e8f0;
+}
+
+.elegant-progress {
+    width: 150px;
+    height: 3px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+:host-context(body.dark-mode) .elegant-progress {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.progress-fill {
+    width: 0%;
+    height: 100%;
+    background: #258e48;
+    border-radius: 4px;
+    animation: fillProgress 0.8s ease-in-out forwards;
+}
+
+@keyframes gentlePulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 142, 72, 0.3); }
+    50% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(37, 142, 72, 0); }
+}
+
+@keyframes fillProgress {
+    0% { width: 0%; }
+    100% { width: 100%; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

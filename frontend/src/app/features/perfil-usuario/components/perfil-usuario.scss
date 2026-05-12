@@ -362,6 +362,74 @@
   }
 }
 
+/* ===== DANGER ZONE ===== */
+.danger-zone-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.card-danger {
+  border: 2px solid #F5A3A8;
+
+  .card-header {
+    background: #F5A3A8 !important;
+
+    h6,
+    i {
+      color: #721C24 !important;
+    }
+  }
+
+  &:hover {
+    border-color: #E91E63;
+    box-shadow: 0 5px 20px rgba(233, 30, 99, 0.3);
+  }
+}
+
+/* ===== PASSWORD FORM ===== */
+.password-form {
+  .form-group {
+    margin-bottom: 1rem;
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.8rem;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      background: var(--bg-card);
+      color: var(--text-primary);
+      transition: var(--transition);
+
+      &:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(29, 57, 118, 0.1);
+      }
+
+      &::placeholder {
+        color: var(--text-secondary);
+        opacity: 0.7;
+      }
+    }
+  }
+
+  .form-actions {
+    margin-top: 1.5rem;
+    text-align: right;
+  }
+}
+
 /* ===== PETS GRID ===== */
 .pets-grid {
   display: grid;
@@ -1397,5 +1465,286 @@ input, select, textarea {
         transform: scale(1.1);
       }
     }
+  }
+}
+
+/* ========================================
+   HISTORIAL CLÍNICO
+   ======================================== */
+
+/* Selector de mascota */
+.historial-selector {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background: var(--bg-card);
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.5rem;
+}
+
+.selector-label {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+
+  i {
+    color: var(--primary-color);
+  }
+}
+
+.mascota-select {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  border: 2px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.9rem;
+  outline: none;
+  cursor: pointer;
+  transition: var(--transition);
+
+  &:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(29, 57, 118, 0.15);
+  }
+}
+
+/* Header del historial */
+.historial-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.historial-pet-name {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  i {
+    color: var(--primary-color);
+    font-size: 1.1rem;
+  }
+}
+
+/* Timeline */
+.timeline {
+  position: relative;
+  padding-left: 2rem;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 12px;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--primary-color), var(--secondary-color), var(--pastel-pink));
+    border-radius: 10px;
+  }
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 1.5rem;
+  animation: fadeInUp 0.4s ease-out;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.timeline-marker {
+  position: absolute;
+  left: -2rem;
+  top: 1.2rem;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  border: 3px solid var(--bg-body);
+  box-shadow: 0 0 0 3px var(--primary-color);
+  z-index: 1;
+  transform: translateX(0.5px);
+
+  &.marker-vacuna { background: #10b981; box-shadow: 0 0 0 3px #10b981; }
+  &.marker-consulta { background: #3b82f6; box-shadow: 0 0 0 3px #3b82f6; }
+  &.marker-cirugia { background: #ef4444; box-shadow: 0 0 0 3px #ef4444; }
+  &.marker-desparasitacion { background: #f59e0b; box-shadow: 0 0 0 3px #f59e0b; }
+  &.marker-emergencia { background: #dc2626; box-shadow: 0 0 0 3px #dc2626; }
+  &.marker-control { background: #8b5cf6; box-shadow: 0 0 0 3px #8b5cf6; }
+}
+
+.timeline-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: var(--transition);
+  position: relative;
+
+  &:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+}
+
+.timeline-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 1rem 1.2rem;
+  background: var(--card-header-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.timeline-tipo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+
+  i {
+    font-size: 1.1rem;
+    color: var(--primary-color);
+  }
+}
+
+.tipo-badge {
+  display: inline-block;
+  padding: 0.25rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: 'Fredoka', sans-serif;
+  color: white;
+
+  &.badge-vacuna { background: #10b981; }
+  &.badge-consulta { background: #3b82f6; }
+  &.badge-cirugia { background: #ef4444; }
+  &.badge-desparasitacion { background: #f59e0b; color: #1a1a1a; }
+  &.badge-emergencia { background: #dc2626; }
+  &.badge-control { background: #8b5cf6; }
+}
+
+.timeline-fecha {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+
+  i {
+    font-size: 0.8rem;
+  }
+}
+
+.timeline-card-body {
+  padding: 1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.timeline-detail {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+
+  i {
+    color: var(--primary-color);
+    width: 18px;
+    text-align: center;
+    font-size: 0.85rem;
+    margin-top: 0.15rem;
+    flex-shrink: 0;
+  }
+
+  strong {
+    color: var(--text-primary);
+  }
+}
+
+.timeline-card-actions {
+  position: absolute;
+  top: 0.8rem;
+  right: 0.8rem;
+
+  .btn-delete-small {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    transition: var(--transition);
+
+    &:hover {
+      background: #ef4444;
+      color: white;
+      transform: scale(1.1);
+    }
+  }
+}
+
+/* Historial content wrapper */
+.historial-content {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+/* Responsive historial */
+@media (max-width: 768px) {
+  .historial-selector {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .historial-header-bar {
+    flex-direction: column;
+    align-items: stretch;
+
+    .btn-primary {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  .timeline {
+    padding-left: 1.5rem;
+  }
+
+  .timeline-card-header {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
