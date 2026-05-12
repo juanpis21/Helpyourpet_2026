@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
 import { UsersService } from '../../../core/services/users.service';
 import { ServiciosService, Servicio } from '../../../core/services/servicios.service';
@@ -27,6 +28,7 @@ export class AdminModulesComponent implements OnInit {
   productos: Producto[] = [];
   categorias: Categoria[] = [];
   roles: Role[] = [];
+  veterinarios: any[] = [];
   isLoading: boolean = false;
 
 
@@ -76,6 +78,10 @@ export class AdminModulesComponent implements OnInit {
   // Modales Categorías
   showAddCategoriaModal: boolean = false;
   showEditCategoriaModal: boolean = false;
+
+  // Modales Veterinarios
+  showAddVeterinarioModal: boolean = false;
+  showEditVeterinarioModal: boolean = false;
 
   newCategoria: Partial<Categoria> = {
     nombre: '',
@@ -127,6 +133,31 @@ export class AdminModulesComponent implements OnInit {
 
   editingProducto: Partial<Producto> = {};
 
+  // Datos Veterinarios
+  newVeterinario: any = {
+    username: '',
+    email: '',
+    password: '',
+    firstName: '',
+    lastName: '',
+    phone: '',
+    documentType: '',
+    documentNumber: '',
+    address: '',
+    especialidad: '',
+    matricula: '',
+    aniosExperiencia: 0,
+    universidad: '',
+    telefonoProfesional: '',
+    emailProfesional: '',
+    biografia: '',
+    veterinariaPrincipalId: 0,
+    roleId: 0
+  };
+
+  editingVeterinario: any = {};
+  editingUsuario: any = {};
+
   selectedFile: File | null = null;
   imagePreview: string | null = null;
   
@@ -135,6 +166,15 @@ export class AdminModulesComponent implements OnInit {
   productoImagePreview: string | null = null;
 
   baseUrl: string = 'http://localhost:3000';
+
+  // Método para obtener headers con autenticación
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.authService.getToken();
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+  }
 
   constructor(
     private authService: AuthService,
@@ -145,7 +185,8 @@ export class AdminModulesComponent implements OnInit {
     private categoriasService: CategoriasService,
     private rolesService: RolesService,
     private themeService: ThemeService,
-    private router: Router
+    private router: Router,
+    private http: HttpClient
   ) {}
 
   ngOnInit(): void {
@@ -155,6 +196,7 @@ export class AdminModulesComponent implements OnInit {
     this.cargarProductos();
     this.cargarCategorias();
     this.cargarRoles();
+    this.cargarVeterinarios();
     this.loadAdminProfile();
   }
 
@@ -849,5 +891,183 @@ export class AdminModulesComponent implements OnInit {
         });
       }
     }
+  }
+
+  // ========== CRUD VETERINARIOS ==========
+  cargarVeterinarios(): void {
+    // Llamada a la API para obtener perfiles veterinarios con autenticación
+    this.http.get(`${this.baseUrl}/perfiles-veterinarios`, { headers: this.getAuthHeaders() }).subscribe({
+      next: (data: any) => {
+        this.veterinarios = data;
+      },
+      error: (err: any) => {
+        console.error('Error al cargar veterinarios:', err);
+        alert('❌ Error al cargar veterinarios: ' + (err.error?.message || err.message));
+      }
+    });
+  }
+
+  openAddVeterinarioModal(): void {
+    this.showAddVeterinarioModal = true;
+  }
+
+  closeAddVeterinarioModal(): void {
+    this.showAddVeterinarioModal = false;
+    this.newVeterinario = {
+      username: '',
+      email: '',
+      password: '',
+      firstName: '',
+      lastName: '',
+      phone: '',
+      documentType: '',
+      documentNumber: '',
+      address: '',
+      especialidad: '',
+      matricula: '',
+      aniosExperiencia: 0,
+      universidad: '',
+      telefonoProfesional: '',
+      emailProfesional: '',
+      biografia: '',
+      veterinariaPrincipalId: 0,
+      roleId: 0
+    };
+  }
+
+  guardarVeterinario(): void {
+    // Validar campos obligatorios
+    if (!this.newVeterinario.username || !this.newVeterinario.email || !this.newVeterinario.password || 
+        !this.newVeterinario.firstName || !this.newVeterinario.lastName || !this.newVeterinario.especialidad || 
+        !this.newVeterinario.matricula) {
+      alert('Por favor, completa todos los campos obligatorios');
+      return;
+    }
+
+    // Asignar automáticamente el rol de veterinario (buscar rol con nombre 'veterinario')
+    const rolVeterinario = this.roles.find(role => role.name.toLowerCase() === 'veterinario');
+    if (!rolVeterinario) {
+      alert('Error: No se encontró el rol de veterinario en el sistema');
+      return;
+    }
+    this.newVeterinario.roleId = rolVeterinario.id;
+
+    // Primero crear el usuario usando el endpoint existente
+    const userData = {
+      username: this.newVeterinario.username,
+      email: this.newVeterinario.email,
+      password: this.newVeterinario.password,
+      firstName: this.newVeterinario.firstName,
+      lastName: this.newVeterinario.lastName,
+      phone: this.newVeterinario.phone,
+      documentType: this.newVeterinario.documentType,
+      documentNumber: this.newVeterinario.documentNumber,
+      address: this.newVeterinario.address,
+      roleId: this.newVeterinario.roleId,
+      isActive: true
+    };
+
+    this.usersService.createUser(userData).subscribe({
+      next: (userResponse) => {
+        // Luego crear el perfil veterinario usando el endpoint existente
+        const perfilData = {
+          especialidad: this.newVeterinario.especialidad,
+          matricula: this.newVeterinario.matricula,
+          aniosExperiencia: this.newVeterinario.aniosExperiencia || 0,
+          universidad: this.newVeterinario.universidad,
+          telefonoProfesional: this.newVeterinario.telefonoProfesional,
+          emailProfesional: this.newVeterinario.emailProfesional,
+          biografia: this.newVeterinario.biografia,
+          usuarioId: userResponse.id,
+          veterinariaPrincipalId: this.newVeterinario.veterinariaPrincipalId || null,
+          isActive: true
+        };
+
+        this.http.post(`${this.baseUrl}/perfiles-veterinarios`, perfilData, { headers: this.getAuthHeaders() }).subscribe({
+          next: () => {
+            this.closeAddVeterinarioModal();
+            this.cargarVeterinarios();
+            alert('✅ Veterinario registrado correctamente');
+          },
+          error: (err: any) => {
+            console.error('Error al crear perfil veterinario:', err);
+            alert('❌ Error al crear perfil veterinario: ' + (err.error?.message || err.message));
+          }
+        });
+      },
+      error: (err: any) => {
+        console.error('Error al crear usuario:', err);
+        alert('❌ Error al crear usuario: ' + (err.error?.message || err.message));
+      }
+    });
+  }
+
+  openEditVeterinarioModal(veterinario: any): void {
+    this.editingVeterinario = { ...veterinario };
+    this.editingUsuario = { ...veterinario.usuario };
+    this.showEditVeterinarioModal = true;
+  }
+
+  closeEditVeterinarioModal(): void {
+    this.showEditVeterinarioModal = false;
+    this.editingVeterinario = {};
+    this.editingUsuario = {};
+  }
+
+  guardarEdicionVeterinario(): void {
+    if (!this.editingVeterinario.id) return;
+
+    // Actualizar usuario si hay cambios usando el endpoint existente
+    if (this.editingUsuario.id) {
+      const userData = { ...this.editingUsuario };
+      
+      // Si la contraseña está vacía, no la enviamos
+      if (!userData.password) {
+        delete userData.password;
+      }
+
+      this.usersService.updateUser(this.editingUsuario.id, userData).subscribe({
+        next: () => {
+          // Actualizar perfil veterinario usando el endpoint existente
+          const perfilData = {
+            especialidad: this.editingVeterinario.especialidad,
+            matricula: this.editingVeterinario.matricula,
+            aniosExperiencia: this.editingVeterinario.aniosExperiencia,
+            universidad: this.editingVeterinario.universidad,
+            telefonoProfesional: this.editingVeterinario.telefonoProfesional,
+            emailProfesional: this.editingVeterinario.emailProfesional,
+            biografia: this.editingVeterinario.biografia,
+            veterinariaPrincipalId: this.editingVeterinario.veterinariaPrincipalId || null,
+            isActive: this.editingVeterinario.isActive
+          };
+
+          this.http.patch(`${this.baseUrl}/perfiles-veterinarios/${this.editingVeterinario.id}`, perfilData, { headers: this.getAuthHeaders() }).subscribe({
+            next: () => {
+              this.closeEditVeterinarioModal();
+              this.cargarVeterinarios();
+              alert('✅ Veterinario actualizado correctamente');
+            },
+            error: (err: any) => {
+              console.error('Error al actualizar perfil veterinario:', err);
+              alert('❌ Error al actualizar perfil veterinario: ' + (err.error?.message || err.message));
+            }
+          });
+        },
+        error: (err: any) => {
+          console.error('Error al actualizar usuario:', err);
+          alert('❌ Error al actualizar usuario: ' + (err.error?.message || err.message));
+        }
+      });
+    }
+  }
+
+  toggleEstadoVeterinario(veterinario: any): void {
+    const nuevoEstado = !veterinario.isActive;
+    
+    // Actualizar estado del perfil veterinario usando endpoint existente
+    this.http.patch(`${this.baseUrl}/perfiles-veterinarios/${veterinario.id}`, { isActive: nuevoEstado }, { headers: this.getAuthHeaders() }).subscribe({
+      next: () => this.cargarVeterinarios(),
+      error: (err: any) => alert('Error al cambiar estado: ' + (err.error?.message || err.message))
+    });
   }
 }

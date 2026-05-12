@@ -3,7 +3,6 @@ import { Column, Entity, OneToOne, OneToMany, PrimaryGeneratedColumn, CreateDate
 import { User } from '../../users/entities/user.entity';
 import { Veterinaria } from '../../veterinarias/entities/veterinaria.entity';
 import { Cita } from '../../citas/entities/cita.entity';
-import { Role } from '../../roles/entities/role.entity';
 
 @Entity('perfiles_veterinarios')
 export class PerfilVeterinario {
@@ -75,16 +74,12 @@ export class PerfilVeterinario {
   @JoinColumn()
   usuario: User;
 
-  @ManyToOne(() => Role, role => role.perfilesVeterinarios)
-  rol: Role;
-
   @ApiProperty({ 
     description: 'Veterinaria principal donde trabaja', 
     type: () => Veterinaria 
   })
   @ManyToOne(() => Veterinaria, veterinaria => veterinaria.veterinarios)
   veterinariaPrincipal?: Veterinaria;
-
 
   @ApiProperty({ 
     description: 'Indica si el perfil veterinario está activo', 
