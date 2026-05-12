@@ -103,4 +103,10 @@ export class HistoriasClinicasService {
     await this.findOneConsulta(id);
     await this.consultaRepo.delete(id);
   }
+
+  async updateConsulta(id: number, dto: any): Promise<ConsultaMedica> {
+    const consulta = await this.findOneConsulta(id);
+    Object.assign(consulta, dto);
+    return this.consultaRepo.save(consulta);
+  }
 }

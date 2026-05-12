@@ -65,6 +65,12 @@ export class HistoriasClinicasController {
     return this.service.findConsultasByHistoria(+historiaId);
   }
 
+  @Patch('consultas/:id')
+  @ApiOperation({ summary: 'Actualizar una consulta médica' })
+  updateConsulta(@Param('id') id: string, @Body() dto: any) {
+    return this.service.updateConsulta(+id, dto);
+  }
+
   @Delete('consultas/:id')
   @ApiOperation({ summary: 'Eliminar una consulta médica' })
   removeConsulta(@Param('id') id: string) {

@@ -456,7 +456,7 @@
 
         <!-- Barra de acciones -->
         <div class="hc-topbar">
-          <button class="btn-secondary" (click)="cerrarHistoria()">
+          <button class="btn-primary" (click)="cerrarHistoria()">
             <i class="fas fa-arrow-left"></i> Volver
           </button>
           <div class="hc-topbar-title">
@@ -464,7 +464,7 @@
             <strong>{{ historiaActual.mascota?.name }}</strong>
             <span class="badge-especie">{{ historiaActual.mascota?.species }}</span>
           </div>
-          <button class="btn-primary" (click)="showNuevaConsultaModal = true">
+          <button class="btn-primary" (click)="abrirNuevaConsulta()">
             <i class="fas fa-plus-circle"></i> Nueva Consulta
           </button>
         </div>
@@ -543,7 +543,7 @@
                 <button class="btn-primary small-btn" (click)="guardarEdicionHistoria()">
                   <i class="fas fa-save"></i> Guardar
                 </button>
-                <button class="btn-secondary small-btn" (click)="hcEditando = false">
+                <button class="btn-primary small-btn" (click)="hcEditando = false">
                   Cancelar
                 </button>
               </ng-container>
@@ -567,8 +567,8 @@
             <div class="hc-consulta-header">
               <span class="hc-consulta-num">Consulta #{{ consultasActuales.length - i }}</span>
               <span class="hc-consulta-date"><i class="fas fa-calendar-alt"></i> {{ c.fechaConsulta | date:'dd/MM/yyyy HH:mm' }}</span>
-              <button class="btn-icon-danger" (click)="eliminarConsulta(c.id)" title="Eliminar consulta">
-                <i class="fas fa-trash"></i>
+              <button class="btn-icon-primary" (click)="editarConsulta(c)" title="Editar consulta">
+                <i class="fas fa-edit"></i>
               </button>
             </div>
             <div class="hc-consulta-body">
@@ -678,7 +678,7 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" (click)="closeAddPetModal()">Cancelar</button>
+      <button class="btn-primary" (click)="closeAddPetModal()">Cancelar</button>
       <button class="btn-primary" (click)="registrarMascota()">Registrar</button>
     </div>
   </div>
@@ -710,7 +710,7 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" (click)="showAddCitaModal = false">Cancelar</button>
+      <button class="btn-primary" (click)="showAddCitaModal = false">Cancelar</button>
       <button class="btn-primary" (click)="registrarCita()">Programar</button>
     </div>
   </div>
@@ -761,7 +761,7 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" (click)="closeAddUserModal()">Cancelar</button>
+      <button class="btn-primary" (click)="closeAddUserModal()">Cancelar</button>
       <button class="btn-primary" (click)="registrarUsuario()">Registrar</button>
     </div>
   </div>
@@ -786,6 +786,13 @@
       </div>
 
       <div class="form-grid">
+        <div class="form-group full">
+          <label>Dueño (Usuario) *</label>
+          <select [(ngModel)]="editingPet.ownerId">
+            <option [ngValue]="null">Seleccione un usuario</option>
+            <option *ngFor="let u of usuarios" [ngValue]="u.id">{{ u.firstName }} {{ u.lastName }}</option>
+          </select>
+        </div>
         <div class="form-group">
           <label>Nombre *</label>
           <input type="text" [(ngModel)]="editingPet.name">
@@ -831,7 +838,7 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" (click)="closeEditPetModal()">Cancelar</button>
+      <button class="btn-primary" (click)="closeEditPetModal()">Cancelar</button>
       <button class="btn-primary" (click)="actualizarMascota()">Guardar Cambios</button>
     </div>
   </div>
@@ -882,7 +889,7 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" (click)="closeEditUserModal()">Cancelar</button>
+      <button class="btn-primary" (click)="closeEditUserModal()">Cancelar</button>
       <button class="btn-primary" (click)="actualizarUsuario()">Guardar Cambios</button>
     </div>
   </div>
@@ -892,7 +899,7 @@
 <div class="modal-overlay" *ngIf="showNuevaConsultaModal" (click)="showNuevaConsultaModal = false">
   <div class="modal-box modal-consulta" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h3><i class="fas fa-stethoscope"></i> Nueva Consulta Médica</h3>
+      <h3><i class="fas fa-stethoscope"></i> {{ nuevaConsulta.id ? 'Editar Consulta Médica' : 'Nueva Consulta Médica' }}</h3>
       <button class="close-btn" (click)="showNuevaConsultaModal = false">&times;</button>
     </div>
     <div class="modal-body">
@@ -945,9 +952,9 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" (click)="showNuevaConsultaModal = false">Cancelar</button>
+      <button class="btn-primary" (click)="showNuevaConsultaModal = false">Cancelar</button>
       <button class="btn-primary" (click)="guardarNuevaConsulta()">
-        <i class="fas fa-save"></i> Guardar Consulta
+        <i class="fas fa-save"></i> Guardar Cambios
       </button>
     </div>
   </div>

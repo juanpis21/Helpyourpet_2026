@@ -496,6 +496,7 @@ export class Veterinario implements OnInit {
 
   openEditPetModal(pet: any): void {
     this.editingPet = { ...pet };
+    this.editingPet.ownerId = pet.owner?.id || pet.ownerId;
     this.showEditPetModal = true;
     this.imagePreview = pet.foto ? `${this.API_BASE}${pet.foto}` : null;
   }
@@ -522,6 +523,7 @@ export class Veterinario implements OnInit {
     formData.append('color', this.editingPet.color);
     formData.append('weight', String(this.editingPet.weight));
     formData.append('description', this.editingPet.description || '');
+    formData.append('ownerId', String(this.editingPet.ownerId));
 
     if (this.selectedFile) {
       formData.append('foto', this.selectedFile);
@@ -667,6 +669,26 @@ export class Veterinario implements OnInit {
       });
   }
 
+  abrirNuevaConsulta(): void {
+    this.nuevaConsulta = {
+      fechaConsulta: '', peso: null, temperatura: null,
+      motivoConsulta: '', sintomas: '', diagnostico: '',
+      tratamiento: '', medicamentos: '', observaciones: '', proximaCita: ''
+    };
+    this.showNuevaConsultaModal = true;
+  }
+
+  editarConsulta(consulta: any): void {
+    this.nuevaConsulta = { ...consulta };
+    if (this.nuevaConsulta.fechaConsulta) {
+      this.nuevaConsulta.fechaConsulta = new Date(this.nuevaConsulta.fechaConsulta).toISOString().slice(0, 16);
+    }
+    if (this.nuevaConsulta.proximaCita) {
+      this.nuevaConsulta.proximaCita = new Date(this.nuevaConsulta.proximaCita).toISOString().split('T')[0];
+    }
+    this.showNuevaConsultaModal = true;
+  }
+
   guardarNuevaConsulta(): void {
     if (!this.historiaActual) return;
     const token = localStorage.getItem('access_token');
@@ -679,32 +701,31 @@ export class Veterinario implements OnInit {
       fechaConsulta: this.nuevaConsulta.fechaConsulta || undefined,
       proximaCita: this.nuevaConsulta.proximaCita || undefined
     };
-    this.http.post<any>(`${this.API_BASE}/historias-clinicas/consultas`, payload, { headers })
-      .subscribe({
-        next: (consulta) => {
-          this.consultasActuales.unshift(consulta);
-          this.showNuevaConsultaModal = false;
-          this.nuevaConsulta = {
-            fechaConsulta: '', peso: null, temperatura: null,
-            motivoConsulta: '', sintomas: '', diagnostico: '',
-            tratamiento: '', medicamentos: '', observaciones: '', proximaCita: ''
-          };
-        },
-        error: (err) => alert('Error al guardar consulta: ' + (err.error?.message || err.message))
-      });
-  }
 
-  eliminarConsulta(id: number): void {
-    if (!confirm('¿Eliminar esta consulta?')) return;
-    const token = localStorage.getItem('access_token');
-    const headers = { Authorization: `Bearer ${token}` };
-    this.http.delete(`${this.API_BASE}/historias-clinicas/consultas/${id}`, { headers })
-      .subscribe({
-        next: () => {
-          this.consultasActuales = this.consultasActuales.filter(c => c.id !== id);
-        },
-        error: (err) => alert('Error al eliminar: ' + (err.error?.message || err.message))
-      });
+    if (this.nuevaConsulta.id) {
+      this.http.patch<any>(`${this.API_BASE}/historias-clinicas/consultas/${this.nuevaConsulta.id}`, payload, { headers })
+        .subscribe({
+          next: (consulta) => {
+            const index = this.consultasActuales.findIndex(c => c.id === consulta.id);
+            if (index !== -1) {
+              this.consultasActuales[index] = consulta;
+            }
+            this.showNuevaConsultaModal = false;
+            this.cdr.detectChanges();
+          },
+          error: (err) => alert('Error al actualizar consulta: ' + (err.error?.message || err.message))
+        });
+    } else {
+      this.http.post<any>(`${this.API_BASE}/historias-clinicas/consultas`, payload, { headers })
+        .subscribe({
+          next: (consulta) => {
+            this.consultasActuales.unshift(consulta);
+            this.showNuevaConsultaModal = false;
+            this.cdr.detectChanges();
+          },
+          error: (err) => alert('Error al guardar consulta: ' + (err.error?.message || err.message))
+        });
+    }
   }
   // ────────────────────────────────────────────────────────────────
 }
