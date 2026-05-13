@@ -214,7 +214,7 @@ export class AdminModulesComponent implements OnInit {
   }
 
   cargarUsuarios(): void {
-    this.usersService.getUsersByRoles(['usuario', 'veterinario']).subscribe({
+    this.usersService.getUsersByRoles(['usuario']).subscribe({
       next: (data) => this.usuarios = data,
       error: (err) => console.error('Error al cargar usuarios:', err)
     });
@@ -248,8 +248,8 @@ export class AdminModulesComponent implements OnInit {
     
     return this.usuarios.filter(u => {
       const roleStr = this.getRolesString(u).toLowerCase().trim();
-      // Solo incluimos si el rol es exactamente 'usuario' o 'veterinario'
-      return roleStr === 'usuario' || roleStr === 'veterinario';
+      // Solo incluimos si el rol es exactamente 'usuario'
+      return roleStr === 'usuario';
     });
   }
 
@@ -1015,31 +1015,30 @@ export class AdminModulesComponent implements OnInit {
   }
 
   guardarEdicionVeterinario(): void {
-    if (!this.editingVeterinario.id) return;
+    if (!this.editingVeterinario.id || !this.editingUsuario.id) return;
 
-    // Actualizar usuario si hay cambios usando el endpoint existente
-    if (this.editingUsuario.id) {
-      const userData = { ...this.editingUsuario };
-      
-      // Si la contraseña está vacía, no la enviamos
-      if (!userData.password) {
-        delete userData.password;
-      }
+    // Solo permitir edición de nombre, apellido, teléfono y dirección según lo solicitado
+    const userData = {
+      firstName: this.editingUsuario.firstName,
+      lastName: this.editingUsuario.lastName,
+      phone: this.editingUsuario.phone,
+      address: this.editingUsuario.address
+    };
 
-      this.usersService.updateUser(this.editingUsuario.id, userData).subscribe({
-        next: () => {
-          // Actualizar perfil veterinario usando el endpoint existente
-          const perfilData = {
-            especialidad: this.editingVeterinario.especialidad,
-            matricula: this.editingVeterinario.matricula,
-            aniosExperiencia: this.editingVeterinario.aniosExperiencia,
-            universidad: this.editingVeterinario.universidad,
-            telefonoProfesional: this.editingVeterinario.telefonoProfesional,
-            emailProfesional: this.editingVeterinario.emailProfesional,
-            biografia: this.editingVeterinario.biografia,
-            veterinariaPrincipalId: this.editingVeterinario.veterinariaPrincipalId || null,
-            isActive: this.editingVeterinario.isActive
-          };
+    this.usersService.updateUser(this.editingUsuario.id, userData).subscribe({
+      next: () => {
+        // Actualizar perfil veterinario (se envían los datos actuales ya que no son editables en este modal)
+        const perfilData = {
+          especialidad: this.editingVeterinario.especialidad,
+          matricula: this.editingVeterinario.matricula,
+          aniosExperiencia: this.editingVeterinario.aniosExperiencia,
+          universidad: this.editingVeterinario.universidad,
+          telefonoProfesional: this.editingVeterinario.telefonoProfesional,
+          emailProfesional: this.editingVeterinario.emailProfesional,
+          biografia: this.editingVeterinario.biografia,
+          veterinariaPrincipalId: this.editingVeterinario.veterinariaPrincipalId || null,
+          isActive: this.editingVeterinario.isActive
+        };
 
           this.http.patch(`${this.baseUrl}/perfiles-veterinarios/${this.editingVeterinario.id}`, perfilData, { headers: this.getAuthHeaders() }).subscribe({
             next: () => {
@@ -1058,7 +1057,6 @@ export class AdminModulesComponent implements OnInit {
           alert('❌ Error al actualizar usuario: ' + (err.error?.message || err.message));
         }
       });
-    }
   }
 
   toggleEstadoVeterinario(veterinario: any): void {

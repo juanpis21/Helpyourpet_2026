@@ -136,11 +136,7 @@ export class PerfilUsuario implements OnInit {
     notas: ''
   };
   // Password update data
-  passwordData = {
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  };
+  newPassword: string = '';
 
   private historialIdCounter = 1;
 
@@ -742,59 +738,29 @@ export class PerfilUsuario implements OnInit {
     return total;
   }
 
-  actualizarPassword(): void {
-    // Validaciones
-    if (!this.passwordData.currentPassword || !this.passwordData.newPassword || !this.passwordData.confirmPassword) {
-      alert('❌ Todos los campos de contraseña son obligatorios');
-      return;
-    }
-
-    if (this.passwordData.newPassword !== this.passwordData.confirmPassword) {
-      alert('❌ Las contraseñas nuevas no coinciden');
-      return;
-    }
-
-    if (this.passwordData.newPassword.length < 6) {
-      alert('❌ La nueva contraseña debe tener al menos 6 caracteres');
+  cambiarPassword(): void {
+    if (!this.newPassword || this.newPassword.length < 6) {
+      alert('⚠️ La contraseña debe tener al menos 6 caracteres');
       return;
     }
 
     const currentUser = this.authService.getCurrentUser();
-    if (!currentUser) {
-      alert('❌ No hay usuario autenticado');
-      return;
-    }
+    if (!currentUser) return;
 
-    // Verificar contraseña actual primero
-    this.authService.verifyCurrentPassword(currentUser.id, this.passwordData.currentPassword).subscribe({
-      next: (isValid) => {
-        if (!isValid) {
-          alert('❌ La contraseña actual es incorrecta');
-          return;
-        }
+    // Usar FormData para que sea compatible con el backend (multer)
+    const formData = new FormData();
+    formData.append('password', this.newPassword);
 
-        // Actualizar contraseña
-        this.usersService.updateUser(currentUser.id, {
-          password: this.passwordData.newPassword
-        }).subscribe({
-          next: () => {
-            alert('✅ Contraseña actualizada exitosamente');
-            // Limpiar formulario
-            this.passwordData = {
-              currentPassword: '',
-              newPassword: '',
-              confirmPassword: ''
-            };
-          },
-          error: (err) => {
-            console.error('❌ Error al actualizar contraseña:', err);
-            alert('❌ Error al actualizar la contraseña: ' + (err.error?.message || 'Error desconocido'));
-          }
-        });
+    this.usersService.updateUser(currentUser.id, formData).subscribe({
+      next: () => {
+        alert('✅ Contraseña actualizada correctamente. Por seguridad, debes iniciar sesión de nuevo.');
+        this.newPassword = '';
+        this.cerrarSesion(); // Cerrar sesión tras cambiar contraseña
       },
       error: (err) => {
-        console.error('❌ Error al verificar contraseña actual:', err);
-        alert('❌ Error al verificar la contraseña actual');
+        const errorMsg = err.error?.message;
+        const detail = Array.isArray(errorMsg) ? errorMsg.join(', ') : errorMsg;
+        alert('❌ Error al cambiar la contraseña: ' + (detail || err.message));
       }
     });
   }

@@ -92,36 +92,69 @@ export class UsersService {
   }
 
   async registerByVeterinario(registerDto: RegisterUserByVetDto, createdById: number): Promise<User> {
+    console.log('📝 [UsersService] Registrando usuario por veterinario:', registerDto.documentNumber);
+
+    // Buscar si ya existe el usuario por documento
     const existingUser = await this.usersRepository.findOne({
       where: { documentNumber: registerDto.documentNumber },
       relations: ['role']
     });
 
     if (existingUser) {
-      console.log('User already exists with document number:', registerDto.documentNumber);
-      return existingUser;
+      console.log('🔄 [UsersService] Usuario ya existe, actualizando información y vinculando al veterinario.');
+      
+      // Si el usuario existe pero no tiene un creador asignado o es de tipo usuario sin cuenta
+      // lo vinculamos al veterinario actual para que pueda verlo en su lista
+      if (!existingUser.createdById) {
+        existingUser.createdById = createdById;
+      }
+
+      // Actualizamos datos básicos si vienen en el DTO
+      Object.assign(existingUser, {
+        firstName: registerDto.firstName,
+        lastName: registerDto.lastName,
+        phone: registerDto.phone || existingUser.phone,
+        address: registerDto.address || existingUser.address,
+        age: registerDto.age || existingUser.age,
+        documentType: registerDto.documentType,
+        fullName: `${registerDto.firstName} ${registerDto.lastName}`
+      });
+
+      return this.usersRepository.save(existingUser);
     }
 
-    const user: User = this.usersRepository.create({
+    // Si no existe, buscamos el rol 'usuario' dinámicamente
+    const usuarioRole = await this.rolesRepository.findOne({ where: { name: 'usuario' } });
+    const roleId = usuarioRole ? usuarioRole.id : 4; // Fallback a 4 si no se encuentra
+
+    const user = this.usersRepository.create({
       ...registerDto,
-      roleId: 4, // Rol por defecto 'usuario'
+      roleId,
       tieneCuenta: false,
       createdById,
       isActive: true,
       fullName: `${registerDto.firstName} ${registerDto.lastName}`
     });
 
+    console.log('✅ [UsersService] Creando nuevo usuario pre-registrado:', user.fullName);
     return this.usersRepository.save(user);
   }
 
   async findUsuariosByVeterinario(createdById: number): Promise<User[]> {
-    console.log('🔍 Buscando todos los usuarios registrados por vet ID:', createdById);
+    console.log('🔍 [UsersService] Buscando usuarios registrados por veterinario ID:', createdById);
+    
+    // Buscar el rol 'usuario' dinámicamente para el filtro
+    const usuarioRole = await this.rolesRepository.findOne({ where: { name: 'usuario' } });
+    const roleId = usuarioRole ? usuarioRole.id : 4;
+
     const users = await this.usersRepository.find({
-      where: { roleId: 4, createdById },
+      where: { roleId, createdById },
       relations: ['role'],
-      select: ['id', 'firstName', 'lastName', 'fullName', 'phone', 'documentType', 'documentNumber', 'age', 'address', 'tieneCuenta', 'createdAt', 'createdById']
+      select: ['id', 'firstName', 'lastName', 'fullName', 'phone', 'documentType', 'documentNumber', 'age', 'address', 'tieneCuenta', 'createdAt', 'createdById'],
+      order: { createdAt: 'DESC' }
     });
-    console.log(`✅ Usuarios encontrados: ${users.length}`);
+    
+    console.log(`✅ [UsersService] Usuarios encontrados: ${users.length}`);
     return users;
   }
 
@@ -181,21 +214,26 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+    console.log(`🚀 [UsersService] Iniciando actualización para usuario ID: ${id}`);
+    
     const user = await this.usersRepository.findOne({
       where: { id },
       relations: ['pets', 'role'],
-      select: ['id', 'username', 'email', 'fullName', 'firstName', 'lastName', 'phone', 'documentType', 'documentNumber', 'age', 'address', 'avatar', 'roleId', 'isActive', 'createdAt', 'updatedAt'],
     });
 
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    if (updateUserDto.username || updateUserDto.email) {
+    // Clonar el DTO para no modificar el original y manejar campos especiales
+    const updateData: any = { ...updateUserDto };
+
+    // Validación de duplicados si se cambia email o username
+    if (updateData.username || updateData.email) {
       const existingUser = await this.usersRepository.findOne({
         where: [
-          { username: updateUserDto.username },
-          { email: updateUserDto.email },
+          { username: updateData.username },
+          { email: updateData.email },
         ],
       });
 
@@ -204,26 +242,35 @@ export class UsersService {
       }
     }
 
-    if (updateUserDto.password) {
-      console.log(`🔐 [UsersService] Solicitud de cambio de contraseña para usuario ID: ${id}`);
-      const hashedPassword = await bcrypt.hash(updateUserDto.password, 10);
-      const updateResult = await this.usersRepository.update(id, { password: hashedPassword });
-      console.log(`✅ [UsersService] Resultado de actualización de password:`, updateResult.affected > 0 ? 'EXITOSO' : 'FALLIDO');
-      delete updateUserDto.password;
+    // Gestión de contraseña
+    if (updateData.password) {
+      if (updateData.password.trim().length === 0) {
+        console.warn('⚠️ [UsersService] Se recibió una contraseña vacía, ignorando actualización de password.');
+        delete updateData.password;
+      } else {
+        console.log(`🔐 [UsersService] Hasheando nueva contraseña para usuario ${user.username}...`);
+        updateData.password = await bcrypt.hash(updateData.password, 10);
+        console.log('✅ [UsersService] Contraseña hasheada correctamente.');
+      }
     }
 
-    if (Object.keys(updateUserDto).length > 0) {
-      console.log(`📝 [UsersService] Actualizando otros campos para usuario ID: ${id}`);
-      await this.usersRepository.update(id, updateUserDto);
+    // Limpiar campos que no deben ir en el update (como relaciones o campos calculados)
+    delete updateData.id;
+    delete updateData.createdAt;
+    delete updateData.updatedAt;
+    delete updateData.role;
+    delete updateData.pets;
+
+    if (Object.keys(updateData).length > 0) {
+      console.log(`📝 [UsersService] Campos a actualizar: ${Object.keys(updateData).join(', ')}`);
+      const updateResult = await this.usersRepository.update(id, updateData);
+      console.log(`✅ [UsersService] Resultado: ${updateResult.affected} fila(s) afectada(s).`);
+    } else {
+      console.log('ℹ️ [UsersService] No hay campos para actualizar.');
     }
 
-    const updatedUser = await this.usersRepository.findOne({
-      where: { id: user.id },
-      relations: ['pets', 'role'],
-      select: ['id', 'username', 'email', 'fullName', 'firstName', 'lastName', 'phone', 'documentType', 'documentNumber', 'age', 'address', 'avatar', 'roleId', 'isActive', 'createdAt', 'updatedAt'],
-    });
-
-    return updatedUser;
+    // Retornar el usuario actualizado
+    return this.findOne(id);
   }
 
   async deactivate(id: number): Promise<void> {

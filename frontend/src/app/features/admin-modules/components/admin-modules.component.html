@@ -25,8 +25,8 @@
         </a>
       </li>
       <li>
-        <a [class.active]="activeSection === 'servicios'" (click)="setSection('servicios')">
-          <i class="fas fa-concierge-bell"></i><span>Servicios</span>
+        <a [class.active]="activeSection === 'veterinarios'" (click)="setSection('veterinarios')">
+          <i class="fas fa-user-md"></i><span>Veterinarios</span>
         </a>
       </li>
       <li>
@@ -35,18 +35,18 @@
         </a>
       </li>
       <li>
-        <a [class.active]="activeSection === 'veterinarios'" (click)="setSection('veterinarios')">
-          <i class="fas fa-user-md"></i><span>Veterinarios</span>
-        </a>
-      </li>
-      <li>
-        <a [class.active]="activeSection === 'productos'" (click)="setSection('productos')">
-          <i class="fas fa-box"></i><span>Productos</span>
+        <a [class.active]="activeSection === 'servicios'" (click)="setSection('servicios')">
+          <i class="fas fa-concierge-bell"></i><span>Servicios</span>
         </a>
       </li>
       <li>
         <a [class.active]="activeSection === 'categorias'" (click)="setSection('categorias')">
           <i class="fas fa-tags"></i><span>Categorías</span>
+        </a>
+      </li>
+      <li>
+        <a [class.active]="activeSection === 'productos'" (click)="setSection('productos')">
+          <i class="fas fa-box"></i><span>Productos</span>
         </a>
       </li>
       <li>
@@ -1189,15 +1189,6 @@
       </div>
       <div class="modal-body">
         <div class="form-grid">
-          <!-- Vista Previa de Color -->
-          <div class="form-group full" style="margin-bottom: 0.5rem;">
-            <div [style.background]="newCategoria.color"
-              style="height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);">
-              <i class="fas fa-tags"
-                style="font-size: 2rem; color: white; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));"></i>
-            </div>
-          </div>
-
           <div class="form-group full">
             <label>Nombre de Categoría *</label>
             <input type="text" [(ngModel)]="newCategoria.nombre" placeholder="Ej: Alimentos">
@@ -1206,11 +1197,6 @@
           <div class="form-group">
             <label>Código Interno *</label>
             <input type="text" [(ngModel)]="newCategoria.codigo" placeholder="Ej: CAT-001">
-          </div>
-          <div class="form-group">
-            <label>Color Distintivo</label>
-            <input type="color" [(ngModel)]="newCategoria.color"
-              style="height: 45px; width: 100%; cursor: pointer; padding: 2px; border-radius: 8px;">
           </div>
 
           <div class="form-group full">
@@ -1235,15 +1221,6 @@
       </div>
       <div class="modal-body">
         <div class="form-grid">
-          <!-- Vista Previa de Color -->
-          <div class="form-group full" style="margin-bottom: 0.5rem;">
-            <div [style.background]="editingCategoria.color"
-              style="height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);">
-              <i class="fas fa-tags"
-                style="font-size: 2rem; color: white; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));"></i>
-            </div>
-          </div>
-
           <div class="form-group full">
             <label>Nombre *</label>
             <input type="text" [(ngModel)]="editingCategoria.nombre">
@@ -1252,11 +1229,6 @@
           <div class="form-group">
             <label>Código *</label>
             <input type="text" [(ngModel)]="editingCategoria.codigo">
-          </div>
-          <div class="form-group">
-            <label>Color Distintivo</label>
-            <input type="color" [(ngModel)]="editingCategoria.color"
-              style="height: 45px; width: 100%; cursor: pointer; padding: 2px; border-radius: 8px;">
           </div>
 
           <div class="form-group full">
@@ -1394,7 +1366,6 @@
       </div>
     </div>
   </div>
-
   <div class="modal-overlay" *ngIf="showEditVeterinarioModal" (click)="closeEditVeterinarioModal()">
     <div class="modal-box" (click)="$event.stopPropagation()" style="max-width: 800px;">
       <div class="modal-header">
@@ -1404,43 +1375,14 @@
       <div class="modal-body">
         <div style="margin-bottom: 1.5rem;">
           <h4 style="color: var(--primary); margin-bottom: 0.5rem;">
-            <i class="fas fa-info-circle"></i> Información de Usuario
+            <i class="fas fa-info-circle"></i> Información del veterinario
           </h4>
           <p style="color: var(--text-secondary); font-size: 0.9rem;">
-            Modifique los datos de la cuenta de usuario del veterinario.
+            Modifique los datos básicos del veterinario.
           </p>
         </div>
         
         <div class="form-grid">
-          <div class="form-group">
-            <label><i class="fas fa-user"></i> Nombre de Usuario</label>
-            <input type="text" [(ngModel)]="editingUsuario.username" readonly>
-          </div>
-          <div class="form-group">
-            <label><i class="fas fa-envelope"></i> Email Personal</label>
-            <input type="email" [(ngModel)]="editingUsuario.email">
-          </div>
-          <div class="form-group">
-            <label><i class="fas fa-lock"></i> Nueva Contraseña</label>
-            <input type="password" [(ngModel)]="editingUsuario.password" placeholder="Dejar vacío si no cambia">
-          </div>
-          <div class="form-group">
-            <label><i class="fas fa-id-card"></i> Tipo Documento</label>
-            <select [(ngModel)]="editingUsuario.documentType">
-              <option value="">Seleccionar</option>
-              <option value="Cédula">Cédula</option>
-              <option value="Pasaporte">Pasaporte</option>
-              <option value="Cédula Extranjería">Cédula Extranjería</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label><i class="fas fa-hashtag"></i> Número Documento</label>
-            <input type="text" [(ngModel)]="editingUsuario.documentNumber">
-          </div>
-          <div class="form-group">
-            <label><i class="fas fa-phone"></i> Teléfono Personal</label>
-            <input type="text" [(ngModel)]="editingUsuario.phone">
-          </div>
           <div class="form-group">
             <label><i class="fas fa-user"></i> Nombres</label>
             <input type="text" [(ngModel)]="editingUsuario.firstName">
@@ -1449,7 +1391,11 @@
             <label><i class="fas fa-user"></i> Apellidos</label>
             <input type="text" [(ngModel)]="editingUsuario.lastName">
           </div>
-          <div class="form-group full">
+          <div class="form-group">
+            <label><i class="fas fa-phone"></i> Teléfono</label>
+            <input type="text" [(ngModel)]="editingUsuario.phone">
+          </div>
+          <div class="form-group">
             <label><i class="fas fa-map-marker-alt"></i> Dirección</label>
             <input type="text" [(ngModel)]="editingUsuario.address">
           </div>
@@ -1479,7 +1425,7 @@
           </div>
           <div class="form-group">
             <label><i class="fas fa-university"></i> Universidad</label>
-            <input type="text" [(ngModel)]="editingVeterinario.universidad">
+            <input type="text" [(ngModel)]="editingVeterinario.universidad" placeholder="Universidad">
           </div>
           <div class="form-group">
             <label><i class="fas fa-phone-alt"></i> Teléfono Profesional</label>
@@ -1514,7 +1460,7 @@
           <i class="fas fa-times"></i> Cancelar
         </button>
         <button class="btn-primary" (click)="guardarEdicionVeterinario()">
-          <i class="fas fa-save"></i> Actualizar Veterinario
+          <i class="fas fa-save"></i> Guardar Cambios
         </button>
       </div>
     </div>

@@ -392,57 +392,16 @@
   margin-bottom: 3rem;
 }
 
-.card-security {
-  .card-header {
-    background: #1e293b !important; /* Dark navy */
-    h6 { color: white !important; font-weight: 700; }
-  }
-}
-
-.card-danger-alt {
-  border: 1px solid rgba(239, 68, 68, 0.1);
-  .card-header.danger-light {
-    background: #fff1f2 !important; /* Light pink */
-    h6 { 
-      color: #991b1b !important; /* Dark red */
-      font-weight: 700;
-    }
-  }
-}
-
-.config-hint {
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-  margin-bottom: 2rem;
+/* Estilos para la tarjeta de seguridad migrada del admin */
+.card-body p {
   line-height: 1.5;
 }
 
-.password-form-simple {
-  .form-group {
-    margin-bottom: 1.5rem;
-    label {
-      font-weight: 700;
-      color: #1e293b;
-      margin-bottom: 0.8rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    input {
-      width: 100%;
-      padding: 1rem 1.2rem;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      background: white;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-      &:focus {
-        border-color: #1e293b;
-        box-shadow: 0 0 0 4px rgba(30, 41, 59, 0.05);
-      }
-    }
-  }
+.form-group label i {
+  margin-right: 0.5rem;
+  color: var(--primary-color);
 }
+
 
 .form-actions-center, .danger-action {
   display: flex;

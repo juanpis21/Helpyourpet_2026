@@ -405,24 +405,25 @@
         </div>
       </div>
       <div class="config-secondary-grid">
-        <!-- Tarjeta de Seguridad -->
-        <div class="card card-security">
-          <div class="card-header">
-            <h6><i class="fas fa-shield-alt"></i> Seguridad y Acceso</h6>
+        <!-- Card de Seguridad -->
+        <div class="card">
+          <div class="card-header" style="background: linear-gradient(90deg, #374151 0%, #111827 100%) !important;">
+            <h5><i class="fas fa-shield-alt"></i> Seguridad y Acceso</h5>
           </div>
           <div class="card-body">
-            <p class="config-hint">Protege tu cuenta actualizando tu contraseña regularmente.</p>
-            <div class="password-form">
-              <div class="form-group">
-                <label><i class="fas fa-lock"></i> Nueva Contraseña</label>
-                <input type="password" [(ngModel)]="passwordData.newPassword" placeholder="Mínimo 8 caracteres">
-              </div>
-              <div class="form-actions-center">
-                <button class="btn-outline-dark" (click)="actualizarPassword()">
-                  <i class="fas fa-key"></i> Cambiar Contraseña
-                </button>
+            <p style="margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.9rem;">
+              Protege tu cuenta actualizando tu contraseña regularmente.
+            </p>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label><i class="fas fa-lock"></i> Nueva Contraseña</label>
+              <div style="position: relative;">
+                <input type="password" [(ngModel)]="newPassword" name="newPassword" placeholder="Mínimo 8 caracteres"
+                  style="width: 100%;">
               </div>
             </div>
+            <button class="btn-secondary" style="width: 100%; justify-content: center;" (click)="cambiarPassword()">
+              <i class="fas fa-key"></i> Cambiar Contraseña
+            </button>
           </div>
         </div>
 
