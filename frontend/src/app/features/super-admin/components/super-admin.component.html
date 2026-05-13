@@ -172,7 +172,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let user of allUsers">
+                <tr *ngFor="let user of allUsers; trackBy: trackByUserId">
                   <td>
                     <div class="user-info">
                       <img [src]="getFullImageUrl(user.avatar)" class="avatar-sm">
@@ -194,7 +194,7 @@
                     <button class="btn-icon" 
                             [class.delete]="user.isActive" 
                             [class.edit]="!user.isActive"
-                            (click)="$event.stopPropagation(); toggleUserStatus(user)"
+                            (click)="toggleUserStatus(user)"
                             [title]="user.isActive ? 'Desactivar Usuario' : 'Activar Usuario'">
                       <i class="fas" [ngClass]="user.isActive ? 'fa-user-slash' : 'fa-user-check'"></i>
                     </button>

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation, inject } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, inject, ChangeDetectorRef, ChangeDetectionStrategy, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
@@ -16,7 +16,8 @@ import { Subscription } from 'rxjs';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './super-admin.component.html',
-  styleUrl: './super-admin.component.scss'
+  styleUrl: './super-admin.component.scss',
+  changeDetection: ChangeDetectionStrategy.Default
 })
 export class SuperAdminComponent implements OnInit {
   // UI State
@@ -79,7 +80,9 @@ export class SuperAdminComponent implements OnInit {
     private petsService: PetsService,
     private veterinariasService: VeterinariasService,
     private themeService: ThemeService,
-    private authService: AuthService
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit(): void {
@@ -132,24 +135,50 @@ export class SuperAdminComponent implements OnInit {
   }
 
   toggleUserStatus(user: any): void {
-    const originalStatus = user.isActive;
-    const newStatus = !originalStatus;
-    
-    // Actualización optimista
-    user.isActive = newStatus;
+    this.ngZone.run(() => {
+      const originalStatus = user.isActive;
+      const newStatus = !originalStatus;
+      
+      console.log('🔄 [toggleUserStatus] Cambiando estado de usuario:', user.username, 'de', originalStatus, 'a', newStatus);
+      
+      // Encontrar el índice del usuario en el array
+      const index = this.allUsers.findIndex(u => u.id === user.id);
+      if (index === -1) return;
+      
+      // Crear una copia del usuario con el nuevo estado
+      const updatedUser = { ...this.allUsers[index], isActive: newStatus };
+      
+      // Reemplazar el objeto en el array para forzar detección de cambios
+      this.allUsers = [...this.allUsers];
+      this.allUsers[index] = updatedUser;
+      
+      // Forzar detección de cambios para actualizar la UI inmediatamente
+      this.cdr.detectChanges();
 
-    this.usersService.updateUser(user.id, { isActive: newStatus }).subscribe({
-      next: (updatedUser) => {
-        console.log('✅ Estado actualizado en servidor:', updatedUser.username, updatedUser.isActive);
-        // Sincronizar el objeto local con la respuesta real del servidor sin recargar todo
-        Object.assign(user, updatedUser);
-      },
-      error: (err) => {
-        console.error(`❌ Error al cambiar estado:`, err);
-        user.isActive = originalStatus;
-        alert('No se pudo cambiar el estado. Revisa tu conexión.');
-      }
+      this.usersService.updateUser(user.id, { isActive: newStatus }).subscribe({
+        next: (response) => {
+          console.log('✅ Estado actualizado en servidor:', response.username, response.isActive);
+          // Actualizar el objeto en el array con la respuesta del servidor
+          this.allUsers = [...this.allUsers];
+          this.allUsers[index] = { ...this.allUsers[index], ...response };
+          // Forzar detección de cambios nuevamente después de la respuesta
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error(`❌ Error al cambiar estado:`, err);
+          // Revertir al estado original en caso de error
+          this.allUsers = [...this.allUsers];
+          this.allUsers[index] = { ...this.allUsers[index], isActive: originalStatus };
+          // Forzar detección de cambios para revertir la UI en caso de error
+          this.cdr.detectChanges();
+          alert('No se pudo cambiar el estado. Revisa tu conexión.');
+        }
+      });
     });
+  }
+
+  trackByUserId(index: number, user: any): number {
+    return user.id;
   }
 
   logout(): void {

@@ -193,6 +193,7 @@
   transition: all 0.3s ease;
   background: var(--bg-body);
   z-index: 1;
+  overflow: visible;
 }
 
 .sidebar-closed .main-content {
@@ -205,6 +206,38 @@
   .main-content {
     left: 250px !important;
     width: calc(100% - 250px) !important;
+    z-index: 5;
+  }
+  
+  .sidebar-overlay {
+    display: none !important;
+  }
+  
+  .table-container {
+    overflow-x: visible;
+    z-index: 10;
+    position: relative;
+  }
+  
+  .data-table {
+    position: relative;
+    z-index: 15;
+  }
+  
+  .data-table tbody td {
+    position: relative;
+    z-index: 15;
+  }
+  
+  .data-table tbody tr {
+    position: relative;
+    z-index: 15;
+  }
+  
+  .btn-icon {
+    pointer-events: auto !important;
+    z-index: 100 !important;
+    position: relative !important;
   }
 }
 
@@ -325,6 +358,9 @@
   width: 100%; 
   overflow-x: auto; 
   border-radius: 8px;
+  position: relative;
+  z-index: 5;
+  transform: translateZ(0);
 }
 
 .data-table {
@@ -393,10 +429,12 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
   font-size: 1.1rem;
   background: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 10;
 
   &.edit {
     color: var(--primary-color);
