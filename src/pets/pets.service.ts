@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { Pet } from './entities/pet.entity';
 import { CreatePetDto } from './dto/create-pet.dto';
 import { UpdatePetDto } from './dto/update-pet.dto';
@@ -55,6 +55,28 @@ export class PetsService {
       where: { ownerId },
       relations: ['owner'],
       select: ['id', 'name', 'species', 'breed', 'age', 'gender', 'color', 'weight', 'description', 'foto', 'ownerId', 'isActive', 'createdAt', 'updatedAt', 'owner']
+    });
+  }
+
+  async findByVeterinaria(veterinarioId: number): Promise<Pet[]> {
+    console.log('🔍 [PetsService] Buscando mascotas por veterinaria del vet ID:', veterinarioId);
+    
+    // 1. Obtener los usuarios (dueños) que pertenecen a esa veterinaria
+    const usuarios = await this.usersService.findUsuariosByVeterinaria(veterinarioId);
+    const ownerIds = usuarios.map(u => u.id);
+    
+    if (ownerIds.length === 0) {
+      return [];
+    }
+
+    // 2. Buscar mascotas de esos dueños
+    return this.petsRepository.find({
+      where: { 
+        ownerId: In(ownerIds) 
+      },
+      relations: ['owner'],
+      select: ['id', 'name', 'species', 'breed', 'age', 'gender', 'color', 'weight', 'description', 'foto', 'ownerId', 'isActive', 'createdAt', 'updatedAt', 'owner'],
+      order: { createdAt: 'DESC' }
     });
   }
 

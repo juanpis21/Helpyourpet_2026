@@ -6,6 +6,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { RegisterUserByVetDto } from './dto/register-user-by-vet.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Role } from '../roles/entities/role.entity';
+import { PerfilVeterinario } from '../perfiles-veterinarios/entities/perfil-veterinario.entity';
 import { PermissionsService } from '../permissions/permissions.service';
 import * as bcrypt from 'bcrypt';
 
@@ -16,6 +17,8 @@ export class UsersService {
     private usersRepository: Repository<User>,
     @InjectRepository(Role)
     private rolesRepository: Repository<Role>,
+    @InjectRepository(PerfilVeterinario)
+    private perfilesRepository: Repository<PerfilVeterinario>,
     private permissionsService: PermissionsService,
   ) { }
 
@@ -155,6 +158,51 @@ export class UsersService {
     });
     
     console.log(`✅ [UsersService] Usuarios encontrados: ${users.length}`);
+    return users;
+  }
+
+  async findUsuariosByVeterinaria(veterinarioId: number): Promise<User[]> {
+    console.log('🔍 [UsersService] Buscando usuarios por veterinaria del vet ID:', veterinarioId);
+
+    // 1. Buscar el perfil del veterinario actual para saber su veterinaria
+    const perfilVet = await this.perfilesRepository.findOne({
+      where: { usuario: { id: veterinarioId }, isActive: true },
+      relations: ['veterinariaPrincipal']
+    });
+
+    if (!perfilVet || !perfilVet.veterinariaPrincipal) {
+      console.log('⚠️ [UsersService] No se encontró perfil o veterinaria para el vet ID:', veterinarioId);
+      // Si no tiene veterinaria, devolvemos solo los suyos (fallback)
+      return this.findUsuariosByVeterinario(veterinarioId);
+    }
+
+    const veterinariaId = perfilVet.veterinariaPrincipal.id;
+    console.log('🏥 [UsersService] Veterinaria ID detectada:', veterinariaId);
+
+    // 2. Obtener todos los veterinarios de esa misma veterinaria
+    const todosLosVets = await this.perfilesRepository.find({
+      where: { veterinariaPrincipal: { id: veterinariaId }, isActive: true },
+      relations: ['usuario']
+    });
+
+    const vetIds = todosLosVets.map(pv => pv.usuario.id);
+    console.log('👨‍⚕️ [UsersService] IDs de veterinarios en la misma clínica:', vetIds);
+
+    // 3. Buscar usuarios creados por cualquiera de esos veterinarios
+    const usuarioRole = await this.rolesRepository.findOne({ where: { name: 'usuario' } });
+    const roleId = usuarioRole ? usuarioRole.id : 4;
+
+    const users = await this.usersRepository.find({
+      where: { 
+        roleId, 
+        createdById: In(vetIds) 
+      },
+      relations: ['role'],
+      select: ['id', 'firstName', 'lastName', 'fullName', 'phone', 'documentType', 'documentNumber', 'age', 'address', 'tieneCuenta', 'createdAt', 'createdById'],
+      order: { createdAt: 'DESC' }
+    });
+
+    console.log(`✅ [UsersService] Usuarios de la veterinaria encontrados: ${users.length}`);
     return users;
   }
 

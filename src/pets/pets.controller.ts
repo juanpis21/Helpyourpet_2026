@@ -105,6 +105,15 @@ export class PetsController {
     return this.petsService.findAll();
   }
 
+  @Get('by-veterinaria')
+  @ApiOperation({ summary: 'Obtener mascotas registradas en la misma veterinaria' })
+  @ApiResponse({ status: 200, description: 'Lista de mascotas de la veterinaria', type: [Pet] })
+  findByVeterinaria(@Request() req) {
+    const userId = req.user.sub || req.user.userId;
+    // Asumimos que si llega aquí con rol veterinario (validado por guard), filtramos
+    return this.petsService.findByVeterinaria(userId);
+  }
+
   @Get('owner/:ownerId')
   @ApiOperation({ summary: 'Obtener mascotas por dueño' })
   @ApiParam({ name: 'ownerId', description: 'ID del dueño' })

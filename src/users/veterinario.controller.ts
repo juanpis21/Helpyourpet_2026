@@ -45,4 +45,15 @@ export class VeterinarioController {
     }
     return this.usersService.findUsuariosByVeterinario(user.userId);
   }
+
+  @Get('by-veterinaria')
+  @ApiOperation({ summary: 'Obtener usuarios registrados por cualquier veterinario de la misma clínica' })
+  @ApiResponse({ status: 200, description: 'Lista de usuarios de la veterinaria', type: [User] })
+  async getUsuariosByVeterinaria(@Req() req: any) {
+    const user = req.user;
+    if (user.roleId !== 3) {
+      throw new ForbiddenException('Solo los veterinarios pueden acceder a este filtro.');
+    }
+    return this.usersService.findUsuariosByVeterinaria(user.userId);
+  }
 }

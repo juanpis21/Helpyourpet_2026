@@ -6,4 +6,5 @@ export declare class VeterinarioController {
     constructor(usersService: UsersService);
     registerUser(registerDto: RegisterUserByVetDto, req: any): Promise<User>;
     getUsuariosSinCuenta(req: any): Promise<User[]>;
+    getUsuariosByVeterinaria(req: any): Promise<User[]>;
 }

@@ -18,12 +18,14 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const user_entity_1 = require("./entities/user.entity");
 const role_entity_1 = require("../roles/entities/role.entity");
+const perfil_veterinario_entity_1 = require("../perfiles-veterinarios/entities/perfil-veterinario.entity");
 const permissions_service_1 = require("../permissions/permissions.service");
 const bcrypt = require("bcrypt");
 let UsersService = class UsersService {
-    constructor(usersRepository, rolesRepository, permissionsService) {
+    constructor(usersRepository, rolesRepository, perfilesRepository, permissionsService) {
         this.usersRepository = usersRepository;
         this.rolesRepository = rolesRepository;
+        this.perfilesRepository = perfilesRepository;
         this.permissionsService = permissionsService;
     }
     async create(createUserDto) {
@@ -122,6 +124,38 @@ let UsersService = class UsersService {
             order: { createdAt: 'DESC' }
         });
         console.log(`✅ [UsersService] Usuarios encontrados: ${users.length}`);
+        return users;
+    }
+    async findUsuariosByVeterinaria(veterinarioId) {
+        console.log('🔍 [UsersService] Buscando usuarios por veterinaria del vet ID:', veterinarioId);
+        const perfilVet = await this.perfilesRepository.findOne({
+            where: { usuario: { id: veterinarioId }, isActive: true },
+            relations: ['veterinariaPrincipal']
+        });
+        if (!perfilVet || !perfilVet.veterinariaPrincipal) {
+            console.log('⚠️ [UsersService] No se encontró perfil o veterinaria para el vet ID:', veterinarioId);
+            return this.findUsuariosByVeterinario(veterinarioId);
+        }
+        const veterinariaId = perfilVet.veterinariaPrincipal.id;
+        console.log('🏥 [UsersService] Veterinaria ID detectada:', veterinariaId);
+        const todosLosVets = await this.perfilesRepository.find({
+            where: { veterinariaPrincipal: { id: veterinariaId }, isActive: true },
+            relations: ['usuario']
+        });
+        const vetIds = todosLosVets.map(pv => pv.usuario.id);
+        console.log('👨‍⚕️ [UsersService] IDs de veterinarios en la misma clínica:', vetIds);
+        const usuarioRole = await this.rolesRepository.findOne({ where: { name: 'usuario' } });
+        const roleId = usuarioRole ? usuarioRole.id : 4;
+        const users = await this.usersRepository.find({
+            where: {
+                roleId,
+                createdById: (0, typeorm_2.In)(vetIds)
+            },
+            relations: ['role'],
+            select: ['id', 'firstName', 'lastName', 'fullName', 'phone', 'documentType', 'documentNumber', 'age', 'address', 'tieneCuenta', 'createdAt', 'createdById'],
+            order: { createdAt: 'DESC' }
+        });
+        console.log(`✅ [UsersService] Usuarios de la veterinaria encontrados: ${users.length}`);
         return users;
     }
     async findAll() {
@@ -230,7 +264,9 @@ exports.UsersService = UsersService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
     __param(1, (0, typeorm_1.InjectRepository)(role_entity_1.Role)),
+    __param(2, (0, typeorm_1.InjectRepository)(perfil_veterinario_entity_1.PerfilVeterinario)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         permissions_service_1.PermissionsService])
 ], UsersService);

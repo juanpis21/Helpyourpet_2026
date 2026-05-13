@@ -48,6 +48,10 @@ let PetsController = class PetsController {
     findAll() {
         return this.petsService.findAll();
     }
+    findByVeterinaria(req) {
+        const userId = req.user.sub || req.user.userId;
+        return this.petsService.findByVeterinaria(userId);
+    }
     findByOwner(ownerId) {
         return this.petsService.findByOwnerId(+ownerId);
     }
@@ -122,6 +126,15 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], PetsController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('by-veterinaria'),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtener mascotas registradas en la misma veterinaria' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Lista de mascotas de la veterinaria', type: [pet_entity_1.Pet] }),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], PetsController.prototype, "findByVeterinaria", null);
 __decorate([
     (0, common_1.Get)('owner/:ownerId'),
     (0, swagger_1.ApiOperation)({ summary: 'Obtener mascotas por dueño' }),

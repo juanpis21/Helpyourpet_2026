@@ -11,6 +11,7 @@ export declare class PetsService {
     findAll(): Promise<Pet[]>;
     findOne(id: number): Promise<Pet>;
     findByOwnerId(ownerId: number): Promise<Pet[]>;
+    findByVeterinaria(veterinarioId: number): Promise<Pet[]>;
     update(id: number, updatePetDto: UpdatePetDto): Promise<Pet>;
     remove(id: number): Promise<void>;
 }

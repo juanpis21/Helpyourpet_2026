@@ -7,6 +7,7 @@ export declare class PetsController {
     constructor(petsService: PetsService);
     create(req: any, createPetDto: CreatePetDto, file?: Express.Multer.File): Promise<Pet>;
     findAll(): Promise<Pet[]>;
+    findByVeterinaria(req: any): Promise<Pet[]>;
     findByOwner(ownerId: string): Promise<Pet[]>;
     findOne(id: string): Promise<Pet>;
     update(id: string, updatePetDto: UpdatePetDto, file?: Express.Multer.File): Promise<Pet>;

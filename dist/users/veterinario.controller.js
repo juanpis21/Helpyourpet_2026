@@ -37,6 +37,13 @@ let VeterinarioController = class VeterinarioController {
         }
         return this.usersService.findUsuariosByVeterinario(user.userId);
     }
+    async getUsuariosByVeterinaria(req) {
+        const user = req.user;
+        if (user.roleId !== 3) {
+            throw new common_1.ForbiddenException('Solo los veterinarios pueden acceder a este filtro.');
+        }
+        return this.usersService.findUsuariosByVeterinaria(user.userId);
+    }
 };
 exports.VeterinarioController = VeterinarioController;
 __decorate([
@@ -59,6 +66,15 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], VeterinarioController.prototype, "getUsuariosSinCuenta", null);
+__decorate([
+    (0, common_1.Get)('by-veterinaria'),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtener usuarios registrados por cualquier veterinario de la misma clínica' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Lista de usuarios de la veterinaria', type: [user_entity_1.User] }),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], VeterinarioController.prototype, "getUsuariosByVeterinaria", null);
 exports.VeterinarioController = VeterinarioController = __decorate([
     (0, swagger_1.ApiTags)('veterinario'),
     (0, common_1.Controller)('veterinario'),

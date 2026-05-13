@@ -299,7 +299,6 @@ export class Veterinario implements OnInit {
     this.cargarMascotas();
     this.cargarUsuarios();
     this.cargarUsuariosSinCuenta();
-    this.cargarPublicaciones();
     this.cargarCitas();
   }
 
@@ -337,29 +336,29 @@ export class Veterinario implements OnInit {
 
   // Lógica de Mascotas
   cargarMascotas(): void {
-    this.http.get<any[]>(`${this.API_BASE}/pets`, this.getHeaders()).subscribe({
+    this.http.get<any[]>(`${this.API_BASE}/pets/by-veterinaria`, this.getHeaders()).subscribe({
       next: (data) => this.mascotas = data,
-      error: (err) => console.error('Error cargando mascotas:', err)
+      error: (err) => console.error('Error cargando mascotas de la veterinaria:', err)
     });
   }
 
   cargarUsuarios(): void {
-    this.userService.getUsersByRoles(['usuario']).subscribe({
+    this.userService.getUsersByVeterinaria().subscribe({
       next: (data) => {
-        console.log('👥 Clientes cargados:', data);
+        console.log('👥 Clientes de la veterinaria cargados:', data);
         this.usuarios = data;
       },
-      error: (err) => console.error('Error cargando usuarios:', err)
+      error: (err) => console.error('Error cargando usuarios de la veterinaria:', err)
     });
   }
 
   cargarUsuariosSinCuenta(): void {
-    this.userService.getUsuariosSinCuenta().subscribe({
+    this.userService.getUsersByVeterinaria().subscribe({
       next: (data) => {
         this.usuariosSinCuenta = data;
-        console.log('👥 Usuarios sin cuenta cargados:', data.length);
+        console.log('👥 Usuarios de la veterinaria cargados:', data.length);
       },
-      error: (err) => console.error('Error cargando usuarios sin cuenta:', err)
+      error: (err) => console.error('Error cargando usuarios de la veterinaria:', err)
     });
   }
 
@@ -597,12 +596,7 @@ export class Veterinario implements OnInit {
   publicacionImagePreview: string | null = null;
   selectedPublicacionFile: File | null = null;
 
-  cargarPublicaciones(): void {
-    this.http.get<any[]>(`${this.API_BASE}/publicaciones`, this.getHeaders()).subscribe({
-      next: (data) => this.publicaciones = data,
-      error: (err) => console.error('Error cargando publicaciones:', err)
-    });
-  }
+
 
   openEditPublicacionModal(pub: any): void {
     this.editingPublicacion = { ...pub };
@@ -653,7 +647,7 @@ export class Veterinario implements OnInit {
     this.http.patch(`${this.API_BASE}/publicaciones/${this.editingPublicacion.id}`, formData, this.getHeaders()).subscribe({
       next: () => {
         alert('Publicación actualizada con éxito');
-        this.cargarPublicaciones();
+        this.cargarPublicacionesUsuario();
         this.closeEditPublicacionModal();
       },
       error: (err) => {

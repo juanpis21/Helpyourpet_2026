@@ -59,6 +59,22 @@ let PetsService = class PetsService {
             select: ['id', 'name', 'species', 'breed', 'age', 'gender', 'color', 'weight', 'description', 'foto', 'ownerId', 'isActive', 'createdAt', 'updatedAt', 'owner']
         });
     }
+    async findByVeterinaria(veterinarioId) {
+        console.log('🔍 [PetsService] Buscando mascotas por veterinaria del vet ID:', veterinarioId);
+        const usuarios = await this.usersService.findUsuariosByVeterinaria(veterinarioId);
+        const ownerIds = usuarios.map(u => u.id);
+        if (ownerIds.length === 0) {
+            return [];
+        }
+        return this.petsRepository.find({
+            where: {
+                ownerId: (0, typeorm_2.In)(ownerIds)
+            },
+            relations: ['owner'],
+            select: ['id', 'name', 'species', 'breed', 'age', 'gender', 'color', 'weight', 'description', 'foto', 'ownerId', 'isActive', 'createdAt', 'updatedAt', 'owner'],
+            order: { createdAt: 'DESC' }
+        });
+    }
     async update(id, updatePetDto) {
         const pet = await this.petsRepository.findOne({
             where: { id },

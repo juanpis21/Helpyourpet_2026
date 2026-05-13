@@ -106,6 +106,10 @@ export class UsersService {
     return this.http.get<any[]>(`http://localhost:3000/veterinario/usuarios`, { headers: this.getAuthHeaders() });
   }
 
+  getUsersByVeterinaria(): Observable<any[]> {
+    return this.http.get<any[]>(`http://localhost:3000/veterinario/by-veterinaria`, { headers: this.getAuthHeaders() });
+  }
+
   deleteUser(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });
   }
