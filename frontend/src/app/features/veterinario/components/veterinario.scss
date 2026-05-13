@@ -515,6 +515,7 @@
 .photo-hint { font-size: 0.7rem; color: var(--text-secondary); margin: 0.3rem 0; }
 .config-form { flex: 1; }
 .form-actions { margin-top: 1rem; text-align: center; }
+.readonly-field { background-color: var(--bg-body); cursor: not-allowed; border-color: transparent; font-weight: 500; color: var(--text-secondary); opacity: 0.8; }
 
 /* ===== PUBLICACIONES GRID ===== */
 .publicaciones-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }

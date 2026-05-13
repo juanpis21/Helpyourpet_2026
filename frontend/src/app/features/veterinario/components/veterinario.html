@@ -386,6 +386,23 @@
                   <label>Número Documento</label>
                   <input type="text" [(ngModel)]="usuario.numDocumento" placeholder="Número de documento">
                 </div>
+                <!-- Información Profesional (Solo lectura para veterinarios) -->
+                <div class="form-group">
+                  <label>Especialidad</label>
+                  <input type="text" [(ngModel)]="usuario.especialidad" readonly class="readonly-field">
+                </div>
+                <div class="form-group">
+                  <label>Matrícula Profesional</label>
+                  <input type="text" [(ngModel)]="usuario.matricula" readonly class="readonly-field">
+                </div>
+                <div class="form-group">
+                  <label>Años de Experiencia</label>
+                  <input type="number" [(ngModel)]="usuario.aniosExperiencia" readonly class="readonly-field">
+                </div>
+                <div class="form-group">
+                  <label>Veterinaria Principal</label>
+                  <input type="text" [(ngModel)]="usuario.nombreVeterinaria" readonly class="readonly-field">
+                </div>
               </div>
               <div class="form-actions">
                 <button class="btn-primary" (click)="guardarPerfil()"><i class="fas fa-save"></i> Guardar

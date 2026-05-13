@@ -43,6 +43,11 @@ interface Usuario {
   direccion: string;
   imagen: string;
   roleId?: number;
+  // Perfil Profesional (Veterinario)
+  especialidad?: string;
+  matricula?: string;
+  aniosExperiencia?: number;
+  nombreVeterinaria?: string;
 }
 
 @Component({
@@ -201,6 +206,24 @@ export class Veterinario implements OnInit {
         imagen: avatar && avatar.startsWith('/uploads/') ? `http://localhost:3000${avatar}` : avatar,
         roleId: currentUser.roleId
       };
+
+      // Si es veterinario, cargar su perfil profesional
+      if (currentUser.roleId === 3) {
+        this.http.get<any[]>(`${this.API_BASE}/perfiles-veterinarios/usuario/${currentUser.id}`, this.getHeaders())
+          .subscribe({
+            next: (perfiles) => {
+              if (perfiles && perfiles.length > 0) {
+                const perfil = perfiles[0];
+                this.usuario.especialidad = perfil.especialidad;
+                this.usuario.matricula = perfil.matricula;
+                this.usuario.aniosExperiencia = perfil.aniosExperiencia;
+                this.usuario.nombreVeterinaria = perfil.veterinariaPrincipal?.nombre || 'No asignada';
+                this.cdr.detectChanges();
+              }
+            },
+            error: (err) => console.error('Error al cargar perfil veterinario:', err)
+          });
+      }
     }
   }
 
