@@ -45,7 +45,7 @@ export class SuperAdminComponent implements OnInit {
   showAddVeterinariaModal: boolean = false;
   showEditVeterinariaModal: boolean = false;
   showNewAdminModal: boolean = false;
-  newVeterinaria: Partial<Veterinaria> = {
+  newVeterinaria: any = {
     nombre: '',
     direccion: '',
     telefono: '',
@@ -53,7 +53,8 @@ export class SuperAdminComponent implements OnInit {
     rut: '',
     descripcion: '',
     isActive: true,
-    adminId: undefined
+    adminId: undefined,
+    verificado: false
   };
   editingVeterinaria: Partial<Veterinaria> = {};
   newAdmin: any = {
@@ -364,7 +365,8 @@ export class SuperAdminComponent implements OnInit {
       rut: '',
       descripcion: '',
       isActive: true,
-      adminId: undefined
+      adminId: undefined,
+      verificado: false
     };
   }
 
@@ -374,7 +376,16 @@ export class SuperAdminComponent implements OnInit {
       return;
     }
 
-    this.veterinariasService.create(this.newVeterinaria).subscribe({
+    if (!this.newVeterinaria.verificado) {
+      alert('Debes verificar la existencia de la veterinaria en los sitios oficiales antes de registrarla');
+      return;
+    }
+
+    // Eliminar el campo verificado antes de enviar al backend
+    const veterinariaData = { ...this.newVeterinaria };
+    delete veterinariaData.verificado;
+
+    this.veterinariasService.create(veterinariaData).subscribe({
       next: () => {
         this.closeAddVeterinariaModal();
         this.loadGlobalData();
