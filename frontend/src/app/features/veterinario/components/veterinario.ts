@@ -878,7 +878,6 @@ export class Veterinario implements OnInit {
     }
   }
 
-<<<<<<< Updated upstream
   private actualizarPesoMascota(mascotaId: number, peso: number): void {
     const token = localStorage.getItem('access_token');
     const headers = { Authorization: `Bearer ${token}` };
@@ -892,8 +891,6 @@ export class Veterinario implements OnInit {
       });
   }
   // ────────────────────────────────────────────────────────────────
-}
-=======
   // ===== TICKETS =====
   openTicketModal(): void {
     this.newTicket = {
@@ -948,4 +945,3 @@ export class Veterinario implements OnInit {
     });
   }
 }  // ────────────────────────────────────────────────────────────────
->>>>>>> Stashed changes

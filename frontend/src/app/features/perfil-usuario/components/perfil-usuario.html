@@ -583,15 +583,13 @@
       <button class="btn-primary" (click)="guardarHistorial()"><i class="fas fa-save"></i> Guardar Registro</button>
     </div>
 
-  </div>
-</div>
-<!-- ===== MODAL EDITAR MASCOTA ===== -->
-<div class="modal-overlay" *ngIf="showEditPetModal" (click)="closeEditPetModal()">
+<!-- Modal de Crear Ticket -->
+<div class="modal-overlay" *ngIf="showTicketModal" (click)="closeTicketModal()">
   <div class="modal-box" (click)="$event.stopPropagation()">
 
     <div class="modal-header">
-      <h3><i class="fas fa-edit"></i> Editar Mascota</h3>
-      <button class="close-btn" (click)="closeEditPetModal()">
+      <h3><i class="fas fa-ticket-alt"></i> Crear Ticket</h3>
+      <button class="close-btn" (click)="closeTicketModal()">
         <i class="fas fa-times"></i>
       </button>
     </div>
@@ -669,42 +667,4 @@
     </div>
 
   </div>
-<<<<<<< Updated upstream
 </div>
-=======
-</div>
-
-<!-- Modal de Crear Ticket -->
-<div class="modal-overlay" *ngIf="showTicketModal" (click)="closeTicketModal()">
-  <div class="modal-box" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h3>Crear Ticket de Soporte</h3>
-      <button class="close-btn" (click)="closeTicketModal()">&times;</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-grid">
-        <div class="form-group full">
-          <label>Asunto *</label>
-          <input type="text" [(ngModel)]="newTicket.asunto" placeholder="Ej: Problema con mi cuenta">
-        </div>
-        <div class="form-group full">
-          <label>Prioridad</label>
-          <select [(ngModel)]="newTicket.prioridad" class="form-control">
-            <option value="Baja">Baja</option>
-            <option value="Media">Media</option>
-            <option value="Alta">Alta</option>
-          </select>
-        </div>
-        <div class="form-group full">
-          <label>Descripción *</label>
-          <textarea [(ngModel)]="newTicket.descripcion" rows="5" placeholder="Describe detalladamente tu problema o consulta..."></textarea>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-secondary" (click)="closeTicketModal()">Cancelar</button>
-      <button class="btn-primary" (click)="createTicket()">Enviar Ticket</button>
-    </div>
-  </div>
-</div>
->>>>>>> Stashed changes

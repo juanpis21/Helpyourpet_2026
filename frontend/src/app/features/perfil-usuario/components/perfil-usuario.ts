@@ -211,11 +211,8 @@ export class PerfilUsuario implements OnInit {
     private usersService: UsersService,
     private mascotasService: MascotasService,
     private publicacionesService: PublicacionesService,
-<<<<<<< Updated upstream
-    private cdr: ChangeDetectorRef
-=======
+    private cdr: ChangeDetectorRef,
     private ticketsService: TicketsService
->>>>>>> Stashed changes
   ) {}
 
   ngOnInit(): void {
