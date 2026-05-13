@@ -808,6 +808,9 @@ export class Veterinario implements OnInit {
             if (index !== -1) {
               this.consultasActuales[index] = consulta;
             }
+            if (this.nuevaConsulta.peso) {
+              this.actualizarPesoMascota(this.historiaActual.mascotaId, this.nuevaConsulta.peso);
+            }
             this.showNuevaConsultaModal = false;
             this.cdr.detectChanges();
           },
@@ -818,12 +821,28 @@ export class Veterinario implements OnInit {
         .subscribe({
           next: (consulta) => {
             this.consultasActuales.unshift(consulta);
+            if (this.nuevaConsulta.peso) {
+              this.actualizarPesoMascota(this.historiaActual.mascotaId, this.nuevaConsulta.peso);
+            }
             this.showNuevaConsultaModal = false;
             this.cdr.detectChanges();
           },
           error: (err) => alert('Error al guardar consulta: ' + (err.error?.message || err.message))
         });
     }
+  }
+
+  private actualizarPesoMascota(mascotaId: number, peso: number): void {
+    const token = localStorage.getItem('access_token');
+    const headers = { Authorization: `Bearer ${token}` };
+    this.http.patch(`${this.API_BASE}/pets/${mascotaId}`, { weight: Number(peso) }, { headers })
+      .subscribe({
+        next: () => {
+          console.log('⚖️ [Historia Clínica] Peso de la mascota actualizado en la tabla pets.');
+          this.cargarMascotas();
+        },
+        error: (err) => console.error('Error al actualizar peso de la mascota:', err)
+      });
   }
   // ────────────────────────────────────────────────────────────────
 }
