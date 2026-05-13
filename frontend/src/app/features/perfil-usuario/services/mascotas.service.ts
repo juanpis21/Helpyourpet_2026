@@ -61,6 +61,12 @@ export class MascotasService {
     });
   }
 
+  getHistorialByMascota(mascotaId: number): Observable<any> {
+    return this.http.get<any>(`http://localhost:3000/historias-clinicas/mascota/${mascotaId}`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
   createMascota(mascota: any): Observable<Mascota> {
     if (mascota instanceof FormData) {
       return this.http.post<Mascota>(this.apiUrl, mascota, {

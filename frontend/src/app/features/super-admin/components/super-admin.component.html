@@ -172,7 +172,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let user of allUsers">
+                <tr *ngFor="let user of allUsers; trackBy: trackByUserId">
                   <td>
                     <div class="user-info">
                       <img [src]="getFullImageUrl(user.avatar)" class="avatar-sm">
@@ -194,7 +194,7 @@
                     <button class="btn-icon" 
                             [class.delete]="user.isActive" 
                             [class.edit]="!user.isActive"
-                            (click)="$event.stopPropagation(); toggleUserStatus(user)"
+                            (click)="toggleUserStatus(user)"
                             [title]="user.isActive ? 'Desactivar Usuario' : 'Activar Usuario'">
                       <i class="fas" [ngClass]="user.isActive ? 'fa-user-slash' : 'fa-user-check'"></i>
                     </button>
@@ -422,11 +422,11 @@
           <label>Teléfono *</label>
           <input type="tel" [(ngModel)]="newVeterinaria.telefono" placeholder="Ej: +57 300 123 4567">
         </div>
-        <div class="form-group full">
+        <div class="form-group">
           <label>Dirección *</label>
           <input type="text" [(ngModel)]="newVeterinaria.direccion" placeholder="Ej: Calle Principal #123">
         </div>
-        <div class="form-group full">
+        <div class="form-group">
           <label>Correo Electrónico *</label>
           <input type="email" [(ngModel)]="newVeterinaria.email" placeholder="Ej: contacto@veterinaria.com">
         </div>
@@ -443,6 +443,26 @@
               {{ admin.username }} ({{ admin.fullName || admin.firstName }})
             </option>
           </select>
+        </div>
+        <div class="form-group full verification-section">
+          <label class="verification-label">Verificación de Existencia *</label>
+          <div class="verification-links">
+            <p class="verification-text">Antes de registrar, verifica que la veterinaria existe en los siguientes sitios oficiales:</p>
+            <div class="links-container">
+              <a href="https://www.rues.org.co/" target="_blank" class="verification-link">
+                <i class="fas fa-external-link-alt"></i> RUES - Registro Único Empresarial
+              </a>
+              <a href="https://consejoprofesionalmvz.gov.co/" target="_blank" class="verification-link">
+                <i class="fas fa-external-link-alt"></i> Consejo Profesional de Médicos Veterinarios
+              </a>
+            </div>
+          </div>
+          <div class="verification-checkbox">
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="newVeterinaria.verificado">
+              <span>Confirmo que verifiqué la existencia de esta veterinaria en los sitios oficiales</span>
+            </label>
+          </div>
         </div>
       </div>
     </div>
