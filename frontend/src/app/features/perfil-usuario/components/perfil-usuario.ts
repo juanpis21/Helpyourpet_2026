@@ -61,6 +61,12 @@ export class PerfilUsuario implements OnInit {
   seccionActiva = 'dashboard';
   sidebarAbierto = true;
   darkMode = false;
+  activePubMenuId: number | null = null;
+
+  togglePubMenu(id: number, event: Event): void {
+    event.stopPropagation();
+    this.activePubMenuId = this.activePubMenuId === id ? null : id;
+  }
 
 
   usuario: Usuario = {
@@ -301,6 +307,10 @@ export class PerfilUsuario implements OnInit {
 
   cerrarSidebar(): void {
     this.sidebarAbierto = false;
+  }
+
+  closeAllMenus(): void {
+    this.activePubMenuId = null;
   }
 
   toggleDarkMode(): void {

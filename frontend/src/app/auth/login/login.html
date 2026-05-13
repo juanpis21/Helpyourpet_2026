@@ -58,15 +58,17 @@
     <!-- LADO DERECHO -->
     <div class="right">
 
-        <div class="form-box" (keyup.enter)="onSubmit()">
+        <div class="form-box">
             <div class="titulo">Iniciar sesión</div>
 
             <input 
+                #usernameInput
                 type="text" 
                 placeholder="Correo electrónico o celular" 
                 [(ngModel)]="credentials.username"
                 name="username"
                 [disabled]="isLoading"
+                (keydown.enter)="onSubmit()"
                 required
             >
             <input 
@@ -75,6 +77,7 @@
                 [(ngModel)]="credentials.password"
                 name="password"
                 [disabled]="isLoading"
+                (keydown.enter)="onSubmit()"
                 required
             >
 

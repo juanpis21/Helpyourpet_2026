@@ -3,7 +3,7 @@
 
 <div class="perfil-layout" [class.sidebar-closed]="!sidebarAbierto">
   <!-- ===== SIDEBAR ===== -->
-  <nav class="sidebar" [class.active]="sidebarAbierto">
+  <nav class="sidebar" [class.active]="sidebarAbierto" [class.closed]="!sidebarAbierto">
     <div class="sidebar-header">
       <h3>HelpYourPet</h3>
       <div class="user-profile">
@@ -57,7 +57,7 @@
   <app-preloader></app-preloader>
 
   <!-- ===== CONTENIDO PRINCIPAL ===== -->
-  <main class="main-content">
+  <main class="main-content" (click)="closeAllMenus()">
     <!-- ===== DASHBOARD ===== -->
     <section *ngIf="seccionActiva === 'dashboard'" class="content-section animate-in">
       <div class="section-header">
@@ -323,7 +323,14 @@
             </div>
           </div>
           <div class="publicacion-actions">
-            <button class="btn-delete-small" (click)="eliminarPublicacion(pub.id)"><i class="fas fa-trash"></i></button>
+            <button class="btn-menu-dots" (click)="togglePubMenu(pub.id, $event)">
+              <i class="fas fa-ellipsis-v"></i>
+            </button>
+            <div class="pub-dropdown" *ngIf="activePubMenuId === pub.id">
+              <button class="dropdown-item delete" (click)="eliminarPublicacion(pub.id)">
+                <i class="fas fa-trash-alt"></i> Eliminar
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -397,43 +404,43 @@
           </div>
         </div>
       </div>
-
-      <!-- Zona de Peligro -->
-      <div class="danger-zone-grid">
-        <div class="card card-danger">
-          <div class="card-header danger"><h6><i class="fas fa-exclamation-triangle"></i> Zona de Peligro</h6></div>
-          <div class="card-body center">
-            <p>Desactivación de cuenta</p>
-            <button class="btn-danger" (click)="eliminarCuenta()"><i class="fas fa-user-slash"></i> Desactivar Cuenta</button>
+      <div class="config-secondary-grid">
+        <!-- Tarjeta de Seguridad -->
+        <div class="card card-security">
+          <div class="card-header">
+            <h6><i class="fas fa-shield-alt"></i> Seguridad y Acceso</h6>
           </div>
-        </div>
-
-        <!-- Tarjeta de Cambio de Contraseña -->
-        <div class="card">
-          <div class="card-header"><h6><i class="fas fa-key"></i> Cambiar Contraseña</h6></div>
           <div class="card-body">
+            <p class="config-hint">Protege tu cuenta actualizando tu contraseña regularmente.</p>
             <div class="password-form">
               <div class="form-group">
-                <label>Contraseña Actual</label>
-                <input type="password" [(ngModel)]="passwordData.currentPassword" placeholder="Ingresa tu contraseña actual">
+                <label><i class="fas fa-lock"></i> Nueva Contraseña</label>
+                <input type="password" [(ngModel)]="passwordData.newPassword" placeholder="Mínimo 8 caracteres">
               </div>
-              <div class="form-group">
-                <label>Nueva Contraseña</label>
-                <input type="password" [(ngModel)]="passwordData.newPassword" placeholder="Ingresa la nueva contraseña">
-              </div>
-              <div class="form-group">
-                <label>Confirmar Nueva Contraseña</label>
-                <input type="password" [(ngModel)]="passwordData.confirmPassword" placeholder="Confirma la nueva contraseña">
-              </div>
-              <div class="form-actions">
-                <button class="btn-primary" (click)="actualizarPassword()"><i class="fas fa-save"></i> Actualizar Contraseña</button>
+              <div class="form-actions-center">
+                <button class="btn-outline-dark" (click)="actualizarPassword()">
+                  <i class="fas fa-key"></i> Cambiar Contraseña
+                </button>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Tarjeta de Desactivación -->
+        <div class="card card-danger-alt">
+          <div class="card-header danger-light">
+            <h6><i class="fas fa-exclamation-triangle"></i> Desactivación de cuenta</h6>
+          </div>
+          <div class="card-body center">
+            <p class="config-hint">La desactivación de cuenta es una acción reversible.</p>
+            <div class="danger-action">
+              <button class="btn-danger-light" (click)="eliminarCuenta()">
+                <i class="fas fa-user-slash"></i> Desactivar mi Cuenta
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
-
-
     </section>
   </main>
 </div>

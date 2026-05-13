@@ -1,4 +1,4 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -21,18 +21,17 @@ export class Login {
   errorMessage = '';
   showPreloader = false;
   preloaderFadingOut = false;
-
-  @HostListener('window:keydown.enter')
-  handleKeyDown() {
-    this.onSubmit();
-  }
+  @ViewChild('usernameInput') usernameInput!: ElementRef;
 
   constructor(
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   onSubmit(): void {
+    if (this.isLoading) return;
+
     if (!this.credentials.username || !this.credentials.password) {
       Swal.fire({
         icon: 'warning',
@@ -55,50 +54,43 @@ export class Login {
       next: (response) => {
         console.log('Login successful:', response);
         this.isLoading = false;
-
-        // Redirigir inmediatamente — el preloader se muestra en la vista de destino
         this.redirectByPermissions();
       },
       error: (error) => {
-        this.isLoading = false;
+        this.isLoading = false; // Liberar inmediatamente para evitar que se quede pegado
         console.error('Login error full details:', error);
+        
+        let title = 'Error';
+        let text = 'Ocurrió un error inesperado.';
+
         if (error.status === 0) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Servidor no disponible',
-            text: 'No se pudo conectar con el servidor. Verifica que el backend esté corriendo.',
-            confirmButtonText: 'Reintentar',
-            confirmButtonColor: '#258e48',
-            background: '#fff',
-            customClass: {
-              popup: 'swal-rounded'
-            }
-          });
+          title = 'Servidor no disponible';
+          text = 'No se pudo conectar con el servidor. Verifica que el backend esté corriendo.';
         } else if (error.status === 401) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Credenciales inválidas',
-            text: 'El correo o la contraseña no son válidos. Por favor, verifica e intenta nuevamente.',
-            confirmButtonText: 'Intentar de nuevo',
-            confirmButtonColor: '#258e48',
-            background: '#fff',
-            customClass: {
-              popup: 'swal-rounded'
-            }
-          });
+          title = 'Credenciales inválidas';
+          text = 'El correo o la contraseña no son válidos. Por favor, verifica e intenta nuevamente.';
         } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error inesperado',
-            text: error.error?.message || error.message || 'Ocurrió un error inesperado.',
-            confirmButtonText: 'Aceptar',
-            confirmButtonColor: '#258e48',
-            background: '#fff',
-            customClass: {
-              popup: 'swal-rounded'
-            }
-          });
+          text = error.error?.message || error.message || text;
         }
+
+        this.credentials.password = '';
+        this.cdr.detectChanges(); // Forzar actualización de la vista inmediatamente
+        
+        setTimeout(() => {
+          if (this.usernameInput) this.usernameInput.nativeElement.focus();
+        }, 100);
+
+        Swal.fire({
+          icon: 'error',
+          title: title,
+          text: text,
+          confirmButtonText: 'Intentar de nuevo',
+          confirmButtonColor: '#258e48',
+          background: '#fff',
+          customClass: {
+            popup: 'swal-rounded'
+          }
+        });
       }
     });
   }

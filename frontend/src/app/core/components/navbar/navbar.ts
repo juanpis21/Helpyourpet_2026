@@ -42,9 +42,16 @@ export class Navbar implements OnInit {
         roleId: Number(user.roleId || user.role?.id),
         nombre: user.fullName || user.username || 'Usuario',
         email: user.email,
-        avatar: user.avatar || 'assets/images/Default.png'
+        avatar: this.getFullAvatarUrl(user.avatar)
       };
     }
+  }
+
+  private getFullAvatarUrl(avatarPath: string | null): string {
+    if (!avatarPath) return 'assets/images/Default.png';
+    if (avatarPath.startsWith('http') || avatarPath.startsWith('data:')) return avatarPath;
+    const cleanPath = avatarPath.startsWith('/') ? avatarPath : `/${avatarPath}`;
+    return `http://localhost:3000${cleanPath}`;
   }
 
   hasAccess(module: string): boolean {
