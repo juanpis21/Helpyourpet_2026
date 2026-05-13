@@ -7,6 +7,8 @@ import { AuthService } from '../../../core/services/auth.service';
 import { UsersService } from '../../../core/services/users.service';
 import { ThemeService } from '../../../core/services/theme.service';
 import { PublicacionesService } from '../../inicio/services/publicaciones.service';
+import { TicketsService } from '../../../core/services/tickets.service';
+import type { CreateTicketDto } from '../../../core/services/tickets.service';
 
 interface Mascota {
   id?: number;
@@ -65,6 +67,7 @@ export class Veterinario implements OnInit {
   private themeService = inject(ThemeService);
   private publicacionesService = inject(PublicacionesService);
   private cdr = inject(ChangeDetectorRef);
+  private ticketsService = inject(TicketsService);
 
   activeSection: string = 'dashboard';
   sidebarOpen: boolean = true;
@@ -87,6 +90,15 @@ export class Veterinario implements OnInit {
   // Profile image handling
   selectedProfileFile: File | null = null;
   profileImagePreview: string | null = null;
+
+  // Ticket modal
+  showTicketModal: boolean = false;
+  misTickets: any[] = [];
+  newTicket: CreateTicketDto = {
+    asunto: '',
+    descripcion: '',
+    prioridad: 'Media'
+  };
 
   // Modales y Formularios
   showAddPetModal: boolean = false;
@@ -186,6 +198,7 @@ export class Veterinario implements OnInit {
       this.loadUserProfile();
       this.cargarDatos();
       this.cargarPublicacionesUsuario();
+      this.loadMyTickets();
     }
   }
 
@@ -327,6 +340,16 @@ export class Veterinario implements OnInit {
 
   setSection(section: string): void {
     this.activeSection = section;
+    if (section === 'tickets') {
+      this.loadMyTickets();
+    }
+  }
+
+  loadMyTickets(): void {
+    this.ticketsService.getMyTickets().subscribe({
+      next: (tickets) => this.misTickets = tickets,
+      error: (err) => console.error('Error loading my tickets:', err)
+    });
   }
 
   toggleSidebar(): void {
@@ -850,11 +873,12 @@ export class Veterinario implements OnInit {
             this.showNuevaConsultaModal = false;
             this.cdr.detectChanges();
           },
-          error: (err) => alert('Error al guardar consulta: ' + (err.error?.message || err.message))
+          error: (err) => alert('Error al crear consulta: ' + (err.error?.message || err.message))
         });
     }
   }
 
+<<<<<<< Updated upstream
   private actualizarPesoMascota(mascotaId: number, peso: number): void {
     const token = localStorage.getItem('access_token');
     const headers = { Authorization: `Bearer ${token}` };
@@ -869,3 +893,59 @@ export class Veterinario implements OnInit {
   }
   // ────────────────────────────────────────────────────────────────
 }
+=======
+  // ===== TICKETS =====
+  openTicketModal(): void {
+    this.newTicket = {
+      asunto: '',
+      descripcion: '',
+      prioridad: 'Media'
+    };
+    this.showTicketModal = true;
+  }
+
+  closeTicketModal(): void {
+    this.showTicketModal = false;
+    this.newTicket = {
+      asunto: '',
+      descripcion: '',
+      prioridad: 'Media'
+    };
+  }
+
+  createTicket(): void {
+    if (!this.newTicket.asunto || !this.newTicket.descripcion) {
+      alert('Por favor, completa los campos obligatorios');
+      return;
+    }
+
+    if (this.newTicket.asunto.length < 5) {
+      alert('El asunto debe tener al menos 5 caracteres');
+      return;
+    }
+
+    if (this.newTicket.descripcion.length < 10) {
+      alert('La descripción debe tener al menos 10 caracteres');
+      return;
+    }
+
+    const user = this.authService.getCurrentUser();
+    if (!user) {
+      alert('Debes estar logueado para crear un ticket');
+      return;
+    }
+
+    this.ticketsService.create(this.newTicket).subscribe({
+      next: () => {
+        this.closeTicketModal();
+        this.loadMyTickets();
+        alert('Ticket creado correctamente. Te responderemos pronto.');
+      },
+      error: (err) => {
+        console.error('Error creating ticket:', err);
+        alert('Error al crear ticket. Por favor intenta nuevamente.');
+      }
+    });
+  }
+}  // ────────────────────────────────────────────────────────────────
+>>>>>>> Stashed changes

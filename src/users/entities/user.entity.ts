@@ -6,6 +6,7 @@ import { PerfilVeterinario } from '../../perfiles-veterinarios/entities/perfil-v
 import { HistorialCita } from '../../historial-citas/entities/historial-cita.entity';
 import { MovimientoInventario } from '../../movimientos/entities/movimiento-inventario.entity';
 import { Role } from '../../roles/entities/role.entity';
+import { Ticket } from '../../tickets/entities/ticket.entity';
 
 @Entity('users')
 export class User {
@@ -98,6 +99,10 @@ export class User {
 
   @OneToMany(() => MovimientoInventario, movimiento => movimiento.usuario)
   movimientosInventario: MovimientoInventario[];
+
+  @ApiHideProperty()
+  @OneToMany(() => Ticket, ticket => ticket.user)
+  tickets: Ticket[];
 
   @OneToOne(() => PerfilVeterinario, perfilVeterinario => perfilVeterinario.usuario)
   perfilVeterinario: PerfilVeterinario;

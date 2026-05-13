@@ -33,6 +33,16 @@
           <i class="fas fa-hospital"></i><span>Todas las Veterinarias</span>
         </a>
       </li>
+      <li>
+        <a [class.active]="activeTab === 'tickets'" (click)="setSection('tickets')">
+          <i class="fas fa-ticket-alt"></i><span>Tickets PQR</span>
+        </a>
+      </li>
+      <li>
+        <a [class.active]="activeTab === 'announcements'" (click)="setSection('announcements')">
+          <i class="fas fa-bullhorn"></i><span>Mensajes Globales</span>
+        </a>
+      </li>
       <li class="separator">
         <a class="logout-link" (click)="logout()">
           <i class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span>
@@ -303,7 +313,142 @@
       </div>
     </section>
 
+    <!-- TICKETS PQR -->
+    <section *ngIf="activeTab === 'tickets'" class="content-section animate-in">
+      <div class="section-header">
+        <h1><i class="fas fa-ticket-alt"></i> Tickets de Soporte PQR</h1>
+        <div class="header-actions">
+          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        </div>
+      </div>
 
+      <div class="card">
+        <div class="card-header"><h5><i class="fas fa-list"></i> Todos los Tickets</h5></div>
+        <div class="card-body">
+          <div *ngIf="allTickets.length === 0" class="empty-state">
+            <i class="fas fa-ticket-alt"></i>
+            <p>No hay tickets pendientes</p>
+          </div>
+          <div class="table-container" *ngIf="allTickets.length > 0">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Asunto</th>
+                  <th>Usuario</th>
+                  <th>Prioridad</th>
+                  <th>Estado</th>
+                  <th>Fecha</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let ticket of allTickets">
+                  <td>#{{ ticket.id }}</td>
+                  <td><strong>{{ ticket.asunto }}</strong></td>
+                  <td>{{ ticket.user?.username || 'N/A' }}</td>
+                  <td>
+                    <span class="badge" [class.badge-high]="ticket.prioridad === 'Alta'" 
+                                       [class.badge-medium]="ticket.prioridad === 'Media'" 
+                                       [class.badge-low]="ticket.prioridad === 'Baja'">
+                      {{ ticket.prioridad }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="status-pill" 
+                          [class.status-open]="ticket.estado === 'Abierto'"
+                          [class.status-in-progress]="ticket.estado === 'En Proceso'"
+                          [class.status-closed]="ticket.estado === 'Cerrado'">
+                      {{ ticket.estado }}
+                    </span>
+                  </td>
+                  <td>{{ ticket.createdAt | date:'short' }}</td>
+                  <td>
+                    <div class="actions">
+                      <button class="btn-icon edit" (click)="openTicketDetails(ticket)" title="Ver detalles">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                      <select class="form-control" style="width: auto; padding: 0.3rem; margin-left: 0.5rem;" 
+                              [ngModel]="ticket.estado" (ngModelChange)="updateTicketStatus(ticket.id, $event)">
+                        <option value="Abierto">Abierto</option>
+                        <option value="En Proceso">En Proceso</option>
+                        <option value="Cerrado">Cerrado</option>
+                      </select>
+                      <button class="btn-icon delete" (click)="deleteTicket(ticket.id)" style="margin-left: 0.5rem;" title="Eliminar">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ANNOUNCEMENTS -->
+    <section *ngIf="activeTab === 'announcements'" class="content-section animate-in">
+      <div class="section-header">
+        <h1><i class="fas fa-bullhorn"></i> Mensajes Globales</h1>
+        <div class="header-actions">
+          <button class="btn-primary" (click)="openCreateAnnouncementModal()">
+            <i class="fas fa-plus"></i> Nuevo Anuncio
+          </button>
+          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h5><i class="fas fa-list"></i> Todos los Anuncios</h5></div>
+        <div class="card-body">
+          <div *ngIf="allAnnouncements.length === 0" class="empty-state">
+            <i class="fas fa-bullhorn"></i>
+            <p>No hay anuncios creados aún</p>
+            <button class="btn-primary" (click)="openCreateAnnouncementModal()">Crear Primer Anuncio</button>
+          </div>
+          <div class="table-container" *ngIf="allAnnouncements.length > 0">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Título</th>
+                  <th>Mensaje</th>
+                  <th>Expiración</th>
+                  <th>Estado</th>
+                  <th>Fecha Creación</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let announcement of allAnnouncements">
+                  <td>#{{ announcement.id }}</td>
+                  <td><strong>{{ announcement.titulo }}</strong></td>
+                  <td style="max-width: 300px;">{{ announcement.mensaje | slice:0:50 }}{{ announcement.mensaje.length > 50 ? '...' : '' }}</td>
+                  <td>{{ announcement.fechaExpiracion ? (announcement.fechaExpiracion | date:'short') : 'Sin expiración' }}</td>
+                  <td>
+                    <span class="status-pill" [class.active]="announcement.isActive">
+                      {{ announcement.isActive ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </td>
+                  <td>{{ announcement.createdAt | date:'short' }}</td>
+                  <td>
+                    <div class="actions">
+                      <button class="btn-icon edit" (click)="openEditAnnouncementModal(announcement)">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button class="btn-icon delete" (click)="deleteAnnouncement(announcement.id)">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- PERMISSIONS -->
     <section *ngIf="activeTab === 'permissions'" class="content-section animate-in">
@@ -364,6 +509,135 @@
     </section>
 
   </main>
+</div>
+
+<!-- Modal de Detalles de Ticket -->
+<div class="modal-overlay" *ngIf="showTicketDetailsModal" (click)="closeTicketDetailsModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Detalles del Ticket #{{ selectedTicket?.id }}</h3>
+      <button class="close-btn" (click)="closeTicketDetailsModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="ticket-details">
+        <div class="detail-row">
+          <label>Asunto:</label>
+          <span>{{ selectedTicket?.asunto }}</span>
+        </div>
+        <div class="detail-row">
+          <label>Usuario:</label>
+          <span>{{ selectedTicket?.user?.username || 'N/A' }}</span>
+        </div>
+        <div class="detail-row">
+          <label>Prioridad:</label>
+          <span class="badge" [class.badge-high]="selectedTicket?.prioridad === 'Alta'" 
+                     [class.badge-medium]="selectedTicket?.prioridad === 'Media'" 
+                     [class.badge-low]="selectedTicket?.prioridad === 'Baja'">
+            {{ selectedTicket?.prioridad }}
+          </span>
+        </div>
+        <div class="detail-row">
+          <label>Estado:</label>
+          <span class="status-pill" 
+                [class.status-open]="selectedTicket?.estado === 'Abierto'"
+                [class.status-in-progress]="selectedTicket?.estado === 'En Proceso'"
+                [class.status-closed]="selectedTicket?.estado === 'Cerrado'">
+            {{ selectedTicket?.estado }}
+          </span>
+        </div>
+        <div class="detail-row">
+          <label>Fecha de creación:</label>
+          <span>{{ selectedTicket?.createdAt | date:'full' }}</span>
+        </div>
+        <div class="detail-row full">
+          <label>Descripción:</label>
+          <p>{{ selectedTicket?.descripcion }}</p>
+        </div>
+      </div>
+      <div class="ticket-response">
+        <label>Respuesta:</label>
+        <textarea [(ngModel)]="ticketResponse" rows="4" placeholder="Escribe tu respuesta al ticket..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeTicketDetailsModal()">Cerrar</button>
+      <button class="btn-primary" (click)="respondToTicket()">Enviar Respuesta</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Crear Anuncio -->
+<div class="modal-overlay" *ngIf="showCreateAnnouncementModal" (click)="closeCreateAnnouncementModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Crear Nuevo Anuncio</h3>
+      <button class="close-btn" (click)="closeCreateAnnouncementModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Título *</label>
+          <input type="text" [(ngModel)]="newAnnouncement.titulo" placeholder="Ej: Mantenimiento programado">
+        </div>
+        <div class="form-group full">
+          <label>Mensaje *</label>
+          <textarea [(ngModel)]="newAnnouncement.mensaje" rows="4" placeholder="Mensaje del anuncio..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Fecha de Expiración</label>
+          <input type="datetime-local" [(ngModel)]="newAnnouncement.fechaExpiracion">
+        </div>
+        <div class="form-group">
+          <label>Estado</label>
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="newAnnouncement.isActive">
+            <span>Activo</span>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeCreateAnnouncementModal()">Cancelar</button>
+      <button class="btn-primary" (click)="createAnnouncement()">Crear</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Editar Anuncio -->
+<div class="modal-overlay" *ngIf="showEditAnnouncementModal" (click)="closeEditAnnouncementModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Editar Anuncio</h3>
+      <button class="close-btn" (click)="closeEditAnnouncementModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Título *</label>
+          <input type="text" [(ngModel)]="editingAnnouncement.titulo">
+        </div>
+        <div class="form-group full">
+          <label>Mensaje *</label>
+          <textarea [(ngModel)]="editingAnnouncement.mensaje" rows="4"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Fecha de Expiración</label>
+          <input type="datetime-local" [(ngModel)]="editingAnnouncement.fechaExpiracion">
+        </div>
+        <div class="form-group">
+          <label>Estado</label>
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="editingAnnouncement.isActive">
+            <span>Activo</span>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeEditAnnouncementModal()">Cancelar</button>
+      <button class="btn-primary" (click)="updateAnnouncement()">Actualizar</button>
+    </div>
+  </div>
 </div>
 
 <!-- Modales de Roles (Estilo Producto Admin) -->

@@ -50,8 +50,8 @@
         </a>
       </li>
       <li>
-        <a [class.active]="activeSection === 'inventario'" (click)="setSection('inventario')">
-          <i class="fas fa-warehouse"></i><span>Inventario</span>
+        <a [class.active]="activeSection === 'tickets'" (click)="setSection('tickets')">
+          <i class="fas fa-ticket-alt"></i><span>Soporte / Tickets</span>
         </a>
       </li>
       <li>
@@ -713,8 +713,69 @@
         </div>
       </div>
     </section>
-  </main>
 
+    <!-- TICKETS / SOPORTE -->
+    <section *ngIf="activeSection === 'tickets'" class="content-section">
+      <div class="section-header">
+        <h1><i class="fas fa-ticket-alt"></i> Soporte / Tickets</h1>
+        <div class="header-actions">
+          <button class="btn-primary" (click)="openTicketModal()">
+            <i class="fas fa-plus"></i> Nuevo Ticket
+          </button>
+          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        </div>
+      </div>
+
+      <!-- Mis Tickets -->
+      <div class="card" *ngIf="misTickets.length > 0">
+        <div class="card-header"><h5><i class="fas fa-list"></i> Mis Tickets</h5></div>
+        <div class="card-body">
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Asunto</th>
+                  <th>Prioridad</th>
+                  <th>Estado</th>
+                  <th>Fecha</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let ticket of misTickets">
+                  <td>#{{ ticket.id }}</td>
+                  <td><strong>{{ ticket.asunto }}</strong></td>
+                  <td>
+                    <span class="badge" [class.badge-high]="ticket.prioridad === 'Alta'" 
+                                       [class.badge-medium]="ticket.prioridad === 'Media'" 
+                                       [class.badge-low]="ticket.prioridad === 'Baja'">
+                      {{ ticket.prioridad }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="status-pill" 
+                          [class.status-open]="ticket.estado === 'Abierto'"
+                          [class.status-in-progress]="ticket.estado === 'En Proceso'"
+                          [class.status-closed]="ticket.estado === 'Cerrado'">
+                      {{ ticket.estado }}
+                    </span>
+                  </td>
+                  <td>{{ ticket.createdAt | date:'short' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="misTickets.length === 0" class="empty-state">
+        <i class="fas fa-ticket-alt"></i>
+        <p>No has creado ningún ticket aún</p>
+      </div>
+    </section>
+
+  </main>
+</div>
   <!-- Modales de Servicios -->
   <div class="modal-overlay" *ngIf="showAddServiceModal" (click)="closeAddServiceModal()">
     <div class="modal-box" (click)="$event.stopPropagation()">
@@ -1243,7 +1304,6 @@
       </div>
     </div>
   </div>
-</div>
 
   <!-- Modales de Veterinarios -->
   <div class="modal-overlay" *ngIf="showAddVeterinarioModal" (click)="closeAddVeterinarioModal()">
@@ -1465,3 +1525,37 @@
       </div>
     </div>
   </div>
+
+<!-- Modal de Crear Ticket -->
+<div class="modal-overlay" *ngIf="showTicketModal" (click)="closeTicketModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Crear Ticket de Soporte</h3>
+      <button class="close-btn" (click)="closeTicketModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Asunto *</label>
+          <input type="text" [(ngModel)]="newTicket.asunto" placeholder="Ej: Problema con mi cuenta">
+        </div>
+        <div class="form-group full">
+          <label>Prioridad</label>
+          <select [(ngModel)]="newTicket.prioridad" class="form-control">
+            <option value="Baja">Baja</option>
+            <option value="Media">Media</option>
+            <option value="Alta">Alta</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Descripción *</label>
+          <textarea [(ngModel)]="newTicket.descripcion" rows="5" placeholder="Describe detalladamente tu problema o consulta..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeTicketModal()">Cancelar</button>
+      <button class="btn-primary" (click)="createTicket()">Enviar Ticket</button>
+    </div>
+  </div>
+</div>

@@ -59,6 +59,10 @@ import { Module as ModuleEntity } from './modules/entities/module.entity';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { MonitoringModule } from './monitoring/monitoring.module';
+import { TicketsModule } from './tickets/tickets.module';
+import { Ticket } from './tickets/entities/ticket.entity';
+import { AnnouncementsModule } from './announcements/announcements.module';
+import { Announcement } from './announcements/entities/announcement.entity';
 
 @Module({
   imports: [
@@ -76,7 +80,7 @@ import { MonitoringModule } from './monitoring/monitoring.module';
         username: configService.get<string>('database.username'),
         password: configService.get<string>('database.password'),
         database: configService.get<string>('database.database'),
-        entities: [User, Role, Pet, Veterinaria, Cita, PerfilVeterinario, Emergencia, HistorialCita, Producto, Categoria, MovimientoInventario, Proveedor, Servicio, Calificacion, Carrito, CarritoProducto, Venta, DetalleVenta, Notificacion, Evento, HistoriaClinica, ConsultaMedica, ReporteMaltrato, TokenRecuperacion, Publicacion, Permission, ModuleEntity],
+        entities: [User, Role, Pet, Veterinaria, Cita, PerfilVeterinario, Emergencia, HistorialCita, Producto, Categoria, MovimientoInventario, Proveedor, Servicio, Calificacion, Carrito, CarritoProducto, Venta, DetalleVenta, Notificacion, Evento, HistoriaClinica, ConsultaMedica, ReporteMaltrato, TokenRecuperacion, Publicacion, Permission, ModuleEntity, Ticket, Announcement],
         synchronize: configService.get<boolean>('database.synchronize'),
         logging: configService.get<boolean>('database.logging'),
       }),
@@ -126,6 +130,8 @@ import { MonitoringModule } from './monitoring/monitoring.module';
     PermissionsModule,
     ModulesModule,
     MonitoringModule,
+    TicketsModule,
+    AnnouncementsModule,
   ],
   providers: [
     {

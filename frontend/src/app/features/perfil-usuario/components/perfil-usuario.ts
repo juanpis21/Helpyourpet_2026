@@ -8,6 +8,8 @@ import { UsersService } from '../../../core/services/users.service';
 import { MascotasService } from '../services/mascotas.service';
 import { PublicacionesService } from '../../inicio/services/publicaciones.service';
 import { PreloaderComponent } from '../../../shared/components/preloader/preloader';
+import { TicketsService } from '../../../core/services/tickets.service';
+import type { CreateTicketDto } from '../../../core/services/tickets.service';
 
 interface Mascota {
   id: number;
@@ -138,6 +140,68 @@ export class PerfilUsuario implements OnInit {
   // Password update data
   newPassword: string = '';
 
+  // Ticket modal
+  showTicketModal: boolean = false;
+  misTickets: any[] = [];
+  newTicket: CreateTicketDto = {
+    asunto: '',
+    descripcion: '',
+    prioridad: 'Media'
+  };
+
+  openTicketModal(): void {
+    this.newTicket = {
+      asunto: '',
+      descripcion: '',
+      prioridad: 'Media'
+    };
+    this.showTicketModal = true;
+  }
+
+  closeTicketModal(): void {
+    this.showTicketModal = false;
+    this.newTicket = {
+      asunto: '',
+      descripcion: '',
+      prioridad: 'Media'
+    };
+  }
+
+  createTicket(): void {
+    if (!this.newTicket.asunto || !this.newTicket.descripcion) {
+      alert('Por favor, completa los campos obligatorios');
+      return;
+    }
+
+    if (this.newTicket.asunto.length < 5) {
+      alert('El asunto debe tener al menos 5 caracteres');
+      return;
+    }
+
+    if (this.newTicket.descripcion.length < 10) {
+      alert('La descripción debe tener al menos 10 caracteres');
+      return;
+    }
+
+    const user = this.authService.getCurrentUser();
+    if (!user) {
+      alert('Debes estar logueado para crear un ticket');
+      return;
+    }
+
+    this.ticketsService.create(this.newTicket).subscribe({
+      next: () => {
+        this.closeTicketModal();
+        this.loadMyTickets();
+        alert('Ticket creado correctamente. Te responderemos pronto.');
+      },
+      error: (err) => {
+        console.error('Error creating ticket:', err);
+        alert('Error al crear ticket. Por favor intenta nuevamente.');
+      }
+    });
+  }
+
   private historialIdCounter = 1;
 
   constructor(
@@ -147,7 +211,11 @@ export class PerfilUsuario implements OnInit {
     private usersService: UsersService,
     private mascotasService: MascotasService,
     private publicacionesService: PublicacionesService,
+<<<<<<< Updated upstream
     private cdr: ChangeDetectorRef
+=======
+    private ticketsService: TicketsService
+>>>>>>> Stashed changes
   ) {}
 
   ngOnInit(): void {
@@ -166,7 +234,8 @@ export class PerfilUsuario implements OnInit {
         await Promise.all([
           this.loadUserProfile(),
           this.cargarMascotasUsuario(),
-          this.cargarPublicacionesUsuario()
+          this.cargarPublicacionesUsuario(),
+          this.loadMyTickets()
         ]);
       } else if (this.authService.isLoggedIn()) {
         // Try to reload user from backend
@@ -296,6 +365,16 @@ export class PerfilUsuario implements OnInit {
   // UI Methods
   cambiarSeccion(seccion: string): void {
     this.seccionActiva = seccion;
+    if (seccion === 'tickets') {
+      this.loadMyTickets();
+    }
+  }
+
+  loadMyTickets(): void {
+    this.ticketsService.getMyTickets().subscribe({
+      next: (tickets) => this.misTickets = tickets,
+      error: (err) => console.error('Error loading my tickets:', err)
+    });
   }
 
   toggleSidebar(): void {

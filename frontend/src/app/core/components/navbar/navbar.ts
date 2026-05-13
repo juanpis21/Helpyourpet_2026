@@ -108,6 +108,10 @@ export class Navbar implements OnInit {
     this.router.navigate(['/sobre-nosotros']);
   }
 
+  irATickets() {
+    this.router.navigate(['/inicio']);
+  }
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event) {
     this.isMenuOpen = false;

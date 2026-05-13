@@ -11,6 +11,8 @@ import { ProductosService, Producto } from '../../../core/services/productos.ser
 import { CategoriasService, Categoria } from '../../../core/services/categorias.service';
 import { RolesService, Role } from '../../../core/services/roles.service';
 import { ThemeService } from '../../../core/services/theme.service';
+import { TicketsService } from '../../../core/services/tickets.service';
+import type { CreateTicketDto } from '../../../core/services/tickets.service';
 
 @Component({
   selector: 'app-admin-modules',
@@ -47,6 +49,15 @@ export class AdminModulesComponent implements OnInit {
   adminProfilePreview: string | null = null;
   selectedAdminFile: File | null = null;
   newPassword: string = '';
+
+  // Ticket modal
+  showTicketModal: boolean = false;
+  misTickets: any[] = [];
+  newTicket: CreateTicketDto = {
+    asunto: '',
+    descripcion: '',
+    prioridad: 'Media'
+  };
 
   // Modales Usuarios
   showAddUserModal: boolean = false;
@@ -167,6 +178,60 @@ export class AdminModulesComponent implements OnInit {
 
   baseUrl: string = 'http://localhost:3000';
 
+  // ===== TICKETS =====
+  openTicketModal(): void {
+    this.newTicket = {
+      asunto: '',
+      descripcion: '',
+      prioridad: 'Media'
+    };
+    this.showTicketModal = true;
+  }
+
+  closeTicketModal(): void {
+    this.showTicketModal = false;
+    this.newTicket = {
+      asunto: '',
+      descripcion: '',
+      prioridad: 'Media'
+    };
+  }
+
+  createTicket(): void {
+    if (!this.newTicket.asunto || !this.newTicket.descripcion) {
+      alert('Por favor, completa los campos obligatorios');
+      return;
+    }
+
+    if (this.newTicket.asunto.length < 5) {
+      alert('El asunto debe tener al menos 5 caracteres');
+      return;
+    }
+
+    if (this.newTicket.descripcion.length < 10) {
+      alert('La descripción debe tener al menos 10 caracteres');
+      return;
+    }
+
+    const user = this.authService.getCurrentUser();
+    if (!user) {
+      alert('Debes estar logueado para crear un ticket');
+      return;
+    }
+
+    this.ticketsService.create(this.newTicket).subscribe({
+      next: () => {
+        this.closeTicketModal();
+        this.loadMyTickets();
+        alert('Ticket creado correctamente. Te responderemos pronto.');
+      },
+      error: (err) => {
+        console.error('Error creating ticket:', err);
+        alert('Error al crear ticket. Por favor intenta nuevamente.');
+      }
+    });
+  }
+
   // Método para obtener headers con autenticación
   private getAuthHeaders(): HttpHeaders {
     const token = this.authService.getToken();
@@ -186,7 +251,8 @@ export class AdminModulesComponent implements OnInit {
     private rolesService: RolesService,
     private themeService: ThemeService,
     private router: Router,
-    private http: HttpClient
+    private http: HttpClient,
+    private ticketsService: TicketsService
   ) {}
 
   ngOnInit(): void {
@@ -198,6 +264,7 @@ export class AdminModulesComponent implements OnInit {
     this.cargarRoles();
     this.cargarVeterinarios();
     this.loadAdminProfile();
+    this.loadMyTickets();
   }
 
   toggleSidebar(): void {
@@ -211,6 +278,16 @@ export class AdminModulesComponent implements OnInit {
 
   setSection(section: string): void {
     this.activeSection = section;
+    if (section === 'tickets') {
+      this.loadMyTickets();
+    }
+  }
+
+  loadMyTickets(): void {
+    this.ticketsService.getMyTickets().subscribe({
+      next: (tickets) => this.misTickets = tickets,
+      error: (err) => console.error('Error loading my tickets:', err)
+    });
   }
 
   cargarUsuarios(): void {

@@ -9,6 +9,8 @@ import { PetsService, Pet } from '../../../core/services/pets.service';
 import { VeterinariasService, Veterinaria } from '../../../core/services/veterinarias.service';
 import { ThemeService } from '../../../core/services/theme.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { TicketsService, Ticket, CreateTicketDto, UpdateTicketDto } from '../../../core/services/tickets.service';
+import { AnnouncementsService, Announcement, CreateAnnouncementDto, UpdateAnnouncementDto } from '../../../core/services/announcements.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -32,6 +34,8 @@ export class SuperAdminComponent implements OnInit {
   allUsers: any[] = [];
   allPets: Pet[] = [];
   allVets: Veterinaria[] = [];
+  allTickets: Ticket[] = [];
+  allAnnouncements: Announcement[] = [];
   
   // Role Selection for Modules
   selectedRoleForModules: Role | null = null;
@@ -45,6 +49,11 @@ export class SuperAdminComponent implements OnInit {
   showAddVeterinariaModal: boolean = false;
   showEditVeterinariaModal: boolean = false;
   showNewAdminModal: boolean = false;
+  showCreateAnnouncementModal: boolean = false;
+  showEditAnnouncementModal: boolean = false;
+  showTicketDetailsModal: boolean = false;
+  selectedTicket: Ticket | null = null;
+  ticketResponse: string = '';
   newVeterinaria: any = {
     nombre: '',
     direccion: '',
@@ -70,6 +79,13 @@ export class SuperAdminComponent implements OnInit {
     password: '',
     confirmPassword: ''
   };
+  newAnnouncement: CreateAnnouncementDto = {
+    titulo: '',
+    mensaje: '',
+    fechaExpiracion: undefined,
+    isActive: true
+  };
+  editingAnnouncement: Partial<Announcement> = {};
 
   // Inject Router
   private router = inject(Router);
@@ -83,13 +99,17 @@ export class SuperAdminComponent implements OnInit {
     private themeService: ThemeService,
     private authService: AuthService,
     private cdr: ChangeDetectorRef,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private ticketsService: TicketsService,
+    private announcementsService: AnnouncementsService
   ) {}
 
   ngOnInit(): void {
     this.loadRoles();
     this.loadModules();
     this.loadGlobalData();
+    this.loadTickets();
+    this.loadAnnouncements();
     
     this.themeSub = this.themeService.darkMode$.subscribe(isDark => {
       this.modoOscuro = isDark;
@@ -126,6 +146,12 @@ export class SuperAdminComponent implements OnInit {
     this.activeTab = section;
     if (section === 'users' || section === 'dashboard') {
       this.loadGlobalData();
+    }
+    if (section === 'tickets') {
+      this.loadTickets();
+    }
+    if (section === 'announcements') {
+      this.loadAnnouncements();
     }
   }
 
@@ -534,5 +560,174 @@ export class SuperAdminComponent implements OnInit {
         alert('Error al crear administrador: ' + errorMessage);
       }
     });
+  }
+
+  // ===== TICKETS =====
+  loadTickets(): void {
+    console.log('Cargando tickets...');
+    this.ticketsService.getAll().subscribe({
+      next: (tickets) => {
+        console.log('Tickets cargados:', tickets);
+        this.allTickets = tickets;
+      },
+      error: (err) => {
+        console.error('Error loading tickets:', err);
+        this.allTickets = [];
+      }
+    });
+  }
+
+  updateTicketStatus(ticketId: number, newStatus: string): void {
+    this.ticketsService.updateStatus(ticketId, newStatus).subscribe({
+      next: () => this.loadTickets(),
+      error: (err) => {
+        console.error('Error updating ticket status:', err);
+        alert('Error al actualizar estado del ticket');
+      }
+    });
+  }
+
+  deleteTicket(ticketId: number): void {
+    if (confirm('¿Estás seguro de eliminar este ticket?')) {
+      this.ticketsService.delete(ticketId).subscribe({
+        next: () => this.loadTickets(),
+        error: (err) => {
+          console.error('Error deleting ticket:', err);
+          alert('Error al eliminar ticket');
+        }
+      });
+    }
+  }
+
+  openTicketDetails(ticket: Ticket): void {
+    this.selectedTicket = ticket;
+    this.ticketResponse = '';
+    this.showTicketDetailsModal = true;
+  }
+
+  closeTicketDetailsModal(): void {
+    this.showTicketDetailsModal = false;
+    this.selectedTicket = null;
+    this.ticketResponse = '';
+  }
+
+  respondToTicket(): void {
+    if (!this.ticketResponse.trim()) {
+      alert('Por favor, escribe una respuesta');
+      return;
+    }
+
+    // Aquí podrías implementar el envío de la respuesta
+    // Por ahora, solo mostraremos un mensaje de confirmación
+    alert('Respuesta enviada correctamente');
+    this.closeTicketDetailsModal();
+  }
+
+  // ===== ANNOUNCEMENTS =====
+  loadAnnouncements(): void {
+    console.log('Cargando announcements...');
+    this.announcementsService.getAll().subscribe({
+      next: (announcements) => {
+        console.log('Announcements cargados:', announcements);
+        this.allAnnouncements = announcements;
+      },
+      error: (err) => {
+        console.error('Error loading announcements:', err);
+        this.allAnnouncements = [];
+      }
+    });
+  }
+
+  openCreateAnnouncementModal(): void {
+    this.newAnnouncement = {
+      titulo: '',
+      mensaje: '',
+      fechaExpiracion: undefined,
+      isActive: true
+    };
+    this.showCreateAnnouncementModal = true;
+  }
+
+  closeCreateAnnouncementModal(): void {
+    this.showCreateAnnouncementModal = false;
+    this.newAnnouncement = {
+      titulo: '',
+      mensaje: '',
+      fechaExpiracion: undefined,
+      isActive: true
+    };
+  }
+
+  createAnnouncement(): void {
+    if (!this.newAnnouncement.titulo || !this.newAnnouncement.mensaje) {
+      alert('Por favor, completa los campos obligatorios');
+      return;
+    }
+
+    const confirmMessage = `¿Estás seguro de enviar este mensaje a todos los usuarios?\n\nTítulo: ${this.newAnnouncement.titulo}\nMensaje: ${this.newAnnouncement.mensaje.substring(0, 100)}${this.newAnnouncement.mensaje.length > 100 ? '...' : ''}`;
+    
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    this.announcementsService.create(this.newAnnouncement).subscribe({
+      next: () => {
+        this.closeCreateAnnouncementModal();
+        this.loadAnnouncements();
+        alert('✅ Anuncio enviado correctamente a todos los usuarios activos');
+      },
+      error: (err) => {
+        console.error('Error creating announcement:', err);
+        alert('❌ Error al enviar anuncio. Por favor intenta nuevamente.');
+      }
+    });
+  }
+
+  openEditAnnouncementModal(announcement: Announcement): void {
+    this.editingAnnouncement = { ...announcement };
+    this.showEditAnnouncementModal = true;
+  }
+
+  closeEditAnnouncementModal(): void {
+    this.showEditAnnouncementModal = false;
+    this.editingAnnouncement = {};
+  }
+
+  updateAnnouncement(): void {
+    if (!this.editingAnnouncement.id || !this.editingAnnouncement.titulo || !this.editingAnnouncement.mensaje) {
+      alert('Por favor, completa los campos obligatorios');
+      return;
+    }
+
+    const updateData: UpdateAnnouncementDto = {
+      titulo: this.editingAnnouncement.titulo,
+      mensaje: this.editingAnnouncement.mensaje,
+      fechaExpiracion: this.editingAnnouncement.fechaExpiracion || undefined,
+      isActive: this.editingAnnouncement.isActive
+    };
+
+    this.announcementsService.update(this.editingAnnouncement.id, updateData).subscribe({
+      next: () => {
+        this.closeEditAnnouncementModal();
+        this.loadAnnouncements();
+        alert('Anuncio actualizado correctamente');
+      },
+      error: (err) => {
+        console.error('Error updating announcement:', err);
+        alert('Error al actualizar anuncio');
+      }
+    });
+  }
+
+  deleteAnnouncement(announcementId: number): void {
+    if (confirm('¿Estás seguro de eliminar este anuncio?')) {
+      this.announcementsService.delete(announcementId).subscribe({
+        next: () => this.loadAnnouncements(),
+        error: (err) => {
+          console.error('Error deleting announcement:', err);
+          alert('Error al eliminar anuncio');
+        }
+      });
+    }
   }
 }

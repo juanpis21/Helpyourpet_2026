@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { ThemeService } from '../../../core/services/theme.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { PublicacionesService } from '../services/publicaciones.service';
+import { AnnouncementsService, Announcement } from '../../../core/services/announcements.service';
+import { TicketsService, CreateTicketDto } from '../../../core/services/tickets.service';
 import { PreloaderComponent } from '../../../shared/components/preloader/preloader';
 
 interface Publicacion {
@@ -58,6 +60,14 @@ export class Inicio implements OnInit {
   showScrollTop: boolean = false;
   nuevoComentario: { [key: number]: string } = {};
   currentPlaceholder: string = '';
+  activeAnnouncements: Announcement[] = [];
+  showAnnouncementBanner: boolean = true;
+  showTicketModal: boolean = false;
+  newTicket: CreateTicketDto = {
+    asunto: '',
+    descripcion: '',
+    prioridad: 'Media'
+  };
 
   // Preloader is now self-managed by PreloaderComponent
 
@@ -76,7 +86,9 @@ export class Inicio implements OnInit {
     private router: Router,
     private themeService: ThemeService,
     private authService: AuthService,
-    private publicacionesService: PublicacionesService
+    private publicacionesService: PublicacionesService,
+    private announcementsService: AnnouncementsService,
+    private ticketsService: TicketsService
   ) {}
 
   getRandomPlaceholder(): string {
@@ -125,6 +137,9 @@ export class Inicio implements OnInit {
 
       // Load real publications
       await this.cargarPublicaciones();
+      
+      // Load active announcements
+      this.loadActiveAnnouncements();
     } catch (error) {
       console.error('Error al inicializar inicio:', error);
     }
@@ -171,6 +186,64 @@ export class Inicio implements OnInit {
         resolve();
       });
     });
+  }
+
+  private loadActiveAnnouncements(): void {
+    this.announcementsService.getActive().subscribe({
+      next: (announcements) => {
+        this.activeAnnouncements = announcements;
+      },
+      error: (err) => {
+        console.error('Error loading active announcements:', err);
+        this.activeAnnouncements = [];
+      }
+    });
+  }
+
+  closeAnnouncementBanner(): void {
+    this.showAnnouncementBanner = false;
+  }
+
+  // ===== TICKETS =====
+  openTicketModal(): void {
+    this.showTicketModal = true;
+  }
+
+  closeTicketModal(): void {
+    this.showTicketModal = false;
+    this.newTicket = {
+      asunto: '',
+      descripcion: '',
+      prioridad: 'Media'
+    };
+  }
+
+  createTicket(): void {
+    if (!this.newTicket.asunto || !this.newTicket.descripcion) {
+      alert('Por favor, completa los campos obligatorios');
+      return;
+    }
+
+    const user = this.authService.getCurrentUser();
+    if (!user) {
+      alert('Debes estar logueado para crear un ticket');
+      return;
+    }
+
+    this.ticketsService.create(this.newTicket).subscribe({
+      next: () => {
+        this.closeTicketModal();
+        alert('Ticket creado correctamente. Te responderemos pronto.');
+      },
+      error: (err) => {
+        console.error('Error creating ticket:', err);
+        alert('Error al crear ticket. Por favor intenta nuevamente.');
+      }
+    });
+  }
+
+  irATickets(): void {
+    this.openTicketModal();
   }
 
   toggleMenu(): void {

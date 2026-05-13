@@ -1,6 +1,22 @@
 <!-- PRELOADER ANIMADO -->
 <app-preloader></app-preloader>
 
+<!-- BANNER DE ANUNCIOS -->
+<div class="announcement-banner" *ngIf="activeAnnouncements.length > 0 && showAnnouncementBanner">
+  <div class="announcement-content">
+    <div class="announcement-icon">
+      <i class="fas fa-bullhorn"></i>
+    </div>
+    <div class="announcement-message">
+      <h4 *ngFor="let announcement of activeAnnouncements">{{ announcement.titulo }}</h4>
+      <p *ngFor="let announcement of activeAnnouncements">{{ announcement.mensaje }}</p>
+    </div>
+    <button class="announcement-close" (click)="closeAnnouncementBanner()">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+</div>
+
 <!-- LAYOUT PRINCIPAL: Centrado -->
 <div class="layout-principal">
 
@@ -148,4 +164,38 @@
 
   </section>
 
+</div>
+
+<!-- Modal de Crear Ticket -->
+<div class="modal-overlay" *ngIf="showTicketModal" (click)="closeTicketModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Crear Ticket de Soporte</h3>
+      <button class="close-btn" (click)="closeTicketModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Asunto *</label>
+          <input type="text" [(ngModel)]="newTicket.asunto" placeholder="Ej: Problema con mi cuenta">
+        </div>
+        <div class="form-group full">
+          <label>Prioridad</label>
+          <select [(ngModel)]="newTicket.prioridad" class="form-control">
+            <option value="Baja">Baja</option>
+            <option value="Media">Media</option>
+            <option value="Alta">Alta</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Descripción *</label>
+          <textarea [(ngModel)]="newTicket.descripcion" rows="5" placeholder="Describe detalladamente tu problema o consulta..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeTicketModal()">Cancelar</button>
+      <button class="btn-primary" (click)="createTicket()">Enviar Ticket</button>
+    </div>
+  </div>
 </div>

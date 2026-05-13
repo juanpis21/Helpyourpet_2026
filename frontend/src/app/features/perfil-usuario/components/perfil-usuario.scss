@@ -2141,3 +2141,85 @@ input, select, textarea {
     align-items: flex-start;
   }
 }
+
+/* ===== TICKETS ===== */
+.ticket-info {
+  display: flex;
+  gap: 2rem;
+  margin: 1.5rem 0;
+}
+
+.ticket-info .info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.ticket-info .info-item i {
+  color: var(--secondary-color);
+  font-size: 1.2rem;
+}
+
+.info-text {
+  margin-bottom: 1rem;
+  color: var(--text-secondary);
+}
+
+/* ===== TICKET STATUS PILLS & BADGES ===== */
+.status-pill {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-open {
+  background: #FCE8E6;
+  color: #D93025;
+}
+
+.status-in-progress {
+  background: #FFF4E5;
+  color: #B26A00;
+}
+
+.status-closed {
+  background: #E6F4EA;
+  color: #1E8E3E;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: #E8EAF0;
+  color: #5A6577;
+}
+
+.badge-high {
+  background: #FCE8E6;
+  color: #D93025;
+}
+
+.badge-medium {
+  background: #FFF4E5;
+  color: #B26A00;
+}
+
+.badge-low {
+  background: #E6F4EA;
+  color: #1E8E3E;
+}
+
+:host-context([data-theme="dark"]) {
+  .status-open { background: rgba(217, 48, 37, 0.2); }
+  .status-in-progress { background: rgba(178, 106, 0, 0.2); }
+  .status-closed { background: rgba(30, 142, 62, 0.2); }
+  .badge-high { background: rgba(217, 48, 37, 0.2); }
+  .badge-medium { background: rgba(178, 106, 0, 0.2); }
+  .badge-low { background: rgba(30, 142, 62, 0.2); }
+}
