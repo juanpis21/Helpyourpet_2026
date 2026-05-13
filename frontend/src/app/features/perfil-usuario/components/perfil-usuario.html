@@ -7,7 +7,8 @@
     <div class="sidebar-header">
       <h3>HelpYourPet</h3>
       <div class="user-profile">
-        <img [src]="profileImagePreview || (usuario.imagen && usuario.imagen.startsWith('/uploads/') ? 'http://localhost:3000' + usuario.imagen : (usuario.imagen || 'assets/images/Default.png'))"
+        <img
+          [src]="profileImagePreview || (usuario.imagen && usuario.imagen.startsWith('/uploads/') ? 'http://localhost:3000' + usuario.imagen : (usuario.imagen || 'assets/images/Default.png'))"
           alt="Foto de perfil" class="profile-avatar">
         <h5>{{ usuario.nombres }} {{ usuario.apellidos }}</h5>
         <p>{{ getRoleName() | titlecase }}</p>
@@ -165,7 +166,8 @@
               <td>{{ mascota.weight }} kg</td>
               <td>
                 <div class="action-buttons">
-                  <button class="btn-delete" (click)="eliminarMascota(mascota.id)"><i class="fas fa-ban"></i> Desactivar</button>
+                  <button class="btn-delete" (click)="eliminarMascota(mascota.id)"><i class="fas fa-ban"></i>
+                    Desactivar</button>
                 </div>
               </td>
 
@@ -191,7 +193,8 @@
       <!-- Selector de mascota -->
       <div class="historial-selector" *ngIf="mascotas.length > 0">
         <label class="selector-label"><i class="fas fa-paw"></i> Selecciona una mascota:</label>
-        <select [(ngModel)]="mascotaSeleccionadaHistorial" (ngModelChange)="onMascotaHistorialChange()" class="mascota-select">
+        <select [(ngModel)]="mascotaSeleccionadaHistorial" (ngModelChange)="onMascotaHistorialChange()"
+          class="mascota-select">
           <option [ngValue]="null">-- Seleccionar mascota --</option>
           <option *ngFor="let m of mascotas" [ngValue]="m.id">{{ m.name }} ({{ m.species }})</option>
         </select>
@@ -214,10 +217,8 @@
       <!-- Historial clínico con timeline -->
       <div *ngIf="mascotaSeleccionadaHistorial" class="historial-content">
         <div class="historial-header-bar">
-          <h3 class="historial-pet-name"><i class="fas fa-stethoscope"></i> Historial de {{ getNombreMascotaSeleccionada() }}</h3>
-          <button class="btn-primary" (click)="openAddHistorialModal()">
-            <i class="fas fa-plus"></i> Agregar Registro
-          </button>
+          <h3 class="historial-pet-name"><i class="fas fa-stethoscope"></i> Historial de {{
+            getNombreMascotaSeleccionada() }}</h3>
         </div>
 
         <!-- Sin registros -->
@@ -235,9 +236,11 @@
               <div class="timeline-card-header">
                 <div class="timeline-tipo">
                   <i [ngClass]="getHistorialIcon(registro.tipo)"></i>
-                  <span class="tipo-badge" [ngClass]="'badge-' + registro.tipo">{{ getHistorialTipoLabel(registro.tipo) }}</span>
+                  <span class="tipo-badge" [ngClass]="'badge-' + registro.tipo">{{ getHistorialTipoLabel(registro.tipo)
+                    }}</span>
                 </div>
-                <span class="timeline-fecha"><i class="fas fa-calendar-alt"></i> {{ registro.fecha | date:'dd/MM/yyyy' }}</span>
+                <span class="timeline-fecha"><i class="fas fa-calendar-alt"></i> {{ registro.fecha | date:'dd/MM/yyyy'
+                  }}</span>
               </div>
               <div class="timeline-card-body">
                 <div class="timeline-detail" *ngIf="registro.veterinario">
@@ -258,9 +261,7 @@
                 </div>
               </div>
               <div class="timeline-card-actions">
-                <button class="btn-delete-small" (click)="eliminarHistorial(registro.id)" title="Eliminar registro">
-                  <i class="fas fa-trash"></i>
-                </button>
+                <!-- Solo lectura para usuarios, no pueden eliminar el historial -->
               </div>
             </div>
           </div>
@@ -285,7 +286,8 @@
         <i class="fas fa-shopping-cart"></i>
         <h4>No tienes compras registradas.</h4>
         <p>¡Visita nuestra tienda para encontrar productos para tu mascota!</p>
-        <button class="btn-primary large" (click)="irATienda()"><i class="fas fa-shopping-cart"></i> Ir a la Tienda</button>
+        <button class="btn-primary" (click)="irATienda()"><i class="fas fa-shopping-cart"></i> Ir a la
+          Tienda</button>
       </div>
     </section>
 
@@ -307,13 +309,16 @@
         <i class="fas fa-heart"></i>
         <h3>No has publicado nada aún</h3>
         <p>¡Comparte algo con la comunidad! 🐾</p>
-        <button class="btn-primary large" (click)="irAInicio()"><i class="fas fa-plus"></i> Crear Primera Publicación</button>
+        <button class="btn-primary large" (click)="irAInicio()"><i class="fas fa-plus"></i> Crear Primera
+          Publicación</button>
       </div>
 
       <div *ngIf="publicaciones.length > 0" class="publicaciones-grid">
         <div *ngFor="let pub of publicaciones" class="publicacion-card">
           <div *ngIf="pub.imagen" class="publicacion-image">
-            <img [src]="pub.imagen && pub.imagen.startsWith('/uploads/') ? 'http://localhost:3000' + pub.imagen : pub.imagen" [alt]="pub.descripcion" class="pub-img">
+            <img
+              [src]="pub.imagen && pub.imagen.startsWith('/uploads/') ? 'http://localhost:3000' + pub.imagen : pub.imagen"
+              [alt]="pub.descripcion" class="pub-img">
           </div>
           <div class="publicacion-content">
             <p class="pub-descripcion">{{ pub.descripcion }}</p>
@@ -351,12 +356,15 @@
 
       <!-- Información Personal -->
       <div class="card">
-        <div class="card-header"><h5><i class="fas fa-user-edit"></i> Información Personal</h5></div>
+        <div class="card-header">
+          <h5><i class="fas fa-user-edit"></i> Información Personal</h5>
+        </div>
         <div class="card-body">
           <div class="config-layout">
             <!-- Foto de perfil -->
             <div class="config-photo">
-              <img [src]="profileImagePreview || (usuario.imagen && usuario.imagen.startsWith('/uploads/') ? 'http://localhost:3000' + usuario.imagen : (usuario.imagen || 'assets/images/Default.png'))"
+              <img
+                [src]="profileImagePreview || (usuario.imagen && usuario.imagen.startsWith('/uploads/') ? 'http://localhost:3000' + usuario.imagen : (usuario.imagen || 'assets/images/Default.png'))"
                 alt="Foto de perfil" class="config-avatar">
               <p class="photo-hint">JPG, PNG</p>
               <label class="btn-outline small">
@@ -398,7 +406,8 @@
                 </div>
               </div>
               <div class="form-actions">
-                <button class="btn-primary" (click)="guardarPerfil()"><i class="fas fa-save"></i> Guardar Cambios</button>
+                <button class="btn-primary" (click)="guardarPerfil()"><i class="fas fa-save"></i> Guardar
+                  Cambios</button>
               </div>
             </div>
           </div>
@@ -494,7 +503,8 @@
 
         <div class="form-group full-width">
           <label>Notas adicionales</label>
-          <textarea [(ngModel)]="newHistorial.notas" rows="3" placeholder="Observaciones, recomendaciones..."></textarea>
+          <textarea [(ngModel)]="newHistorial.notas" rows="3"
+            placeholder="Observaciones, recomendaciones..."></textarea>
         </div>
       </div>
     </div>
@@ -577,7 +587,8 @@
 
         <div class="form-group full-width">
           <label>Descripción</label>
-          <textarea [(ngModel)]="editingPet.description" rows="3" placeholder="Características, comportamiento..."></textarea>
+          <textarea [(ngModel)]="editingPet.description" rows="3"
+            placeholder="Características, comportamiento..."></textarea>
         </div>
 
       </div>

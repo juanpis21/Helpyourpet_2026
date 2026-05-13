@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -146,7 +146,8 @@ export class PerfilUsuario implements OnInit {
     private authService: AuthService,
     private usersService: UsersService,
     private mascotasService: MascotasService,
-    private publicacionesService: PublicacionesService
+    private publicacionesService: PublicacionesService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -619,21 +620,30 @@ export class PerfilUsuario implements OnInit {
   }
 
   cargarHistorial(petId: number): void {
-    // Cargar desde localStorage (datos locales por ahora)
-    const key = `historial_${petId}`;
-    const saved = localStorage.getItem(key);
-    if (saved) {
-      try {
-        this.historialClinico = JSON.parse(saved);
-        // Actualizar el counter para evitar IDs duplicados
-        const maxId = this.historialClinico.reduce((max, h) => Math.max(max, h.id), 0);
-        this.historialIdCounter = maxId + 1;
-      } catch {
+    this.mascotasService.getHistorialByMascota(petId).subscribe({
+      next: (res) => {
+        if (res && res.consultas) {
+          this.historialClinico = res.consultas.map((c: any) => ({
+            id: c.id,
+            petId: petId,
+            fecha: c.fechaConsulta,
+            tipo: c.motivoConsulta ? c.motivoConsulta.toLowerCase().includes('vacuna') ? 'vacuna' : c.motivoConsulta.toLowerCase().includes('cirugia') ? 'cirugia' : c.motivoConsulta.toLowerCase().includes('emergencia') ? 'emergencia' : 'consulta' : 'consulta',
+            veterinario: 'Veterinario',
+            diagnostico: c.diagnostico,
+            tratamiento: c.tratamiento || c.medicamentos,
+            notas: c.observaciones || c.sintomas
+          }));
+        } else {
+          this.historialClinico = [];
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error cargando el historial:', err);
         this.historialClinico = [];
+        this.cdr.detectChanges();
       }
-    } else {
-      this.historialClinico = [];
-    }
+    });
   }
 
   guardarHistorialEnStorage(): void {
