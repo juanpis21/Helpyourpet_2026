@@ -24,6 +24,7 @@ import type { CreateTicketDto } from '../../../core/services/tickets.service';
 export class AdminModulesComponent implements OnInit {
   activeSection: string = 'dashboard';
   sidebarOpen: boolean = true;
+  darkMode: boolean = false;
   usuarios: any[] = [];
   servicios: Servicio[] = [];
   veterinarias: Veterinaria[] = [];
@@ -278,12 +279,22 @@ export class AdminModulesComponent implements OnInit {
     this.cargarCategorias();
     this.cargarRoles();
     this.cargarVeterinarios();
+    this.darkMode = this.themeService.isDarkMode;
+    this.themeService.darkMode$.subscribe(dark => this.darkMode = dark);
     this.loadAdminProfile();
     this.loadMyTickets();
   }
 
   toggleSidebar(): void {
     this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  toggleDarkMode(): void {
+    this.themeService.toggleDarkMode();
+  }
+
+  irAInicio(): void {
+    this.router.navigate(['/inicio']);
   }
 
   logout(): void {

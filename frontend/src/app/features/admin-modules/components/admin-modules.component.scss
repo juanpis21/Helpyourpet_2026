@@ -267,12 +267,17 @@
 /* ===== CARDS & TABLES ===== */
 .card {
   background: var(--bg-card);
-  border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-  margin-bottom: 2.5rem;
-  overflow: hidden;
   border: 1px solid var(--border-color);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.2rem;
+  transition: var(--transition);
+  overflow: hidden;
+
+  &:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
 }
 
 .card-header {
@@ -291,7 +296,7 @@
   }
 }
 
-.card-body { padding: 2rem; }
+.card-body { padding: 1.2rem; }
 
 .table-container {
   width: 100%;
@@ -302,26 +307,49 @@
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  
+
   thead th {
-    background: #f8fafc;
-    color: var(--text-secondary);
-    padding: 1.2rem 1rem;
-    font-weight: 700;
+    background: var(--primary-color);
+    color: white;
+    padding: 0.8rem 1rem;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
     text-align: left;
-    border-bottom: 2px solid var(--border-color);
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    letter-spacing: 1px;
   }
+
   tbody td {
-    padding: 1.2rem 1rem;
+    padding: 0.8rem 1rem;
     border-bottom: 1px solid var(--border-color);
-    font-size: 0.95rem;
+    font-size: 0.88rem;
+    background: var(--bg-card);
     color: var(--text-primary);
     vertical-align: middle;
   }
-  tbody tr:hover td { background: rgba(0,0,0,0.015); }
+
+  tbody tr {
+    transition: var(--transition);
+  }
+
+  tbody tr:hover td {
+    background: rgba(137, 168, 213, 0.1);
+  }
+}
+
+:host-context([data-theme="dark"]) .data-table {
+  thead th {
+    background: #2D3548;
+    color: #E8EAF0;
+  }
+
+  tbody td {
+    background: var(--bg-card);
+    color: var(--text-primary);
+  }
+
+  tbody tr:hover td {
+    background: rgba(137, 168, 213, 0.15);
+  }
 }
 
 /* ===== USER INFO & AVATARS ===== */
@@ -346,9 +374,37 @@
   }
 }
 
-:host-context([data-theme="dark"]) .data-table thead th {
-  background: #2D3A4E;
-  color: #F3F4F6;
+/* ===== EMPTY STATE ===== */
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+
+  i {
+    font-size: 2.5rem;
+    margin-bottom: 0.8rem;
+    display: block;
+    opacity: 0.5;
+  }
+
+  p {
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  &.large {
+    padding: 3rem;
+
+    i {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
+    }
+
+    h4 {
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+    }
+  }
 }
 
 /* ===== COMPONENTS ===== */

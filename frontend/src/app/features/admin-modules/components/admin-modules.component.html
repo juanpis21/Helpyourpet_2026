@@ -789,15 +789,19 @@
       </div>
     </section>
 
-    <!-- TICKETS / SOPORTE -->
-    <section *ngIf="activeSection === 'tickets'" class="content-section">
+    <!-- ===== TICKETS / SOPORTE ===== -->
+    <section *ngIf="activeSection === 'tickets'" class="content-section animate-in">
       <div class="section-header">
         <h1><i class="fas fa-ticket-alt"></i> Soporte / Tickets</h1>
         <div class="header-actions">
           <button class="btn-primary" (click)="openTicketModal()">
             <i class="fas fa-plus"></i> Nuevo Ticket
           </button>
-          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="menu-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="theme-btn" (click)="toggleDarkMode()">
+            <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
+          <button class="home-btn" (click)="irAInicio()"><i class="fas fa-home"></i></button>
         </div>
       </div>
 
