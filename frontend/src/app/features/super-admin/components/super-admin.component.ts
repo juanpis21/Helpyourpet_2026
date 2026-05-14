@@ -11,12 +11,13 @@ import { ThemeService } from '../../../core/services/theme.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { TicketsService, Ticket, CreateTicketDto, UpdateTicketDto } from '../../../core/services/tickets.service';
 import { AnnouncementsService, Announcement, CreateAnnouncementDto, UpdateAnnouncementDto } from '../../../core/services/announcements.service';
+import { PreloaderComponent } from '../../../shared/components/preloader/preloader';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-super-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, PreloaderComponent],
   templateUrl: './super-admin.component.html',
   styleUrl: './super-admin.component.scss',
   changeDetection: ChangeDetectionStrategy.Default
