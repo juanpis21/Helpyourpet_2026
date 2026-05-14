@@ -1,4 +1,5 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, ElementRef, ViewChild, ChangeDetectorRef, Inject, PLATFORM_ID, OnDestroy } from '@angular/core';
+import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -316,7 +317,12 @@ export class Inicio implements OnInit {
         },
         error: (err) => {
           console.error('Error al crear publicación:', err);
-          alert('Error al crear la publicación. Por favor intenta nuevamente.');
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Error al crear la publicación. Por favor intenta nuevamente.',
+            confirmButtonColor: '#1d3976'
+          });
         }
       });
     }
