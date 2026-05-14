@@ -36,7 +36,7 @@ export class SuperAdminComponent implements OnInit {
   allVets: Veterinaria[] = [];
   allTickets: Ticket[] = [];
   allAnnouncements: Announcement[] = [];
-  
+
   // Role Selection for Modules
   selectedRoleForModules: Role | null = null;
   roleModules: string[] = [];
@@ -102,7 +102,7 @@ export class SuperAdminComponent implements OnInit {
     private ngZone: NgZone,
     private ticketsService: TicketsService,
     private announcementsService: AnnouncementsService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadRoles();
@@ -110,7 +110,7 @@ export class SuperAdminComponent implements OnInit {
     this.loadGlobalData();
     this.loadTickets();
     this.loadAnnouncements();
-    
+
     this.themeSub = this.themeService.darkMode$.subscribe(isDark => {
       this.modoOscuro = isDark;
     });
@@ -165,20 +165,20 @@ export class SuperAdminComponent implements OnInit {
     this.ngZone.run(() => {
       const originalStatus = user.isActive;
       const newStatus = !originalStatus;
-      
+
       console.log('🔄 [toggleUserStatus] Cambiando estado de usuario:', user.username, 'de', originalStatus, 'a', newStatus);
-      
+
       // Encontrar el índice del usuario en el array
       const index = this.allUsers.findIndex(u => u.id === user.id);
       if (index === -1) return;
-      
+
       // Crear una copia del usuario con el nuevo estado
       const updatedUser = { ...this.allUsers[index], isActive: newStatus };
-      
+
       // Reemplazar el objeto en el array para forzar detección de cambios
       this.allUsers = [...this.allUsers];
       this.allUsers[index] = updatedUser;
-      
+
       // Forzar detección de cambios para actualizar la UI inmediatamente
       this.cdr.detectChanges();
 
@@ -244,7 +244,7 @@ export class SuperAdminComponent implements OnInit {
 
   editRole(role: Role): void {
     this.isEditingRole = true;
-    this.currentRole = { 
+    this.currentRole = {
       id: role.id,
       name: role.name,
       description: role.description
@@ -348,7 +348,7 @@ export class SuperAdminComponent implements OnInit {
     } else {
       this.roleModules.push(moduleName);
     }
-    
+
     // Guardar automáticamente al cambiar
     this.savePermissions();
   }
@@ -484,9 +484,9 @@ export class SuperAdminComponent implements OnInit {
 
   saveNewAdmin(): void {
     // Validaciones
-    if (!this.newAdmin.firstName || !this.newAdmin.lastName || !this.newAdmin.email || 
-        !this.newAdmin.documentType || !this.newAdmin.documentNumber || 
-        !this.newAdmin.age || !this.newAdmin.roleId || !this.newAdmin.password || !this.newAdmin.confirmPassword) {
+    if (!this.newAdmin.firstName || !this.newAdmin.lastName || !this.newAdmin.email ||
+      !this.newAdmin.documentType || !this.newAdmin.documentNumber ||
+      !this.newAdmin.age || !this.newAdmin.roleId || !this.newAdmin.password || !this.newAdmin.confirmPassword) {
       alert('Por favor, completa todos los campos obligatorios');
       return;
     }
@@ -665,7 +665,7 @@ export class SuperAdminComponent implements OnInit {
     }
 
     const confirmMessage = `¿Estás seguro de enviar este mensaje a todos los usuarios?\n\nTítulo: ${this.newAnnouncement.titulo}\nMensaje: ${this.newAnnouncement.mensaje.substring(0, 100)}${this.newAnnouncement.mensaje.length > 100 ? '...' : ''}`;
-    
+
     if (!confirm(confirmMessage)) {
       return;
     }

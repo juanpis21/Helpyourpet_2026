@@ -10,7 +10,7 @@ export class RolesService {
   constructor(
     @InjectRepository(Role)
     private rolesRepository: Repository<Role>,
-  ) {}
+  ) { }
 
   async create(createRoleDto: CreateRoleDto): Promise<Role> {
     const existingRole = await this.rolesRepository.findOne({
@@ -73,7 +73,7 @@ export class RolesService {
 
     // Guardar cambios
     await this.rolesRepository.save(role);
-    
+
     // Devolver el rol actualizado con relaciones desde la base de datos
     const updatedRole = await this.rolesRepository.findOne({
       where: { id: role.id },

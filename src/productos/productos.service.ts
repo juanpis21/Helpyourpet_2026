@@ -1,4 +1,6 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { promises as fsPromises } from 'fs';
+import { join, basename } from 'path';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Producto } from './entities/producto.entity';
@@ -68,6 +70,16 @@ export class ProductosService {
   async update(id: number, updateProductoDto: UpdateProductoDto): Promise<Producto> {
     const producto = await this.findOne(id);
 
+    // Si se sube una nueva imagen, eliminar la anterior del disco para evitar archivos huérfanos
+    if (updateProductoDto.imagen && producto.imagen) {
+      const oldImagePath = join(process.cwd(), 'uploads', 'productos', basename(producto.imagen));
+      try {
+        await fsPromises.unlink(oldImagePath);
+      } catch (err) {
+        // Ignorar errores si el archivo ya no está presente
+      }
+    }
+
     // Verificar si el código de barras ya existe (si se está actualizando)
     if (updateProductoDto.codigoBarras && updateProductoDto.codigoBarras !== producto.codigoBarras) {
       const existingProducto = await this.productosRepository.findOne({
@@ -102,6 +114,15 @@ export class ProductosService {
 
   async remove(id: number): Promise<void> {
     const producto = await this.findOne(id);
+    // Eliminar la imagen del producto si existe
+    if (producto.imagen) {
+      const imagePath = join(process.cwd(), 'uploads', 'productos', basename(producto.imagen));
+      try {
+        await fsPromises.unlink(imagePath);
+      } catch (err) {
+        // Ignorar errores si el archivo ya no está presente
+      }
+    }
     await this.productosRepository.remove(producto);
   }
 }

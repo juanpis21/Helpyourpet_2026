@@ -32,6 +32,21 @@ export class AdminModulesComponent implements OnInit {
   roles: Role[] = [];
   veterinarios: any[] = [];
   isLoading: boolean = false;
+  
+  // Variables de Búsqueda
+  searchTermUsuarios: string = '';
+  searchTermVeterinarias: string = '';
+  searchTermProductos: string = '';
+  searchTermVeterinarios: string = '';
+  searchTermServicios: string = '';
+
+  // Variables de Paginación
+  itemsPerPage: number = 10;
+  currentPageUsuarios: number = 1;
+  currentPageVeterinarias: number = 1;
+  currentPageProductos: number = 1;
+  currentPageVeterinarios: number = 1;
+  currentPageServicios: number = 1;
 
 
   // Configuración Admin
@@ -334,6 +349,111 @@ export class AdminModulesComponent implements OnInit {
     if (!user.role) return 'Usuario';
     if (typeof user.role === 'string') return user.role;
     return user.role.name || 'Usuario';
+  }
+
+  // Getters para listas filtradas con búsqueda
+  get filteredUsuariosList(): any[] {
+    const baseList = this.usuarios.filter(u => this.getRolesString(u).toLowerCase() === 'usuario');
+    if (!this.searchTermUsuarios) return baseList;
+    const term = this.searchTermUsuarios.toLowerCase();
+    return baseList.filter(u => 
+      (u.firstName || '').toLowerCase().includes(term) ||
+      (u.lastName || '').toLowerCase().includes(term) ||
+      (u.email || '').toLowerCase().includes(term)
+    );
+  }
+
+  get filteredVeterinariasList(): Veterinaria[] {
+    if (!this.searchTermVeterinarias) return this.veterinarias;
+    const term = this.searchTermVeterinarias.toLowerCase();
+    return this.veterinarias.filter(v => 
+      (v.nombre || '').toLowerCase().includes(term) ||
+      (v.email || '').toLowerCase().includes(term) ||
+      (v.rut || '').toLowerCase().includes(term)
+    );
+  }
+
+  get filteredProductosList(): Producto[] {
+    if (!this.searchTermProductos) return this.productos;
+    const term = this.searchTermProductos.toLowerCase();
+    return this.productos.filter(p => 
+      (p.nombre || '').toLowerCase().includes(term) ||
+      (p.codigoBarras || '').toLowerCase().includes(term) ||
+      (p.lote || '').toLowerCase().includes(term) ||
+      this.getCategoriaNombre(p.categoriaId).toLowerCase().includes(term)
+    );
+  }
+
+  get filteredVeterinariosList(): any[] {
+    if (!this.searchTermVeterinarios) return this.veterinarios;
+    const term = this.searchTermVeterinarios.toLowerCase();
+    return this.veterinarios.filter(v => 
+      (v.usuario?.firstName || '').toLowerCase().includes(term) ||
+      (v.usuario?.lastName || '').toLowerCase().includes(term) ||
+      (v.usuario?.email || '').toLowerCase().includes(term) ||
+      (v.matricula || '').toLowerCase().includes(term) ||
+      (v.especialidad || '').toLowerCase().includes(term)
+    );
+  }
+
+  get filteredServiciosList(): Servicio[] {
+    if (!this.searchTermServicios) return this.servicios;
+    const term = this.searchTermServicios.toLowerCase();
+    return this.servicios.filter(s => 
+      (s.nombre || '').toLowerCase().includes(term) ||
+      (s.tipoServicio || '').toLowerCase().includes(term) ||
+      (s.descripcion || '').toLowerCase().includes(term)
+    );
+  }
+
+  // Getters para listas paginadas
+  get paginatedUsuariosList(): any[] {
+    const start = (this.currentPageUsuarios - 1) * this.itemsPerPage;
+    return this.filteredUsuariosList.slice(start, start + this.itemsPerPage);
+  }
+
+  get paginatedVeterinariasList(): Veterinaria[] {
+    const start = (this.currentPageVeterinarias - 1) * this.itemsPerPage;
+    return this.filteredVeterinariasList.slice(start, start + this.itemsPerPage);
+  }
+
+  get paginatedProductosList(): Producto[] {
+    const start = (this.currentPageProductos - 1) * this.itemsPerPage;
+    return this.filteredProductosList.slice(start, start + this.itemsPerPage);
+  }
+
+  get paginatedVeterinariosList(): any[] {
+    const start = (this.currentPageVeterinarios - 1) * this.itemsPerPage;
+    return this.filteredVeterinariosList.slice(start, start + this.itemsPerPage);
+  }
+
+  get paginatedServiciosList(): Servicio[] {
+    const start = (this.currentPageServicios - 1) * this.itemsPerPage;
+    return this.filteredServiciosList.slice(start, start + this.itemsPerPage);
+  }
+
+  // Métodos de navegación
+  getMath(): any { return Math; }
+
+  getTotalPages(list: any[]): number {
+    return Math.ceil(list.length / this.itemsPerPage);
+  }
+
+  nextPage(type: string, list: any[]): void {
+    const total = this.getTotalPages(list);
+    if (type === 'usuarios' && this.currentPageUsuarios < total) this.currentPageUsuarios++;
+    if (type === 'veterinarias' && this.currentPageVeterinarias < total) this.currentPageVeterinarias++;
+    if (type === 'productos' && this.currentPageProductos < total) this.currentPageProductos++;
+    if (type === 'veterinarios' && this.currentPageVeterinarios < total) this.currentPageVeterinarios++;
+    if (type === 'servicios' && this.currentPageServicios < total) this.currentPageServicios++;
+  }
+
+  prevPage(type: string): void {
+    if (type === 'usuarios' && this.currentPageUsuarios > 1) this.currentPageUsuarios--;
+    if (type === 'veterinarias' && this.currentPageVeterinarias > 1) this.currentPageVeterinarias--;
+    if (type === 'productos' && this.currentPageProductos > 1) this.currentPageProductos--;
+    if (type === 'veterinarios' && this.currentPageVeterinarios > 1) this.currentPageVeterinarios--;
+    if (type === 'servicios' && this.currentPageServicios > 1) this.currentPageServicios--;
   }
 
   // CRUD USUARIOS
@@ -1082,6 +1202,14 @@ export class AdminModulesComponent implements OnInit {
   openEditVeterinarioModal(veterinario: any): void {
     this.editingVeterinario = { ...veterinario };
     this.editingUsuario = { ...veterinario.usuario };
+    
+    // Si la veterinaria viene como objeto, extraemos el ID para el select
+    if (veterinario.veterinariaPrincipal && !veterinario.veterinariaPrincipalId) {
+      this.editingVeterinario.veterinariaPrincipalId = veterinario.veterinariaPrincipal.id;
+    } else if (!veterinario.veterinariaPrincipal && !veterinario.veterinariaPrincipalId) {
+      this.editingVeterinario.veterinariaPrincipalId = 0;
+    }
+
     this.showEditVeterinarioModal = true;
   }
 
