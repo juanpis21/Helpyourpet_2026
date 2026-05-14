@@ -1184,13 +1184,13 @@ export class AdminModulesComponent implements OnInit {
           especialidad: this.newVeterinario.especialidad,
           matricula: this.newVeterinario.matricula,
           aniosExperiencia: this.newVeterinario.aniosExperiencia || 0,
-          universidad: this.newVeterinario.universidad,
+          universidad: this.newVeterinario.universidad || undefined,
           telefonoProfesional: this.newVeterinario.telefonoProfesional || undefined,
           emailProfesional: this.newVeterinario.emailProfesional || undefined,
-          biografia: this.newVeterinario.biografia,
-          usuarioId: userResponse.id,
+          biografia: this.newVeterinario.biografia || undefined,
           veterinariaPrincipalId: this.newVeterinario.veterinariaPrincipalId || null,
-          isActive: true
+          isActive: true,
+          usuarioId: userResponse.id
         };
 
         this.http.post(`${this.baseUrl}/perfiles-veterinarios`, perfilData, { headers: this.getAuthHeaders() }).subscribe({
@@ -1274,10 +1274,10 @@ export class AdminModulesComponent implements OnInit {
           especialidad: this.editingVeterinario.especialidad,
           matricula: this.editingVeterinario.matricula,
           aniosExperiencia: this.editingVeterinario.aniosExperiencia,
-          universidad: this.editingVeterinario.universidad,
+          universidad: this.editingVeterinario.universidad || undefined,
           telefonoProfesional: this.editingVeterinario.telefonoProfesional || undefined,
           emailProfesional: this.editingVeterinario.emailProfesional || undefined,
-          biografia: this.editingVeterinario.biografia,
+          biografia: this.editingVeterinario.biografia || undefined,
           veterinariaPrincipalId: this.editingVeterinario.veterinariaPrincipalId || null,
           isActive: this.editingVeterinario.isActive,
           usuarioId: this.editingUsuario.id
