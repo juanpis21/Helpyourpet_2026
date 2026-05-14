@@ -583,88 +583,39 @@
       <button class="btn-primary" (click)="guardarHistorial()"><i class="fas fa-save"></i> Guardar Registro</button>
     </div>
 
+  </div>
+</div>
+
 <!-- Modal de Crear Ticket -->
 <div class="modal-overlay" *ngIf="showTicketModal" (click)="closeTicketModal()">
   <div class="modal-box" (click)="$event.stopPropagation()">
-
     <div class="modal-header">
-      <h3><i class="fas fa-ticket-alt"></i> Crear Ticket</h3>
-      <button class="close-btn" (click)="closeTicketModal()">
-        <i class="fas fa-times"></i>
-      </button>
+      <h3>Crear Ticket de Soporte</h3>
+      <button class="close-btn" (click)="closeTicketModal()">&times;</button>
     </div>
-
     <div class="modal-body">
       <div class="form-grid">
-        <div class="form-group full-width">
-          <label>Nombre *</label>
-          <input type="text" [(ngModel)]="editingPet.name" placeholder="Nombre de la mascota">
+        <div class="form-group full">
+          <label>Asunto *</label>
+          <input type="text" [(ngModel)]="newTicket.asunto" placeholder="Ej: Problema con mi cuenta">
         </div>
-
-        <div class="form-group">
-          <label>Especie *</label>
-          <select [(ngModel)]="editingPet.species">
-            <option value="">Selecciona una especie</option>
-            <option value="Perro">Perro</option>
-            <option value="Gato">Gato</option>
-            <option value="Ave">Ave</option>
-            <option value="Pez">Pez</option>
+        <div class="form-group full">
+          <label>Prioridad</label>
+          <select [(ngModel)]="newTicket.prioridad" class="form-control">
+            <option value="Baja">Baja</option>
+            <option value="Media">Media</option>
+            <option value="Alta">Alta</option>
           </select>
         </div>
-
-        <div class="form-group">
-          <label>Raza</label>
-          <input type="text" [(ngModel)]="editingPet.breed" placeholder="Raza">
+        <div class="form-group full">
+          <label>Descripción *</label>
+          <textarea [(ngModel)]="newTicket.descripcion" rows="5" placeholder="Describe detalladamente tu problema o consulta..."></textarea>
         </div>
-
-        <div class="form-group">
-          <label>Edad (años) *</label>
-          <input type="number" [(ngModel)]="editingPet.age" min="0" max="50" placeholder="0">
-        </div>
-
-        <div class="form-group">
-          <label>Género</label>
-          <select [(ngModel)]="editingPet.gender">
-            <option value="M">Macho</option>
-            <option value="F">Hembra</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Color</label>
-          <input type="text" [(ngModel)]="editingPet.color" placeholder="Color">
-        </div>
-
-        <div class="form-group">
-          <label>Peso (kg) *</label>
-          <input type="number" [(ngModel)]="editingPet.weight" min="0.1" max="200" step="0.1" placeholder="0">
-        </div>
-
-        <div class="form-group full-width">
-          <label>Imagen de la mascota</label>
-          <label class="file-input-label">
-            <i class="fas fa-cloud-upload-alt"></i> Cambiar imagen
-            <input type="file" accept="image/*" (change)="onEditPetImageSelected($event)" hidden>
-          </label>
-          <div *ngIf="editingPetImagePreview" class="image-preview">
-            <img [src]="editingPetImagePreview" alt="Preview" class="preview-img">
-            <button class="remove-image-btn" (click)="removeEditPetImage()"><i class="fas fa-times"></i></button>
-          </div>
-        </div>
-
-        <div class="form-group full-width">
-          <label>Descripción</label>
-          <textarea [(ngModel)]="editingPet.description" rows="3"
-            placeholder="Características, comportamiento..."></textarea>
-        </div>
-
       </div>
     </div>
-
     <div class="modal-footer">
-      <button class="btn-secondary" (click)="closeEditPetModal()">Cancelar</button>
-      <button class="btn-primary" (click)="guardarEdicionMascota()">Guardar Cambios</button>
+      <button class="btn-secondary" (click)="closeTicketModal()">Cancelar</button>
+      <button class="btn-primary" (click)="createTicket()">Enviar Ticket</button>
     </div>
-
   </div>
 </div>

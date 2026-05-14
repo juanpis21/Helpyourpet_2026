@@ -1,4 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -340,23 +341,32 @@ export class PerfilUsuario implements OnInit {
   }
 
   eliminarPublicacion(id: number): void {
-    if (confirm('¿Estás seguro de que quieres eliminar esta publicación?')) {
-      // Eliminar localmente inmediatamente
-      this.publicaciones = this.publicaciones.filter(p => p.id !== id);
+    Swal.fire({
+      title: '¿Eliminar publicación?',
+      text: '¿Estás seguro de que quieres eliminar esta publicación?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, eliminar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.publicaciones = this.publicaciones.filter(p => p.id !== id);
 
-      this.publicacionesService.eliminarPublicacion(id).subscribe({
-        next: () => {
-          console.log('✅ Publicación eliminada exitosamente');
-          this.cargarPublicacionesUsuario();
-          alert('✅ Publicación eliminada exitosamente');
-        },
-        error: (err) => {
-          console.error('❌ Error al eliminar publicación:', err);
-          this.cargarPublicacionesUsuario();
-          alert('❌ Error al eliminar la publicación: ' + (err.error?.message || 'Error desconocido'));
-        }
-      });
-    }
+        this.publicacionesService.eliminarPublicacion(id).subscribe({
+          next: () => {
+            console.log('✅ Publicación eliminada exitosamente');
+            this.cargarPublicacionesUsuario();
+            Swal.fire('Eliminada', 'Publicación eliminada exitosamente', 'success');
+          },
+          error: (err) => {
+            console.error('❌ Error al eliminar publicación:', err);
+            this.cargarPublicacionesUsuario();
+            Swal.fire('Error', 'Error al eliminar la publicación: ' + (err.error?.message || 'Error desconocido'), 'error');
+          }
+        });
+      }
+    });
   }
 
   // UI Methods
@@ -428,13 +438,13 @@ export class PerfilUsuario implements OnInit {
 
   guardarMascota(): void {
     if (!this.newPet.name || !this.newPet.species) {
-      alert('Completa nombre y especie');
+      Swal.fire('¡Atención!', 'Completa nombre y especie', 'warning');
       return;
     }
 
     const currentUser = this.authService.getCurrentUser();
     if (!currentUser) {
-      alert('No hay usuario autenticado');
+      Swal.fire('¡Error!', 'No hay usuario autenticado', 'error');
       return;
     }
 
@@ -474,11 +484,11 @@ export class PerfilUsuario implements OnInit {
         };
         this.selectedPetFile = null;
         this.newPetImagePreview = null;
-        alert('✅ Mascota registrada exitosamente');
+        Swal.fire('¡Éxito!', 'Mascota registrada exitosamente', 'success');
       },
       error: (err) => {
         console.error('❌ Error al crear mascota:', err);
-        alert('❌ Error al registrar la mascota: ' + (err.error?.message || 'Error desconocido'));
+        Swal.fire('Error', 'Error al registrar la mascota: ' + (err.error?.message || 'Error desconocido'), 'error');
       }
     });
   }
@@ -512,7 +522,7 @@ export class PerfilUsuario implements OnInit {
     // Validar peso
     const weight = Number(this.editingPet.weight);
     if (!weight || weight < 0.1 || weight > 200) {
-      alert('❌ El peso debe estar entre 0.1 y 200 kg');
+      Swal.fire('Atención', 'El peso debe estar entre 0.1 y 200 kg', 'warning');
       return;
     }
 
@@ -533,35 +543,45 @@ export class PerfilUsuario implements OnInit {
       next: (mascotaActualizada) => {
         console.log('✅ Mascota actualizada exitosamente:', mascotaActualizada);
         this.cargarMascotasUsuario();
-        alert('✅ Mascota actualizada exitosamente');
+        Swal.fire('¡Actualizada!', 'Mascota actualizada exitosamente', 'success');
         this.closeEditPetModal();
       },
       error: (err) => {
         console.error('❌ Error al actualizar mascota:', err);
-        alert('❌ Error al actualizar la mascota: ' + (err.error?.message || 'Error desconocido'));
+        Swal.fire('Error', 'Error al actualizar la mascota: ' + (err.error?.message || 'Error desconocido'), 'error');
         // NO cerrar el modal para que el usuario pueda corregir
       }
     });
   }
 
   eliminarMascota(id: number): void {
-    if (confirm('¿Estás seguro de que quieres desactivar esta mascota?')) {
-      // Optimistic update: ocultar de la lista local
-      this.mascotas = this.mascotas.filter(m => m.id !== id);
+    Swal.fire({
+      title: '¿Desactivar mascota?',
+      text: '¿Estás seguro de que quieres desactivar esta mascota?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, desactivar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Optimistic update: ocultar de la lista local
+        this.mascotas = this.mascotas.filter(m => m.id !== id);
 
-      this.mascotasService.updateMascota(id, { isActive: false }).subscribe({
-        next: () => {
-          console.log('✅ Mascota desactivada exitosamente');
-          this.cargarMascotasUsuario();
-          alert('✅ Mascota desactivada exitosamente');
-        },
-        error: (err) => {
-          console.error('❌ Error al desactivar mascota:', err);
-          this.cargarMascotasUsuario(); // Revertir si falla
-          alert('❌ Error al desactivar la mascota: ' + (err.error?.message || 'Error desconocido'));
-        }
-      });
-    }
+        this.mascotasService.updateMascota(id, { isActive: false }).subscribe({
+          next: () => {
+            console.log('✅ Mascota desactivada exitosamente');
+            this.cargarMascotasUsuario();
+            Swal.fire('Desactivada', 'Mascota desactivada exitosamente', 'success');
+          },
+          error: (err) => {
+            console.error('❌ Error al desactivar mascota:', err);
+            this.cargarMascotasUsuario(); // Revertir si falla
+            Swal.fire('Error', 'Error al desactivar la mascota: ' + (err.error?.message || 'Error desconocido'), 'error');
+          }
+        });
+      }
+    });
   }
 
   getGeneroTexto(genero: string): string {
@@ -626,7 +646,7 @@ export class PerfilUsuario implements OnInit {
   guardarPerfil(): void {
     const currentUser = this.authService.getCurrentUser();
     if (!currentUser) {
-      alert('❌ No hay usuario autenticado');
+      Swal.fire('Error', 'No hay usuario autenticado', 'error');
       return;
     }
 
@@ -648,10 +668,10 @@ export class PerfilUsuario implements OnInit {
       next: (response) => {
         this.authService.updateCurrentUser(response);
         this.selectedProfileFile = null;
-        alert('✅ Perfil actualizado correctamente');
+        Swal.fire('¡Actualizado!', 'Perfil actualizado correctamente', 'success');
       },
       error: (error) => {
-        alert('❌ Error al actualizar el perfil: ' + (error.error?.message || 'Error desconocido'));
+        Swal.fire('Error', 'Error al actualizar el perfil: ' + (error.error?.message || 'Error desconocido'), 'error');
         console.error('Update profile error:', error);
       }
     });
@@ -671,18 +691,31 @@ export class PerfilUsuario implements OnInit {
 
   eliminarCuenta(): void {
     const currentUser = this.authService.getCurrentUser();
-    if (currentUser && confirm('¿Estás seguro de que deseas desactivar tu cuenta? Esta acción te cerrará la sesión y no podrás ingresar hasta que sea reactivada.')) {
-      this.usersService.deleteUser(currentUser.id).subscribe({
-        next: () => {
-          alert('Cuenta desactivada exitosamente.');
-          this.cerrarSesion();
-        },
-        error: (error) => {
-          alert('❌ Error al eliminar la cuenta: ' + (error.error?.message || 'Error desconocido'));
-          console.error('Delete account error:', error);
-        }
-      });
-    }
+    if (!currentUser) return;
+    
+    Swal.fire({
+      title: '¿Desactivar cuenta?',
+      text: '¿Estás seguro de que deseas desactivar tu cuenta? Esta acción te cerrará la sesión y no podrás ingresar hasta que sea reactivada.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, desactivar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.usersService.deleteUser(currentUser.id).subscribe({
+          next: () => {
+            Swal.fire('Desactivada', 'Cuenta desactivada exitosamente.', 'success').then(() => {
+              this.cerrarSesion();
+            });
+          },
+          error: (error) => {
+            Swal.fire('Error', 'Error al eliminar la cuenta: ' + (error.error?.message || 'Error desconocido'), 'error');
+            console.error('Delete account error:', error);
+          }
+        });
+      }
+    });
   }
 
   // ===== HISTORIAL CLÍNICO =====
@@ -771,14 +804,24 @@ export class PerfilUsuario implements OnInit {
     this.historialClinico.unshift(registro);
     this.guardarHistorialEnStorage();
     this.showAddHistorialModal = false;
-    alert('✅ Registro clínico guardado exitosamente');
+    Swal.fire('¡Éxito!', 'Registro clínico guardado exitosamente', 'success');
   }
 
   eliminarHistorial(id: number): void {
-    if (confirm('¿Estás seguro de eliminar este registro clínico?')) {
-      this.historialClinico = this.historialClinico.filter(h => h.id !== id);
-      this.guardarHistorialEnStorage();
-    }
+    Swal.fire({
+      title: '¿Eliminar registro?',
+      text: '¿Estás seguro de eliminar este registro clínico?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then(result => {
+      if (result.isConfirmed) {
+        this.historialClinico = this.historialClinico.filter(h => h.id !== id);
+        this.guardarHistorialEnStorage();
+        Swal.fire('Eliminado', 'Registro clínico eliminado', 'success');
+      }
+    });
   }
 
   getHistorialIcon(tipo: string): string {
@@ -826,7 +869,7 @@ export class PerfilUsuario implements OnInit {
 
   cambiarPassword(): void {
     if (!this.newPassword || this.newPassword.length < 6) {
-      alert('⚠️ La contraseña debe tener al menos 6 caracteres');
+      Swal.fire('Atención', 'La contraseña debe tener al menos 6 caracteres', 'warning');
       return;
     }
 
@@ -839,14 +882,15 @@ export class PerfilUsuario implements OnInit {
 
     this.usersService.updateUser(currentUser.id, formData).subscribe({
       next: () => {
-        alert('✅ Contraseña actualizada correctamente. Por seguridad, debes iniciar sesión de nuevo.');
-        this.newPassword = '';
-        this.cerrarSesion(); // Cerrar sesión tras cambiar contraseña
+        Swal.fire('¡Actualizada!', 'Contraseña actualizada correctamente. Por seguridad, debes iniciar sesión de nuevo.', 'success').then(() => {
+          this.newPassword = '';
+          this.cerrarSesion(); // Cerrar sesión tras cambiar contraseña
+        });
       },
       error: (err) => {
         const errorMsg = err.error?.message;
         const detail = Array.isArray(errorMsg) ? errorMsg.join(', ') : errorMsg;
-        alert('❌ Error al cambiar la contraseña: ' + (detail || err.message));
+        Swal.fire('Error', 'Error al cambiar la contraseña: ' + (detail || err.message), 'error');
       }
     });
   }

@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
+import Swal from 'sweetalert2';
 import { HttpClient } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -231,7 +232,12 @@ export class Tienda implements OnInit, OnDestroy {
   // ===== CHECKOUT =====
   procederPago(): void {
     if (this.carrito.length === 0) {
-      alert('Tu carrito está vacío');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Carrito vacío',
+        text: 'Tu carrito está vacío. Agrega productos para poder proceder al pago.',
+        confirmButtonColor: '#1d3976'
+      });
       return;
     }
 

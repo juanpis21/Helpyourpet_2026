@@ -11,12 +11,13 @@ import { ThemeService } from '../../../core/services/theme.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { TicketsService, Ticket, CreateTicketDto, UpdateTicketDto } from '../../../core/services/tickets.service';
 import { AnnouncementsService, Announcement, CreateAnnouncementDto, UpdateAnnouncementDto } from '../../../core/services/announcements.service';
+import { PreloaderComponent } from '../../../shared/components/preloader/preloader';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-super-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, PreloaderComponent],
   templateUrl: './super-admin.component.html',
   styleUrl: './super-admin.component.scss',
   changeDetection: ChangeDetectionStrategy.Default
@@ -276,6 +277,7 @@ export class SuperAdminComponent implements OnInit {
         next: () => {
           this.loadRoles();
           this.closeRoleModal();
+          setTimeout(() => window.location.reload(), 500);
         },
         error: (err) => {
           const msg = err.error?.message;
@@ -289,6 +291,7 @@ export class SuperAdminComponent implements OnInit {
         next: () => {
           this.loadRoles();
           this.closeRoleModal();
+          setTimeout(() => window.location.reload(), 500);
         },
         error: (err) => {
           const msg = err.error?.message;
@@ -416,6 +419,7 @@ export class SuperAdminComponent implements OnInit {
         this.closeAddVeterinariaModal();
         this.loadGlobalData();
         alert('Veterinaria registrada correctamente');
+        setTimeout(() => window.location.reload(), 500);
       },
       error: (err) => alert('Error al registrar veterinaria: ' + (err.error?.message || err.message))
     });
@@ -442,6 +446,7 @@ export class SuperAdminComponent implements OnInit {
         this.closeEditVeterinariaModal();
         this.loadGlobalData();
         alert('Veterinaria actualizada correctamente');
+        setTimeout(() => window.location.reload(), 500);
       },
       error: (err) => alert('Error al actualizar veterinaria: ' + (err.error?.message || err.message))
     });
@@ -553,6 +558,7 @@ export class SuperAdminComponent implements OnInit {
         this.closeNewAdminModal();
         this.loadGlobalData(); // Recargar la lista de administradores
         alert('Administrador creado correctamente');
+        setTimeout(() => window.location.reload(), 500);
       },
       error: (err) => {
         console.error('❌ Error al crear administrador:', err);
@@ -675,6 +681,7 @@ export class SuperAdminComponent implements OnInit {
         this.closeCreateAnnouncementModal();
         this.loadAnnouncements();
         alert('✅ Anuncio enviado correctamente a todos los usuarios activos');
+        setTimeout(() => window.location.reload(), 500);
       },
       error: (err) => {
         console.error('Error creating announcement:', err);
@@ -711,6 +718,7 @@ export class SuperAdminComponent implements OnInit {
         this.closeEditAnnouncementModal();
         this.loadAnnouncements();
         alert('Anuncio actualizado correctamente');
+        setTimeout(() => window.location.reload(), 500);
       },
       error: (err) => {
         console.error('Error updating announcement:', err);
