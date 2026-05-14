@@ -276,6 +276,7 @@ export class SuperAdminComponent implements OnInit {
         next: () => {
           this.loadRoles();
           this.closeRoleModal();
+          setTimeout(() => window.location.reload(), 500);
         },
         error: (err) => {
           const msg = err.error?.message;
@@ -289,6 +290,7 @@ export class SuperAdminComponent implements OnInit {
         next: () => {
           this.loadRoles();
           this.closeRoleModal();
+          setTimeout(() => window.location.reload(), 500);
         },
         error: (err) => {
           const msg = err.error?.message;
@@ -416,6 +418,7 @@ export class SuperAdminComponent implements OnInit {
         this.closeAddVeterinariaModal();
         this.loadGlobalData();
         alert('Veterinaria registrada correctamente');
+        setTimeout(() => window.location.reload(), 500);
       },
       error: (err) => alert('Error al registrar veterinaria: ' + (err.error?.message || err.message))
     });
@@ -442,6 +445,7 @@ export class SuperAdminComponent implements OnInit {
         this.closeEditVeterinariaModal();
         this.loadGlobalData();
         alert('Veterinaria actualizada correctamente');
+        setTimeout(() => window.location.reload(), 500);
       },
       error: (err) => alert('Error al actualizar veterinaria: ' + (err.error?.message || err.message))
     });
@@ -553,6 +557,7 @@ export class SuperAdminComponent implements OnInit {
         this.closeNewAdminModal();
         this.loadGlobalData(); // Recargar la lista de administradores
         alert('Administrador creado correctamente');
+        setTimeout(() => window.location.reload(), 500);
       },
       error: (err) => {
         console.error('❌ Error al crear administrador:', err);
@@ -675,6 +680,7 @@ export class SuperAdminComponent implements OnInit {
         this.closeCreateAnnouncementModal();
         this.loadAnnouncements();
         alert('✅ Anuncio enviado correctamente a todos los usuarios activos');
+        setTimeout(() => window.location.reload(), 500);
       },
       error: (err) => {
         console.error('Error creating announcement:', err);
@@ -711,6 +717,7 @@ export class SuperAdminComponent implements OnInit {
         this.closeEditAnnouncementModal();
         this.loadAnnouncements();
         alert('Anuncio actualizado correctamente');
+        setTimeout(() => window.location.reload(), 500);
       },
       error: (err) => {
         console.error('Error updating announcement:', err);

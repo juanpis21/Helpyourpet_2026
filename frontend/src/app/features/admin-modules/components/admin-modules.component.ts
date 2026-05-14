@@ -244,6 +244,7 @@ export class AdminModulesComponent implements OnInit {
         this.closeTicketModal();
         this.loadMyTickets();
         alert('Ticket creado correctamente. Te responderemos pronto.');
+        setTimeout(() => window.location.reload(), 500);
       },
       error: (err) => {
         console.error('Error creating ticket:', err);
@@ -496,6 +497,7 @@ export class AdminModulesComponent implements OnInit {
         this.closeAddUserModal();
         this.cargarUsuarios();
         alert('Usuario creado correctamente');
+        setTimeout(() => window.location.reload(), 500);
       },
       error: (err) => alert('Error al crear usuario: ' + (err.error?.message || err.message))
     });
@@ -530,6 +532,7 @@ export class AdminModulesComponent implements OnInit {
         this.closeEditUserModal();
         this.cargarUsuarios();
         alert('Usuario actualizado correctamente');
+        setTimeout(() => window.location.reload(), 500);
       },
       error: (err) => alert('Error al actualizar usuario: ' + (err.error?.message || err.message))
     });
@@ -607,6 +610,7 @@ export class AdminModulesComponent implements OnInit {
         this.closeAddServiceModal();
         this.cargarServicios();
         alert('Servicio creado correctamente');
+        setTimeout(() => window.location.reload(), 500);
       },
       error: (err) => alert('Error al crear servicio: ' + err.message)
     });
@@ -646,6 +650,7 @@ export class AdminModulesComponent implements OnInit {
         this.closeEditServiceModal();
         this.cargarServicios();
         alert('Servicio actualizado correctamente');
+        setTimeout(() => window.location.reload(), 500);
       },
       error: (err) => alert('Error al actualizar servicio: ' + err.message)
     });
@@ -696,6 +701,7 @@ export class AdminModulesComponent implements OnInit {
         this.closeAddVeterinariaModal();
         this.cargarVeterinarias();
         alert('Veterinaria registrada correctamente');
+        setTimeout(() => window.location.reload(), 500);
       },
       error: (err) => alert('Error al registrar veterinaria: ' + (err.error?.message || err.message))
     });
@@ -721,6 +727,7 @@ export class AdminModulesComponent implements OnInit {
         this.closeEditVeterinariaModal();
         this.cargarVeterinarias();
         alert('Veterinaria actualizada correctamente');
+        setTimeout(() => window.location.reload(), 500);
       },
       error: (err) => alert('Error al actualizar veterinaria: ' + (err.error?.message || err.message))
     });
@@ -817,6 +824,7 @@ export class AdminModulesComponent implements OnInit {
         this.closeAddProductoModal();
         this.cargarProductos();
         alert('Producto registrado correctamente');
+        setTimeout(() => window.location.reload(), 500);
       },
       error: (err) => {
         console.error('Error al registrar producto:', err);
@@ -871,6 +879,7 @@ export class AdminModulesComponent implements OnInit {
         this.closeEditProductoModal();
         this.cargarProductos();
         alert('Producto actualizado correctamente');
+        setTimeout(() => window.location.reload(), 500);
       },
       error: (err) => {
         console.error('Error al actualizar producto:', err);
@@ -1049,6 +1058,7 @@ export class AdminModulesComponent implements OnInit {
         this.selectedAdminFile = null;
         this.loadAdminProfile();
         alert('✅ Perfil actualizado correctamente');
+        setTimeout(() => window.location.reload(), 500);
       },
       error: (error) => {
         alert('❌ Error al actualizar el perfil: ' + (error.error?.message || 'Error desconocido'));
@@ -1212,6 +1222,7 @@ export class AdminModulesComponent implements OnInit {
             this.currentPageVeterinarios = 1; // Resetear a la primera página
             this.cargarVeterinarios();
             alert('✅ Veterinario registrado y perfil profesional creado correctamente');
+            setTimeout(() => window.location.reload(), 500);
           },
           error: (err: any) => {
             this.isLoading = false;
@@ -1303,6 +1314,7 @@ export class AdminModulesComponent implements OnInit {
               this.closeEditVeterinarioModal();
               this.cargarVeterinarios();
               alert('✅ Datos del veterinario actualizados correctamente');
+              setTimeout(() => window.location.reload(), 500);
             },
             error: (err: any) => {
               console.error('Error al actualizar perfil veterinario:', err);
