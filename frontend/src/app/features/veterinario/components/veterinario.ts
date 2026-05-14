@@ -26,11 +26,11 @@ interface Mascota {
 
 interface Cita {
   id?: number;
-  fecha: string;
+  fechaHora: string;
   motivo: string;
   estado: string;
-  userId: number;
-  petId: number;
+  usuario?: any;
+  mascota?: any;
 }
 
 interface Usuario {
@@ -100,7 +100,10 @@ export class Veterinario implements OnInit {
     prioridad: 'Media'
   };
 
-  // Modales y Formularios
+  newPassword: string = '';
+
+  // Mascotas
+  searchTermMascotas: string = '';
   showAddPetModal: boolean = false;
   showAddUserModal: boolean = false;
   showAddCitaModal: boolean = false;
@@ -115,6 +118,14 @@ export class Veterinario implements OnInit {
   hcSelectedPetId: number | null = null;
   hcMascotasFiltradas: any[] = [];
   hcLoading: boolean = false;
+
+  // Paginación Mascotas
+  petsCurrentPage: number = 1;
+  petsPageSize: number = 20;
+
+  // Paginación Usuarios
+  usersCurrentPage: number = 1;
+  usersPageSize: number = 20;
   hcEditando: boolean = false;
   hcEditForm: any = {};
 
@@ -177,8 +188,88 @@ export class Veterinario implements OnInit {
   };
 
   usuariosSinCuenta: any[] = [];
+  searchTermUsuarios: string = '';
   selectedFile: File | null = null;
   imagePreview: string | null = null;
+
+  get filteredMascotas() {
+    if (!this.searchTermMascotas.trim()) return this.mascotas;
+    const term = this.searchTermMascotas.toLowerCase();
+    return this.mascotas.filter(m =>
+      m.name?.toLowerCase().includes(term) ||
+      m.owner?.firstName?.toLowerCase().includes(term) ||
+      m.owner?.lastName?.toLowerCase().includes(term)
+    );
+  }
+
+  get paginatedMascotas() {
+    const filtered = this.filteredMascotas;
+    // Si el término de búsqueda cambia y la página actual queda fuera de rango, resetear a 1
+    const totalPages = Math.ceil(filtered.length / this.petsPageSize);
+    if (this.petsCurrentPage > totalPages && totalPages > 0) {
+      this.petsCurrentPage = 1;
+    }
+
+    const startIndex = (this.petsCurrentPage - 1) * this.petsPageSize;
+    return filtered.slice(startIndex, startIndex + this.petsPageSize);
+  }
+
+  get totalPetsPages() {
+    return Math.ceil(this.filteredMascotas.length / this.petsPageSize);
+  }
+
+  nextPetsPage() {
+    if (this.petsCurrentPage < this.totalPetsPages) {
+      this.petsCurrentPage++;
+      this.cdr.detectChanges();
+    }
+  }
+
+  prevPetsPage() {
+    if (this.petsCurrentPage > 1) {
+      this.petsCurrentPage--;
+      this.cdr.detectChanges();
+    }
+  }
+
+  get filteredUsuarios() {
+    if (!this.searchTermUsuarios.trim()) return this.usuariosSinCuenta;
+    const term = this.searchTermUsuarios.toLowerCase();
+    return this.usuariosSinCuenta.filter(u =>
+      u.firstName?.toLowerCase().includes(term) ||
+      u.lastName?.toLowerCase().includes(term) ||
+      u.documentNumber?.toString().includes(term)
+    );
+  }
+
+  get paginatedUsuarios() {
+    const filtered = this.filteredUsuarios;
+    const totalPages = Math.ceil(filtered.length / this.usersPageSize);
+    if (this.usersCurrentPage > totalPages && totalPages > 0) {
+      this.usersCurrentPage = 1;
+    }
+
+    const startIndex = (this.usersCurrentPage - 1) * this.usersPageSize;
+    return filtered.slice(startIndex, startIndex + this.usersPageSize);
+  }
+
+  get totalUsersPages() {
+    return Math.ceil(this.filteredUsuarios.length / this.usersPageSize);
+  }
+
+  nextUsersPage() {
+    if (this.usersCurrentPage < this.totalUsersPages) {
+      this.usersCurrentPage++;
+      this.cdr.detectChanges();
+    }
+  }
+
+  prevUsersPage() {
+    if (this.usersCurrentPage > 1) {
+      this.usersCurrentPage--;
+      this.cdr.detectChanges();
+    }
+  }
 
   newCita: any = {
     fecha: '',
@@ -315,6 +406,33 @@ export class Veterinario implements OnInit {
         error: (error) => alert('Error al eliminar la cuenta: ' + (error.error?.message || error.message))
       });
     }
+  }
+
+  cambiarPassword(): void {
+    if (!this.newPassword || this.newPassword.length < 6) {
+      alert('⚠️ La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) return;
+
+    // Usar FormData para que sea compatible con el interceptor del backend
+    const formData = new FormData();
+    formData.append('password', this.newPassword);
+
+    this.userService.updateUser(currentUser.id, formData).subscribe({
+      next: () => {
+        alert('✅ Contraseña actualizada correctamente. Por seguridad, debes iniciar sesión de nuevo.');
+        this.newPassword = '';
+        this.cerrarSesion(); // Cerrar sesión tras cambiar contraseña
+      },
+      error: (err) => {
+        const errorMsg = err.error?.message;
+        const detail = Array.isArray(errorMsg) ? errorMsg.join(', ') : errorMsg;
+        alert('❌ Error al cambiar la contraseña: ' + (detail || err.message));
+      }
+    });
   }
 
   cerrarSesion(): void {
@@ -590,9 +708,51 @@ export class Veterinario implements OnInit {
   // Lógica de Citas
   cargarCitas(): void {
     this.http.get<any[]>(`${this.API_BASE}/citas`, this.getHeaders()).subscribe({
-      next: (data) => this.citas = data,
+      next: (data) => {
+        // Ordenar: Programadas arriba, Completadas/Canceladas abajo, luego por fecha ascendente
+        this.citas = data.sort((a, b) => {
+          const order: { [key: string]: number } = { 'Programada': 0, 'En curso': 1, 'Completada': 2, 'Cancelada': 3 };
+          const aOrder = order[a.estado] ?? 99;
+          const bOrder = order[b.estado] ?? 99;
+          
+          if (aOrder !== bOrder) return aOrder - bOrder;
+          return new Date(a.fechaHora).getTime() - new Date(b.fechaHora).getTime();
+        });
+        this.cdr.detectChanges();
+      },
       error: (err) => console.error('Error cargando citas:', err)
     });
+  }
+
+  finalizarCita(id: number): void {
+    if (confirm('¿Estás seguro de que deseas marcar esta cita como finalizada?')) {
+      this.http.patch(`${this.API_BASE}/citas/${id}`, { estado: 'Completada' }, this.getHeaders()).subscribe({
+        next: () => {
+          alert('✅ Cita finalizada con éxito');
+          this.cargarCitas();
+        },
+        error: (err) => alert('❌ Error al finalizar cita: ' + (err.error?.message || err.message))
+      });
+    }
+  }
+
+  eliminarCita(id: number): void {
+    if (confirm('¿Estás seguro de que deseas eliminar esta cita? Esta acción no se puede deshacer.')) {
+      this.http.delete(`${this.API_BASE}/citas/${id}`, this.getHeaders()).subscribe({
+        next: () => {
+          alert('🗑️ Cita eliminada con éxito');
+          this.cargarCitas();
+        },
+        error: (err) => alert('❌ Error al eliminar cita: ' + (err.error?.message || err.message))
+      });
+    }
+  }
+
+  openProgramarCitaModal(): void {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    this.minDateTimeStr = now.toISOString().slice(0, 16);
+    this.showAddCitaModal = true;
   }
 
   registrarCita(): void {

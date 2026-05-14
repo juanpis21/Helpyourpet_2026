@@ -82,7 +82,7 @@ export class CitasService {
     return this.citasRepository.find({
       where: { isActive: true },
       relations: ['usuario', 'mascota', 'veterinario'],
-      select: ['id', 'motivo', 'fechaHora', 'estado', 'notas', 'isActive', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario']
+      select: ['id', 'motivo', 'fechaHora', 'estado', 'isActive', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario']
     });
   }
 
@@ -90,7 +90,7 @@ export class CitasService {
     const cita = await this.citasRepository.findOne({
       where: { id, isActive: true },
       relations: ['usuario', 'mascota', 'veterinario'],
-      select: ['id', 'motivo', 'fechaHora', 'estado', 'notas', 'isActive', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario']
+      select: ['id', 'motivo', 'fechaHora', 'estado', 'isActive', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario']
     });
 
     if (!cita) {
@@ -104,7 +104,7 @@ export class CitasService {
     return this.citasRepository.find({
       where: { usuario: { id: usuarioId } },
       relations: ['usuario', 'mascota', 'veterinario'],
-      select: ['id', 'motivo', 'fechaHora', 'estado', 'notas', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario'],
+      select: ['id', 'motivo', 'fechaHora', 'estado', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario'],
       order: { fechaHora: 'ASC' }
     });
   }
@@ -113,7 +113,7 @@ export class CitasService {
     return this.citasRepository.find({
       where: { mascota: { id: mascotaId } },
       relations: ['usuario', 'mascota', 'veterinario'],
-      select: ['id', 'motivo', 'fechaHora', 'estado', 'notas', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario'],
+      select: ['id', 'motivo', 'fechaHora', 'estado', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario'],
       order: { fechaHora: 'ASC' }
     });
   }
@@ -122,7 +122,7 @@ export class CitasService {
     return this.citasRepository.find({
       where: { estado, isActive: true },
       relations: ['usuario', 'mascota', 'veterinario'],
-      select: ['id', 'motivo', 'fechaHora', 'estado', 'notas', 'isActive', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario'],
+      select: ['id', 'motivo', 'fechaHora', 'estado', 'isActive', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario'],
       order: { fechaHora: 'ASC' }
     });
   }
@@ -154,7 +154,7 @@ export class CitasService {
       })
       .andWhere('cita.isActive = :isActive', { isActive: true })
       .select([
-        'cita.id', 'cita.motivo', 'cita.fechaHora', 'cita.estado', 'cita.notas', 
+        'cita.id', 'cita.motivo', 'cita.fechaHora', 'cita.estado', 
         'cita.isActive', 'cita.createdAt', 'cita.updatedAt', 
         'usuario.id', 'usuario.username', 'usuario.email', 'usuario.fullName',
         'mascota.id', 'mascota.name', 'mascota.species',
@@ -215,9 +215,6 @@ export class CitasService {
     if (updateCitaDto.estado !== undefined) {
       cita.estado = updateCitaDto.estado;
     }
-    if (updateCitaDto.notas !== undefined) {
-      cita.notas = updateCitaDto.notas;
-    }
     if (updateCitaDto.idVeterinario !== undefined) {
       const veterinario = await this.usersService.findOne(updateCitaDto.idVeterinario);
       if (!veterinario) {
@@ -244,9 +241,6 @@ export class CitasService {
     if (updateCitaDto.estado !== undefined && updateCitaDto.estado !== cita.estado) {
       cambios.push({ campo: 'estado', anterior: cita.estado, nuevo: updateCitaDto.estado });
     }
-    if (updateCitaDto.notas !== undefined && updateCitaDto.notas !== cita.notas) {
-      cambios.push({ campo: 'notas', anterior: cita.notas || '', nuevo: updateCitaDto.notas || '' });
-    }
 
     // Registrar cada cambio en el historial
     for (const cambio of cambios) {
@@ -263,7 +257,7 @@ export class CitasService {
     const updatedCita = await this.citasRepository.findOne({
       where: { id: cita.id },
       relations: ['usuario', 'mascota', 'veterinario'],
-      select: ['id', 'motivo', 'fechaHora', 'estado', 'notas', 'isActive', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario']
+      select: ['id', 'motivo', 'fechaHora', 'estado', 'isActive', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario']
     });
 
     return updatedCita;

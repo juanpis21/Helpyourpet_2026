@@ -36,16 +36,6 @@ export class CreateCitaDto {
   estado?: CitaEstado;
 
   @ApiProperty({ 
-    description: 'Notas adicionales de la cita', 
-    example: 'El paciente es nervioso, se necesita manejo especial',
-    required: false
-  })
-  @IsOptional()
-  @IsString()
-  @MaxLength(1000)
-  notas?: string;
-
-  @ApiProperty({ 
     description: 'ID del usuario que solicita la cita', 
     example: 1 
   })

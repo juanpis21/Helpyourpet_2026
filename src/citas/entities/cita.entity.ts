@@ -41,14 +41,6 @@ export class Cita {
   estado: string;
 
   @ApiProperty({ 
-    description: 'Notas adicionales de la cita', 
-    example: 'El paciente es nervioso, se necesita manejo especial',
-    required: false
-  })
-  @Column({ type: 'text', nullable: true })
-  notas?: string;
-
-  @ApiProperty({ 
     description: 'Usuario que solicita la cita', 
     type: () => User 
   })

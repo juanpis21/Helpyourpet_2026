@@ -79,11 +79,18 @@
       </div>
 
       <div class="stats-grid">
+        <div class="stat-card orange">
+          <div class="stat-icon"><i class="fas fa-users"></i></div>
+          <div class="stat-info">
+            <h3>{{ usuariosSinCuenta.length }}</h3>
+            <p>Usuarios Registrados</p>
+          </div>
+        </div>
         <div class="stat-card blue">
           <div class="stat-icon"><i class="fas fa-paw"></i></div>
           <div class="stat-info">
             <h3>{{ mascotas.length }}</h3>
-            <p>Mascotas Totales</p>
+            <p>Mascotas Registradas</p>
           </div>
         </div>
         <div class="stat-card green">
@@ -124,6 +131,12 @@
           <h5>Mascotas Registradas</h5>
         </div>
         <div class="card-body">
+          <div class="search-bar-container">
+            <div class="search-input-wrapper">
+              <i class="fas fa-search"></i>
+              <input type="text" [(ngModel)]="searchTermMascotas" placeholder="Buscar por nombre de mascota o dueño...">
+            </div>
+          </div>
           <div class="table-container">
             <table class="data-table">
               <thead>
@@ -141,7 +154,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let m of mascotas">
+                <tr *ngFor="let m of paginatedMascotas">
                   <td><strong>{{ m.name }}</strong></td>
                   <td>{{ m.species }}</td>
                   <td>{{ m.breed }}</td>
@@ -168,6 +181,18 @@
               </tbody>
             </table>
           </div>
+
+          <!-- Paginación Mascotas -->
+          <div class="pagination-container" *ngIf="mascotas.length > petsPageSize">
+            <button class="btn-primary small-btn" (click)="prevPetsPage()" [disabled]="petsCurrentPage === 1">
+              <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <span class="page-info">Página {{ petsCurrentPage }} de {{ totalPetsPages }}</span>
+            <button class="btn-primary small-btn" (click)="nextPetsPage()"
+              [disabled]="petsCurrentPage === totalPetsPages">
+              Siguiente <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -193,6 +218,13 @@
           <h5>Usuarios Registrados por el Veterinario</h5>
         </div>
         <div class="card-body">
+          <div class="search-bar-container">
+            <div class="search-input-wrapper">
+              <i class="fas fa-search"></i>
+              <input type="text" [(ngModel)]="searchTermUsuarios"
+                placeholder="Buscar por nombre, apellido o documento...">
+            </div>
+          </div>
           <div class="table-responsive" *ngIf="usuariosSinCuenta.length > 0">
             <table class="data-table">
               <thead>
@@ -209,7 +241,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let user of usuariosSinCuenta">
+                <tr *ngFor="let user of paginatedUsuarios">
                   <td class="bold">{{ user.firstName }}</td>
                   <td>{{ user.lastName }}</td>
                   <td>{{ user.documentType }}</td>
@@ -232,6 +264,18 @@
             </table>
           </div>
 
+          <!-- Paginación Usuarios -->
+          <div class="pagination-container" *ngIf="usuariosSinCuenta.length > usersPageSize">
+            <button class="btn-primary small-btn" (click)="prevUsersPage()" [disabled]="usersCurrentPage === 1">
+              <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <span class="page-info">Página {{ usersCurrentPage }} de {{ totalUsersPages }}</span>
+            <button class="btn-primary small-btn" (click)="nextUsersPage()"
+              [disabled]="usersCurrentPage === totalUsersPages">
+              Siguiente <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+
           <div class="empty-state" *ngIf="usuariosSinCuenta.length === 0">
             <i class="fas fa-users"></i>
             <p>No hay usuarios registrados por este veterinario.</p>
@@ -245,7 +289,7 @@
       <div class="section-header">
         <h1><i class="fas fa-calendar-check"></i> Agenda de Citas</h1>
         <div class="header-actions">
-          <button class="btn-primary" (click)="showAddCitaModal = true">
+          <button class="btn-primary" (click)="openProgramarCitaModal()">
             <i class="fas fa-plus"></i> Nueva Cita
           </button>
           <button class="menu-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
@@ -263,19 +307,39 @@
               <thead>
                 <tr>
                   <th>Fecha</th>
+                  <th>Hora</th>
                   <th>Mascota</th>
                   <th>Dueño</th>
                   <th>Motivo</th>
                   <th>Estado</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let c of citas">
-                  <td>{{ c.fecha | date:'medium' }}</td>
-                  <td><strong>{{ c.pet?.name }}</strong></td>
-                  <td>{{ c.user?.firstName }} {{ c.user?.lastName }}</td>
+                  <td>{{ c.fechaHora | date:'dd/MM/yyyy' }}</td>
+                  <td>{{ c.fechaHora | date:'shortTime' }}</td>
+                  <td><strong>{{ c.mascota?.name }}</strong></td>
+                  <td>{{ c.usuario?.firstName }} {{ c.usuario?.lastName }}</td>
                   <td>{{ c.motivo }}</td>
-                  <td><span class="status-pill active">{{ c.estado }}</span></td>
+                  <td>
+                    <span class="status-pill" [class.status-open]="c.estado === 'Programada'"
+                      [class.status-in-progress]="c.estado === 'En curso'"
+                      [class.status-closed]="c.estado === 'Completada'">
+                      {{ c.estado }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="actions-cell">
+                      <button *ngIf="c.estado === 'Programada' || c.estado === 'En curso'"
+                        class="btn-action btn-success" (click)="finalizarCita(c.id)" title="Finalizar Cita">
+                        <i class="fas fa-check"></i>
+                      </button>
+                      <button class="btn-action btn-danger-outline" (click)="eliminarCita(c.id)" title="Eliminar Cita">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -316,8 +380,10 @@
             </div>
           </div>
           <div class="publicacion-actions">
-            <button class="btn-edit-small" (click)="openEditPublicacionModal(pub)" title="Editar Publicación"><i class="fas fa-pencil-alt"></i></button>
-            <button class="btn-delete-small" (click)="eliminarPublicacion(pub.id)" title="Eliminar Publicación"><i class="fas fa-trash"></i></button>
+            <button class="btn-edit-small" (click)="openEditPublicacionModal(pub)" title="Editar Publicación"><i
+                class="fas fa-pencil-alt"></i></button>
+            <button class="btn-delete-small" (click)="eliminarPublicacion(pub.id)" title="Eliminar Publicación"><i
+                class="fas fa-trash"></i></button>
           </div>
         </div>
       </div>
@@ -380,16 +446,11 @@
                 </div>
                 <div class="form-group">
                   <label>Tipo Documento</label>
-                  <select [(ngModel)]="usuario.tipoDocumento">
-                    <option value="Cédula">Cédula</option>
-                    <option value="Pasaporte">Pasaporte</option>
-                    <option value="Cédula Extranjería">Cédula Extranjería</option>
-                    <option value="Registro Civil">Registro Civil</option>
-                  </select>
+                  <input type="text" [(ngModel)]="usuario.tipoDocumento" readonly class="readonly-field">
                 </div>
                 <div class="form-group">
                   <label>Número Documento</label>
-                  <input type="text" [(ngModel)]="usuario.numDocumento" placeholder="Número de documento">
+                  <input type="text" [(ngModel)]="usuario.numDocumento" readonly class="readonly-field">
                 </div>
                 <!-- Información Profesional (Solo lectura para veterinarios) -->
                 <div class="form-group">
@@ -418,13 +479,39 @@
         </div>
       </div>
 
-      <div class="danger-zone-grid">
-        <div class="card card-danger">
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <!-- Card de Seguridad -->
+        <div class="card" style="height: 100%;">
+          <div class="card-header" style="background: linear-gradient(90deg, #374151 0%, #111827 100%) !important;">
+            <h5 style="color: white; margin: 0; font-size: 1.1rem; padding: 1rem;"><i class="fas fa-shield-alt"></i>
+              Seguridad y Acceso</h5>
+          </div>
+          <div class="card-body">
+            <p style="margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.9rem;">
+              Protege tu cuenta actualizando tu contraseña regularmente.
+            </p>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label><i class="fas fa-lock"></i> Nueva Contraseña</label>
+              <div style="position: relative;">
+                <input type="password" [(ngModel)]="newPassword" name="newPassword" placeholder="Mínimo 6 caracteres"
+                  style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color);">
+              </div>
+            </div>
+            <button class="btn-primary" style="width: 100%; justify-content: center; background: #374151;"
+              (click)="cambiarPassword()">
+              <i class="fas fa-key"></i> Cambiar Contraseña
+            </button>
+          </div>
+        </div>
+
+        <!-- Zona de Peligro -->
+        <div class="card card-danger" style="height: 100%;">
           <div class="card-header danger">
             <h6><i class="fas fa-exclamation-triangle"></i> Zona de Peligro</h6>
           </div>
-          <div class="card-body center">
-            <p>Desactivación de cuenta</p>
+          <div class="card-body center" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; height: calc(100% - 60px);">
+            <p style="margin-bottom: 1.5rem;">Desactivación de cuenta</p>
             <button class="btn-danger" (click)="eliminarCuenta()"><i class="fas fa-user-slash"></i> Desactivar
               Cuenta</button>
           </div>
@@ -450,7 +537,9 @@
 
       <!-- Mis Tickets -->
       <div class="card" *ngIf="misTickets.length > 0">
-        <div class="card-header"><h5><i class="fas fa-list"></i> Mis Tickets</h5></div>
+        <div class="card-header">
+          <h5><i class="fas fa-list"></i> Mis Tickets</h5>
+        </div>
         <div class="card-body">
           <div class="table-container">
             <table class="data-table">
@@ -468,17 +557,16 @@
                   <td>#{{ ticket.id }}</td>
                   <td><strong>{{ ticket.asunto }}</strong></td>
                   <td>
-                    <span class="badge" [class.badge-high]="ticket.prioridad === 'Alta'" 
-                                       [class.badge-medium]="ticket.prioridad === 'Media'" 
-                                       [class.badge-low]="ticket.prioridad === 'Baja'">
+                    <span class="badge" [class.badge-high]="ticket.prioridad === 'Alta'"
+                      [class.badge-medium]="ticket.prioridad === 'Media'"
+                      [class.badge-low]="ticket.prioridad === 'Baja'">
                       {{ ticket.prioridad }}
                     </span>
                   </td>
                   <td>
-                    <span class="status-pill" 
-                          [class.status-open]="ticket.estado === 'Abierto'"
-                          [class.status-in-progress]="ticket.estado === 'En Proceso'"
-                          [class.status-closed]="ticket.estado === 'Cerrado'">
+                    <span class="status-pill" [class.status-open]="ticket.estado === 'Abierto'"
+                      [class.status-in-progress]="ticket.estado === 'En Proceso'"
+                      [class.status-closed]="ticket.estado === 'Cerrado'">
                       {{ ticket.estado }}
                     </span>
                   </td>
@@ -807,7 +895,7 @@
         </div>
         <div class="form-group">
           <label>Fecha y Hora</label>
-          <input type="datetime-local" [(ngModel)]="newCita.fecha">
+          <input type="datetime-local" [(ngModel)]="newCita.fecha" [min]="minDateTimeStr">
         </div>
         <div class="form-group full">
           <label>Motivo</label>
@@ -892,13 +980,6 @@
       </div>
 
       <div class="form-grid">
-        <div class="form-group">
-          <label>Dueño (Usuario) *</label>
-          <select [(ngModel)]="editingPet.ownerId">
-            <option [ngValue]="null">Seleccione un usuario</option>
-            <option *ngFor="let u of usuarios" [ngValue]="u.id">{{ u.firstName }} {{ u.lastName }}</option>
-          </select>
-        </div>
         <div class="form-group">
           <label>Nombre *</label>
           <input type="text" [(ngModel)]="editingPet.name">
@@ -1087,7 +1168,8 @@
         <label for="pub-photo-edit" class="upload-btn">
           <i class="fas fa-camera"></i> Cambiar Foto
         </label>
-        <input type="file" id="pub-photo-edit" (change)="onPublicacionFileSelected($event)" style="display: none;" accept="image/*">
+        <input type="file" id="pub-photo-edit" (change)="onPublicacionFileSelected($event)" style="display: none;"
+          accept="image/*">
       </div>
 
       <div class="form-grid">
@@ -1127,7 +1209,8 @@
         </div>
         <div class="form-group full">
           <label>Descripción *</label>
-          <textarea [(ngModel)]="newTicket.descripcion" rows="5" placeholder="Describe detalladamente tu problema o consulta..."></textarea>
+          <textarea [(ngModel)]="newTicket.descripcion" rows="5"
+            placeholder="Describe detalladamente tu problema o consulta..."></textarea>
         </div>
       </div>
     </div>
