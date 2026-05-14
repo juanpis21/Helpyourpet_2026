@@ -74,10 +74,17 @@
       <div class="section-header">
         <h1><i class="fas fa-home"></i> Panel de Control</h1>
         <div class="header-actions">
-          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="menu-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="theme-btn" (click)="toggleDarkMode()">
+            <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
         </div>
       </div>
-
+      <div class="card">
+        <div class="card-header">
+          <h5><i class="fas fa-info-circle"></i> Resumen del Sistema</h5>
+        </div>
+      </div>
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-icon"><i class="fas fa-users"></i></div>
@@ -109,13 +116,23 @@
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-header">
-          <h5><i class="fas fa-info-circle"></i> Resumen del Sistema</h5>
+      <!-- Dashboard Charts -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h4><i class="fas fa-chart-pie"></i> Distribución de Usuarios</h4>
+          </div>
+          <div class="chart-body">
+            <canvas id="userChart"></canvas>
+          </div>
         </div>
-        <div class="card-body">
-          <p>Bienvenido al sistema de administración centralizado. Desde aquí puedes gestionar los módulos críticos de
-            la plataforma.</p>
+        <div class="chart-card">
+          <div class="chart-header">
+            <h4><i class="fas fa-chart-bar"></i> Stock de Productos</h4>
+          </div>
+          <div class="chart-body">
+            <canvas id="productChart"></canvas>
+          </div>
         </div>
       </div>
     </section>
@@ -125,7 +142,11 @@
       <div class="section-header">
         <h1><i class="fas fa-users"></i> Gestión de Usuarios</h1>
         <div class="header-actions">
-          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="menu-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="theme-btn" (click)="toggleDarkMode()">
+            <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
+          <button class="home-btn" (click)="irAInicio()"><i class="fas fa-home"></i></button>
         </div>
       </div>
 
@@ -171,8 +192,8 @@
                           class="fas fa-edit"></i></button>
                       <button class="btn-icon toggle" (click)="toggleEstadoUsuario(user)"
                         [title]="user.isActive ? 'Desactivar' : 'Activar'">
-                        <i class="fas" [ngClass]="user.isActive ? 'fa-ban' : 'fa-check-circle'"
-                          [style.color]="user.isActive ? '#ef4444' : '#22c55e'"></i>
+                        <i class="fas" [ngClass]="user.isActive ? 'fa-toggle-on' : 'fa-toggle-off'"
+                          [style.color]="user.isActive ? '#2e7d32' : '#c62828'"></i>
                       </button>
                     </div>
                   </td>
@@ -182,11 +203,17 @@
           </div>
           <!-- Paginación Usuarios -->
           <div class="pagination-controls" *ngIf="filteredUsuariosList.length > itemsPerPage">
-            <span class="pagination-info">Mostrando {{ (currentPageUsuarios - 1) * itemsPerPage + 1 }} - {{ getMath().min(currentPageUsuarios * itemsPerPage, filteredUsuariosList.length) }} de {{ filteredUsuariosList.length }}</span>
+            <span class="pagination-info">Mostrando {{ (currentPageUsuarios - 1) * itemsPerPage + 1 }} - {{
+              getMath().min(currentPageUsuarios * itemsPerPage, filteredUsuariosList.length) }} de {{
+              filteredUsuariosList.length }}</span>
             <div class="pagination-buttons">
-              <button class="btn-page" (click)="prevPage('usuarios')" [disabled]="currentPageUsuarios === 1"><i class="fas fa-chevron-left"></i></button>
-              <span class="page-number">Página {{ currentPageUsuarios }} de {{ getTotalPages(filteredUsuariosList) }}</span>
-              <button class="btn-page" (click)="nextPage('usuarios', filteredUsuariosList)" [disabled]="currentPageUsuarios === getTotalPages(filteredUsuariosList)"><i class="fas fa-chevron-right"></i></button>
+              <button class="btn-page" (click)="prevPage('usuarios')" [disabled]="currentPageUsuarios === 1"><i
+                  class="fas fa-chevron-left"></i></button>
+              <span class="page-number">Página {{ currentPageUsuarios }} de {{ getTotalPages(filteredUsuariosList)
+                }}</span>
+              <button class="btn-page" (click)="nextPage('usuarios', filteredUsuariosList)"
+                [disabled]="currentPageUsuarios === getTotalPages(filteredUsuariosList)"><i
+                  class="fas fa-chevron-right"></i></button>
             </div>
           </div>
         </div>
@@ -198,11 +225,14 @@
       <div class="section-header">
         <h1><i class="fas fa-concierge-bell"></i> Gestión de Servicios</h1>
         <div class="header-actions">
-
           <button class="btn-primary" (click)="openAddServiceModal()">
             <i class="fas fa-plus"></i> Agregar Servicio
           </button>
-          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="menu-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="theme-btn" (click)="toggleDarkMode()">
+            <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
+          <button class="home-btn" (click)="irAInicio()"><i class="fas fa-home"></i></button>
         </div>
       </div>
 
@@ -214,7 +244,8 @@
           <div class="search-bar-container">
             <div class="search-input-wrapper">
               <i class="fas fa-search"></i>
-              <input type="text" [(ngModel)]="searchTermServicios" placeholder="Buscar por nombre o tipo de servicio...">
+              <input type="text" [(ngModel)]="searchTermServicios"
+                placeholder="Buscar por nombre o tipo de servicio...">
             </div>
           </div>
           <div class="table-container">
@@ -267,11 +298,17 @@
           </div>
           <!-- Paginación Servicios -->
           <div class="pagination-controls" *ngIf="filteredServiciosList.length > itemsPerPage">
-            <span class="pagination-info">Mostrando {{ (currentPageServicios - 1) * itemsPerPage + 1 }} - {{ getMath().min(currentPageServicios * itemsPerPage, filteredServiciosList.length) }} de {{ filteredServiciosList.length }}</span>
+            <span class="pagination-info">Mostrando {{ (currentPageServicios - 1) * itemsPerPage + 1 }} - {{
+              getMath().min(currentPageServicios * itemsPerPage, filteredServiciosList.length) }} de {{
+              filteredServiciosList.length }}</span>
             <div class="pagination-buttons">
-              <button class="btn-page" (click)="prevPage('servicios')" [disabled]="currentPageServicios === 1"><i class="fas fa-chevron-left"></i></button>
-              <span class="page-number">Página {{ currentPageServicios }} de {{ getTotalPages(filteredServiciosList) }}</span>
-              <button class="btn-page" (click)="nextPage('servicios', filteredServiciosList)" [disabled]="currentPageServicios === getTotalPages(filteredServiciosList)"><i class="fas fa-chevron-right"></i></button>
+              <button class="btn-page" (click)="prevPage('servicios')" [disabled]="currentPageServicios === 1"><i
+                  class="fas fa-chevron-left"></i></button>
+              <span class="page-number">Página {{ currentPageServicios }} de {{ getTotalPages(filteredServiciosList)
+                }}</span>
+              <button class="btn-page" (click)="nextPage('servicios', filteredServiciosList)"
+                [disabled]="currentPageServicios === getTotalPages(filteredServiciosList)"><i
+                  class="fas fa-chevron-right"></i></button>
             </div>
           </div>
         </div>
@@ -283,7 +320,11 @@
       <div class="section-header">
         <h1><i class="fas fa-hospital"></i> Gestión de Veterinarias</h1>
         <div class="header-actions">
-          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="menu-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="theme-btn" (click)="toggleDarkMode()">
+            <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
+          <button class="home-btn" (click)="irAInicio()"><i class="fas fa-home"></i></button>
         </div>
       </div>
 
@@ -347,11 +388,17 @@
           </div>
           <!-- Paginación Veterinarias -->
           <div class="pagination-controls" *ngIf="filteredVeterinariasList.length > itemsPerPage">
-            <span class="pagination-info">Mostrando {{ (currentPageVeterinarias - 1) * itemsPerPage + 1 }} - {{ getMath().min(currentPageVeterinarias * itemsPerPage, filteredVeterinariasList.length) }} de {{ filteredVeterinariasList.length }}</span>
+            <span class="pagination-info">Mostrando {{ (currentPageVeterinarias - 1) * itemsPerPage + 1 }} - {{
+              getMath().min(currentPageVeterinarias * itemsPerPage, filteredVeterinariasList.length) }} de {{
+              filteredVeterinariasList.length }}</span>
             <div class="pagination-buttons">
-              <button class="btn-page" (click)="prevPage('veterinarias')" [disabled]="currentPageVeterinarias === 1"><i class="fas fa-chevron-left"></i></button>
-              <span class="page-number">Página {{ currentPageVeterinarias }} de {{ getTotalPages(filteredVeterinariasList) }}</span>
-              <button class="btn-page" (click)="nextPage('veterinarias', filteredVeterinariasList)" [disabled]="currentPageVeterinarias === getTotalPages(filteredVeterinariasList)"><i class="fas fa-chevron-right"></i></button>
+              <button class="btn-page" (click)="prevPage('veterinarias')" [disabled]="currentPageVeterinarias === 1"><i
+                  class="fas fa-chevron-left"></i></button>
+              <span class="page-number">Página {{ currentPageVeterinarias }} de {{
+                getTotalPages(filteredVeterinariasList) }}</span>
+              <button class="btn-page" (click)="nextPage('veterinarias', filteredVeterinariasList)"
+                [disabled]="currentPageVeterinarias === getTotalPages(filteredVeterinariasList)"><i
+                  class="fas fa-chevron-right"></i></button>
             </div>
           </div>
         </div>
@@ -366,7 +413,11 @@
           <button class="btn-primary" (click)="openAddVeterinarioModal()">
             <i class="fas fa-plus"></i> Agregar Veterinario
           </button>
-          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="menu-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="theme-btn" (click)="toggleDarkMode()">
+            <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
+          <button class="home-btn" (click)="irAInicio()"><i class="fas fa-home"></i></button>
         </div>
       </div>
 
@@ -378,7 +429,8 @@
           <div class="search-bar-container">
             <div class="search-input-wrapper">
               <i class="fas fa-search"></i>
-              <input type="text" [(ngModel)]="searchTermVeterinarios" placeholder="Buscar por nombre, especialidad o matrícula...">
+              <input type="text" [(ngModel)]="searchTermVeterinarios"
+                placeholder="Buscar por nombre, especialidad o matrícula...">
             </div>
           </div>
           <div class="table-container">
@@ -435,11 +487,17 @@
           </div>
           <!-- Paginación Veterinarios -->
           <div class="pagination-controls" *ngIf="filteredVeterinariosList.length > itemsPerPage">
-            <span class="pagination-info">Mostrando {{ (currentPageVeterinarios - 1) * itemsPerPage + 1 }} - {{ getMath().min(currentPageVeterinarios * itemsPerPage, filteredVeterinariosList.length) }} de {{ filteredVeterinariosList.length }}</span>
+            <span class="pagination-info">Mostrando {{ (currentPageVeterinarios - 1) * itemsPerPage + 1 }} - {{
+              getMath().min(currentPageVeterinarios * itemsPerPage, filteredVeterinariosList.length) }} de {{
+              filteredVeterinariosList.length }}</span>
             <div class="pagination-buttons">
-              <button class="btn-page" (click)="prevPage('veterinarios')" [disabled]="currentPageVeterinarios === 1"><i class="fas fa-chevron-left"></i></button>
-              <span class="page-number">Página {{ currentPageVeterinarios }} de {{ getTotalPages(filteredVeterinariosList) }}</span>
-              <button class="btn-page" (click)="nextPage('veterinarios', filteredVeterinariosList)" [disabled]="currentPageVeterinarios === getTotalPages(filteredVeterinariosList)"><i class="fas fa-chevron-right"></i></button>
+              <button class="btn-page" (click)="prevPage('veterinarios')" [disabled]="currentPageVeterinarios === 1"><i
+                  class="fas fa-chevron-left"></i></button>
+              <span class="page-number">Página {{ currentPageVeterinarios }} de {{
+                getTotalPages(filteredVeterinariosList) }}</span>
+              <button class="btn-page" (click)="nextPage('veterinarios', filteredVeterinariosList)"
+                [disabled]="currentPageVeterinarios === getTotalPages(filteredVeterinariosList)"><i
+                  class="fas fa-chevron-right"></i></button>
             </div>
           </div>
         </div>
@@ -454,7 +512,11 @@
           <button class="btn-primary" (click)="openAddProductoModal()">
             <i class="fas fa-plus"></i> Agregar Producto
           </button>
-          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="menu-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="theme-btn" (click)="toggleDarkMode()">
+            <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
+          <button class="home-btn" (click)="irAInicio()"><i class="fas fa-home"></i></button>
         </div>
       </div>
 
@@ -466,7 +528,8 @@
           <div class="search-bar-container">
             <div class="search-input-wrapper">
               <i class="fas fa-search"></i>
-              <input type="text" [(ngModel)]="searchTermProductos" placeholder="Buscar por nombre, categoría o código...">
+              <input type="text" [(ngModel)]="searchTermProductos"
+                placeholder="Buscar por nombre, categoría o código...">
             </div>
           </div>
           <div class="table-container">
@@ -539,11 +602,17 @@
           </div>
           <!-- Paginación Productos -->
           <div class="pagination-controls" *ngIf="filteredProductosList.length > itemsPerPage">
-            <span class="pagination-info">Mostrando {{ (currentPageProductos - 1) * itemsPerPage + 1 }} - {{ getMath().min(currentPageProductos * itemsPerPage, filteredProductosList.length) }} de {{ filteredProductosList.length }}</span>
+            <span class="pagination-info">Mostrando {{ (currentPageProductos - 1) * itemsPerPage + 1 }} - {{
+              getMath().min(currentPageProductos * itemsPerPage, filteredProductosList.length) }} de {{
+              filteredProductosList.length }}</span>
             <div class="pagination-buttons">
-              <button class="btn-page" (click)="prevPage('productos')" [disabled]="currentPageProductos === 1"><i class="fas fa-chevron-left"></i></button>
-              <span class="page-number">Página {{ currentPageProductos }} de {{ getTotalPages(filteredProductosList) }}</span>
-              <button class="btn-page" (click)="nextPage('productos', filteredProductosList)" [disabled]="currentPageProductos === getTotalPages(filteredProductosList)"><i class="fas fa-chevron-right"></i></button>
+              <button class="btn-page" (click)="prevPage('productos')" [disabled]="currentPageProductos === 1"><i
+                  class="fas fa-chevron-left"></i></button>
+              <span class="page-number">Página {{ currentPageProductos }} de {{ getTotalPages(filteredProductosList)
+                }}</span>
+              <button class="btn-page" (click)="nextPage('productos', filteredProductosList)"
+                [disabled]="currentPageProductos === getTotalPages(filteredProductosList)"><i
+                  class="fas fa-chevron-right"></i></button>
             </div>
           </div>
         </div>
@@ -558,7 +627,11 @@
           <button class="btn-primary" (click)="openAddCategoriaModal()">
             <i class="fas fa-plus"></i> Nueva Categoría
           </button>
-          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="menu-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="theme-btn" (click)="toggleDarkMode()">
+            <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
+          <button class="home-btn" (click)="irAInicio()"><i class="fas fa-home"></i></button>
         </div>
       </div>
 
@@ -616,7 +689,11 @@
       <div class="section-header">
         <h1><i class="fas fa-warehouse"></i> Inventario General</h1>
         <div class="header-actions">
-          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="menu-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="theme-btn" (click)="toggleDarkMode()">
+            <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
+          <button class="home-btn" (click)="irAInicio()"><i class="fas fa-home"></i></button>
         </div>
       </div>
 
@@ -685,7 +762,11 @@
       <div class="section-header">
         <h1><i class="fas fa-cog"></i> Configuración de Perfil</h1>
         <div class="header-actions">
-          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="menu-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="theme-btn" (click)="toggleDarkMode()">
+            <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
+          <button class="home-btn" (click)="irAInicio()"><i class="fas fa-home"></i></button>
         </div>
       </div>
 
@@ -807,7 +888,9 @@
 
       <!-- Mis Tickets -->
       <div class="card" *ngIf="misTickets.length > 0">
-        <div class="card-header"><h5><i class="fas fa-list"></i> Mis Tickets</h5></div>
+        <div class="card-header">
+          <h5><i class="fas fa-list"></i> Mis Tickets</h5>
+        </div>
         <div class="card-body">
           <div class="table-container">
             <table class="data-table">
@@ -825,17 +908,16 @@
                   <td>#{{ ticket.id }}</td>
                   <td><strong>{{ ticket.asunto }}</strong></td>
                   <td>
-                    <span class="badge" [class.badge-high]="ticket.prioridad === 'Alta'" 
-                                       [class.badge-medium]="ticket.prioridad === 'Media'" 
-                                       [class.badge-low]="ticket.prioridad === 'Baja'">
+                    <span class="badge" [class.badge-high]="ticket.prioridad === 'Alta'"
+                      [class.badge-medium]="ticket.prioridad === 'Media'"
+                      [class.badge-low]="ticket.prioridad === 'Baja'">
                       {{ ticket.prioridad }}
                     </span>
                   </td>
                   <td>
-                    <span class="status-pill" 
-                          [class.status-open]="ticket.estado === 'Abierto'"
-                          [class.status-in-progress]="ticket.estado === 'En Proceso'"
-                          [class.status-closed]="ticket.estado === 'Cerrado'">
+                    <span class="status-pill" [class.status-open]="ticket.estado === 'Abierto'"
+                      [class.status-in-progress]="ticket.estado === 'En Proceso'"
+                      [class.status-closed]="ticket.estado === 'Cerrado'">
                       {{ ticket.estado }}
                     </span>
                   </td>
@@ -855,774 +937,778 @@
 
   </main>
 </div>
-  <!-- Modales de Servicios -->
-  <div class="modal-overlay" *ngIf="showAddServiceModal" (click)="closeAddServiceModal()">
-    <div class="modal-box" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>Nuevo Servicio</h3>
-        <button class="close-btn" (click)="closeAddServiceModal()">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-grid">
-          <div class="form-group full">
-            <label>Nombre *</label>
-            <input type="text" [(ngModel)]="newService.nombre">
-          </div>
-          <div class="form-group">
-            <label>Tipo *</label>
-            <select [(ngModel)]="newService.tipoServicio">
-              <option value="CONSULTA">Consulta</option>
-              <option value="CIRUGIA">Cirugía</option>
-              <option value="VACUNACION">Vacunación</option>
-              <option value="ESTETICA">Estética</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Precio *</label>
-            <input type="number" [(ngModel)]="newService.precioBase">
-          </div>
-          <div class="form-group full">
-            <label>Veterinaria *</label>
-            <select [(ngModel)]="newService.veterinariaId">
-              <option [ngValue]="0">Seleccionar Veterinaria</option>
-              <option *ngFor="let vet of veterinarias" [ngValue]="vet.id">{{ vet.nombre }}</option>
-            </select>
-          </div>
-          <div class="form-group full">
-            <label>Imagen del Servicio</label>
-            <div class="file-upload-container">
-              <input type="file" (change)="onFileSelected($event)" accept="image/*" id="fileAdd">
-              <label for="fileAdd" class="file-label">
-                <i class="fas fa-cloud-upload-alt"></i> Seleccionar Imagen
-              </label>
-              <div *ngIf="imagePreview" class="preview-container">
-                <img [src]="imagePreview" class="img-preview">
-              </div>
+<!-- Modales de Servicios -->
+<div class="modal-overlay" *ngIf="showAddServiceModal" (click)="closeAddServiceModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Nuevo Servicio</h3>
+      <button class="close-btn" (click)="closeAddServiceModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Nombre *</label>
+          <input type="text" [(ngModel)]="newService.nombre">
+        </div>
+        <div class="form-group">
+          <label>Tipo *</label>
+          <select [(ngModel)]="newService.tipoServicio">
+            <option value="CONSULTA">Consulta</option>
+            <option value="CIRUGIA">Cirugía</option>
+            <option value="VACUNACION">Vacunación</option>
+            <option value="ESTETICA">Estética</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Precio *</label>
+          <input type="number" [(ngModel)]="newService.precioBase">
+        </div>
+        <div class="form-group full">
+          <label>Veterinaria *</label>
+          <select [(ngModel)]="newService.veterinariaId">
+            <option [ngValue]="0">Seleccionar Veterinaria</option>
+            <option *ngFor="let vet of veterinarias" [ngValue]="vet.id">{{ vet.nombre }}</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Imagen del Servicio</label>
+          <div class="file-upload-container">
+            <input type="file" (change)="onFileSelected($event)" accept="image/*" id="fileAdd">
+            <label for="fileAdd" class="file-label">
+              <i class="fas fa-cloud-upload-alt"></i> Seleccionar Imagen
+            </label>
+            <div *ngIf="imagePreview" class="preview-container">
+              <img [src]="imagePreview" class="img-preview">
             </div>
           </div>
-          <div class="form-group full">
-            <label>Descripción</label>
-            <textarea [(ngModel)]="newService.descripcion" rows="3"></textarea>
-          </div>
+        </div>
+        <div class="form-group full">
+          <label>Descripción</label>
+          <textarea [(ngModel)]="newService.descripcion" rows="3"></textarea>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" (click)="closeAddServiceModal()">Cancelar</button>
-        <button class="btn-primary" (click)="guardarServicio()">Guardar</button>
-      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeAddServiceModal()">Cancelar</button>
+      <button class="btn-primary" (click)="guardarServicio()">Guardar</button>
     </div>
   </div>
+</div>
 
-  <div class="modal-overlay" *ngIf="showEditServiceModal" (click)="closeEditServiceModal()">
-    <div class="modal-box" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>Editar Servicio</h3>
-        <button class="close-btn" (click)="closeEditServiceModal()">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-grid">
-          <div class="form-group full">
-            <label>Nombre *</label>
-            <input type="text" [(ngModel)]="editingService.nombre">
-          </div>
-          <div class="form-group">
-            <label>Tipo *</label>
-            <select [(ngModel)]="editingService.tipoServicio">
-              <option value="CONSULTA">Consulta</option>
-              <option value="CIRUGIA">Cirugía</option>
-              <option value="VACUNACION">Vacunación</option>
-              <option value="ESTETICA">Estética</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Precio *</label>
-            <input type="number" [(ngModel)]="editingService.precioBase">
-          </div>
-          <div class="form-group full">
-            <label>Veterinaria *</label>
-            <select [(ngModel)]="editingService.veterinariaId">
-              <option *ngFor="let vet of veterinarias" [ngValue]="vet.id">{{ vet.nombre }}</option>
-            </select>
-          </div>
-          <div class="form-group full">
-            <label>Imagen del Servicio</label>
-            <div class="file-upload-container">
-              <input type="file" (change)="onFileSelected($event)" accept="image/*" id="fileEdit">
-              <label for="fileEdit" class="file-label">
-                <i class="fas fa-cloud-upload-alt"></i> Cambiar Imagen
-              </label>
-              <div *ngIf="imagePreview || editingService.imagen" class="preview-container">
-                <img [src]="imagePreview || (baseUrl + editingService.imagen)" class="img-preview">
-              </div>
+<div class="modal-overlay" *ngIf="showEditServiceModal" (click)="closeEditServiceModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Editar Servicio</h3>
+      <button class="close-btn" (click)="closeEditServiceModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Nombre *</label>
+          <input type="text" [(ngModel)]="editingService.nombre">
+        </div>
+        <div class="form-group">
+          <label>Tipo *</label>
+          <select [(ngModel)]="editingService.tipoServicio">
+            <option value="CONSULTA">Consulta</option>
+            <option value="CIRUGIA">Cirugía</option>
+            <option value="VACUNACION">Vacunación</option>
+            <option value="ESTETICA">Estética</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Precio *</label>
+          <input type="number" [(ngModel)]="editingService.precioBase">
+        </div>
+        <div class="form-group full">
+          <label>Veterinaria *</label>
+          <select [(ngModel)]="editingService.veterinariaId">
+            <option *ngFor="let vet of veterinarias" [ngValue]="vet.id">{{ vet.nombre }}</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Imagen del Servicio</label>
+          <div class="file-upload-container">
+            <input type="file" (change)="onFileSelected($event)" accept="image/*" id="fileEdit">
+            <label for="fileEdit" class="file-label">
+              <i class="fas fa-cloud-upload-alt"></i> Cambiar Imagen
+            </label>
+            <div *ngIf="imagePreview || editingService.imagen" class="preview-container">
+              <img [src]="imagePreview || (baseUrl + editingService.imagen)" class="img-preview">
             </div>
           </div>
-          <div class="form-group full">
-            <label>Descripción</label>
-            <textarea [(ngModel)]="editingService.descripcion" rows="3"></textarea>
-          </div>
+        </div>
+        <div class="form-group full">
+          <label>Descripción</label>
+          <textarea [(ngModel)]="editingService.descripcion" rows="3"></textarea>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" (click)="closeEditServiceModal()">Cancelar</button>
-        <button class="btn-primary" (click)="guardarEdicionServicio()">Actualizar</button>
-      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeEditServiceModal()">Cancelar</button>
+      <button class="btn-primary" (click)="guardarEdicionServicio()">Actualizar</button>
     </div>
   </div>
+</div>
 
-  <!-- Modales de Usuarios -->
-    <!-- Modal de Agregar Usuario -->
-    <div class="modal-overlay" *ngIf="showAddUserModal" (click)="closeAddUserModal()">
-      <div class="modal-box" (click)="$event.stopPropagation()" style="max-width: 800px;">
-        <div class="modal-header">
-          <h3><i class="fas fa-user-plus"></i> Registrar Nuevo Usuario</h3>
-          <button class="close-btn" (click)="closeAddUserModal()">&times;</button>
+<!-- Modales de Usuarios -->
+<!-- Modal de Agregar Usuario -->
+<div class="modal-overlay" *ngIf="showAddUserModal" (click)="closeAddUserModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()" style="max-width: 800px;">
+    <div class="modal-header">
+      <h3><i class="fas fa-user-plus"></i> Registrar Nuevo Usuario</h3>
+      <button class="close-btn" (click)="closeAddUserModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
+        <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fas fa-id-card"></i> Información Personal
+        </h4>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label><i class="fas fa-user"></i> Nombre *</label>
+          <input type="text" [(ngModel)]="newUser.firstName" placeholder="Ej: Juan">
         </div>
-        <div class="modal-body">
-          <div style="margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
-            <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-              <i class="fas fa-id-card"></i> Información Personal
-            </h4>
-          </div>
-          <div class="form-grid">
-            <div class="form-group">
-              <label><i class="fas fa-user"></i> Nombre *</label>
-              <input type="text" [(ngModel)]="newUser.firstName" placeholder="Ej: Juan">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-user"></i> Apellido *</label>
-              <input type="text" [(ngModel)]="newUser.lastName" placeholder="Ej: Pérez">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-user-circle"></i> Nombre de Usuario *</label>
-              <input type="text" [(ngModel)]="newUser.username" placeholder="Ej: juanperez123">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-envelope"></i> Correo Electrónico *</label>
-              <input type="email" [(ngModel)]="newUser.email" placeholder="correo@ejemplo.com">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-lock"></i> Contraseña *</label>
-              <input type="password" [(ngModel)]="newUser.password" placeholder="Mínimo 6 caracteres">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-phone"></i> Teléfono</label>
-              <input type="text" [(ngModel)]="newUser.phone" placeholder="+57 300...">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-map-marker-alt"></i> Dirección</label>
-              <input type="text" [(ngModel)]="newUser.address" placeholder="Calle 123 #45-67">
-            </div>
-          </div>
+        <div class="form-group">
+          <label><i class="fas fa-user"></i> Apellido *</label>
+          <input type="text" [(ngModel)]="newUser.lastName" placeholder="Ej: Pérez">
         </div>
-        <div class="modal-footer">
-          <button class="btn-secondary" (click)="closeAddUserModal()">
-            <i class="fas fa-times"></i> Cancelar
-          </button>
-          <button class="btn-primary" (click)="guardarUsuario()">
-            <i class="fas fa-save"></i> Crear Usuario
-          </button>
+        <div class="form-group">
+          <label><i class="fas fa-user-circle"></i> Nombre de Usuario *</label>
+          <input type="text" [(ngModel)]="newUser.username" placeholder="Ej: juanperez123">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-envelope"></i> Correo Electrónico *</label>
+          <input type="email" [(ngModel)]="newUser.email" placeholder="correo@ejemplo.com">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-lock"></i> Contraseña *</label>
+          <input type="password" [(ngModel)]="newUser.password" placeholder="Mínimo 6 caracteres">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-phone"></i> Teléfono</label>
+          <input type="text" [(ngModel)]="newUser.phone" placeholder="+57 300...">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-map-marker-alt"></i> Dirección</label>
+          <input type="text" [(ngModel)]="newUser.address" placeholder="Calle 123 #45-67">
         </div>
       </div>
     </div>
-
-    <!-- Modal de Editar Usuario -->
-    <div class="modal-overlay" *ngIf="showEditUserModal" (click)="closeEditUserModal()">
-      <div class="modal-box" (click)="$event.stopPropagation()" style="max-width: 800px;">
-        <div class="modal-header">
-          <h3><i class="fas fa-user-edit"></i> Editar Usuario</h3>
-          <button class="close-btn" (click)="closeEditUserModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div style="margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
-            <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-              <i class="fas fa-id-card"></i> Datos del Cliente
-            </h4>
-          </div>
-          <div class="form-grid">
-            <div class="form-group">
-              <label><i class="fas fa-user"></i> Nombre</label>
-              <input type="text" [(ngModel)]="editingUser.firstName">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-user"></i> Apellido</label>
-              <input type="text" [(ngModel)]="editingUser.lastName">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-calendar-alt"></i> Edad</label>
-              <input type="number" [(ngModel)]="editingUser.age">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-phone"></i> Teléfono</label>
-              <input type="text" [(ngModel)]="editingUser.phone">
-            </div>
-            <div class="form-group full">
-              <label><i class="fas fa-map-marker-alt"></i> Dirección</label>
-              <input type="text" [(ngModel)]="editingUser.address">
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-secondary" (click)="closeEditUserModal()">
-            <i class="fas fa-times"></i> Cancelar
-          </button>
-          <button class="btn-primary" (click)="guardarEdicionUsuario()">
-            <i class="fas fa-save"></i> Guardar Cambios
-          </button>
-        </div>
-      </div>
-    </div>
-
-  <!-- Modales de Veterinarias -->
-    <!-- Modal de Agregar Veterinaria -->
-    <div class="modal-overlay" *ngIf="showAddVeterinariaModal" (click)="closeAddVeterinariaModal()">
-      <div class="modal-box" (click)="$event.stopPropagation()" style="max-width: 800px;">
-        <div class="modal-header">
-          <h3><i class="fas fa-hospital"></i> Registrar Sede Veterinaria</h3>
-          <button class="close-btn" (click)="closeAddVeterinariaModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div style="margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
-            <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-              <i class="fas fa-info-circle"></i> Información de la Clínica
-            </h4>
-          </div>
-          <div class="form-grid">
-            <div class="form-group full">
-              <label><i class="fas fa-building"></i> Nombre de la Sede *</label>
-              <input type="text" [(ngModel)]="newVeterinaria.nombre" placeholder="Ej: Clínica San Francisco">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-id-card-alt"></i> NIT / RUT *</label>
-              <input type="text" [(ngModel)]="newVeterinaria.rut" placeholder="Ej: 900.123.456-1">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-phone-alt"></i> Teléfono *</label>
-              <input type="tel" [(ngModel)]="newVeterinaria.telefono" placeholder="Ej: +57 300...">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-envelope"></i> Correo Electrónico *</label>
-              <input type="email" [(ngModel)]="newVeterinaria.email" placeholder="contacto@veterinaria.com">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-map-marker-alt"></i> Dirección *</label>
-              <input type="text" [(ngModel)]="newVeterinaria.direccion" placeholder="Ej: Calle 45 #12-34">
-            </div>
-            <div class="form-group full">
-              <label><i class="fas fa-align-left"></i> Descripción</label>
-              <textarea [(ngModel)]="newVeterinaria.descripcion" rows="3" placeholder="Escribe aquí los servicios o información de la sede..."></textarea>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-secondary" (click)="closeAddVeterinariaModal()">
-            <i class="fas fa-times"></i> Cancelar
-          </button>
-          <button class="btn-primary" (click)="guardarVeterinaria()">
-            <i class="fas fa-save"></i> Registrar Sede
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal de Editar Veterinaria -->
-    <div class="modal-overlay" *ngIf="showEditVeterinariaModal" (click)="closeEditVeterinariaModal()">
-      <div class="modal-box" (click)="$event.stopPropagation()" style="max-width: 800px;">
-        <div class="modal-header">
-          <h3><i class="fas fa-edit"></i> Editar Sede Veterinaria</h3>
-          <button class="close-btn" (click)="closeEditVeterinariaModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div style="margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
-            <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-              <i class="fas fa-info-circle"></i> Información de la Clínica
-            </h4>
-          </div>
-          <div class="form-grid">
-            <div class="form-group full">
-              <label><i class="fas fa-building"></i> Nombre de la Sede</label>
-              <input type="text" [(ngModel)]="editingVeterinaria.nombre">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-id-card-alt"></i> NIT / RUT</label>
-              <input type="text" [(ngModel)]="editingVeterinaria.rut">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-phone-alt"></i> Teléfono</label>
-              <input type="tel" [(ngModel)]="editingVeterinaria.telefono">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-envelope"></i> Correo Electrónico</label>
-              <input type="email" [(ngModel)]="editingVeterinaria.email">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-map-marker-alt"></i> Dirección</label>
-              <input type="text" [(ngModel)]="editingVeterinaria.direccion">
-            </div>
-            <div class="form-group full">
-              <label><i class="fas fa-align-left"></i> Descripción</label>
-              <textarea [(ngModel)]="editingVeterinaria.descripcion" rows="3"></textarea>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-secondary" (click)="closeEditVeterinariaModal()">
-            <i class="fas fa-times"></i> Cancelar
-          </button>
-          <button class="btn-primary" (click)="guardarEdicionVeterinaria()">
-            <i class="fas fa-save"></i> Guardar Cambios
-          </button>
-        </div>
-      </div>
-    </div>
-
-  <!-- Modales de Productos -->
-    <!-- Modal de Agregar Producto -->
-    <div class="modal-overlay" *ngIf="showAddProductoModal" (click)="closeAddProductoModal()">
-      <div class="modal-box" (click)="$event.stopPropagation()" style="max-width: 900px;">
-        <div class="modal-header">
-          <h3><i class="fas fa-box-open"></i> Registrar Nuevo Producto</h3>
-          <button class="close-btn" (click)="closeAddProductoModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div style="margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
-            <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-              <i class="fas fa-tags"></i> Detalles del Producto
-            </h4>
-          </div>
-          <div class="form-grid">
-            <div class="form-group full">
-              <label><i class="fas fa-shopping-basket"></i> Nombre del Producto *</label>
-              <input type="text" [(ngModel)]="newProducto.nombre" placeholder="Ej: Ivermectina 1%">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-list-ul"></i> Categoría *</label>
-              <select [(ngModel)]="newProducto.categoriaId">
-                <option [ngValue]="0">Seleccionar Categoría</option>
-                <option *ngFor="let cat of categorias" [ngValue]="cat.id">{{ cat.nombre }}</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-hospital"></i> Sede Veterinaria *</label>
-              <select [(ngModel)]="newProducto.veterinariaId">
-                <option [ngValue]="0">Seleccionar Sede</option>
-                <option *ngFor="let vet of veterinarias" [ngValue]="vet.id">{{ vet.nombre }}</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-barcode"></i> Código de Barras</label>
-              <input type="text" [(ngModel)]="newProducto.codigoBarras" placeholder="SKU-123">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-ruler-combined"></i> Unidad de Medida</label>
-              <select [(ngModel)]="newProducto.unidadMedida">
-                <option value="unidades">Unidades</option>
-                <option value="ml">Mililitros (ml)</option>
-                <option value="mg">Miligramos (mg)</option>
-                <option value="tabletas">Tabletas</option>
-                <option value="capsulas">Cápsulas</option>
-                <option value="kg">Kilogramos (kg)</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-cubes"></i> Stock Inicial *</label>
-              <input type="number" [(ngModel)]="newProducto.stockActual" min="0">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-exclamation-triangle"></i> Stock Mínimo *</label>
-              <input type="number" [(ngModel)]="newProducto.stockMinimo" min="0">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-dollar-sign"></i> Precio Compra *</label>
-              <input type="number" [(ngModel)]="newProducto.precioCompra" min="0">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-hand-holding-usd"></i> Precio Venta *</label>
-              <input type="number" [(ngModel)]="newProducto.precioVenta" min="0">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-layer-group"></i> Lote</label>
-              <input type="text" [(ngModel)]="newProducto.lote" placeholder="Cód. Lote">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-calendar-times"></i> Vencimiento</label>
-              <input type="date" [(ngModel)]="newProducto.fechaVencimiento" [min]="todayDate">
-            </div>
-            <div class="form-group full">
-              <label><i class="fas fa-image"></i> Imagen del Producto</label>
-              <div class="file-upload-container">
-                <input type="file" (change)="onProductoFileSelected($event)" accept="image/*" id="fileAddProd">
-                <label for="fileAddProd" class="file-label">
-                  <i class="fas fa-cloud-upload-alt"></i> Subir Imagen
-                </label>
-                <div *ngIf="productoImagePreview" class="preview-container">
-                  <img [src]="productoImagePreview" class="img-preview">
-                </div>
-              </div>
-            </div>
-            <div class="form-group full">
-              <label><i class="fas fa-align-left"></i> Descripción del Producto</label>
-              <textarea [(ngModel)]="newProducto.descripcion" rows="2" placeholder="Escribe aquí los beneficios o indicaciones..."></textarea>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-secondary" (click)="closeAddProductoModal()">
-            <i class="fas fa-times"></i> Cancelar
-          </button>
-          <button class="btn-primary" (click)="guardarProducto()">
-            <i class="fas fa-save"></i> Guardar Producto
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal de Editar Producto -->
-    <div class="modal-overlay" *ngIf="showEditProductoModal" (click)="closeEditProductoModal()">
-      <div class="modal-box" (click)="$event.stopPropagation()" style="max-width: 900px;">
-        <div class="modal-header">
-          <h3><i class="fas fa-edit"></i> Editar Producto</h3>
-          <button class="close-btn" (click)="closeEditProductoModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div style="margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
-            <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-              <i class="fas fa-tags"></i> Detalles del Producto
-            </h4>
-          </div>
-          <div class="form-grid">
-            <div class="form-group full">
-              <label><i class="fas fa-shopping-basket"></i> Nombre del Producto</label>
-              <input type="text" [(ngModel)]="editingProducto.nombre">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-list-ul"></i> Categoría</label>
-              <select [(ngModel)]="editingProducto.categoriaId">
-                <option *ngFor="let cat of categorias" [ngValue]="cat.id">{{ cat.nombre }}</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-hospital"></i> Sede Veterinaria</label>
-              <select [(ngModel)]="editingProducto.veterinariaId">
-                <option *ngFor="let vet of veterinarias" [ngValue]="vet.id">{{ vet.nombre }}</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-barcode"></i> Código de Barras</label>
-              <input type="text" [(ngModel)]="editingProducto.codigoBarras">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-ruler-combined"></i> Unidad de Medida</label>
-              <select [(ngModel)]="editingProducto.unidadMedida">
-                <option value="unidades">Unidades</option>
-                <option value="ml">Mililitros (ml)</option>
-                <option value="mg">Miligramos (mg)</option>
-                <option value="tabletas">Tabletas</option>
-                <option value="capsulas">Cápsulas</option>
-                <option value="kg">Kilogramos (kg)</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-cubes"></i> Stock Actual</label>
-              <input type="number" [(ngModel)]="editingProducto.stockActual" min="0">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-exclamation-triangle"></i> Stock Mínimo</label>
-              <input type="number" [(ngModel)]="editingProducto.stockMinimo" min="0">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-dollar-sign"></i> Precio Compra</label>
-              <input type="number" [(ngModel)]="editingProducto.precioCompra" min="0">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-hand-holding-usd"></i> Precio Venta</label>
-              <input type="number" [(ngModel)]="editingProducto.precioVenta" min="0">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-layer-group"></i> Lote</label>
-              <input type="text" [(ngModel)]="editingProducto.lote">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-calendar-times"></i> Vencimiento</label>
-              <input type="date" [(ngModel)]="editingProducto.fechaVencimiento" [min]="todayDate">
-            </div>
-            <div class="form-group full">
-              <label><i class="fas fa-image"></i> Imagen del Producto</label>
-              <div class="file-upload-container">
-                <input type="file" (change)="onProductoFileSelected($event)" accept="image/*" id="fileEditProd">
-                <label for="fileEditProd" class="file-label">
-                  <i class="fas fa-cloud-upload-alt"></i> Cambiar Imagen
-                </label>
-                <div *ngIf="productoImagePreview || editingProducto.imagen" class="preview-container">
-                  <img [src]="productoImagePreview || (baseUrl + editingProducto.imagen)" class="img-preview">
-                </div>
-              </div>
-            </div>
-            <div class="form-group full">
-              <label><i class="fas fa-align-left"></i> Descripción del Producto</label>
-              <textarea [(ngModel)]="editingProducto.descripcion" rows="2"></textarea>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-secondary" (click)="closeEditProductoModal()">
-            <i class="fas fa-times"></i> Cancelar
-          </button>
-          <button class="btn-primary" (click)="guardarEdicionProducto()">
-            <i class="fas fa-save"></i> Guardar Cambios
-          </button>
-        </div>
-      </div>
-    </div>
-  <div class="modal-overlay" *ngIf="showAddCategoriaModal" (click)="closeAddCategoriaModal()">
-    <div class="modal-box" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>Registrar Nueva Categoría</h3>
-        <button class="close-btn" (click)="closeAddCategoriaModal()">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-grid">
-          <div class="form-group full">
-            <label>Nombre de Categoría *</label>
-            <input type="text" [(ngModel)]="newCategoria.nombre" placeholder="Ej: Alimentos">
-          </div>
-
-          <div class="form-group">
-            <label>Código Interno *</label>
-            <input type="text" [(ngModel)]="newCategoria.codigo" placeholder="Ej: CAT-001">
-          </div>
-
-          <div class="form-group full">
-            <label>Descripción</label>
-            <textarea [(ngModel)]="newCategoria.descripcion" placeholder="Escribe una breve descripción..."
-              rows="3"></textarea>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" (click)="closeAddCategoriaModal()">Cancelar</button>
-        <button class="btn-primary" (click)="guardarCategoria()">Registrar Categoría</button>
-      </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeAddUserModal()">
+        <i class="fas fa-times"></i> Cancelar
+      </button>
+      <button class="btn-primary" (click)="guardarUsuario()">
+        <i class="fas fa-save"></i> Crear Usuario
+      </button>
     </div>
   </div>
-  <!-- Modal Editar Categoría -->
-  <div class="modal-overlay" *ngIf="showEditCategoriaModal" (click)="closeEditCategoriaModal()">
-    <div class="modal-box" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>Editar Categoría</h3>
-        <button class="close-btn" (click)="closeEditCategoriaModal()">&times;</button>
+</div>
+
+<!-- Modal de Editar Usuario -->
+<div class="modal-overlay" *ngIf="showEditUserModal" (click)="closeEditUserModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()" style="max-width: 800px;">
+    <div class="modal-header">
+      <h3><i class="fas fa-user-edit"></i> Editar Usuario</h3>
+      <button class="close-btn" (click)="closeEditUserModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
+        <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fas fa-id-card"></i> Datos del Cliente
+        </h4>
       </div>
-      <div class="modal-body">
-        <div class="form-grid">
-          <div class="form-group full">
-            <label>Nombre *</label>
-            <input type="text" [(ngModel)]="editingCategoria.nombre">
-          </div>
-
-          <div class="form-group">
-            <label>Código *</label>
-            <input type="text" [(ngModel)]="editingCategoria.codigo">
-          </div>
-
-          <div class="form-group full">
-            <label>Descripción</label>
-            <textarea [(ngModel)]="editingCategoria.descripcion" rows="3"></textarea>
-          </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label><i class="fas fa-user"></i> Nombre</label>
+          <input type="text" [(ngModel)]="editingUser.firstName">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-user"></i> Apellido</label>
+          <input type="text" [(ngModel)]="editingUser.lastName">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-calendar-alt"></i> Edad</label>
+          <input type="number" [(ngModel)]="editingUser.age">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-phone"></i> Teléfono</label>
+          <input type="text" [(ngModel)]="editingUser.phone">
+        </div>
+        <div class="form-group full">
+          <label><i class="fas fa-map-marker-alt"></i> Dirección</label>
+          <input type="text" [(ngModel)]="editingUser.address">
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" (click)="closeEditCategoriaModal()">Cancelar</button>
-        <button class="btn-primary" (click)="guardarEdicionCategoria()">Guardar Cambios</button>
-      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeEditUserModal()">
+        <i class="fas fa-times"></i> Cancelar
+      </button>
+      <button class="btn-primary" (click)="guardarEdicionUsuario()">
+        <i class="fas fa-save"></i> Guardar Cambios
+      </button>
     </div>
   </div>
+</div>
 
-  <!-- Modales de Veterinarios -->
-  <!-- Modal de Agregar Veterinario -->
-  <div class="modal-overlay" *ngIf="showAddVeterinarioModal" (click)="closeAddVeterinarioModal()">
-    <div class="modal-box" (click)="$event.stopPropagation()" style="max-width: 800px;">
-      <div class="modal-header">
-        <h3><i class="fas fa-user-md"></i> Registrar Nuevo Veterinario</h3>
-        <button class="close-btn" (click)="closeAddVeterinarioModal()">&times;</button>
+<!-- Modales de Veterinarias -->
+<!-- Modal de Agregar Veterinaria -->
+<div class="modal-overlay" *ngIf="showAddVeterinariaModal" (click)="closeAddVeterinariaModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()" style="max-width: 800px;">
+    <div class="modal-header">
+      <h3><i class="fas fa-hospital"></i> Registrar Sede Veterinaria</h3>
+      <button class="close-btn" (click)="closeAddVeterinariaModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
+        <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fas fa-info-circle"></i> Información de la Clínica
+        </h4>
       </div>
-      <div class="modal-body">
-        <div style="margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
-          <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-            <i class="fas fa-id-card"></i> Información del Veterinario
-          </h4>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label><i class="fas fa-building"></i> Nombre de la Sede *</label>
+          <input type="text" [(ngModel)]="newVeterinaria.nombre" placeholder="Ej: Clínica San Francisco">
         </div>
-        
-        <div class="form-grid">
-          <div class="form-group">
-            <label><i class="fas fa-user"></i> Nombres *</label>
-            <input type="text" [(ngModel)]="newVeterinario.firstName" placeholder="Ej: Juan Carlos">
-          </div>
-          <div class="form-group">
-            <label><i class="fas fa-user"></i> Apellidos *</label>
-            <input type="text" [(ngModel)]="newVeterinario.lastName" placeholder="Ej: Pérez García">
-          </div>
-          <div class="form-group">
-            <label><i class="fas fa-user-circle"></i> Nombre de Usuario *</label>
-            <input type="text" [(ngModel)]="newVeterinario.username" placeholder="Ej: dr_perez">
-          </div>
-          <div class="form-group">
-            <label><i class="fas fa-envelope"></i> Correo Electrónico *</label>
-            <input type="email" [(ngModel)]="newVeterinario.email" placeholder="correo@ejemplo.com">
-          </div>
-          <div class="form-group">
-            <label><i class="fas fa-lock"></i> Contraseña *</label>
-            <input type="password" [(ngModel)]="newVeterinario.password" placeholder="Mínimo 6 caracteres">
-          </div>
-          <div class="form-group">
-            <label><i class="fas fa-phone"></i> Teléfono</label>
-            <input type="text" [(ngModel)]="newVeterinario.phone" placeholder="+57 300...">
-          </div>
-          <div class="form-group">
-            <label><i class="fas fa-id-card"></i> Tipo Documento</label>
-            <select [(ngModel)]="newVeterinario.documentType">
-              <option value="">Seleccionar</option>
-              <option value="Cédula">Cédula</option>
-              <option value="Pasaporte">Pasaporte</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label><i class="fas fa-hashtag"></i> Número Documento *</label>
-            <input type="text" [(ngModel)]="newVeterinario.documentNumber" placeholder="12345678">
-          </div>
-          <div class="form-group">
-            <label><i class="fas fa-calendar-alt"></i> Edad</label>
-            <input type="number" [(ngModel)]="newVeterinario.age" min="18">
-          </div>
-          <div class="form-group">
-            <label><i class="fas fa-map-marker-alt"></i> Dirección</label>
-            <input type="text" [(ngModel)]="newVeterinario.address" placeholder="Calle 123 #45-67">
-          </div>
+        <div class="form-group">
+          <label><i class="fas fa-id-card-alt"></i> NIT / RUT *</label>
+          <input type="text" [(ngModel)]="newVeterinaria.rut" placeholder="Ej: 900.123.456-1">
         </div>
-
-        <div style="margin: 2rem 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
-          <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-            <i class="fas fa-graduation-cap"></i> Información Profesional
-          </h4>
+        <div class="form-group">
+          <label><i class="fas fa-phone-alt"></i> Teléfono *</label>
+          <input type="tel" [(ngModel)]="newVeterinaria.telefono" placeholder="Ej: +57 300...">
         </div>
-
-        <div class="form-grid">
-          <div class="form-group">
-            <label><i class="fas fa-stethoscope"></i> Especialidad *</label>
-            <input type="text" [(ngModel)]="newVeterinario.especialidad" placeholder="Ej: Cirugía, Dermatología...">
-          </div>
-          <div class="form-group">
-            <label><i class="fas fa-certificate"></i> Matrícula Profesional *</label>
-            <input type="text" [(ngModel)]="newVeterinario.matricula" placeholder="MV-12345">
-          </div>
-          <div class="form-group">
-            <label><i class="fas fa-clock"></i> Años de Experiencia</label>
-            <input type="number" [(ngModel)]="newVeterinario.aniosExperiencia" min="0">
-          </div>
-          <div class="form-group">
-            <label><i class="fas fa-university"></i> Universidad</label>
-            <input type="text" [(ngModel)]="newVeterinario.universidad" placeholder="Universidad Nacional">
-          </div>
-          <div class="form-group full">
-            <label><i class="fas fa-hospital"></i> Veterinaria Principal</label>
-            <select [(ngModel)]="newVeterinario.veterinariaPrincipalId">
-              <option [ngValue]="0">Seleccionar Veterinaria</option>
-              <option *ngFor="let vet of veterinarias" [ngValue]="vet.id">{{ vet.nombre }}</option>
-            </select>
-          </div>
+        <div class="form-group">
+          <label><i class="fas fa-envelope"></i> Correo Electrónico *</label>
+          <input type="email" [(ngModel)]="newVeterinaria.email" placeholder="contacto@veterinaria.com">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-map-marker-alt"></i> Dirección *</label>
+          <input type="text" [(ngModel)]="newVeterinaria.direccion" placeholder="Ej: Calle 45 #12-34">
+        </div>
+        <div class="form-group full">
+          <label><i class="fas fa-align-left"></i> Descripción</label>
+          <textarea [(ngModel)]="newVeterinaria.descripcion" rows="3"
+            placeholder="Escribe aquí los servicios o información de la sede..."></textarea>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" (click)="closeAddVeterinarioModal()">
-          <i class="fas fa-times"></i> Cancelar
-        </button>
-        <button class="btn-primary" (click)="guardarVeterinario()">
-          <i class="fas fa-save"></i> Registrar Veterinario
-        </button>
-      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeAddVeterinariaModal()">
+        <i class="fas fa-times"></i> Cancelar
+      </button>
+      <button class="btn-primary" (click)="guardarVeterinaria()">
+        <i class="fas fa-save"></i> Registrar Sede
+      </button>
     </div>
   </div>
-    <!-- Modal de Editar Veterinario -->
-    <div class="modal-overlay" *ngIf="showEditVeterinarioModal" (click)="closeEditVeterinarioModal()">
-      <div class="modal-box" (click)="$event.stopPropagation()" style="max-width: 800px;">
-        <div class="modal-header">
-          <h3><i class="fas fa-edit"></i> Editar Veterinario</h3>
-          <button class="close-btn" (click)="closeEditVeterinarioModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div style="margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
-            <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-              <i class="fas fa-id-card"></i> Información del Veterinario
-            </h4>
-          </div>
-          
-          <div class="form-grid">
-            <div class="form-group">
-              <label><i class="fas fa-user"></i> Nombres</label>
-              <input type="text" [(ngModel)]="editingUsuario.firstName">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-user"></i> Apellidos</label>
-              <input type="text" [(ngModel)]="editingUsuario.lastName">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-envelope"></i> Correo Electrónico</label>
-              <input type="email" [(ngModel)]="editingUsuario.email">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-phone"></i> Teléfono</label>
-              <input type="text" [(ngModel)]="editingUsuario.phone">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-calendar-alt"></i> Edad</label>
-              <input type="number" [(ngModel)]="editingUsuario.age" min="18">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-map-marker-alt"></i> Dirección</label>
-              <input type="text" [(ngModel)]="editingUsuario.address">
-            </div>
-          </div>
+</div>
 
-          <div style="margin: 2rem 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
-            <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-              <i class="fas fa-graduation-cap"></i> Información Profesional
-            </h4>
-          </div>
-
-          <div class="form-grid">
-            <div class="form-group">
-              <label><i class="fas fa-certificate"></i> Matrícula Profesional <small>(Lectura)</small></label>
-              <input type="text" [(ngModel)]="editingVeterinario.matricula" readonly style="background-color: #f5f5f5; cursor: not-allowed;">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-stethoscope"></i> Especialidad</label>
-              <input type="text" [(ngModel)]="editingVeterinario.especialidad">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-clock"></i> Años de Experiencia</label>
-              <input type="number" [(ngModel)]="editingVeterinario.aniosExperiencia">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-university"></i> Universidad <small>(Lectura)</small></label>
-              <input type="text" [(ngModel)]="editingVeterinario.universidad" readonly style="background-color: #f5f5f5; cursor: not-allowed;">
-            </div>
-            <div class="form-group">
-              <label><i class="fas fa-hospital"></i> Veterinaria Principal</label>
-              <select [(ngModel)]="editingVeterinario.veterinariaPrincipalId">
-                <option [ngValue]="0">Seleccionar Veterinaria</option>
-                <option *ngFor="let vet of veterinarias" [ngValue]="vet.id">{{ vet.nombre }}</option>
-              </select>
-            </div>
-          </div>
+<!-- Modal de Editar Veterinaria -->
+<div class="modal-overlay" *ngIf="showEditVeterinariaModal" (click)="closeEditVeterinariaModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()" style="max-width: 800px;">
+    <div class="modal-header">
+      <h3><i class="fas fa-edit"></i> Editar Sede Veterinaria</h3>
+      <button class="close-btn" (click)="closeEditVeterinariaModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
+        <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fas fa-info-circle"></i> Información de la Clínica
+        </h4>
+      </div>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label><i class="fas fa-building"></i> Nombre de la Sede</label>
+          <input type="text" [(ngModel)]="editingVeterinaria.nombre">
         </div>
-        <div class="modal-footer">
-          <button class="btn-secondary" (click)="closeEditVeterinarioModal()">
-            <i class="fas fa-times"></i> Cancelar
-          </button>
-          <button class="btn-primary" (click)="guardarEdicionVeterinario()">
-            <i class="fas fa-save"></i> Guardar Cambios
-          </button>
+        <div class="form-group">
+          <label><i class="fas fa-id-card-alt"></i> NIT / RUT</label>
+          <input type="text" [(ngModel)]="editingVeterinaria.rut">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-phone-alt"></i> Teléfono</label>
+          <input type="tel" [(ngModel)]="editingVeterinaria.telefono">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-envelope"></i> Correo Electrónico</label>
+          <input type="email" [(ngModel)]="editingVeterinaria.email">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-map-marker-alt"></i> Dirección</label>
+          <input type="text" [(ngModel)]="editingVeterinaria.direccion">
+        </div>
+        <div class="form-group full">
+          <label><i class="fas fa-align-left"></i> Descripción</label>
+          <textarea [(ngModel)]="editingVeterinaria.descripcion" rows="3"></textarea>
         </div>
       </div>
     </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeEditVeterinariaModal()">
+        <i class="fas fa-times"></i> Cancelar
+      </button>
+      <button class="btn-primary" (click)="guardarEdicionVeterinaria()">
+        <i class="fas fa-save"></i> Guardar Cambios
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modales de Productos -->
+<!-- Modal de Agregar Producto -->
+<div class="modal-overlay" *ngIf="showAddProductoModal" (click)="closeAddProductoModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()" style="max-width: 900px;">
+    <div class="modal-header">
+      <h3><i class="fas fa-box-open"></i> Registrar Nuevo Producto</h3>
+      <button class="close-btn" (click)="closeAddProductoModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
+        <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fas fa-tags"></i> Detalles del Producto
+        </h4>
+      </div>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label><i class="fas fa-shopping-basket"></i> Nombre del Producto *</label>
+          <input type="text" [(ngModel)]="newProducto.nombre" placeholder="Ej: Ivermectina 1%">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-list-ul"></i> Categoría *</label>
+          <select [(ngModel)]="newProducto.categoriaId">
+            <option [ngValue]="0">Seleccionar Categoría</option>
+            <option *ngFor="let cat of categorias" [ngValue]="cat.id">{{ cat.nombre }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-hospital"></i> Sede Veterinaria *</label>
+          <select [(ngModel)]="newProducto.veterinariaId">
+            <option [ngValue]="0">Seleccionar Sede</option>
+            <option *ngFor="let vet of veterinarias" [ngValue]="vet.id">{{ vet.nombre }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-barcode"></i> Código de Barras</label>
+          <input type="text" [(ngModel)]="newProducto.codigoBarras" placeholder="SKU-123">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-ruler-combined"></i> Unidad de Medida</label>
+          <select [(ngModel)]="newProducto.unidadMedida">
+            <option value="unidades">Unidades</option>
+            <option value="ml">Mililitros (ml)</option>
+            <option value="mg">Miligramos (mg)</option>
+            <option value="tabletas">Tabletas</option>
+            <option value="capsulas">Cápsulas</option>
+            <option value="kg">Kilogramos (kg)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-cubes"></i> Stock Inicial *</label>
+          <input type="number" [(ngModel)]="newProducto.stockActual" min="0">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-exclamation-triangle"></i> Stock Mínimo *</label>
+          <input type="number" [(ngModel)]="newProducto.stockMinimo" min="0">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-dollar-sign"></i> Precio Compra *</label>
+          <input type="number" [(ngModel)]="newProducto.precioCompra" min="0">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-hand-holding-usd"></i> Precio Venta *</label>
+          <input type="number" [(ngModel)]="newProducto.precioVenta" min="0">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-layer-group"></i> Lote</label>
+          <input type="text" [(ngModel)]="newProducto.lote" placeholder="Cód. Lote">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-calendar-times"></i> Vencimiento</label>
+          <input type="date" [(ngModel)]="newProducto.fechaVencimiento" [min]="todayDate">
+        </div>
+        <div class="form-group full">
+          <label><i class="fas fa-image"></i> Imagen del Producto</label>
+          <div class="file-upload-container">
+            <input type="file" (change)="onProductoFileSelected($event)" accept="image/*" id="fileAddProd">
+            <label for="fileAddProd" class="file-label">
+              <i class="fas fa-cloud-upload-alt"></i> Subir Imagen
+            </label>
+            <div *ngIf="productoImagePreview" class="preview-container">
+              <img [src]="productoImagePreview" class="img-preview">
+            </div>
+          </div>
+        </div>
+        <div class="form-group full">
+          <label><i class="fas fa-align-left"></i> Descripción del Producto</label>
+          <textarea [(ngModel)]="newProducto.descripcion" rows="2"
+            placeholder="Escribe aquí los beneficios o indicaciones..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeAddProductoModal()">
+        <i class="fas fa-times"></i> Cancelar
+      </button>
+      <button class="btn-primary" (click)="guardarProducto()">
+        <i class="fas fa-save"></i> Guardar Producto
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Editar Producto -->
+<div class="modal-overlay" *ngIf="showEditProductoModal" (click)="closeEditProductoModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()" style="max-width: 900px;">
+    <div class="modal-header">
+      <h3><i class="fas fa-edit"></i> Editar Producto</h3>
+      <button class="close-btn" (click)="closeEditProductoModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
+        <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fas fa-tags"></i> Detalles del Producto
+        </h4>
+      </div>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label><i class="fas fa-shopping-basket"></i> Nombre del Producto</label>
+          <input type="text" [(ngModel)]="editingProducto.nombre">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-list-ul"></i> Categoría</label>
+          <select [(ngModel)]="editingProducto.categoriaId">
+            <option *ngFor="let cat of categorias" [ngValue]="cat.id">{{ cat.nombre }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-hospital"></i> Sede Veterinaria</label>
+          <select [(ngModel)]="editingProducto.veterinariaId">
+            <option *ngFor="let vet of veterinarias" [ngValue]="vet.id">{{ vet.nombre }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-barcode"></i> Código de Barras</label>
+          <input type="text" [(ngModel)]="editingProducto.codigoBarras">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-ruler-combined"></i> Unidad de Medida</label>
+          <select [(ngModel)]="editingProducto.unidadMedida">
+            <option value="unidades">Unidades</option>
+            <option value="ml">Mililitros (ml)</option>
+            <option value="mg">Miligramos (mg)</option>
+            <option value="tabletas">Tabletas</option>
+            <option value="capsulas">Cápsulas</option>
+            <option value="kg">Kilogramos (kg)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-cubes"></i> Stock Actual</label>
+          <input type="number" [(ngModel)]="editingProducto.stockActual" min="0">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-exclamation-triangle"></i> Stock Mínimo</label>
+          <input type="number" [(ngModel)]="editingProducto.stockMinimo" min="0">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-dollar-sign"></i> Precio Compra</label>
+          <input type="number" [(ngModel)]="editingProducto.precioCompra" min="0">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-hand-holding-usd"></i> Precio Venta</label>
+          <input type="number" [(ngModel)]="editingProducto.precioVenta" min="0">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-layer-group"></i> Lote</label>
+          <input type="text" [(ngModel)]="editingProducto.lote">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-calendar-times"></i> Vencimiento</label>
+          <input type="date" [(ngModel)]="editingProducto.fechaVencimiento" [min]="todayDate">
+        </div>
+        <div class="form-group full">
+          <label><i class="fas fa-image"></i> Imagen del Producto</label>
+          <div class="file-upload-container">
+            <input type="file" (change)="onProductoFileSelected($event)" accept="image/*" id="fileEditProd">
+            <label for="fileEditProd" class="file-label">
+              <i class="fas fa-cloud-upload-alt"></i> Cambiar Imagen
+            </label>
+            <div *ngIf="productoImagePreview || editingProducto.imagen" class="preview-container">
+              <img [src]="productoImagePreview || (baseUrl + editingProducto.imagen)" class="img-preview">
+            </div>
+          </div>
+        </div>
+        <div class="form-group full">
+          <label><i class="fas fa-align-left"></i> Descripción del Producto</label>
+          <textarea [(ngModel)]="editingProducto.descripcion" rows="2"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeEditProductoModal()">
+        <i class="fas fa-times"></i> Cancelar
+      </button>
+      <button class="btn-primary" (click)="guardarEdicionProducto()">
+        <i class="fas fa-save"></i> Guardar Cambios
+      </button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" *ngIf="showAddCategoriaModal" (click)="closeAddCategoriaModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Registrar Nueva Categoría</h3>
+      <button class="close-btn" (click)="closeAddCategoriaModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Nombre de Categoría *</label>
+          <input type="text" [(ngModel)]="newCategoria.nombre" placeholder="Ej: Alimentos">
+        </div>
+
+        <div class="form-group">
+          <label>Código Interno *</label>
+          <input type="text" [(ngModel)]="newCategoria.codigo" placeholder="Ej: CAT-001">
+        </div>
+
+        <div class="form-group full">
+          <label>Descripción</label>
+          <textarea [(ngModel)]="newCategoria.descripcion" placeholder="Escribe una breve descripción..."
+            rows="3"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeAddCategoriaModal()">Cancelar</button>
+      <button class="btn-primary" (click)="guardarCategoria()">Registrar Categoría</button>
+    </div>
+  </div>
+</div>
+<!-- Modal Editar Categoría -->
+<div class="modal-overlay" *ngIf="showEditCategoriaModal" (click)="closeEditCategoriaModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Editar Categoría</h3>
+      <button class="close-btn" (click)="closeEditCategoriaModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Nombre *</label>
+          <input type="text" [(ngModel)]="editingCategoria.nombre">
+        </div>
+
+        <div class="form-group">
+          <label>Código *</label>
+          <input type="text" [(ngModel)]="editingCategoria.codigo">
+        </div>
+
+        <div class="form-group full">
+          <label>Descripción</label>
+          <textarea [(ngModel)]="editingCategoria.descripcion" rows="3"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeEditCategoriaModal()">Cancelar</button>
+      <button class="btn-primary" (click)="guardarEdicionCategoria()">Guardar Cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modales de Veterinarios -->
+<!-- Modal de Agregar Veterinario -->
+<div class="modal-overlay" *ngIf="showAddVeterinarioModal" (click)="closeAddVeterinarioModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()" style="max-width: 800px;">
+    <div class="modal-header">
+      <h3><i class="fas fa-user-md"></i> Registrar Nuevo Veterinario</h3>
+      <button class="close-btn" (click)="closeAddVeterinarioModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
+        <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fas fa-id-card"></i> Información del Veterinario
+        </h4>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label><i class="fas fa-user"></i> Nombres *</label>
+          <input type="text" [(ngModel)]="newVeterinario.firstName" placeholder="Ej: Juan Carlos">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-user"></i> Apellidos *</label>
+          <input type="text" [(ngModel)]="newVeterinario.lastName" placeholder="Ej: Pérez García">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-user-circle"></i> Nombre de Usuario *</label>
+          <input type="text" [(ngModel)]="newVeterinario.username" placeholder="Ej: dr_perez">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-envelope"></i> Correo Electrónico *</label>
+          <input type="email" [(ngModel)]="newVeterinario.email" placeholder="correo@ejemplo.com">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-lock"></i> Contraseña *</label>
+          <input type="password" [(ngModel)]="newVeterinario.password" placeholder="Mínimo 6 caracteres">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-phone"></i> Teléfono</label>
+          <input type="text" [(ngModel)]="newVeterinario.phone" placeholder="+57 300...">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-id-card"></i> Tipo Documento</label>
+          <select [(ngModel)]="newVeterinario.documentType">
+            <option value="">Seleccionar</option>
+            <option value="Cédula">Cédula</option>
+            <option value="Pasaporte">Pasaporte</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-hashtag"></i> Número Documento *</label>
+          <input type="text" [(ngModel)]="newVeterinario.documentNumber" placeholder="12345678">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-calendar-alt"></i> Edad</label>
+          <input type="number" [(ngModel)]="newVeterinario.age" min="18">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-map-marker-alt"></i> Dirección</label>
+          <input type="text" [(ngModel)]="newVeterinario.address" placeholder="Calle 123 #45-67">
+        </div>
+      </div>
+
+      <div style="margin: 2rem 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
+        <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fas fa-graduation-cap"></i> Información Profesional
+        </h4>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label><i class="fas fa-stethoscope"></i> Especialidad *</label>
+          <input type="text" [(ngModel)]="newVeterinario.especialidad" placeholder="Ej: Cirugía, Dermatología...">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-certificate"></i> Matrícula Profesional *</label>
+          <input type="text" [(ngModel)]="newVeterinario.matricula" placeholder="MV-12345">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-clock"></i> Años de Experiencia</label>
+          <input type="number" [(ngModel)]="newVeterinario.aniosExperiencia" min="0">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-university"></i> Universidad</label>
+          <input type="text" [(ngModel)]="newVeterinario.universidad" placeholder="Universidad Nacional">
+        </div>
+        <div class="form-group full">
+          <label><i class="fas fa-hospital"></i> Veterinaria Principal</label>
+          <select [(ngModel)]="newVeterinario.veterinariaPrincipalId">
+            <option [ngValue]="0">Seleccionar Veterinaria</option>
+            <option *ngFor="let vet of veterinarias" [ngValue]="vet.id">{{ vet.nombre }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeAddVeterinarioModal()">
+        <i class="fas fa-times"></i> Cancelar
+      </button>
+      <button class="btn-primary" (click)="guardarVeterinario()">
+        <i class="fas fa-save"></i> Registrar Veterinario
+      </button>
+    </div>
+  </div>
+</div>
+<!-- Modal de Editar Veterinario -->
+<div class="modal-overlay" *ngIf="showEditVeterinarioModal" (click)="closeEditVeterinarioModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()" style="max-width: 800px;">
+    <div class="modal-header">
+      <h3><i class="fas fa-edit"></i> Editar Veterinario</h3>
+      <button class="close-btn" (click)="closeEditVeterinarioModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
+        <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fas fa-id-card"></i> Información del Veterinario
+        </h4>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label><i class="fas fa-user"></i> Nombres</label>
+          <input type="text" [(ngModel)]="editingUsuario.firstName">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-user"></i> Apellidos</label>
+          <input type="text" [(ngModel)]="editingUsuario.lastName">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-envelope"></i> Correo Electrónico</label>
+          <input type="email" [(ngModel)]="editingUsuario.email">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-phone"></i> Teléfono</label>
+          <input type="text" [(ngModel)]="editingUsuario.phone">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-calendar-alt"></i> Edad</label>
+          <input type="number" [(ngModel)]="editingUsuario.age" min="18">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-map-marker-alt"></i> Dirección</label>
+          <input type="text" [(ngModel)]="editingUsuario.address">
+        </div>
+      </div>
+
+      <div style="margin: 2rem 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
+        <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fas fa-graduation-cap"></i> Información Profesional
+        </h4>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label><i class="fas fa-certificate"></i> Matrícula Profesional <small>(Lectura)</small></label>
+          <input type="text" [(ngModel)]="editingVeterinario.matricula" readonly
+            style="background-color: #f5f5f5; cursor: not-allowed;">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-stethoscope"></i> Especialidad</label>
+          <input type="text" [(ngModel)]="editingVeterinario.especialidad">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-clock"></i> Años de Experiencia</label>
+          <input type="number" [(ngModel)]="editingVeterinario.aniosExperiencia">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-university"></i> Universidad <small>(Lectura)</small></label>
+          <input type="text" [(ngModel)]="editingVeterinario.universidad" readonly
+            style="background-color: #f5f5f5; cursor: not-allowed;">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-hospital"></i> Veterinaria Principal</label>
+          <select [(ngModel)]="editingVeterinario.veterinariaPrincipalId">
+            <option [ngValue]="0">Seleccionar Veterinaria</option>
+            <option *ngFor="let vet of veterinarias" [ngValue]="vet.id">{{ vet.nombre }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeEditVeterinarioModal()">
+        <i class="fas fa-times"></i> Cancelar
+      </button>
+      <button class="btn-primary" (click)="guardarEdicionVeterinario()">
+        <i class="fas fa-save"></i> Guardar Cambios
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- Modal de Crear Ticket -->
 <div class="modal-overlay" *ngIf="showTicketModal" (click)="closeTicketModal()">
@@ -1647,7 +1733,8 @@
         </div>
         <div class="form-group full">
           <label>Descripción *</label>
-          <textarea [(ngModel)]="newTicket.descripcion" rows="5" placeholder="Describe detalladamente tu problema o consulta..."></textarea>
+          <textarea [(ngModel)]="newTicket.descripcion" rows="5"
+            placeholder="Describe detalladamente tu problema o consulta..."></textarea>
         </div>
       </div>
     </div>
@@ -1655,5 +1742,22 @@
       <button class="btn-secondary" (click)="closeTicketModal()">Cancelar</button>
       <button class="btn-primary" (click)="createTicket()">Enviar Ticket</button>
     </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container">
+  <div *ngFor="let toast of toasts" class="toast" [class]="toast.type" [class.closing]="toast.closing">
+    <div class="toast-content">
+      <i class="fas" [ngClass]="{
+          'fa-check-circle': toast.type === 'success',
+          'fa-exclamation-circle': toast.type === 'error',
+          'fa-exclamation-triangle': toast.type === 'warning',
+          'fa-info-circle': toast.type === 'info'
+        }"></i>
+      <span class="toast-msg">{{ toast.message }}</span>
+      <button class="toast-close" (click)="closeToast(toast)">&times;</button>
+    </div>
+    <div class="toast-progress"></div>
   </div>
 </div>
