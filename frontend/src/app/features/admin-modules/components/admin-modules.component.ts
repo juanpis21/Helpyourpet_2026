@@ -34,6 +34,10 @@ export class AdminModulesComponent implements OnInit {
   veterinarios: any[] = [];
   isLoading: boolean = false;
   
+  get todayDate(): string {
+    return new Date().toISOString().split('T')[0];
+  }
+  
   // Variables de Búsqueda
   searchTermUsuarios: string = '';
   searchTermVeterinarias: string = '';
@@ -307,6 +311,9 @@ export class AdminModulesComponent implements OnInit {
     if (section === 'tickets') {
       this.loadMyTickets();
     }
+    if (section === 'veterinarios') {
+      this.cargarVeterinarios();
+    }
   }
 
   loadMyTickets(): void {
@@ -399,11 +406,11 @@ export class AdminModulesComponent implements OnInit {
     if (!this.searchTermVeterinarios) return this.veterinarios;
     const term = this.searchTermVeterinarios.toLowerCase();
     return this.veterinarios.filter(v => 
-      (v.usuario?.firstName || '').toLowerCase().includes(term) ||
-      (v.usuario?.lastName || '').toLowerCase().includes(term) ||
-      (v.usuario?.email || '').toLowerCase().includes(term) ||
-      (v.matricula || '').toLowerCase().includes(term) ||
-      (v.especialidad || '').toLowerCase().includes(term)
+      (v.firstName || '').toLowerCase().includes(term) ||
+      (v.lastName || '').toLowerCase().includes(term) ||
+      (v.username || '').toLowerCase().includes(term) ||
+      (v.perfilVeterinario?.especialidad || '').toLowerCase().includes(term) ||
+      (v.perfilVeterinario?.matricula || '').toLowerCase().includes(term)
     );
   }
 
@@ -1103,10 +1110,10 @@ export class AdminModulesComponent implements OnInit {
 
   // ========== CRUD VETERINARIOS ==========
   cargarVeterinarios(): void {
-    // Llamada a la API para obtener perfiles veterinarios con autenticación
-    this.http.get(`${this.baseUrl}/perfiles-veterinarios`, { headers: this.getAuthHeaders() }).subscribe({
+    this.usersService.getUsersByRoles(['veterinario']).subscribe({
       next: (data: any) => {
-        this.veterinarios = data;
+        console.log('Veterinarios (Users) cargados:', data);
+        this.veterinarios = Array.isArray(data) ? data : [];
       },
       error: (err: any) => {
         console.error('Error al cargar veterinarios:', err);
@@ -1148,19 +1155,24 @@ export class AdminModulesComponent implements OnInit {
     if (!this.newVeterinario.username || !this.newVeterinario.email || !this.newVeterinario.password || 
         !this.newVeterinario.firstName || !this.newVeterinario.lastName || !this.newVeterinario.especialidad || 
         !this.newVeterinario.matricula) {
-      alert('Por favor, completa todos los campos obligatorios');
+      alert('⚠️ Por favor, completa todos los campos obligatorios (*)');
       return;
     }
 
-    // Asignar automáticamente el rol de veterinario (buscar rol con nombre 'veterinario')
+    if (this.newVeterinario.age && this.newVeterinario.age < 18) {
+      alert('⚠️ La edad mínima permitida para registrar un veterinario es 18 años');
+      return;
+    }
+
+    // Asignar automáticamente el rol de veterinario
     const rolVeterinario = this.roles.find(role => role.name.toLowerCase() === 'veterinario');
     if (!rolVeterinario) {
-      alert('Error: No se encontró el rol de veterinario en el sistema');
+      alert('❌ Error: No se encontró el rol de veterinario en el sistema');
       return;
     }
     this.newVeterinario.roleId = rolVeterinario.id;
 
-    // Primero crear el usuario usando el endpoint existente
+    // Datos del usuario
     const userData = {
       username: this.newVeterinario.username,
       email: this.newVeterinario.email,
@@ -1171,54 +1183,72 @@ export class AdminModulesComponent implements OnInit {
       documentType: this.newVeterinario.documentType,
       documentNumber: this.newVeterinario.documentNumber,
       address: this.newVeterinario.address,
+      age: this.newVeterinario.age,
       roleId: this.newVeterinario.roleId,
       isActive: true
     };
 
+    this.isLoading = true;
     this.usersService.createUser(userData).subscribe({
       next: (userResponse) => {
-        // Luego crear el perfil veterinario usando el endpoint existente
         const perfilData = {
           especialidad: this.newVeterinario.especialidad,
           matricula: this.newVeterinario.matricula,
           aniosExperiencia: this.newVeterinario.aniosExperiencia || 0,
-          universidad: this.newVeterinario.universidad,
-          telefonoProfesional: this.newVeterinario.telefonoProfesional,
-          emailProfesional: this.newVeterinario.emailProfesional,
-          biografia: this.newVeterinario.biografia,
-          usuarioId: userResponse.id,
+          universidad: this.newVeterinario.universidad || undefined,
+          telefonoProfesional: this.newVeterinario.telefonoProfesional || undefined,
+          emailProfesional: this.newVeterinario.emailProfesional || undefined,
+          biografia: this.newVeterinario.biografia || undefined,
           veterinariaPrincipalId: this.newVeterinario.veterinariaPrincipalId || null,
-          isActive: true
+          isActive: true,
+          usuarioId: userResponse.id
         };
 
         this.http.post(`${this.baseUrl}/perfiles-veterinarios`, perfilData, { headers: this.getAuthHeaders() }).subscribe({
           next: () => {
+            this.isLoading = false;
             this.closeAddVeterinarioModal();
+            this.searchTermVeterinarios = ''; 
+            this.currentPageVeterinarios = 1; // Resetear a la primera página
             this.cargarVeterinarios();
-            alert('✅ Veterinario registrado correctamente');
+            alert('✅ Veterinario registrado y perfil profesional creado correctamente');
           },
           error: (err: any) => {
+            this.isLoading = false;
             console.error('Error al crear perfil veterinario:', err);
-            alert('❌ Error al crear perfil veterinario: ' + (err.error?.message || err.message));
+            // Revertir creación de usuario si falla el perfil profesional
+            this.usersService.deleteUser(userResponse.id).subscribe({
+              next: () => alert('❌ Error en datos profesionales: ' + (err.error?.message || 'Error desconocido') + '. Se ha revertido la creación del usuario.'),
+              error: () => alert('❌ Error crítico: Falló la creación del perfil y no se pudo eliminar el usuario huérfano. Contacte a soporte.')
+            });
           }
         });
       },
       error: (err: any) => {
+        this.isLoading = false;
         console.error('Error al crear usuario:', err);
         alert('❌ Error al crear usuario: ' + (err.error?.message || err.message));
       }
     });
   }
 
-  openEditVeterinarioModal(veterinario: any): void {
-    this.editingVeterinario = { ...veterinario };
-    this.editingUsuario = { ...veterinario.usuario };
+  openEditVeterinarioModal(user: any): void {
+    this.editingUsuario = { ...user };
+    this.editingVeterinario = user.perfilVeterinario ? { ...user.perfilVeterinario } : {
+      especialidad: '',
+      matricula: '',
+      aniosExperiencia: 0,
+      universidad: '',
+      telefonoProfesional: '',
+      emailProfesional: '',
+      biografia: '',
+      veterinariaPrincipalId: 0,
+      isActive: true
+    };
     
     // Si la veterinaria viene como objeto, extraemos el ID para el select
-    if (veterinario.veterinariaPrincipal && !veterinario.veterinariaPrincipalId) {
-      this.editingVeterinario.veterinariaPrincipalId = veterinario.veterinariaPrincipal.id;
-    } else if (!veterinario.veterinariaPrincipal && !veterinario.veterinariaPrincipalId) {
-      this.editingVeterinario.veterinariaPrincipalId = 0;
+    if (this.editingVeterinario.veterinariaPrincipal && !this.editingVeterinario.veterinariaPrincipalId) {
+      this.editingVeterinario.veterinariaPrincipalId = this.editingVeterinario.veterinariaPrincipal.id;
     }
 
     this.showEditVeterinarioModal = true;
@@ -1231,40 +1261,52 @@ export class AdminModulesComponent implements OnInit {
   }
 
   guardarEdicionVeterinario(): void {
-    if (!this.editingVeterinario.id || !this.editingUsuario.id) return;
+    if (!this.editingUsuario.id) return;
 
-    // Solo permitir edición de nombre, apellido, teléfono y dirección según lo solicitado
+    if (this.editingUsuario.age && this.editingUsuario.age < 18) {
+      alert('⚠️ La edad mínima permitida es 18 años');
+      return;
+    }
+
+    // Solo permitir edición de campos básicos
     const userData = {
       firstName: this.editingUsuario.firstName,
       lastName: this.editingUsuario.lastName,
       phone: this.editingUsuario.phone,
-      address: this.editingUsuario.address
+      address: this.editingUsuario.address,
+      email: this.editingUsuario.email,
+      age: this.editingUsuario.age
     };
 
     this.usersService.updateUser(this.editingUsuario.id, userData).subscribe({
       next: () => {
-        // Actualizar perfil veterinario (se envían los datos actuales ya que no son editables en este modal)
+        // Actualizar o Crear perfil veterinario
         const perfilData = {
           especialidad: this.editingVeterinario.especialidad,
           matricula: this.editingVeterinario.matricula,
           aniosExperiencia: this.editingVeterinario.aniosExperiencia,
-          universidad: this.editingVeterinario.universidad,
-          telefonoProfesional: this.editingVeterinario.telefonoProfesional,
-          emailProfesional: this.editingVeterinario.emailProfesional,
-          biografia: this.editingVeterinario.biografia,
+          universidad: this.editingVeterinario.universidad || undefined,
+          telefonoProfesional: this.editingVeterinario.telefonoProfesional || undefined,
+          emailProfesional: this.editingVeterinario.emailProfesional || undefined,
+          biografia: this.editingVeterinario.biografia || undefined,
           veterinariaPrincipalId: this.editingVeterinario.veterinariaPrincipalId || null,
-          isActive: this.editingVeterinario.isActive
+          isActive: this.editingVeterinario.isActive,
+          usuarioId: this.editingUsuario.id
         };
 
-          this.http.patch(`${this.baseUrl}/perfiles-veterinarios/${this.editingVeterinario.id}`, perfilData, { headers: this.getAuthHeaders() }).subscribe({
+        const request = this.editingVeterinario.id 
+          ? this.http.patch(`${this.baseUrl}/perfiles-veterinarios/${this.editingVeterinario.id}`, perfilData, { headers: this.getAuthHeaders() })
+          : this.http.post(`${this.baseUrl}/perfiles-veterinarios`, perfilData, { headers: this.getAuthHeaders() });
+
+          request.subscribe({
             next: () => {
               this.closeEditVeterinarioModal();
               this.cargarVeterinarios();
-              alert('✅ Veterinario actualizado correctamente');
+              alert('✅ Datos del veterinario actualizados correctamente');
             },
             error: (err: any) => {
               console.error('Error al actualizar perfil veterinario:', err);
-              alert('❌ Error al actualizar perfil veterinario: ' + (err.error?.message || err.message));
+              alert('❌ Error al actualizar perfil profesional: ' + (err.error?.message || err.message));
             }
           });
         },
@@ -1275,11 +1317,11 @@ export class AdminModulesComponent implements OnInit {
       });
   }
 
-  toggleEstadoVeterinario(veterinario: any): void {
-    const nuevoEstado = !veterinario.isActive;
+  toggleEstadoVeterinario(user: any): void {
+    const nuevoEstado = !user.isActive;
     
-    // Actualizar estado del perfil veterinario usando endpoint existente
-    this.http.patch(`${this.baseUrl}/perfiles-veterinarios/${veterinario.id}`, { isActive: nuevoEstado }, { headers: this.getAuthHeaders() }).subscribe({
+    // Actualizar estado del usuario directamente
+    this.usersService.updateUser(user.id, { isActive: nuevoEstado }).subscribe({
       next: () => this.cargarVeterinarios(),
       error: (err: any) => alert('Error al cambiar estado: ' + (err.error?.message || err.message))
     });

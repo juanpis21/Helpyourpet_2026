@@ -208,8 +208,7 @@ export class UsersService {
 
   async findAll(): Promise<User[]> {
     return this.usersRepository.find({
-      relations: ['pets', 'role'],
-      select: ['id', 'username', 'email', 'fullName', 'firstName', 'lastName', 'phone', 'documentType', 'documentNumber', 'age', 'address', 'avatar', 'roleId', 'isActive', 'createdAt', 'updatedAt'],
+      relations: ['pets', 'role', 'perfilVeterinario', 'perfilVeterinario.veterinariaPrincipal'],
     });
   }
 
@@ -221,16 +220,14 @@ export class UsersService {
     const roleIds = roles.map(r => r.id);
     return this.usersRepository.find({
       where: { roleId: In(roleIds) },
-      relations: ['pets', 'role'],
-      select: ['id', 'username', 'email', 'fullName', 'firstName', 'lastName', 'phone', 'documentType', 'documentNumber', 'age', 'address', 'avatar', 'roleId', 'isActive', 'createdAt', 'updatedAt'],
+      relations: ['pets', 'role', 'perfilVeterinario', 'perfilVeterinario.veterinariaPrincipal'],
     });
   }
 
   async findOne(id: number): Promise<User> {
     const user = await this.usersRepository.findOne({
       where: { id },
-      relations: ['pets', 'role', 'role.modules'],
-      select: ['id', 'username', 'email', 'fullName', 'firstName', 'lastName', 'phone', 'documentType', 'documentNumber', 'age', 'address', 'avatar', 'roleId', 'isActive', 'createdAt', 'updatedAt'],
+      relations: ['pets', 'role', 'role.modules', 'perfilVeterinario', 'perfilVeterinario.veterinariaPrincipal'],
     });
 
     if (!user) {
