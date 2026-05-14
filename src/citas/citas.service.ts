@@ -100,6 +100,17 @@ export class CitasService {
     return cita;
   }
 
+  async findByVeterinario(veterinarioId: number): Promise<Cita[]> {
+    return this.citasRepository.find({
+      where: { 
+        veterinario: { id: veterinarioId },
+        isActive: true 
+      },
+      relations: ['usuario', 'mascota', 'veterinario'],
+      select: ['id', 'motivo', 'fechaHora', 'estado', 'isActive', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario']
+    });
+  }
+
   async findByUsuario(usuarioId: number): Promise<Cita[]> {
     return this.citasRepository.find({
       where: { usuario: { id: usuarioId } },

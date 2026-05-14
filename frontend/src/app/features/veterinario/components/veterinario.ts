@@ -707,7 +707,10 @@ export class Veterinario implements OnInit {
 
   // Lógica de Citas
   cargarCitas(): void {
-    this.http.get<any[]>(`${this.API_BASE}/citas`, this.getHeaders()).subscribe({
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) return;
+
+    this.http.get<any[]>(`${this.API_BASE}/citas/veterinario/${currentUser.id}`, this.getHeaders()).subscribe({
       next: (data) => {
         // Ordenar: Programadas arriba, Completadas/Canceladas abajo, luego por fecha ascendente
         this.citas = data.sort((a, b) => {

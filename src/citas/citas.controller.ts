@@ -50,6 +50,14 @@ export class CitasController {
     return this.citasService.findByUsuario(+usuarioId);
   }
 
+  @Get('veterinario/:veterinarioId')
+  @ApiOperation({ summary: 'Obtener citas por veterinario' })
+  @ApiParam({ name: 'veterinarioId', description: 'ID del veterinario' })
+  @ApiResponse({ status: 200, description: 'Lista de citas del veterinario', type: [Cita] })
+  findByVeterinario(@Param('veterinarioId') veterinarioId: string) {
+    return this.citasService.findByVeterinario(+veterinarioId);
+  }
+
   @Get('mascota/:mascotaId')
   @ApiOperation({ summary: 'Obtener citas por mascota' })
   @ApiParam({ name: 'mascotaId', description: 'ID de la mascota' })
