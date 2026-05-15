@@ -2,6 +2,8 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { PermissionsService } from '../permissions/permissions.service';
+import { AuditLogsService } from '../audit-logs/audit-logs.service';
+import { AuditAction } from '../audit-logs/entities/audit-log.entity';
 import * as bcrypt from 'bcrypt';
 import { User } from '../users/entities/user.entity';
 import { LoginDto } from './dto/login.dto';
@@ -17,6 +19,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private permissionsService: PermissionsService,
+    private auditLogsService: AuditLogsService,
   ) {}
 
   async validateUser(username: string, password: string): Promise<any> {
@@ -59,6 +62,18 @@ export class AuthService {
 
     // Cargar usuario con roles y módulos
     const userWithRoles = await this.usersService.findOne(user.id);
+
+    // Registrar login en auditoría
+    try {
+      await this.auditLogsService.log({
+        userId: user.id,
+        action: AuditAction.LOGIN,
+        entity: 'Auth',
+        entityId: user.id,
+        description: `${userWithRoles.username} (${userWithRoles.role?.name || 'usuario'}) inició sesión`,
+        newValue: { role: userWithRoles.role?.name }
+      });
+    } catch (e) { console.error('Error logging audit:', e); }
 
     return {
       access_token: this.jwtService.sign(payload),

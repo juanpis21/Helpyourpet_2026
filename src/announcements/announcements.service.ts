@@ -4,17 +4,33 @@ import { Repository } from 'typeorm';
 import { Announcement } from './entities/announcement.entity';
 import { CreateAnnouncementDto } from './dto/create-announcement.dto';
 import { UpdateAnnouncementDto } from './dto/update-announcement.dto';
+import { AuditLogsService } from '../audit-logs/audit-logs.service';
+import { AuditAction } from '../audit-logs/entities/audit-log.entity';
 
 @Injectable()
 export class AnnouncementsService {
   constructor(
     @InjectRepository(Announcement)
     private announcementsRepository: Repository<Announcement>,
+    private auditLogsService: AuditLogsService,
   ) {}
 
   async create(createAnnouncementDto: CreateAnnouncementDto): Promise<Announcement> {
     const announcement = this.announcementsRepository.create(createAnnouncementDto);
-    return await this.announcementsRepository.save(announcement);
+    const saved = await this.announcementsRepository.save(announcement);
+
+    try {
+      await this.auditLogsService.log({
+        userId: 1,
+        action: AuditAction.CREATE,
+        entity: 'Announcement',
+        entityId: saved.id,
+        description: `Anuncio "${saved.titulo}" fue creado`,
+        newValue: { titulo: saved.titulo }
+      });
+    } catch (e) { console.error('Error logging audit:', e); }
+
+    return saved;
   }
 
   async findAll(): Promise<Announcement[]> {
@@ -49,11 +65,35 @@ export class AnnouncementsService {
   async update(id: number, updateAnnouncementDto: UpdateAnnouncementDto): Promise<Announcement> {
     const announcement = await this.findOne(id);
     Object.assign(announcement, updateAnnouncementDto);
-    return await this.announcementsRepository.save(announcement);
+    const saved = await this.announcementsRepository.save(announcement);
+
+    try {
+      await this.auditLogsService.log({
+        userId: 1,
+        action: AuditAction.UPDATE,
+        entity: 'Announcement',
+        entityId: id,
+        description: `Anuncio "${saved.titulo}" fue actualizado`,
+        newValue: { titulo: saved.titulo, isActive: saved.isActive }
+      });
+    } catch (e) { console.error('Error logging audit:', e); }
+
+    return saved;
   }
 
   async remove(id: number): Promise<void> {
     const announcement = await this.findOne(id);
     await this.announcementsRepository.remove(announcement);
+
+    try {
+      await this.auditLogsService.log({
+        userId: 1,
+        action: AuditAction.DELETE,
+        entity: 'Announcement',
+        entityId: id,
+        description: `Anuncio "${announcement.titulo}" fue eliminado`,
+        oldValue: { titulo: announcement.titulo }
+      });
+    } catch (e) { console.error('Error logging audit:', e); }
   }
 }

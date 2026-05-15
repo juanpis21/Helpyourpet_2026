@@ -66,12 +66,13 @@
         </div>
       </div>
 
+      <!-- Stats Grid -->
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-icon"><i class="fas fa-users"></i></div>
           <div class="stat-info">
             <h3>Usuarios Totales</h3>
-            <p>{{ allUsers.length }}</p>
+            <p>{{ getUsuariosCount() }}</p>
           </div>
         </div>
         <div class="stat-card" style="--icon-bg: #e0f2fe;">
@@ -89,20 +90,91 @@
           </div>
         </div>
         <div class="stat-card" style="--icon-bg: #f0fdf4;">
+          <div class="stat-icon"><i class="fas fa-user-md"></i></div>
+          <div class="stat-info">
+            <h3>Veterinarios</h3>
+            <p>{{ getVeterinariosCount() }}</p>
+          </div>
+        </div>
+        <div class="stat-card" style="--icon-bg: #fefce8;">
           <div class="stat-icon"><i class="fas fa-user-shield"></i></div>
           <div class="stat-info">
-            <h3>Roles Definidos</h3>
-            <p>{{ roles.length }}</p>
+            <h3>Administradores</h3>
+            <p>{{ getAdminsCount() }}</p>
+          </div>
+        </div>
+        <div class="stat-card" style="--icon-bg: #fdf2f8;">
+          <div class="stat-icon"><i class="fas fa-ticket-alt"></i></div>
+          <div class="stat-info">
+            <h3>Tickets Abiertos</h3>
+            <p>{{ getTicketsAbiertos() }}</p>
           </div>
         </div>
       </div>
 
+      <!-- Gráficos -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <div class="card" style="background: var(--bg-card); padding: 1.5rem; border-radius: 12px; box-shadow: var(--shadow-sm);">
+          <h3 style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--text-primary);"><i class="fas fa-chart-pie" style="margin-right: 0.5rem; color: var(--primary-color);"></i>Distribución de Roles</h3>
+          <div style="position: relative; height: 300px; width: 100%;">
+            <canvas id="dashboardDistribucionChart"></canvas>
+          </div>
+        </div>
+        <div class="card" style="background: var(--bg-card); padding: 1.5rem; border-radius: 12px; box-shadow: var(--shadow-sm);">
+          <h3 style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--text-primary);"><i class="fas fa-chart-line" style="margin-right: 0.5rem; color: var(--primary-color);"></i>Crecimiento Mensual</h3>
+          <div style="position: relative; height: 300px; width: 100%;">
+            <canvas id="dashboardCrecimientoChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Historial de Acciones -->
       <div class="card">
         <div class="card-header">
-          <h5><i class="fas fa-info-circle"></i> Estado del Sistema</h5>
+          <h5><i class="fas fa-history"></i> Historial de Acciones (Admins y Veterinarios)</h5>
         </div>
         <div class="card-body">
-          <p>Bienvenido al Panel de Super Administrador. Tienes acceso a la gestión crítica de roles, permisos y la base de datos global de la plataforma.</p>
+          <div *ngIf="historialLoading" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+            <i class="fas fa-spinner fa-spin" style="font-size: 2rem;"></i>
+            <p style="margin-top: 0.5rem;">Cargando historial...</p>
+          </div>
+          <div *ngIf="!historialLoading && historialCitas.length === 0" class="empty-state">
+            <i class="fas fa-history"></i>
+            <p>No hay registros de actividad aún</p>
+          </div>
+          <div class="table-container" *ngIf="!historialLoading && historialCitas.length > 0">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Usuario</th>
+                  <th>Rol</th>
+                  <th>Entidad</th>
+                  <th>Acción</th>
+                  <th>Descripción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let h of historialCitas">
+                  <td>{{ h.createdAt | date:'short' }}</td>
+                  <td>
+                    <div class="user-info">
+                      <img [src]="getFullImageUrl(h.user?.avatar)" class="avatar-sm">
+                      <span>{{ h.user?.firstName }} {{ h.user?.lastName }}</span>
+                    </div>
+                  </td>
+                  <td><span class="badge">{{ h.user?.role?.name || 'N/A' }}</span></td>
+                  <td><span class="badge">{{ h.entity }}</span></td>
+                  <td>
+                    <span class="tipo-badge" [ngClass]="getTipoCambioClass(h.action)">
+                      {{ getTipoCambioLabel(h.action) }}
+                    </span>
+                  </td>
+                  <td>{{ h.description }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </section>

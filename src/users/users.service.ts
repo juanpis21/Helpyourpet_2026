@@ -8,6 +8,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Role } from '../roles/entities/role.entity';
 import { PerfilVeterinario } from '../perfiles-veterinarios/entities/perfil-veterinario.entity';
 import { PermissionsService } from '../permissions/permissions.service';
+import { AuditLogsService } from '../audit-logs/audit-logs.service';
+import { AuditAction } from '../audit-logs/entities/audit-log.entity';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -20,6 +22,7 @@ export class UsersService {
     @InjectRepository(PerfilVeterinario)
     private perfilesRepository: Repository<PerfilVeterinario>,
     private permissionsService: PermissionsService,
+    private auditLogsService: AuditLogsService,
   ) { }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -90,6 +93,18 @@ export class UsersService {
 
     // Crear permisos por defecto para el nuevo usuario
     await this.permissionsService.createDefaultPermissions(savedUser.id);
+
+    // Registrar en auditoría
+    try {
+      await this.auditLogsService.log({
+        userId: savedUser.id,
+        action: AuditAction.CREATE,
+        entity: 'User',
+        entityId: savedUser.id,
+        description: `Usuario ${savedUser.username} se registró en el sistema`,
+        newValue: { username: savedUser.username, email: savedUser.email, roleId: savedUser.roleId }
+      });
+    } catch (e) { console.error('Error logging audit:', e); }
 
     return savedUser;
   }
@@ -315,12 +330,39 @@ export class UsersService {
     }
 
     // Retornar el usuario actualizado
-    return this.findOne(id);
+    const updatedUser = await this.findOne(id);
+
+    // Registrar en auditoría
+    try {
+      await this.auditLogsService.log({
+        userId: id,
+        action: AuditAction.UPDATE,
+        entity: 'User',
+        entityId: id,
+        description: `Usuario ${updatedUser.username} actualizó su perfil`,
+        oldValue: { username: user.username, email: user.email, isActive: user.isActive },
+        newValue: { username: updatedUser.username, email: updatedUser.email, isActive: updatedUser.isActive }
+      });
+    } catch (e) { console.error('Error logging audit:', e); }
+
+    return updatedUser;
   }
 
   async deactivate(id: number): Promise<void> {
     const user = await this.findOne(id);
     user.isActive = false;
     await this.usersRepository.save(user);
+
+    try {
+      await this.auditLogsService.log({
+        userId: id,
+        action: AuditAction.STATUS_CHANGE,
+        entity: 'User',
+        entityId: id,
+        description: `Usuario ${user.username} fue desactivado`,
+        oldValue: { isActive: true },
+        newValue: { isActive: false }
+      });
+    } catch (e) { console.error('Error logging audit:', e); }
   }
 }

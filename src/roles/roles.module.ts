@@ -6,9 +6,10 @@ import { Role } from './entities/role.entity';
 import { RolesSeeder } from './roles.seeder';
 import { User } from '../users/entities/user.entity';
 import { Module as ModuleEntity } from '../modules/entities/module.entity';
+import { AuditLogsModule } from '../audit-logs/audit-logs.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Role, User, ModuleEntity])],
+  imports: [TypeOrmModule.forFeature([Role, User, ModuleEntity]), AuditLogsModule],
   controllers: [RolesController],
   providers: [RolesService, RolesSeeder],
   exports: [RolesService],

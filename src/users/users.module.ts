@@ -7,9 +7,10 @@ import { User } from './entities/user.entity';
 import { Role } from '../roles/entities/role.entity';
 import { PerfilVeterinario } from '../perfiles-veterinarios/entities/perfil-veterinario.entity';
 import { PermissionsModule } from '../permissions/permissions.module';
+import { AuditLogsModule } from '../audit-logs/audit-logs.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Role, PerfilVeterinario]), PermissionsModule],
+  imports: [TypeOrmModule.forFeature([User, Role, PerfilVeterinario]), PermissionsModule, AuditLogsModule],
   controllers: [UsersController, VeterinarioController],
   providers: [UsersService],
   exports: [UsersService],

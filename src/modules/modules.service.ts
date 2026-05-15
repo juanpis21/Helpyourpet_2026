@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Module } from './entities/module.entity';
 import { Role } from '../roles/entities/role.entity';
+import { AuditLogsService } from '../audit-logs/audit-logs.service';
+import { AuditAction } from '../audit-logs/entities/audit-log.entity';
 
 @Injectable()
 export class ModulesService implements OnModuleInit {
@@ -11,6 +13,7 @@ export class ModulesService implements OnModuleInit {
     private moduleRepository: Repository<Module>,
     @InjectRepository(Role)
     private roleRepository: Repository<Role>,
+    private auditLogsService: AuditLogsService,
   ) {}
 
   async onModuleInit() {
@@ -131,6 +134,19 @@ export class ModulesService implements OnModuleInit {
     });
 
     role.modules = modules;
-    return this.roleRepository.save(role);
+    const saved = await this.roleRepository.save(role);
+
+    try {
+      await this.auditLogsService.log({
+        userId: 1,
+        action: AuditAction.UPDATE,
+        entity: 'RoleModules',
+        entityId: roleId,
+        description: `Permisos actualizados para el rol "${role.name}": ${moduleNames.join(', ')}`,
+        newValue: { modules: moduleNames }
+      });
+    } catch (e) { console.error('Error logging audit:', e); }
+
+    return saved;
   }
 }

@@ -5,6 +5,8 @@ import { Pet } from './entities/pet.entity';
 import { CreatePetDto } from './dto/create-pet.dto';
 import { UpdatePetDto } from './dto/update-pet.dto';
 import { UsersService } from '../users/users.service';
+import { AuditLogsService } from '../audit-logs/audit-logs.service';
+import { AuditAction } from '../audit-logs/entities/audit-log.entity';
 
 @Injectable()
 export class PetsService {
@@ -12,6 +14,7 @@ export class PetsService {
     @InjectRepository(Pet)
     private petsRepository: Repository<Pet>,
     private usersService: UsersService,
+    private auditLogsService: AuditLogsService,
   ) {}
 
   async create(createPetDto: CreatePetDto): Promise<Pet> {
@@ -23,10 +26,23 @@ export class PetsService {
     
     const pet = this.petsRepository.create(createPetDto);
     const savedPet = await this.petsRepository.save(pet);
-    return this.petsRepository.findOne({
+    const fullPet = await this.petsRepository.findOne({
       where: { id: savedPet.id },
       select: ['id', 'name', 'species', 'breed', 'age', 'gender', 'color', 'weight', 'description', 'foto', 'ownerId', 'isActive', 'createdAt', 'updatedAt']
     });
+
+    try {
+      await this.auditLogsService.log({
+        userId: createPetDto.ownerId,
+        action: AuditAction.CREATE,
+        entity: 'Pet',
+        entityId: savedPet.id,
+        description: `Mascota "${savedPet.name}" (${savedPet.species}) fue registrada`,
+        newValue: { name: savedPet.name, species: savedPet.species, breed: savedPet.breed }
+      });
+    } catch (e) { console.error('Error logging audit:', e); }
+
+    return fullPet;
   }
 
   async findAll(): Promise<Pet[]> {
@@ -137,11 +153,34 @@ export class PetsService {
       select: ['id', 'name', 'species', 'breed', 'age', 'gender', 'color', 'weight', 'description', 'foto', 'ownerId', 'isActive', 'createdAt', 'updatedAt', 'owner']
     });
 
+    try {
+      await this.auditLogsService.log({
+        userId: updatedPet.ownerId,
+        action: AuditAction.UPDATE,
+        entity: 'Pet',
+        entityId: id,
+        description: `Mascota "${updatedPet.name}" fue actualizada`,
+        oldValue: { name: pet.name, species: pet.species },
+        newValue: { name: updatedPet.name, species: updatedPet.species }
+      });
+    } catch (e) { console.error('Error logging audit:', e); }
+
     return updatedPet;
   }
 
   async remove(id: number): Promise<void> {
     const pet = await this.findOne(id);
     await this.petsRepository.remove(pet);
+
+    try {
+      await this.auditLogsService.log({
+        userId: pet.ownerId,
+        action: AuditAction.DELETE,
+        entity: 'Pet',
+        entityId: id,
+        description: `Mascota "${pet.name}" fue eliminada`,
+        oldValue: { name: pet.name, species: pet.species }
+      });
+    } catch (e) { console.error('Error logging audit:', e); }
   }
 }

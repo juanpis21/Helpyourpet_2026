@@ -4,12 +4,15 @@ import { Repository } from 'typeorm';
 import { Role } from './entities/role.entity';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import { AuditLogsService } from '../audit-logs/audit-logs.service';
+import { AuditAction } from '../audit-logs/entities/audit-log.entity';
 
 @Injectable()
 export class RolesService {
   constructor(
     @InjectRepository(Role)
     private rolesRepository: Repository<Role>,
+    private auditLogsService: AuditLogsService,
   ) { }
 
   async create(createRoleDto: CreateRoleDto): Promise<Role> {
@@ -22,7 +25,20 @@ export class RolesService {
     }
 
     const role = this.rolesRepository.create(createRoleDto);
-    return this.rolesRepository.save(role);
+    const saved = await this.rolesRepository.save(role);
+
+    try {
+      await this.auditLogsService.log({
+        userId: 1,
+        action: AuditAction.CREATE,
+        entity: 'Role',
+        entityId: saved.id,
+        description: `Rol "${saved.name}" fue creado`,
+        newValue: { name: saved.name, description: saved.description }
+      });
+    } catch (e) { console.error('Error logging audit:', e); }
+
+    return saved;
   }
 
   async findAll(): Promise<Role[]> {
@@ -81,6 +97,17 @@ export class RolesService {
       select: ['id', 'name', 'description', 'createdAt', 'updatedAt', 'users']
     });
 
+    try {
+      await this.auditLogsService.log({
+        userId: 1,
+        action: AuditAction.UPDATE,
+        entity: 'Role',
+        entityId: id,
+        description: `Rol "${updatedRole.name}" fue actualizado`,
+        newValue: { name: updatedRole.name, description: updatedRole.description }
+      });
+    } catch (e) { console.error('Error logging audit:', e); }
+
     return updatedRole;
   }
 
@@ -95,5 +122,16 @@ export class RolesService {
   async remove(id: number): Promise<void> {
     const role = await this.findOne(id);
     await this.rolesRepository.remove(role);
+
+    try {
+      await this.auditLogsService.log({
+        userId: 1,
+        action: AuditAction.DELETE,
+        entity: 'Role',
+        entityId: id,
+        description: `Rol "${role.name}" fue eliminado`,
+        oldValue: { name: role.name, description: role.description }
+      });
+    } catch (e) { console.error('Error logging audit:', e); }
   }
 }

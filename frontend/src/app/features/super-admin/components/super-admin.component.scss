@@ -820,6 +820,36 @@
   margin-top: 0.5rem;
 }
 
+/* ===== TIPO BADGES (Historial) ===== */
+.tipo-badge {
+  padding: 0.3rem 0.7rem;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.tipo-creacion {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.tipo-actualizacion {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.tipo-cancelacion {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.tipo-completacion {
+  background: #fef3c7;
+  color: #d97706;
+}
+
 .top-bar-btn {
   background: white;
   border: 1px solid var(--border-color);

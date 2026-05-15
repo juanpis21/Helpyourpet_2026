@@ -1,7 +1,8 @@
-import { Component, OnInit, ViewEncapsulation, inject, ChangeDetectorRef, ChangeDetectionStrategy, NgZone } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewEncapsulation, inject, ChangeDetectorRef, ChangeDetectionStrategy, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { RolesService, Role } from '../../../core/services/roles.service';
 import { ModulesService, Module } from '../../../core/services/modules.service';
 import { UsersService } from '../../../core/services/users.service';
@@ -12,7 +13,10 @@ import { AuthService } from '../../../core/services/auth.service';
 import { TicketsService, Ticket, CreateTicketDto, UpdateTicketDto } from '../../../core/services/tickets.service';
 import { AnnouncementsService, Announcement, CreateAnnouncementDto, UpdateAnnouncementDto } from '../../../core/services/announcements.service';
 import { PreloaderComponent } from '../../../shared/components/preloader/preloader';
+import { Chart, registerables } from 'chart.js';
 import { Subscription } from 'rxjs';
+
+Chart.register(...registerables);
 
 @Component({
   selector: 'app-super-admin',
@@ -22,7 +26,7 @@ import { Subscription } from 'rxjs';
   styleUrl: './super-admin.component.scss',
   changeDetection: ChangeDetectionStrategy.Default
 })
-export class SuperAdminComponent implements OnInit {
+export class SuperAdminComponent implements OnInit, AfterViewInit {
   // UI State
   activeTab: string = 'dashboard';
   sidebarOpen: boolean = true;
@@ -33,10 +37,20 @@ export class SuperAdminComponent implements OnInit {
   roles: Role[] = [];
   modules: Module[] = [];
   allUsers: any[] = [];
+  allUsersTotal: any[] = [];
+  allVeterinarios: any[] = [];
   allPets: Pet[] = [];
   allVets: Veterinaria[] = [];
   allTickets: Ticket[] = [];
   allAnnouncements: Announcement[] = [];
+  historialCitas: any[] = [];
+  historialLoading: boolean = false;
+
+  // Charts
+  dashboardChart1: any;
+  dashboardChart2: any;
+
+  readonly API_BASE = 'http://localhost:3000';
 
   // Role Selection for Modules
   selectedRoleForModules: Role | null = null;
@@ -102,7 +116,8 @@ export class SuperAdminComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     private ngZone: NgZone,
     private ticketsService: TicketsService,
-    private announcementsService: AnnouncementsService
+    private announcementsService: AnnouncementsService,
+    private http: HttpClient
   ) { }
 
   ngOnInit(): void {
@@ -111,26 +126,209 @@ export class SuperAdminComponent implements OnInit {
     this.loadGlobalData();
     this.loadTickets();
     this.loadAnnouncements();
+    this.loadHistorial();
 
     this.themeSub = this.themeService.darkMode$.subscribe(isDark => {
       this.modoOscuro = isDark;
     });
   }
 
+  ngAfterViewInit(): void {
+    setTimeout(() => this.initDashboardCharts(), 1500);
+  }
+
   loadGlobalData(): void {
     this.usersService.getAllUsers().subscribe({
-      next: (users) => this.allUsers = users.filter(user => user.role?.name === 'admin' || user.roleId === 2),
+      next: (users) => {
+        this.allUsersTotal = users;
+        this.allUsers = users.filter(user => user.role?.name === 'admin' || user.roleId === 2);
+        this.allVeterinarios = users.filter(user => user.role?.name === 'veterinario' || user.roleId === 3);
+        if (this.activeTab === 'dashboard') {
+          setTimeout(() => this.initDashboardCharts(), 300);
+        }
+      },
       error: (err) => console.error('Error loading all users:', err)
     });
 
     this.petsService.getAll().subscribe({
-      next: (pets) => this.allPets = pets,
+      next: (pets) => {
+        this.allPets = pets;
+        if (this.activeTab === 'dashboard') {
+          setTimeout(() => this.initDashboardCharts(), 300);
+        }
+      },
       error: (err) => console.error('Error loading all pets:', err)
     });
 
     this.veterinariasService.getAll().subscribe({
       next: (vets) => this.allVets = vets,
       error: (err) => console.error('Error loading all vets:', err)
+    });
+  }
+
+  loadHistorial(): void {
+    this.historialLoading = true;
+    const token = localStorage.getItem('access_token');
+    const headers = { Authorization: `Bearer ${token}` };
+    this.http.get<any[]>(`${this.API_BASE}/audit-logs?limit=50`, { headers }).subscribe({
+      next: (data) => {
+        this.historialCitas = data.slice(0, 50);
+        this.historialLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error loading historial:', err);
+        this.historialCitas = [];
+        this.historialLoading = false;
+      }
+    });
+  }
+
+  getUsuariosCount(): number {
+    return this.allUsersTotal.filter(u => u.role?.name === 'usuario' || u.roleId === 4).length;
+  }
+
+  getAdminsCount(): number {
+    return this.allUsers.length;
+  }
+
+  getVeterinariosCount(): number {
+    return this.allVeterinarios.length;
+  }
+
+  getTicketsAbiertos(): number {
+    return this.allTickets.filter(t => t.estado === 'Abierto').length;
+  }
+
+  getTipoCambioLabel(tipo: string): string {
+    const map: { [key: string]: string } = {
+      'CREATE': 'Creación',
+      'UPDATE': 'Actualización',
+      'DELETE': 'Eliminación',
+      'LOGIN': 'Inicio Sesión',
+      'LOGOUT': 'Cierre Sesión',
+      'STATUS_CHANGE': 'Cambio Estado'
+    };
+    return map[tipo] || tipo;
+  }
+
+  getTipoCambioClass(tipo: string): string {
+    const map: { [key: string]: string } = {
+      'CREATE': 'tipo-creacion',
+      'UPDATE': 'tipo-actualizacion',
+      'DELETE': 'tipo-cancelacion',
+      'LOGIN': 'tipo-completacion',
+      'LOGOUT': 'tipo-actualizacion',
+      'STATUS_CHANGE': 'tipo-completacion'
+    };
+    return map[tipo] || '';
+  }
+
+  initDashboardCharts(): void {
+    if (this.activeTab !== 'dashboard') return;
+    setTimeout(() => {
+      this.renderDistribucionChart();
+      this.renderCrecimientoChart();
+    }, 200);
+  }
+
+  renderDistribucionChart(): void {
+    const canvas = document.getElementById('dashboardDistribucionChart') as HTMLCanvasElement;
+    if (!canvas) return;
+    if (this.dashboardChart1) this.dashboardChart1.destroy();
+
+    this.dashboardChart1 = new Chart(canvas, {
+      type: 'doughnut',
+      data: {
+        labels: ['Usuarios', 'Administradores', 'Veterinarios'],
+        datasets: [{
+          data: [this.getUsuariosCount(), this.getAdminsCount(), this.getVeterinariosCount()],
+          backgroundColor: ['#66B566', '#1d3976', '#9BC3E8'],
+          borderWidth: 0,
+          hoverOffset: 10
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom' } },
+        cutout: '65%'
+      }
+    });
+  }
+
+  renderCrecimientoChart(): void {
+    const canvas = document.getElementById('dashboardCrecimientoChart') as HTMLCanvasElement;
+    if (!canvas) return;
+    if (this.dashboardChart2) this.dashboardChart2.destroy();
+
+    const monthCounts: { [key: string]: { users: number, pets: number, vets: number } } = {};
+
+    this.allUsersTotal.forEach(u => {
+      const date = u.createdAt ? new Date(u.createdAt) : new Date();
+      const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      if (!monthCounts[month]) monthCounts[month] = { users: 0, pets: 0, vets: 0 };
+      monthCounts[month].users++;
+    });
+
+    this.allPets.forEach(p => {
+      const date = (p as any).createdAt ? new Date((p as any).createdAt) : new Date();
+      const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      if (!monthCounts[month]) monthCounts[month] = { users: 0, pets: 0, vets: 0 };
+      monthCounts[month].pets++;
+    });
+
+    this.allVets.forEach(v => {
+      const date = (v as any).createdAt ? new Date((v as any).createdAt) : new Date();
+      const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      if (!monthCounts[month]) monthCounts[month] = { users: 0, pets: 0, vets: 0 };
+      monthCounts[month].vets++;
+    });
+
+    const sortedMonths = Object.keys(monthCounts).sort();
+    const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const labels = sortedMonths.map(m => {
+      const [year, month] = m.split('-');
+      return `${monthNames[parseInt(month, 10) - 1]} ${year}`;
+    });
+
+    this.dashboardChart2 = new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Usuarios',
+            data: sortedMonths.map(m => monthCounts[m].users),
+            borderColor: '#66B566',
+            backgroundColor: 'rgba(102, 181, 102, 0.1)',
+            tension: 0.4,
+            fill: true
+          },
+          {
+            label: 'Mascotas',
+            data: sortedMonths.map(m => monthCounts[m].pets),
+            borderColor: '#1d3976',
+            backgroundColor: 'rgba(29, 57, 118, 0.1)',
+            tension: 0.4,
+            fill: true
+          },
+          {
+            label: 'Veterinarias',
+            data: sortedMonths.map(m => monthCounts[m].vets),
+            borderColor: '#9BC3E8',
+            backgroundColor: 'rgba(155, 195, 232, 0.1)',
+            tension: 0.4,
+            fill: true
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'top' } },
+        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+      }
     });
   }
 
@@ -147,6 +345,10 @@ export class SuperAdminComponent implements OnInit {
     this.activeTab = section;
     if (section === 'users' || section === 'dashboard') {
       this.loadGlobalData();
+    }
+    if (section === 'dashboard') {
+      this.loadHistorial();
+      setTimeout(() => this.initDashboardCharts(), 500);
     }
     if (section === 'tickets') {
       this.loadTickets();

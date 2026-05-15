@@ -4,9 +4,10 @@ import { ModulesService } from './modules.service';
 import { ModulesController } from './modules.controller';
 import { Module } from './entities/module.entity';
 import { Role } from '../roles/entities/role.entity';
+import { AuditLogsModule } from '../audit-logs/audit-logs.module';
 
 @NestModule({
-  imports: [TypeOrmModule.forFeature([Module, Role])],
+  imports: [TypeOrmModule.forFeature([Module, Role]), AuditLogsModule],
   controllers: [ModulesController],
   providers: [ModulesService],
   exports: [ModulesService],

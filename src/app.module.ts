@@ -63,6 +63,8 @@ import { TicketsModule } from './tickets/tickets.module';
 import { Ticket } from './tickets/entities/ticket.entity';
 import { AnnouncementsModule } from './announcements/announcements.module';
 import { Announcement } from './announcements/entities/announcement.entity';
+import { AuditLogsModule } from './audit-logs/audit-logs.module';
+import { AuditLog } from './audit-logs/entities/audit-log.entity';
 
 @Module({
   imports: [
@@ -80,7 +82,7 @@ import { Announcement } from './announcements/entities/announcement.entity';
         username: configService.get<string>('database.username'),
         password: configService.get<string>('database.password'),
         database: configService.get<string>('database.database'),
-        entities: [User, Role, Pet, Veterinaria, Cita, PerfilVeterinario, Emergencia, HistorialCita, Producto, Categoria, MovimientoInventario, Proveedor, Servicio, Calificacion, Carrito, CarritoProducto, Venta, DetalleVenta, Notificacion, Evento, HistoriaClinica, ConsultaMedica, ReporteMaltrato, TokenRecuperacion, Publicacion, Permission, ModuleEntity, Ticket, Announcement],
+        entities: [User, Role, Pet, Veterinaria, Cita, PerfilVeterinario, Emergencia, HistorialCita, Producto, Categoria, MovimientoInventario, Proveedor, Servicio, Calificacion, Carrito, CarritoProducto, Venta, DetalleVenta, Notificacion, Evento, HistoriaClinica, ConsultaMedica, ReporteMaltrato, TokenRecuperacion, Publicacion, Permission, ModuleEntity, Ticket, Announcement, AuditLog],
         synchronize: configService.get<boolean>('database.synchronize'),
         logging: configService.get<boolean>('database.logging'),
       }),
@@ -132,6 +134,7 @@ import { Announcement } from './announcements/entities/announcement.entity';
     MonitoringModule,
     TicketsModule,
     AnnouncementsModule,
+    AuditLogsModule,
   ],
   providers: [
     {
