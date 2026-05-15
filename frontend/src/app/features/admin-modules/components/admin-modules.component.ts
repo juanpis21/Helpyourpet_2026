@@ -40,12 +40,23 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
     return new Date().toISOString().split('T')[0];
   }
 
-  // Variables de Búsqueda
+  // Variables de Búsqueda y Filtros
   searchTermUsuarios: string = '';
+  filterEstadoUsuarios: string = 'todos';
+
   searchTermVeterinarias: string = '';
+
   searchTermProductos: string = '';
+  filterEstadoProductos: string = 'todos';
+  filterVeterinariaProductos: string | number = 'todas';
+
   searchTermVeterinarios: string = '';
+  filterEstadoVeterinarios: string = 'todos';
+  filterVeterinariaVeterinarios: string | number = 'todas';
+
   searchTermServicios: string = '';
+  filterVeterinariaServicios: string | number = 'todas';
+
   toasts: any[] = [];
 
   // Gráficas
@@ -108,6 +119,8 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
   // Ticket modal
   showTicketModal: boolean = false;
   misTickets: any[] = [];
+  allTickets: any[] = []; // NEW
+
   newTicket: CreateTicketDto = {
     asunto: '',
     descripcion: '',
@@ -323,6 +336,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
     this.themeService.darkMode$.subscribe(dark => this.darkMode = dark);
     this.loadAdminProfile();
     this.loadMyTickets();
+    this.loadAllTickets();
   }
 
   ngAfterViewInit(): void {
@@ -341,13 +355,16 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
     const productCtx = document.getElementById('productChart') as HTMLCanvasElement;
 
     if (userCtx) {
+      const activeUsers = this.usuarios.filter(u => u.isActive !== false).length + this.veterinarios.filter(v => v.isActive !== false).length;
+      const inactiveUsers = this.usuarios.filter(u => u.isActive === false).length + this.veterinarios.filter(v => v.isActive === false).length;
+      
       this.userChart = new Chart(userCtx, {
         type: 'doughnut',
         data: {
-          labels: ['Clientes', 'Veterinarios'],
+          labels: ['Activos', 'Inactivos'],
           datasets: [{
-            data: [this.usuarios.length, this.veterinarios.length],
-            backgroundColor: ['#4f46e5', '#10b981'],
+            data: [activeUsers, inactiveUsers],
+            backgroundColor: ['#10b981', '#ef4444'],
             borderWidth: 0,
             hoverOffset: 10
           }]
@@ -364,10 +381,13 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
     }
 
     if (productCtx) {
-      // Tomar los últimos 6 productos para la gráfica
-      const lastProducts = this.productos.slice(0, 6);
-      const labels = lastProducts.length > 0 ? lastProducts.map(p => p.nombre) : ['Sin datos'];
-      const stockData = lastProducts.length > 0 ? lastProducts.map(p => p.stockActual) : [0];
+      // Tomar los 6 productos con MENOR stock para la gráfica
+      const lowestStockProducts = [...this.productos]
+        .sort((a, b) => (a.stockActual) - (b.stockActual))
+        .slice(0, 6);
+        
+      const labels = lowestStockProducts.length > 0 ? lowestStockProducts.map(p => p.nombre) : ['Sin datos'];
+      const stockData = lowestStockProducts.length > 0 ? lowestStockProducts.map(p => p.stockActual) : [0];
 
       this.productChart = new Chart(productCtx, {
         type: 'bar',
@@ -376,7 +396,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
           datasets: [{
             label: 'Stock Actual',
             data: stockData,
-            backgroundColor: '#6366f1',
+            backgroundColor: lowestStockProducts.map(p => p.stockActual <= p.stockMinimo ? '#ef4444' : '#6366f1'),
             borderRadius: 8,
             barThickness: 25
           }]
@@ -433,6 +453,24 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
     });
   }
 
+  loadAllTickets(): void {
+    this.ticketsService.getAll().subscribe({
+      next: (tickets) => {
+        this.allTickets = tickets;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error loading all tickets:', err)
+    });
+  }
+
+  getTicketsPendientes(): number {
+    return this.allTickets.filter(t => t.estado === 'Abierto').length;
+  }
+
+  getProductosStockBajo(): number {
+    return this.productos.filter(p => p.stockActual <= p.stockMinimo).length;
+  }
+
   cargarUsuarios(): void {
     this.usersService.getUsersByRoles(['usuario']).subscribe({
       next: (data) => this.usuarios = data,
@@ -481,7 +519,12 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
   // Getters para listas filtradas con búsqueda
   get filteredUsuariosList(): any[] {
-    const baseList = this.usuarios.filter(u => this.getRolesString(u).toLowerCase() === 'usuario');
+    let baseList = this.usuarios.filter(u => this.getRolesString(u).toLowerCase() === 'usuario');
+    
+    // Filtro por estado
+    if (this.filterEstadoUsuarios === 'activos') baseList = baseList.filter(u => u.isActive !== false);
+    if (this.filterEstadoUsuarios === 'inactivos') baseList = baseList.filter(u => u.isActive === false);
+
     if (!this.searchTermUsuarios) return baseList;
     const term = this.searchTermUsuarios.toLowerCase();
     return baseList.filter(u =>
@@ -502,9 +545,17 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
   }
 
   get filteredProductosList(): Producto[] {
-    if (!this.searchTermProductos) return this.productos;
+    let baseList = this.productos;
+
+    // Filtros avanzados
+    if (this.filterEstadoProductos === 'activos') baseList = baseList.filter(p => p.isActive !== false);
+    if (this.filterEstadoProductos === 'inactivos') baseList = baseList.filter(p => p.isActive === false);
+    if (this.filterEstadoProductos === 'stock_bajo') baseList = baseList.filter(p => p.stockActual <= p.stockMinimo);
+    if (this.filterVeterinariaProductos !== 'todas') baseList = baseList.filter(p => p.veterinariaId === Number(this.filterVeterinariaProductos));
+
+    if (!this.searchTermProductos) return baseList;
     const term = this.searchTermProductos.toLowerCase();
-    return this.productos.filter(p =>
+    return baseList.filter(p =>
       (p.nombre || '').toLowerCase().includes(term) ||
       (p.codigoBarras || '').toLowerCase().includes(term) ||
       (p.lote || '').toLowerCase().includes(term) ||
@@ -513,9 +564,18 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
   }
 
   get filteredVeterinariosList(): any[] {
-    if (!this.searchTermVeterinarios) return this.veterinarios;
+    let baseList = this.veterinarios;
+
+    // Filtros avanzados
+    if (this.filterEstadoVeterinarios === 'activos') baseList = baseList.filter(v => v.isActive !== false);
+    if (this.filterEstadoVeterinarios === 'inactivos') baseList = baseList.filter(v => v.isActive === false);
+    if (this.filterVeterinariaVeterinarios !== 'todas') {
+      baseList = baseList.filter(v => v.perfilVeterinario?.veterinariaPrincipalId === Number(this.filterVeterinariaVeterinarios));
+    }
+
+    if (!this.searchTermVeterinarios) return baseList;
     const term = this.searchTermVeterinarios.toLowerCase();
-    return this.veterinarios.filter(v =>
+    return baseList.filter(v =>
       (v.firstName || '').toLowerCase().includes(term) ||
       (v.lastName || '').toLowerCase().includes(term) ||
       (v.username || '').toLowerCase().includes(term) ||
@@ -525,9 +585,15 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
   }
 
   get filteredServiciosList(): Servicio[] {
-    if (!this.searchTermServicios) return this.servicios;
+    let baseList = this.servicios;
+
+    if (this.filterVeterinariaServicios !== 'todas') {
+      baseList = baseList.filter(s => s.veterinariaId === Number(this.filterVeterinariaServicios));
+    }
+
+    if (!this.searchTermServicios) return baseList;
     const term = this.searchTermServicios.toLowerCase();
-    return this.servicios.filter(s =>
+    return baseList.filter(s =>
       (s.nombre || '').toLowerCase().includes(term) ||
       (s.tipoServicio || '').toLowerCase().includes(term) ||
       (s.descripcion || '').toLowerCase().includes(term)
@@ -1199,9 +1265,6 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
     return user?.role?.name || 'Administrador';
   }
 
-  cambiarContrasena(): void {
-    this.showToast('Funcionalidad de cambio de contraseña próximamente disponible.');
-  }
 
   eliminarCuentaAdmin(): void {
     if (confirm('¿Estás seguro de que deseas desactivar tu cuenta de administrador?')) {
