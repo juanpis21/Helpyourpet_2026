@@ -108,6 +108,24 @@
           </div>
         </div>
       </div>
+
+      <!-- Gráficos -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+        <!-- Gráfico 1 -->
+        <div class="card" style="background: var(--bg-card); padding: 1.5rem; border-radius: 12px; box-shadow: var(--shadow-sm);">
+          <h3 style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--text-primary);"><i class="fas fa-chart-line" style="margin-right: 0.5rem; color: var(--primary-color);"></i>Crecimiento de usuarios y mascotas</h3>
+          <div style="position: relative; height: 300px; width: 100%;">
+            <canvas id="growthChart"></canvas>
+          </div>
+        </div>
+        <!-- Gráfico 2 -->
+        <div class="card" style="background: var(--bg-card); padding: 1.5rem; border-radius: 12px; box-shadow: var(--shadow-sm);">
+          <h3 style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--text-primary);"><i class="fas fa-chart-bar" style="margin-right: 0.5rem; color: var(--primary-color);"></i>Citas médicas por día de la semana</h3>
+          <div style="position: relative; height: 300px; width: 100%;">
+            <canvas id="citasChart"></canvas>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- MASCOTAS -->

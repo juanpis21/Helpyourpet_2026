@@ -1,5 +1,7 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Chart, registerables } from 'chart.js';
+Chart.register(...registerables);
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -101,6 +103,10 @@ export class Veterinario implements OnInit {
   };
 
   newPassword: string = '';
+
+  // Gráficos
+  growthChart: any;
+  citasChart: any;
 
   // Mascotas
   searchTermMascotas: string = '';
@@ -460,6 +466,8 @@ export class Veterinario implements OnInit {
     this.activeSection = section;
     if (section === 'tickets') {
       this.loadMyTickets();
+    } else if (section === 'dashboard') {
+      this.renderCharts();
     }
   }
 
@@ -476,6 +484,154 @@ export class Veterinario implements OnInit {
 
   toggleDarkMode(): void {
     this.themeService.toggleDarkMode();
+  }
+
+  // Lógica de Gráficos
+  renderCharts(): void {
+    if (this.activeSection !== 'dashboard') return;
+
+    // Usamos setTimeout para asegurar que los elementos del DOM (canvas) ya existan
+    setTimeout(() => {
+      this.renderGrowthChart();
+      this.renderCitasChart();
+    }, 100);
+  }
+
+  renderGrowthChart(): void {
+    const canvas = document.getElementById('growthChart') as HTMLCanvasElement;
+    if (!canvas) return;
+
+    if (this.growthChart) {
+      this.growthChart.destroy();
+    }
+
+    const monthCounts: { [key: string]: { users: number, pets: number } } = {};
+
+    this.usuariosSinCuenta.forEach(u => {
+      const date = u.createdAt ? new Date(u.createdAt) : new Date();
+      const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      if (!monthCounts[month]) monthCounts[month] = { users: 0, pets: 0 };
+      monthCounts[month].users++;
+    });
+
+    this.mascotas.forEach(p => {
+      const date = p.createdAt ? new Date(p.createdAt) : new Date();
+      const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      if (!monthCounts[month]) monthCounts[month] = { users: 0, pets: 0 };
+      monthCounts[month].pets++;
+    });
+
+    const sortedMonths = Object.keys(monthCounts).sort();
+    const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+    const labels = sortedMonths.map(m => {
+      const [year, month] = m.split('-');
+      return `${monthNames[parseInt(month, 10) - 1]} ${year}`;
+    });
+
+    const userData = sortedMonths.map(m => monthCounts[m].users);
+    const petData = sortedMonths.map(m => monthCounts[m].pets);
+
+    this.growthChart = new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Usuarios',
+            data: userData,
+            borderColor: '#1d3976',
+            backgroundColor: 'rgba(29, 57, 118, 0.1)',
+            tension: 0.4,
+            fill: true
+          },
+          {
+            label: 'Mascotas',
+            data: petData,
+            borderColor: '#66B566',
+            backgroundColor: 'rgba(102, 181, 102, 0.1)',
+            tension: 0.4,
+            fill: true
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'top' }
+        },
+        scales: {
+          y: { beginAtZero: true, ticks: { precision: 0 } }
+        }
+      }
+    });
+  }
+
+  renderCitasChart(): void {
+    const canvas = document.getElementById('citasChart') as HTMLCanvasElement;
+    if (!canvas) return;
+
+    if (this.citasChart) {
+      this.citasChart.destroy();
+    }
+
+    const citasPorDia = [0, 0, 0, 0, 0, 0, 0]; // Dom a Sab
+
+    // Obtener inicio y fin de la semana actual (Lunes a Domingo)
+    const today = new Date();
+    const currentDay = today.getDay(); // 0 = Domingo, 1 = Lunes, ...
+    const diffToMonday = currentDay === 0 ? -6 : 1 - currentDay; // Ajuste para Lunes = primer día
+    
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() + diffToMonday);
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+
+    this.citas.forEach(cita => {
+      if (cita.fechaHora) {
+        const citaDate = new Date(cita.fechaHora);
+        // Filtrar citas que pertenecen a la semana actual
+        if (citaDate >= startOfWeek && citaDate <= endOfWeek) {
+          const dayIndex = citaDate.getDay();
+          citasPorDia[dayIndex]++;
+        }
+      }
+    });
+
+    // Reordenar para que Lunes sea el primero
+    const labels = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    const data = [
+      citasPorDia[1], citasPorDia[2], citasPorDia[3], citasPorDia[4], 
+      citasPorDia[5], citasPorDia[6], citasPorDia[0]
+    ];
+
+    this.citasChart = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Citas Médicas',
+          data: data,
+          backgroundColor: '#9BC3E8',
+          borderColor: '#1d3976',
+          borderWidth: 1,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: { beginAtZero: true, ticks: { precision: 0 } }
+        }
+      }
+    });
   }
 
   getRoleName(): string {
@@ -501,7 +657,10 @@ export class Veterinario implements OnInit {
   // Lógica de Mascotas
   cargarMascotas(): void {
     this.http.get<any[]>(`${this.API_BASE}/pets/by-veterinaria`, this.getHeaders()).subscribe({
-      next: (data) => this.mascotas = data,
+      next: (data) => {
+        this.mascotas = data;
+        if (this.activeSection === 'dashboard') this.renderCharts();
+      },
       error: (err) => console.error('Error cargando mascotas de la veterinaria:', err)
     });
   }
@@ -521,6 +680,7 @@ export class Veterinario implements OnInit {
       next: (data) => {
         this.usuariosSinCuenta = data;
         console.log('👥 Usuarios de la veterinaria cargados:', data.length);
+        if (this.activeSection === 'dashboard') this.renderCharts();
       },
       error: (err) => console.error('Error cargando usuarios de la veterinaria:', err)
     });
@@ -722,6 +882,7 @@ export class Veterinario implements OnInit {
           return new Date(a.fechaHora).getTime() - new Date(b.fechaHora).getTime();
         });
         this.cdr.detectChanges();
+        if (this.activeSection === 'dashboard') this.renderCharts();
       },
       error: (err) => console.error('Error cargando citas:', err)
     });
