@@ -46,6 +46,14 @@ export class Categoria {
   @Column({ default: true })
   isActive: boolean;
 
+  @ApiProperty({ 
+    description: 'ID de la veterinaria asociada', 
+    example: 1,
+    required: false
+  })
+  @Column({ nullable: true })
+  veterinariaId: number;
+
   @ApiProperty({ description: 'Fecha de creación del registro', example: '2026-03-20T10:30:00.000Z' })
   @CreateDateColumn()
   createdAt: Date;

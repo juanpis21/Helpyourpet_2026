@@ -15,11 +15,12 @@ import { RolesService, Role } from '../../../core/services/roles.service';
 import { ThemeService } from '../../../core/services/theme.service';
 import { TicketsService } from '../../../core/services/tickets.service';
 import type { CreateTicketDto } from '../../../core/services/tickets.service';
+import { PreloaderComponent } from '../../../shared/components/preloader/preloader';
 
 @Component({
   selector: 'app-admin-modules',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PreloaderComponent],
   templateUrl: './admin-modules.component.html',
   styleUrl: './admin-modules.component.scss'
 })
@@ -62,6 +63,13 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
   // Gráficas
   userChart: any;
   productChart: any;
+
+  // Auditorías (Historial de Acciones)
+  historialCitas: any[] = [];
+  historialLoading: boolean = false;
+  historialSearchDate: string = '';
+  historialPage: number = 1;
+  historialPageSize: number = 10;
 
   showToast(message: string, type: 'success' | 'error' | 'warning' | 'info' = 'success'): void {
     const id = Date.now() + Math.random();
@@ -238,6 +246,10 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
   editingVeterinario: any = {};
   editingUsuario: any = {};
 
+  // Validación de documento duplicado
+  documentoDuplicado: boolean = false;
+  verificandoDocumento: boolean = false;
+
   selectedFile: File | null = null;
   imagePreview: string | null = null;
 
@@ -326,18 +338,39 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit(): void {
-    this.cargarUsuarios();
-    this.cargarServicios();
-    this.cargarVeterinarias();
-    this.cargarProductos();
-    this.cargarCategorias();
     this.cargarRoles();
-    this.cargarVeterinarios();
     this.darkMode = this.themeService.isDarkMode;
     this.themeService.darkMode$.subscribe(dark => this.darkMode = dark);
     this.loadAdminProfile();
     this.loadMyTickets();
+    this.loadHistorial();
     this.loadAllTickets();
+  }
+
+  loadHistorial(): void {
+    this.historialLoading = true;
+    const token = localStorage.getItem('access_token');
+    const headers = { Authorization: `Bearer ${token}` };
+    const currentUser = this.authService.getCurrentUser();
+
+    this.http.get<any[]>(`${this.baseUrl}/audit-logs?limit=2000`, { headers }).subscribe({
+      next: (data) => {
+        // Si el usuario es un admin, filtrar para mostrar solo SUS acciones
+        if (currentUser && currentUser.role?.name?.toLowerCase() === 'admin') {
+          this.historialCitas = data.filter(log => log.userId === currentUser.id || log.user?.id === currentUser.id);
+        } else {
+          // Si es superadmin u otro, mostrar todo
+          this.historialCitas = data;
+        }
+        this.historialLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error loading historial:', err);
+        this.historialCitas = [];
+        this.historialLoading = false;
+      }
+    });
   }
 
   ngAfterViewInit(): void {
@@ -348,12 +381,19 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
   }
 
   initCharts(): void {
+    console.log('📊 [DEBUG] Inicializando gráficas...');
     // Destruir gráficas existentes si las hay
-    if (this.userChart) this.userChart.destroy();
-    if (this.productChart) this.productChart.destroy();
+    try {
+      if (this.userChart) this.userChart.destroy();
+      if (this.productChart) this.productChart.destroy();
+    } catch (e) {
+      console.warn('⚠️ [DEBUG] Error al destruir gráficas:', e);
+    }
 
     const userCtx = document.getElementById('userChart') as HTMLCanvasElement;
     const productCtx = document.getElementById('productChart') as HTMLCanvasElement;
+
+    console.log('🔍 [DEBUG] Canvas encontrados:', { userCtx: !!userCtx, productCtx: !!productCtx });
 
     if (userCtx) {
       const activeUsers = this.usuarios.filter(u => u.isActive !== false).length + this.veterinarios.filter(v => v.isActive !== false).length;
@@ -434,10 +474,17 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
     this.router.navigate(['/login']);
   }
 
+  /** Recarga la página después de un breve delay para mostrar el preloader */
+  reloadPage(): void {
+    setTimeout(() => {
+      location.reload();
+    }, 600);
+  }
+
   setSection(section: string): void {
     this.activeSection = section;
     if (section === 'dashboard') {
-      setTimeout(() => this.initCharts(), 100);
+      setTimeout(() => this.initCharts(), 500);
     }
     if (section === 'tickets') {
       this.loadMyTickets();
@@ -474,7 +521,10 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
   cargarUsuarios(): void {
     this.usersService.getUsersByRoles(['usuario']).subscribe({
-      next: (data) => this.usuarios = data,
+      next: (data) => {
+        this.usuarios = data;
+        this.initCharts();
+      },
       error: (err) => console.error('Error al cargar usuarios:', err)
     });
   }
@@ -490,7 +540,19 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
     this.isLoading = true;
     this.serviciosService.getAll().subscribe({
       next: (data) => {
-        this.servicios = data;
+        const currentUser = this.authService.getCurrentUser();
+        const isAdmin = currentUser?.role?.name?.toLowerCase() === 'admin';
+        
+        // Filtrar por las veterinarias del admin
+        if (isAdmin && this.adminVetIds && this.adminVetIds.length) {
+          this.servicios = data.filter(s => this.adminVetIds.includes(s.veterinariaId));
+        } else if (isAdmin && (!this.adminVetIds || this.adminVetIds.length === 0)) {
+          // Si es admin pero aún no tenemos sus IDs (o no tiene), lista vacía para seguridad
+          this.servicios = [];
+        } else {
+          // Super admin u otros
+          this.servicios = data;
+        }
         this.isLoading = false;
       },
       error: (err) => {
@@ -518,7 +580,8 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
     return user.role.name || 'Usuario';
   }
 
-  // Getters para listas filtradas con búsqueda
+  // IDs de veterinarias asociadas al admin (puede haber varias)
+  adminVetIds: number[] = [];
   get filteredUsuariosList(): any[] {
     let baseList = this.usuarios.filter(u => this.getRolesString(u).toLowerCase() === 'usuario');
     
@@ -601,6 +664,24 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
     );
   }
 
+  // --- Getters para Historial (Dashboard) ---
+  get filteredHistorial() {
+    if (!this.historialSearchDate) return this.historialCitas;
+    return this.historialCitas.filter(h => {
+      if (!h.createdAt) return false;
+      return h.createdAt.startsWith(this.historialSearchDate);
+    });
+  }
+
+  get paginatedHistorial() {
+    const start = (this.historialPage - 1) * this.historialPageSize;
+    return this.filteredHistorial.slice(start, start + this.historialPageSize);
+  }
+
+  get historialTotalPages() {
+    return Math.ceil(this.filteredHistorial.length / this.historialPageSize) || 1;
+  }
+
   // Getters para listas paginadas
   get paginatedUsuariosList(): any[] {
     const start = (this.currentPageUsuarios - 1) * this.itemsPerPage;
@@ -673,6 +754,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
         this.closeAddUserModal();
         this.cargarUsuarios();
         this.showToast('Usuario creado correctamente');
+        this.reloadPage();
       },
       error: (err) => this.showToast('Error al crear usuario: ' + (err.error?.message || err.message))
     });
@@ -707,6 +789,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
         this.closeEditUserModal();
         this.cargarUsuarios();
         this.showToast('Usuario actualizado correctamente');
+        this.reloadPage();
       },
       error: (err) => this.showToast('Error al actualizar usuario: ' + (err.error?.message || err.message))
     });
@@ -723,6 +806,10 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
   // CRUD SERVICIOS
   openAddServiceModal(): void {
     this.showAddServiceModal = true;
+    // Si solo hay una veterinaria, seleccionarla por defecto
+    if (this.adminVetIds.length === 1) {
+      this.newService.veterinariaId = this.adminVetIds[0];
+    }
   }
 
   closeAddServiceModal(): void {
@@ -784,6 +871,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
         this.closeAddServiceModal();
         this.cargarServicios();
         this.showToast('Servicio creado correctamente');
+        this.reloadPage();
       },
       error: (err) => this.showToast('Error al crear servicio: ' + err.message)
     });
@@ -823,6 +911,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
         this.closeEditServiceModal();
         this.cargarServicios();
         this.showToast('Servicio actualizado correctamente');
+        this.reloadPage();
       },
       error: (err) => this.showToast('Error al actualizar servicio: ' + err.message)
     });
@@ -840,7 +929,15 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
   // ========== CRUD VETERINARIAS ==========
   cargarVeterinarias(): void {
     this.veterinariasService.getAll().subscribe({
-      next: (data) => this.veterinarias = data,
+      next: (data) => {
+        const currentUser = this.authService.getCurrentUser();
+        // Si el usuario es un admin (no super-admin), solo mostrar sus veterinarias
+        if (currentUser && currentUser.role?.name?.toLowerCase() === 'admin') {
+          this.veterinarias = data.filter(v => v.adminId === currentUser.id);
+        } else {
+          this.veterinarias = data;
+        }
+      },
       error: (err) => console.error('Error al cargar veterinarias:', err)
     });
   }
@@ -873,6 +970,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
         this.closeAddVeterinariaModal();
         this.cargarVeterinarias();
         this.showToast('Veterinaria registrada correctamente');
+        this.reloadPage();
       },
       error: (err) => this.showToast('Error al registrar veterinaria: ' + (err.error?.message || err.message))
     });
@@ -898,6 +996,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
         this.closeEditVeterinariaModal();
         this.cargarVeterinarias();
         this.showToast('Veterinaria actualizada correctamente');
+        this.reloadPage();
       },
       error: (err) => this.showToast('Error al actualizar veterinaria: ' + (err.error?.message || err.message))
     });
@@ -926,20 +1025,48 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
   // ========== CRUD PRODUCTOS ==========
   cargarProductos(): void {
     this.productosService.getAll().subscribe({
-      next: (data) => this.productos = data,
+      next: (data) => {
+        const currentUser = this.authService.getCurrentUser();
+        const isAdmin = currentUser?.role?.name?.toLowerCase() === 'admin';
+
+        // Filtrar por las veterinarias del admin
+        if (isAdmin && this.adminVetIds && this.adminVetIds.length) {
+          this.productos = data.filter(p => this.adminVetIds.includes(p.veterinariaId));
+        } else if (isAdmin && (!this.adminVetIds || this.adminVetIds.length === 0)) {
+          this.productos = [];
+        } else {
+          this.productos = data;
+        }
+        this.initCharts();
+      },
       error: (err) => console.error('Error al cargar productos:', err)
     });
   }
 
   cargarCategorias(): void {
     this.categoriasService.getAll().subscribe({
-      next: (data) => this.categorias = data,
+      next: (data) => {
+        const currentUser = this.authService.getCurrentUser();
+        const isAdmin = currentUser?.role?.name?.toLowerCase() === 'admin';
+        
+        // Filtrar por las veterinarias del admin
+        if (isAdmin && this.adminVetIds && this.adminVetIds.length) {
+          // Solo ver categorías de sus sedes o categorías globales (sin veterinariaId)
+          this.categorias = data.filter(c => !c.veterinariaId || this.adminVetIds.includes(c.veterinariaId));
+        } else {
+          this.categorias = data;
+        }
+      },
       error: (err) => console.error('Error al cargar categorías:', err)
     });
   }
 
   openAddProductoModal(): void {
     this.showAddProductoModal = true;
+    // Si solo hay una veterinaria, seleccionarla por defecto
+    if (this.adminVetIds.length === 1) {
+      this.newProducto.veterinariaId = this.adminVetIds[0];
+    }
   }
 
   closeAddProductoModal(): void {
@@ -994,6 +1121,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
         this.closeAddProductoModal();
         this.cargarProductos();
         this.showToast('Producto registrado correctamente');
+        this.reloadPage();
       },
       error: (err) => {
         console.error('Error al registrar producto:', err);
@@ -1006,6 +1134,10 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
   openEditProductoModal(prod: Producto): void {
     this.editingProducto = { ...prod };
+    // Asegurar que veterinariaId tenga un valor para el select
+    if (!this.editingProducto.veterinariaId) {
+      this.editingProducto.veterinariaId = 0;
+    }
     this.showEditProductoModal = true;
   }
 
@@ -1018,6 +1150,12 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
   guardarEdicionProducto(): void {
     if (!this.editingProducto.id) return;
+
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser?.role?.name?.toLowerCase() === 'admin' && (!this.editingProducto.veterinariaId || this.editingProducto.veterinariaId === 0)) {
+      this.showToast('Por favor, selecciona una sede para el producto');
+      return;
+    }
 
     // Usar FormData
     const formData = new FormData();
@@ -1048,6 +1186,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
         this.closeEditProductoModal();
         this.cargarProductos();
         this.showToast('Producto actualizado correctamente');
+        this.reloadPage();
       },
       error: (err) => {
         console.error('Error al actualizar producto:', err);
@@ -1098,11 +1237,15 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
   // ========== CRUD CATEGORÍAS ==========
   openAddCategoriaModal(): void {
     this.showAddCategoriaModal = true;
+    // Si solo hay una veterinaria, seleccionarla por defecto
+    if (this.adminVetIds.length === 1) {
+      this.newCategoria.veterinariaId = this.adminVetIds[0];
+    }
   }
 
   closeAddCategoriaModal(): void {
     this.showAddCategoriaModal = false;
-    this.newCategoria = { nombre: '', descripcion: '', codigo: '', color: '#4ade80', isActive: true };
+    this.newCategoria = { nombre: '', descripcion: '', codigo: '', color: '#4ade80', isActive: true, veterinariaId: 0 };
   }
 
   guardarCategoria(): void {
@@ -1111,11 +1254,18 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
       return;
     }
 
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser?.role?.name?.toLowerCase() === 'admin' && (!this.newCategoria.veterinariaId || this.newCategoria.veterinariaId === 0)) {
+      this.showToast('Por favor, selecciona una sede para la categoría');
+      return;
+    }
+
     this.categoriasService.create(this.newCategoria).subscribe({
       next: () => {
         this.closeAddCategoriaModal();
         this.cargarCategorias();
         this.showToast('Categoría registrada correctamente');
+        this.reloadPage();
       },
       error: (err) => this.showToast('Error al registrar categoría: ' + (err.error?.message || err.message))
     });
@@ -1123,6 +1273,10 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
   openEditCategoriaModal(cat: Categoria): void {
     this.editingCategoria = { ...cat };
+    // Si no tiene veterinariaId (es nula o undefined), poner 0 para el select
+    if (!this.editingCategoria.veterinariaId) {
+      this.editingCategoria.veterinariaId = 0;
+    }
     this.showEditCategoriaModal = true;
   }
 
@@ -1133,6 +1287,13 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
   guardarEdicionCategoria(): void {
     if (!this.editingCategoria.id) return;
+
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser?.role?.name?.toLowerCase() === 'admin' && (!this.editingCategoria.veterinariaId || this.editingCategoria.veterinariaId === 0)) {
+      this.showToast('Por favor, selecciona una sede para la categoría');
+      return;
+    }
+
     const { id, createdAt, updatedAt, ...updateData } = this.editingCategoria as any;
 
     this.categoriasService.update(this.editingCategoria.id, updateData).subscribe({
@@ -1140,6 +1301,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
         this.closeEditCategoriaModal();
         this.cargarCategorias();
         this.showToast('Categoría actualizada correctamente');
+        this.reloadPage();
       },
       error: (err) => this.showToast('Error al actualizar categoría: ' + (err.error?.message || err.message))
     });
@@ -1186,22 +1348,25 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
         veterinariaId: null
       };
 
-      console.log('🔍 [DEBUG] Buscando veterinaria para admin ID:', currentUser.id);
-      // Obtener veterinaria asociada al admin
-      this.veterinariasService.getByAdminId(currentUser.id).subscribe({
-        next: (veterinaria) => {
-          console.log('🔍 [DEBUG] Veterinaria encontrada:', veterinaria);
-          if (veterinaria) {
-            this.adminUser.veterinariaId = veterinaria.id;
-            console.log('✅ [DEBUG] Veterinaria ID asignada al admin:', this.adminUser.veterinariaId);
-            // Recargar veterinarios con el filtro de veterinaria
-            this.cargarVeterinarios();
-          } else {
-            console.log('⚠️ [DEBUG] No se encontró veterinaria para este admin');
-          }
+      console.log('🔍 [DEBUG] Buscando veterinarias del admin ID:', currentUser.id);
+      // Obtener todas las veterinarias y filtrar por adminId
+      this.veterinariasService.getAll().subscribe({
+        next: (vets) => {
+          const adminVets = vets.filter(v => v.adminId === currentUser.id);
+          this.adminVetIds = adminVets.map(v => v.id);
+          console.log('✅ [DEBUG] Veterinarias del admin:', this.adminVetIds);
+          // Si solo tiene una, asignar a adminUser.veterinariaId para compatibilidad
+          this.adminUser.veterinariaId = this.adminVetIds.length === 1 ? this.adminVetIds[0] : null;
+          // Recargar todos los datos que dependen de las veterinarias del admin
+          this.cargarVeterinarias(); // <-- Agregada
+          this.cargarServicios();
+          this.cargarProductos();
+          this.cargarVeterinarios();
+          this.cargarCategorias(); // <-- Movida aquí para consistencia
+          this.cargarUsuarios(); 
         },
         error: (err) => {
-          console.error('❌ [DEBUG] Error al cargar veterinaria del admin:', err);
+          console.error('❌ [DEBUG] Error al cargar veterinarias del admin:', err);
         }
       });
     }
@@ -1282,6 +1447,40 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
     });
   }
 
+  // Helper formatters para el dashboard
+  getTipoCambioLabel(tipo: string): string {
+    const labels: { [key: string]: string } = {
+      'CREATE': 'CREACIÓN',
+      'UPDATE': 'ACTUALIZACIÓN',
+      'DELETE': 'ELIMINACIÓN',
+      'LOGIN': 'INICIO SESIÓN',
+      'LOGOUT': 'CIERRE SESIÓN'
+    };
+    return labels[tipo] || tipo;
+  }
+
+  getTipoCambioClass(tipo: string): string {
+    const classes: { [key: string]: string } = {
+      'CREATE': 'tipo-create',
+      'UPDATE': 'tipo-update',
+      'DELETE': 'tipo-delete',
+      'LOGIN': 'tipo-login',
+      'LOGOUT': 'tipo-logout'
+    };
+    return classes[tipo] || 'tipo-other';
+  }
+
+  formatDateCorrectly(dateStr: string): Date {
+    return new Date(dateStr);
+  }
+
+  getFullImageUrl(path: string | null | undefined): string {
+    if (!path) return 'assets/images/Default.png';
+    if (path.startsWith('http')) return path;
+    if (path.startsWith('/uploads')) return `${this.baseUrl}${path}`;
+    return `assets/images/${path}`;
+  }
+
   getAdminRoleName(): string {
     const user = this.authService.getCurrentUser();
     return user?.role?.name || 'Administrador';
@@ -1311,20 +1510,20 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
         console.log('🔍 [DEBUG] Veterinarios (Users) cargados:', data);
         const allVets = Array.isArray(data) ? data : [];
 
-        // Filtrar veterinarios por la veterinaria del admin
-        if (this.adminUser.veterinariaId) {
-          console.log('🔍 [DEBUG] Filtrando veterinarios por veterinaria ID:', this.adminUser.veterinariaId);
+        // Filtrar veterinarios por las veterinarias del admin (puede haber varias)
+        if (this.adminVetIds && this.adminVetIds.length) {
+          console.log('🔍 [DEBUG] Filtrando veterinarios por IDs de veterinarias del admin:', this.adminVetIds);
           this.veterinarios = allVets.filter((vet: any) => {
             const vetVetId = vet.perfilVeterinario?.veterinariaPrincipal?.id;
-            console.log(`🔍 [DEBUG] Veterinario ${vet.username}: veterinariaPrincipal.id = ${vetVetId}`);
-            return vetVetId === this.adminUser.veterinariaId;
+            return this.adminVetIds.includes(vetVetId);
           });
-          console.log(`✅ [DEBUG] Veterinarios filtrados por veterinaria ${this.adminUser.veterinariaId}:`, this.veterinarios.length);
+          console.log(`✅ [DEBUG] Veterinarios filtrados por admin:`, this.veterinarios.length);
         } else {
-          // Si el admin no tiene veterinaria asociada, mostrar todos (fallback)
+          // Si el admin no tiene veterinarias asociadas, mostrar todos (fallback)
           this.veterinarios = allVets;
-          console.log('⚠️ [DEBUG] Admin sin veterinaria asociada, mostrando todos los veterinarios');
+          console.log('⚠️ [DEBUG] Admin sin veterinarias asociadas, mostrando todos los veterinarios');
         }
+        this.initCharts();
       },
       error: (err: any) => {
         console.error('Error al cargar veterinarios:', err);
@@ -1335,6 +1534,10 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
   openAddVeterinarioModal(): void {
     this.showAddVeterinarioModal = true;
+    // Si solo hay una veterinaria disponible, seleccionarla por defecto
+    if (this.veterinarias.length === 1) {
+      this.newVeterinario.veterinariaPrincipalId = this.veterinarias[0].id;
+    }
   }
 
   closeAddVeterinarioModal(): void {
@@ -1361,12 +1564,38 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
     };
   }
 
+  verificarDocumentoDuplicado(): void {
+    const docNumber = this.newVeterinario.documentNumber?.trim();
+    if (!docNumber || docNumber.length < 3) {
+      this.documentoDuplicado = false;
+      return;
+    }
+
+    this.verificandoDocumento = true;
+    this.usersService.getAllUsers().subscribe({
+      next: (users) => {
+        this.documentoDuplicado = users.some(u => u.documentNumber === docNumber);
+        this.verificandoDocumento = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.verificandoDocumento = false;
+      }
+    });
+  }
+
   guardarVeterinario(): void {
     // Validar campos obligatorios
-    if (!this.newVeterinario.username || !this.newVeterinario.email || !this.newVeterinario.password ||
+    if (!this.newVeterinario.email || !this.newVeterinario.password ||
       !this.newVeterinario.firstName || !this.newVeterinario.lastName || !this.newVeterinario.especialidad ||
       !this.newVeterinario.matricula) {
       this.showToast('Por favor, completa todos los campos obligatorios (*)', 'warning');
+      return;
+    }
+
+    // Bloquear si el documento está duplicado
+    if (this.documentoDuplicado) {
+      this.showToast('⚠️ Ya existe un usuario con ese número de documento. No se puede registrar.', 'warning');
       return;
     }
 
@@ -1382,6 +1611,9 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
       return;
     }
     this.newVeterinario.roleId = rolVeterinario.id;
+
+    // Usar el email como nombre de usuario automáticamente
+    this.newVeterinario.username = this.newVeterinario.email;
 
     // Datos del usuario
     const userData = {
@@ -1423,6 +1655,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
             this.currentPageVeterinarios = 1; // Resetear a la primera página
             this.cargarVeterinarios();
             this.showToast('✅ Veterinario registrado y perfil profesional creado correctamente');
+            this.reloadPage();
           },
           error: (err: any) => {
             this.isLoading = false;
@@ -1514,6 +1747,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
             this.closeEditVeterinarioModal();
             this.cargarVeterinarios();
             this.showToast('✅ Datos del veterinario actualizados correctamente');
+            this.reloadPage();
           },
           error: (err: any) => {
             console.error('Error al actualizar perfil veterinario:', err);

@@ -110,10 +110,10 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
   get filteredAdmins() {
     if (!this.adminSearchTerm) return this.allUsers;
     const term = this.adminSearchTerm.toLowerCase();
-    return this.allUsers.filter(u => 
-      u.fullName?.toLowerCase().includes(term) || 
-      u.firstName?.toLowerCase().includes(term) || 
-      u.username?.toLowerCase().includes(term) || 
+    return this.allUsers.filter(u =>
+      u.fullName?.toLowerCase().includes(term) ||
+      u.firstName?.toLowerCase().includes(term) ||
+      u.username?.toLowerCase().includes(term) ||
       u.email?.toLowerCase().includes(term)
     );
   }
@@ -134,8 +134,8 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
   get filteredVets() {
     if (!this.vetSearchTerm) return this.allVets;
     const term = this.vetSearchTerm.toLowerCase();
-    return this.allVets.filter(v => 
-      v.nombre?.toLowerCase().includes(term) || 
+    return this.allVets.filter(v =>
+      v.nombre?.toLowerCase().includes(term) ||
       v.direccion?.toLowerCase().includes(term) ||
       v.email?.toLowerCase().includes(term) ||
       v.admin?.username?.toLowerCase().includes(term)
@@ -510,8 +510,6 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
 
   formatDateCorrectly(dateStr: string): Date {
     if (!dateStr) return new Date();
-    // Si la fecha viene sin 'Z' y sin offset, le agregamos 'Z' para forzarla a UTC
-    // Esto asegura que el navegador reste las 5 horas de Colombia correctamente.
     const hasTimezone = dateStr.includes('Z') || dateStr.includes('+') || (dateStr.includes('-') && dateStr.lastIndexOf('-') > 10);
     if (!hasTimezone) {
       return new Date(dateStr + 'Z');

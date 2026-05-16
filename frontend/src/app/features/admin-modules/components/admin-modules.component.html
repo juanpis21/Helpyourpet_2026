@@ -1,3 +1,5 @@
+<!-- PRELOADER ANIMADO -->
+<app-preloader></app-preloader>
 <div class="sidebar-overlay" [class.active]="sidebarOpen" (click)="toggleSidebar()"></div>
 
 <div class="admin-layout" [ngClass]="{'sidebar-closed': !sidebarOpen}">
@@ -16,7 +18,7 @@
     <ul class="nav-menu">
       <li>
         <a [class.active]="activeSection === 'dashboard'" (click)="setSection('dashboard')">
-          <i class="fas fa-home"></i><span>Dashboard</span>
+          <i class="fas fa-home"></i><span>Inicio</span>
         </a>
       </li>
       <li>
@@ -107,6 +109,13 @@
           </div>
         </div>
         <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-hospital"></i></div>
+          <div class="stat-info">
+            <h3>Veterinarias</h3>
+            <p>{{ veterinarias.length }}</p>
+          </div>
+        </div>
+        <div class="stat-card">
           <div class="stat-icon"><i class="fas fa-boxes"></i></div>
           <div class="stat-info">
             <h3>Productos</h3>
@@ -114,17 +123,10 @@
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon" [style.color]="getProductosStockBajo() > 0 ? '#ef4444' : ''"><i class="fas fa-exclamation-triangle"></i></div>
+          <div class="stat-icon"><i class="fas fa-concierge-bell"></i></div>
           <div class="stat-info">
-            <h3 [style.color]="getProductosStockBajo() > 0 ? '#ef4444' : ''">Stock Bajo</h3>
-            <p [style.color]="getProductosStockBajo() > 0 ? '#ef4444' : ''">{{ getProductosStockBajo() }}</p>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon" [style.color]="getTicketsPendientes() > 0 ? '#ef4444' : ''"><i class="fas fa-ticket-alt"></i></div>
-          <div class="stat-info">
-            <h3 [style.color]="getTicketsPendientes() > 0 ? '#ef4444' : ''">Tickets Abiertos</h3>
-            <p [style.color]="getTicketsPendientes() > 0 ? '#ef4444' : ''">{{ getTicketsPendientes() }}</p>
+            <h3>Servicios</h3>
+            <p>{{ servicios.length }}</p>
           </div>
         </div>
       </div>
@@ -145,6 +147,76 @@
           </div>
           <div class="chart-body">
             <canvas id="productChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Historial de Acciones -->
+      <div class="card" style="margin-top: 2rem;">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+          <h5><i class="fas fa-history"></i> Historial de Acciones Recientes</h5>
+          <div style="display: flex; gap: 1rem; align-items: center;">
+            <div class="search-box" style="position: relative;">
+              <i class="fas fa-calendar-alt" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
+              <input type="date" [(ngModel)]="historialSearchDate" (change)="historialPage = 1" 
+                style="padding: 0.5rem 1rem 0.5rem 2.5rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-primary);">
+            </div>
+            <span style="font-size: 0.9rem; color: var(--text-secondary);">Total: {{ filteredHistorial.length }}</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div *ngIf="historialLoading" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+            <i class="fas fa-spinner fa-spin" style="font-size: 2rem;"></i>
+            <p style="margin-top: 0.5rem;">Cargando historial...</p>
+          </div>
+          
+          <div *ngIf="!historialLoading && historialCitas.length === 0" style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+            <i class="fas fa-history" style="font-size: 3rem; opacity: 0.3; margin-bottom: 1rem;"></i>
+            <p>No hay registros de actividad aún</p>
+          </div>
+
+          <div class="table-container" *ngIf="!historialLoading && historialCitas.length > 0">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Usuario</th>
+                  <th>Rol</th>
+                  <th>Acción</th>
+                  <th>Descripción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let h of paginatedHistorial">
+                  <td>{{ formatDateCorrectly(h.createdAt) | date:'dd/MM/yyyy, hh:mm a' }}</td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                      <img [src]="getFullImageUrl(h.user?.avatar)" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+                      <span>{{ h.user?.firstName }} {{ h.user?.lastName }}</span>
+                    </div>
+                  </td>
+                  <td><span class="badge">{{ h.user?.role?.name || 'N/A' }}</span></td>
+                  <td>
+                    <span class="status-pill" [ngClass]="getTipoCambioClass(h.action)">
+                      {{ getTipoCambioLabel(h.action) }}
+                    </span>
+                  </td>
+                  <td>{{ h.description }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pagination-controls" style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center;" *ngIf="!historialLoading && filteredHistorial.length > 0">
+            <span style="font-size: 0.9rem; color: var(--text-secondary);">Página {{ historialPage }} de {{ historialTotalPages }}</span>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn-page" [disabled]="historialPage === 1" (click)="historialPage = historialPage - 1">
+                <i class="fas fa-chevron-left"></i> Anterior
+              </button>
+              <button class="btn-page" [disabled]="historialPage === historialTotalPages" (click)="historialPage = historialPage + 1">
+                Siguiente <i class="fas fa-chevron-right"></i>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -1539,6 +1611,14 @@
           <textarea [(ngModel)]="newCategoria.descripcion" placeholder="Escribe una breve descripción..."
             rows="3"></textarea>
         </div>
+
+        <div class="form-group full">
+          <label><i class="fas fa-hospital"></i> Sede / Veterinaria *</label>
+          <select [(ngModel)]="newCategoria.veterinariaId" class="form-control">
+            <option [ngValue]="0">Seleccionar Sede</option>
+            <option *ngFor="let vet of veterinarias" [ngValue]="vet.id">{{ vet.nombre }}</option>
+          </select>
+        </div>
       </div>
     </div>
     <div class="modal-footer">
@@ -1569,6 +1649,14 @@
         <div class="form-group full">
           <label>Descripción</label>
           <textarea [(ngModel)]="editingCategoria.descripcion" rows="3"></textarea>
+        </div>
+
+        <div class="form-group full">
+          <label><i class="fas fa-hospital"></i> Sede / Veterinaria *</label>
+          <select [(ngModel)]="editingCategoria.veterinariaId" class="form-control">
+            <option [ngValue]="0">Seleccionar Sede</option>
+            <option *ngFor="let vet of veterinarias" [ngValue]="vet.id">{{ vet.nombre }}</option>
+          </select>
         </div>
       </div>
     </div>
@@ -1604,10 +1692,6 @@
           <input type="text" [(ngModel)]="newVeterinario.lastName" placeholder="Ej: Pérez García">
         </div>
         <div class="form-group">
-          <label><i class="fas fa-user-circle"></i> Nombre de Usuario *</label>
-          <input type="text" [(ngModel)]="newVeterinario.username" placeholder="Ej: dr_perez">
-        </div>
-        <div class="form-group">
           <label><i class="fas fa-envelope"></i> Correo Electrónico *</label>
           <input type="email" [(ngModel)]="newVeterinario.email" placeholder="correo@ejemplo.com">
         </div>
@@ -1629,7 +1713,17 @@
         </div>
         <div class="form-group">
           <label><i class="fas fa-hashtag"></i> Número Documento *</label>
-          <input type="text" [(ngModel)]="newVeterinario.documentNumber" placeholder="12345678">
+          <input type="text" [(ngModel)]="newVeterinario.documentNumber" placeholder="12345678"
+                 (blur)="verificarDocumentoDuplicado()"
+                 [style.borderColor]="documentoDuplicado ? '#c62828' : ''">
+          <div *ngIf="verificandoDocumento" style="margin-top: 4px; font-size: 0.8rem; color: var(--text-secondary);">
+            <i class="fas fa-spinner fa-spin"></i> Verificando documento...
+          </div>
+          <div *ngIf="documentoDuplicado && !verificandoDocumento" 
+               style="margin-top: 6px; padding: 8px 12px; background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; color: #991b1b; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>Ya existe un usuario registrado con este número de documento.</span>
+          </div>
         </div>
         <div class="form-group">
           <label><i class="fas fa-calendar-alt"></i> Edad</label>
@@ -1733,8 +1827,7 @@
       <div class="form-grid">
         <div class="form-group">
           <label><i class="fas fa-certificate"></i> Matrícula Profesional <small>(Lectura)</small></label>
-          <input type="text" [(ngModel)]="editingVeterinario.matricula" readonly
-            style="background-color: #f5f5f5; cursor: not-allowed;">
+          <input type="text" [(ngModel)]="editingVeterinario.matricula" readonly>
         </div>
         <div class="form-group">
           <label><i class="fas fa-stethoscope"></i> Especialidad</label>
@@ -1746,8 +1839,7 @@
         </div>
         <div class="form-group">
           <label><i class="fas fa-university"></i> Universidad <small>(Lectura)</small></label>
-          <input type="text" [(ngModel)]="editingVeterinario.universidad" readonly
-            style="background-color: #f5f5f5; cursor: not-allowed;">
+          <input type="text" [(ngModel)]="editingVeterinario.universidad" readonly>
         </div>
       </div>
     </div>

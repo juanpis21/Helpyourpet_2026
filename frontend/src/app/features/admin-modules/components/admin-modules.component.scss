@@ -25,6 +25,10 @@
   --shadow-md: 0 5px 20px rgba(0, 0, 0, 0.12);
   --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.15);
   --transition: all 0.3s ease;
+  --primary: #1d3976;
+  --primary-light: #4a78b5;
+  --bg-readonly: #f1f5f9;
+  --text-muted: #64748b;
   display: block;
   font-family: 'Fredoka', 'Baloo 2', sans-serif;
   color: var(--text-primary);
@@ -43,6 +47,10 @@
   --sidebar-bg: linear-gradient(180deg, #1F2937 0%, #111827 100%);
   --sidebar-text: #F3F4F6;
   --pastel-blue: #2D3A4E;
+  --primary: #6B9AD6;
+  --primary-light: #9BC3E8;
+  --bg-readonly: #374151;
+  --text-muted: #9ca3af;
 }
 
 /* ===== LAYOUT ===== */
@@ -616,6 +624,11 @@
     background: var(--bg-card);
     color: var(--text-primary);
     &:focus { outline: none; border-color: var(--primary-color); }
+    &[readonly] {
+      background: var(--bg-readonly);
+      color: var(--text-muted);
+      cursor: not-allowed;
+    }
   }
 }
 
@@ -626,6 +639,14 @@
   gap: 1rem;
   border-top: 1px solid var(--border-color);
 }
+
+/* ===== ESTILOS DE HISTORIAL ===== */
+.tipo-create { background: rgba(74, 222, 128, 0.2); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3); }
+.tipo-update { background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); }
+.tipo-delete { background: rgba(248, 113, 113, 0.2); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); }
+.tipo-login { background: rgba(167, 139, 250, 0.2); color: #a78bfa; border: 1px solid rgba(167, 139, 250, 0.3); }
+.tipo-logout { background: rgba(156, 163, 175, 0.2); color: #9ca3af; border: 1px solid rgba(156, 163, 175, 0.3); }
+.tipo-other { background: rgba(209, 213, 219, 0.1); color: #9ca3af; border: 1px solid rgba(209, 213, 219, 0.2); }
 
 .animate-in { animation: fadeInUp 0.4s ease-out; }
 @keyframes fadeInUp {

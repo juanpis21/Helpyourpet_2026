@@ -27,7 +27,7 @@ export class CategoriasService {
 
   async findAll(): Promise<Categoria[]> {
     return this.categoriasRepository.find({ 
-      select: ['id', 'nombre', 'descripcion', 'codigo', 'color', 'isActive', 'createdAt', 'updatedAt']
+      select: ['id', 'nombre', 'descripcion', 'codigo', 'color', 'isActive', 'veterinariaId', 'createdAt', 'updatedAt']
     });
   }
 

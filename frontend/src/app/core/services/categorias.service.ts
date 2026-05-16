@@ -9,6 +9,7 @@ export interface Categoria {
   codigo: string;
   color?: string;
   isActive: boolean;
+  veterinariaId?: number;
   createdAt?: string;
   updatedAt?: string;
 }
