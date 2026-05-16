@@ -136,7 +136,7 @@ export class Recovery implements OnInit {
           });
         },
         error: (error) => {
-          this.message = '❌ Error: ' + (error.error?.message || 'No se pudo procesar la solicitud.');
+          this.message = 'Error: ' + (error.error?.message || 'No se pudo procesar la solicitud.');
           this.messageType = 'error';
         }
       });
@@ -153,13 +153,13 @@ export class Recovery implements OnInit {
     }).subscribe({
       next: () => {
         this.isLoading = false;
-        this.message = '✅ Contraseña restablecida con éxito. Redirigiendo al login...';
+        this.message = 'Contraseña restablecida con éxito. Redirigiendo al login...';
         this.messageType = 'success';
         setTimeout(() => this.router.navigate(['/login']), 3000);
       },
       error: (error) => {
         this.isLoading = false;
-        this.message = '❌ Error: ' + (error.error?.message || 'Token inválido o expirado');
+        this.message = 'Error: ' + (error.error?.message || 'Token inválido o expirado');
         this.messageType = 'error';
       }
     });
@@ -170,7 +170,7 @@ export class Recovery implements OnInit {
     const currentUser = this.authService.getCurrentUser();
     
     if (!currentUser?.id) {
-      this.message = '❌ Error: Sesión no válida. Inicia sesión nuevamente.';
+      this.message = 'Error: Sesión no válida. Inicia sesión nuevamente.';
       this.messageType = 'error';
       return;
     }
@@ -181,13 +181,13 @@ export class Recovery implements OnInit {
     this.usersService.updateUser(currentUser.id, { password: nuevaContrasena }).subscribe({
       next: () => {
         this.isLoading = false;
-        this.message = '✅ Contraseña cambiada con éxito.';
+        this.message = 'Contraseña cambiada con éxito.';
         this.messageType = 'success';
         setTimeout(() => this.router.navigate(['/perfil-usuario']), 2000);
       },
       error: (error) => {
         this.isLoading = false;
-        this.message = '❌ Error: ' + (error.error?.message || 'No se pudo completar la acción');
+        this.message = 'Error: ' + (error.error?.message || 'No se pudo completar la acción');
         this.messageType = 'error';
       }
     });

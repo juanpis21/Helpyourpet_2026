@@ -737,10 +737,10 @@ export class PerfilUsuario implements OnInit {
             petId: petId,
             fecha: c.fechaConsulta,
             tipo: c.motivoConsulta ? c.motivoConsulta.toLowerCase().includes('vacuna') ? 'vacuna' : c.motivoConsulta.toLowerCase().includes('cirugia') ? 'cirugia' : c.motivoConsulta.toLowerCase().includes('emergencia') ? 'emergencia' : 'consulta' : 'consulta',
-            veterinario: 'Veterinario',
+            veterinario: c.veterinario || 'Veterinario Especializado',
             diagnostico: c.diagnostico,
-            tratamiento: c.tratamiento || c.medicamentos,
-            notas: c.observaciones || c.sintomas
+            tratamiento: c.tratamiento || c.medicamentos || 'No especificado',
+            notas: c.observaciones || c.sintomas || 'Sin observaciones adicionales'
           }));
         } else {
           this.historialClinico = [];
@@ -751,6 +751,105 @@ export class PerfilUsuario implements OnInit {
         console.error('Error cargando el historial:', err);
         this.historialClinico = [];
         this.cdr.detectChanges();
+      }
+    });
+  }
+
+  showDetalleHistorialModal: boolean = false;
+  detalleHistorial: HistorialClinico | null = null;
+
+  verDetalleHistorial(registro: HistorialClinico): void {
+    const icon = this.getHistorialIcon(registro.tipo);
+    const tipoLabel = this.getHistorialTipoLabel(registro.tipo);
+    const petName = this.getNombreMascotaSeleccionada();
+    const fechaFormatted = new Date(registro.fecha).toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric'
+    });
+
+    Swal.fire({
+      title: `<div class="modal-premium-header ${registro.tipo}">
+                <button type="button" class="swal2-close" aria-label="Close this dialog" style="display: flex;" onclick="Swal.close()">×</button>
+                <div class="header-main">
+                  <div class="icon-circle">
+                    <i class="${icon}"></i>
+                  </div>
+                  <div class="header-text">
+                    <span class="pet-badge">${petName}</span>
+                    <h3>${tipoLabel}</h3>
+                  </div>
+                </div>
+                <div class="header-date">
+                  <i class="fas fa-calendar-alt"></i> ${fechaFormatted}
+                </div>
+              </div>`,
+      html: `
+        <div class="modal-premium-body">
+          <div class="info-grid">
+            <div class="info-card">
+              <div class="card-icon"><i class="fas fa-user-md"></i></div>
+              <div class="card-content">
+                <span class="label">VETERINARIO</span>
+                <span class="value">${registro.veterinario}</span>
+              </div>
+            </div>
+            <div class="info-card">
+              <div class="card-icon"><i class="fas fa-fingerprint"></i></div>
+              <div class="card-content">
+                <span class="label">ID REGISTRO</span>
+                <span class="value">#${registro.id}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <div class="section-title">
+              <i class="fas fa-notes-medical"></i>
+              <span>Diagnóstico Clínico</span>
+            </div>
+            <div class="section-content highlight">
+              ${registro.diagnostico}
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <div class="section-title">
+              <i class="fas fa-pills"></i>
+              <span>Tratamiento y Medicación</span>
+            </div>
+            <div class="section-content normal">
+              ${registro.tratamiento}
+            </div>
+          </div>
+
+          <div class="detail-section" ${!registro.notas ? 'style="display:none;"' : ''}>
+            <div class="section-title">
+              <i class="fas fa-sticky-note"></i>
+              <span>Observaciones del Especialista</span>
+            </div>
+            <div class="section-content notes">
+              ${registro.notas}
+            </div>
+          </div>
+        </div>
+      `,
+      showCloseButton: false, // Ocultar el por defecto, agregué uno personalizado en el header
+      confirmButtonText: '<i class="fas fa-check"></i> ENTENDIDO',
+      buttonsStyling: false,
+      customClass: {
+        popup: 'premium-swal-popup',
+        title: 'premium-swal-title',
+        htmlContainer: 'premium-swal-html',
+        confirmButton: 'premium-swal-button',
+        actions: 'premium-swal-actions'
+      },
+      width: '650px',
+      showClass: {
+        popup: 'animate__animated animate__fadeInDown animate__faster'
+      },
+      hideClass: {
+        popup: 'animate__animated animate__fadeOutUp animate__faster'
       }
     });
   }

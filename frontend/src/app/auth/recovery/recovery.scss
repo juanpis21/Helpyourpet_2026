@@ -138,11 +138,13 @@
   transform: scale(1.02);
 }
 
-.input-wrapper span {
+.input-wrapper i {
   position: absolute;
-  right: 12px;
+  right: 15px;
   top: 50%;
   transform: translateY(-50%);
+  color: #22c55e;
+  font-size: 18px;
 }
 
 /* BOTÓN */
@@ -190,11 +192,14 @@ button:active::after {
 
 /* MENSAJES */
 .message {
-  display: block !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   visibility: visible !important;
   opacity: 1 !important;
   margin-top: 15px;
-  padding: 8px 0;
+  padding: 8px 16px;
   border-radius: 12px;
   font-size: 15px;
   font-weight: bold;

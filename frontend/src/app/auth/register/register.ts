@@ -90,22 +90,46 @@ export class Register {
     // Validaciones
     if (!this.formData.nombres || !this.formData.apellidos || !this.formData.correo ||
         !this.formData.password || !this.formData.confirmPassword) {
-      this.errorMessage = 'Por favor, completa todos los campos obligatorios';
+      Swal.fire({
+        icon: 'error',
+        title: 'Datos no válidos',
+        text: 'Por favor, completa todos los campos obligatorios.',
+        confirmButtonColor: '#272c8b',
+        confirmButtonText: 'Intentar otra vez'
+      });
       return;
     }
 
     if (this.formData.password !== this.formData.confirmPassword) {
-      this.errorMessage = 'Las contraseñas no coinciden';
+      Swal.fire({
+        icon: 'error',
+        title: 'Datos no válidos',
+        text: 'Las contraseñas no coinciden.',
+        confirmButtonColor: '#272c8b',
+        confirmButtonText: 'Intentar otra vez'
+      });
       return;
     }
 
     if (this.formData.password.length < 6) {
-      this.errorMessage = 'La contraseña debe tener al menos 6 caracteres';
+      Swal.fire({
+        icon: 'error',
+        title: 'Datos no válidos',
+        text: 'La contraseña debe tener al menos 6 caracteres.',
+        confirmButtonColor: '#272c8b',
+        confirmButtonText: 'Intentar otra vez'
+      });
       return;
     }
 
     if (!this.formData.acepto) {
-      this.errorMessage = 'Debes aceptar los términos y condiciones';
+      Swal.fire({
+        icon: 'error',
+        title: 'Datos no válidos',
+        text: 'Debes aceptar los términos y condiciones.',
+        confirmButtonColor: '#272c8b',
+        confirmButtonText: 'Intentar otra vez'
+      });
       return;
     }
 
@@ -154,7 +178,23 @@ export class Register {
       },
       error: (error) => {
         this.isSubmitting = false;
-        this.errorMessage = '❌ Error al registrar: ' + (error.error?.message || 'El correo ya existe');
+        let errorMessage = 'El correo ingresado ya existe o los datos son incorrectos.';
+        
+        if (error.error?.message) {
+          if (Array.isArray(error.error.message)) {
+            errorMessage = error.error.message.join(', ');
+          } else {
+            errorMessage = error.error.message;
+          }
+        }
+
+        Swal.fire({
+          icon: 'error',
+          title: 'Datos no válidos',
+          text: errorMessage,
+          confirmButtonColor: '#272c8b',
+          confirmButtonText: 'Intentar otra vez'
+        });
         console.error('Register error:', error);
       }
     });

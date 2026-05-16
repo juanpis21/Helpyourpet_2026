@@ -15,7 +15,7 @@
     <div class="right-side">
 
       <div class="mail-icon">
-        {{ mode === 'request' ? '✉️' : '🔒' }}
+        <i class="fas" [ngClass]="mode === 'request' ? 'fa-envelope' : 'fa-lock'"></i>
       </div>
 
       <h2 *ngIf="mode === 'request'">Recuperar contraseña</h2>
@@ -38,7 +38,7 @@
             placeholder="Correo electrónico"
             formControlName="email"
           />
-          <span>📩</span>
+          <i class="fas fa-envelope"></i>
         </div>
 
         <!-- Campos de Contraseña (Modo reset o change) -->
@@ -48,7 +48,7 @@
             placeholder="Nueva contraseña"
             formControlName="nuevaContrasena"
           />
-          <span>🔒</span>
+          <i class="fas fa-lock"></i>
         </div>
 
         <div class="input-wrapper" *ngIf="isResetOrChange">
@@ -57,7 +57,7 @@
             placeholder="Confirmar nueva contraseña"
             formControlName="confirmarContrasena"
           />
-          <span>✅</span>
+          <i class="fas fa-check-circle"></i>
         </div>
 
         <button type="submit" [disabled]="isLoading || (recoveryForm.invalid && recoveryForm.touched)">
@@ -70,6 +70,7 @@
       </form>
 
       <div *ngIf="message" class="message" [ngClass]="messageType">
+        <i class="fas me-2" [ngClass]="messageType === 'success' ? 'fa-check-circle' : 'fa-times-circle'"></i>
         {{ message }}
       </div>
 
