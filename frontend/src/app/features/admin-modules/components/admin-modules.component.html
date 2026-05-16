@@ -41,7 +41,7 @@
       </li>
       <li>
         <a [class.active]="activeSection === 'categorias'" (click)="setSection('categorias')">
-          <i class="fas fa-tags"></i><span>CategorÃ­as</span>
+          <i class="fas fa-tags"></i><span>Categorías</span>
         </a>
       </li>
       <li>
@@ -61,12 +61,12 @@
       </li>
       <li>
         <a [class.active]="activeSection === 'configuracion'" (click)="setSection('configuracion')">
-          <i class="fas fa-cog"></i><span>ConfiguraciÃ³n</span>
+          <i class="fas fa-cog"></i><span>Configuración</span>
         </a>
       </li>
       <li class="separator">
         <a class="logout-link" (click)="logout()">
-          <i class="fas fa-sign-out-alt"></i><span>Cerrar SesiÃ³n</span>
+          <i class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span>
         </a>
       </li>
     </ul>
@@ -79,6 +79,7 @@
       <div class="section-header">
         <h1><i class="fas fa-home"></i> Panel de Control</h1>
         <div class="header-actions">
+          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
           
           <button class="theme-btn" (click)="toggleDarkMode()">
             <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
@@ -132,7 +133,7 @@
       <div class="charts-grid">
         <div class="chart-card">
           <div class="chart-header">
-            <h4><i class="fas fa-chart-pie"></i> DistribuciÃ³n de Usuarios</h4>
+            <h4><i class="fas fa-chart-pie"></i> Distribución de Usuarios</h4>
           </div>
           <div class="chart-body">
             <canvas id="userChart"></canvas>
@@ -152,8 +153,9 @@
     <!-- USUARIOS -->
     <section *ngIf="activeSection === 'usuarios'" class="content-section">
       <div class="section-header">
-        <h1><i class="fas fa-users"></i> GestiÃ³n de Usuarios</h1>
+        <h1><i class="fas fa-users"></i> Gestión de Usuarios</h1>
         <div class="header-actions">
+          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
           
           <button class="theme-btn" (click)="toggleDarkMode()">
             <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
@@ -187,8 +189,8 @@
                   <th>Usuario</th>
                   <th>Nombre</th>
                   <th>Apellido</th>
-                  <th>TelÃ©fono</th>
-                  <th>DirecciÃ³n</th>
+                  <th>Teléfono</th>
+                  <th>Dirección</th>
                   <th>Estado</th>
                   <th>Acciones</th>
                 </tr>
@@ -220,7 +222,7 @@
               </tbody>
             </table>
           </div>
-          <!-- PaginaciÃ³n Usuarios -->
+          <!-- Paginación Usuarios -->
           <div class="pagination-controls" *ngIf="filteredUsuariosList.length > itemsPerPage">
             <span class="pagination-info">Mostrando {{ (currentPageUsuarios - 1) * itemsPerPage + 1 }} - {{
               getMath().min(currentPageUsuarios * itemsPerPage, filteredUsuariosList.length) }} de {{
@@ -228,7 +230,7 @@
             <div class="pagination-buttons">
               <button class="btn-page" (click)="prevPage('usuarios')" [disabled]="currentPageUsuarios === 1"><i
                   class="fas fa-chevron-left"></i></button>
-              <span class="page-number">PÃ¡gina {{ currentPageUsuarios }} de {{ getTotalPages(filteredUsuariosList)
+              <span class="page-number">Página {{ currentPageUsuarios }} de {{ getTotalPages(filteredUsuariosList)
                 }}</span>
               <button class="btn-page" (click)="nextPage('usuarios', filteredUsuariosList)"
                 [disabled]="currentPageUsuarios === getTotalPages(filteredUsuariosList)"><i
@@ -242,8 +244,9 @@
     <!-- SERVICIOS -->
     <section *ngIf="activeSection === 'servicios'" class="content-section">
       <div class="section-header">
-        <h1><i class="fas fa-concierge-bell"></i> GestiÃ³n de Servicios</h1>
+        <h1><i class="fas fa-concierge-bell"></i> Gestión de Servicios</h1>
         <div class="header-actions">
+          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
           <button class="btn-primary" (click)="openAddServiceModal()">
             <i class="fas fa-plus"></i> Agregar Servicio
           </button>
@@ -256,7 +259,7 @@
 
       <div class="card">
         <div class="card-header">
-          <h5><i class="fas fa-list"></i> CatÃ¡logo de Servicios</h5>
+          <h5><i class="fas fa-list"></i> Catálogo de Servicios</h5>
         </div>
         <div class="card-body">
           <div class="search-bar-container" style="gap: 1rem; flex-wrap: wrap;">
@@ -320,7 +323,7 @@
               <i class="fas fa-spinner fa-spin"></i> Cargando servicios...
             </div>
           </div>
-          <!-- PaginaciÃ³n Servicios -->
+          <!-- Paginación Servicios -->
           <div class="pagination-controls" *ngIf="filteredServiciosList.length > itemsPerPage">
             <span class="pagination-info">Mostrando {{ (currentPageServicios - 1) * itemsPerPage + 1 }} - {{
               getMath().min(currentPageServicios * itemsPerPage, filteredServiciosList.length) }} de {{
@@ -328,7 +331,7 @@
             <div class="pagination-buttons">
               <button class="btn-page" (click)="prevPage('servicios')" [disabled]="currentPageServicios === 1"><i
                   class="fas fa-chevron-left"></i></button>
-              <span class="page-number">PÃ¡gina {{ currentPageServicios }} de {{ getTotalPages(filteredServiciosList)
+              <span class="page-number">Página {{ currentPageServicios }} de {{ getTotalPages(filteredServiciosList)
                 }}</span>
               <button class="btn-page" (click)="nextPage('servicios', filteredServiciosList)"
                 [disabled]="currentPageServicios === getTotalPages(filteredServiciosList)"><i
@@ -342,8 +345,9 @@
     <!-- VETERINARIAS -->
     <section *ngIf="activeSection === 'veterinarias'" class="content-section">
       <div class="section-header">
-        <h1><i class="fas fa-hospital"></i> GestiÃ³n de Veterinarias</h1>
+        <h1><i class="fas fa-hospital"></i> Gestión de Veterinarias</h1>
         <div class="header-actions">
+          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
           
           <button class="theme-btn" (click)="toggleDarkMode()">
             <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
@@ -369,8 +373,8 @@
                   <th>ID</th>
                   <th>Nombre</th>
                   <th>NIT</th>
-                  <th>DirecciÃ³n</th>
-                  <th>TelÃ©fono</th>
+                  <th>Dirección</th>
+                  <th>Teléfono</th>
                   <th>Email</th>
                   <th>Estado</th>
                   <th>Acciones</th>
@@ -409,7 +413,7 @@
               </tbody>
             </table>
           </div>
-          <!-- PaginaciÃ³n Veterinarias -->
+          <!-- Paginación Veterinarias -->
           <div class="pagination-controls" *ngIf="filteredVeterinariasList.length > itemsPerPage">
             <span class="pagination-info">Mostrando {{ (currentPageVeterinarias - 1) * itemsPerPage + 1 }} - {{
               getMath().min(currentPageVeterinarias * itemsPerPage, filteredVeterinariasList.length) }} de {{
@@ -417,7 +421,7 @@
             <div class="pagination-buttons">
               <button class="btn-page" (click)="prevPage('veterinarias')" [disabled]="currentPageVeterinarias === 1"><i
                   class="fas fa-chevron-left"></i></button>
-              <span class="page-number">PÃ¡gina {{ currentPageVeterinarias }} de {{
+              <span class="page-number">Página {{ currentPageVeterinarias }} de {{
                 getTotalPages(filteredVeterinariasList) }}</span>
               <button class="btn-page" (click)="nextPage('veterinarias', filteredVeterinariasList)"
                 [disabled]="currentPageVeterinarias === getTotalPages(filteredVeterinariasList)"><i
@@ -431,8 +435,9 @@
     <!-- VETERINARIOS -->
     <section *ngIf="activeSection === 'veterinarios'" class="content-section">
       <div class="section-header">
-        <h1><i class="fas fa-user-md"></i> GestiÃ³n de Veterinarios</h1>
+        <h1><i class="fas fa-user-md"></i> Gestión de Veterinarios</h1>
         <div class="header-actions">
+          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
           <button class="btn-primary" (click)="openAddVeterinarioModal()">
             <i class="fas fa-plus"></i> Agregar Veterinario
           </button>
@@ -452,7 +457,7 @@
             <div class="search-input-wrapper">
               <i class="fas fa-search"></i>
               <input type="text" [(ngModel)]="searchTermVeterinarios"
-                placeholder="Buscar por nombre, especialidad o matrÃ­cula...">
+                placeholder="Buscar por nombre, especialidad o matrícula...">
             </div>
             <div class="filter-wrapper">
               <select [(ngModel)]="filterEstadoVeterinarios" class="form-control" style="padding: 0.6rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); outline: none;">
@@ -476,7 +481,7 @@
                   <th>Usuario</th>
                   <th>Nombre Completo</th>
                   <th>Especialidad</th>
-                  <th>MatrÃ­cula</th>
+                  <th>Matrícula</th>
                   <th>Email Profesional</th>
                   <th>Veterinaria</th>
                   <th>Estado</th>
@@ -520,7 +525,7 @@
               </tbody>
             </table>
           </div>
-          <!-- PaginaciÃ³n Veterinarios -->
+          <!-- Paginación Veterinarios -->
           <div class="pagination-controls" *ngIf="filteredVeterinariosList.length > itemsPerPage">
             <span class="pagination-info">Mostrando {{ (currentPageVeterinarios - 1) * itemsPerPage + 1 }} - {{
               getMath().min(currentPageVeterinarios * itemsPerPage, filteredVeterinariosList.length) }} de {{
@@ -528,7 +533,7 @@
             <div class="pagination-buttons">
               <button class="btn-page" (click)="prevPage('veterinarios')" [disabled]="currentPageVeterinarios === 1"><i
                   class="fas fa-chevron-left"></i></button>
-              <span class="page-number">PÃ¡gina {{ currentPageVeterinarios }} de {{
+              <span class="page-number">Página {{ currentPageVeterinarios }} de {{
                 getTotalPages(filteredVeterinariosList) }}</span>
               <button class="btn-page" (click)="nextPage('veterinarios', filteredVeterinariosList)"
                 [disabled]="currentPageVeterinarios === getTotalPages(filteredVeterinariosList)"><i
@@ -542,8 +547,9 @@
     <!-- PRODUCTOS -->
     <section *ngIf="activeSection === 'productos'" class="content-section">
       <div class="section-header">
-        <h1><i class="fas fa-boxes"></i> GestiÃ³n de Productos</h1>
+        <h1><i class="fas fa-boxes"></i> Gestión de Productos</h1>
         <div class="header-actions">
+          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
           <button class="btn-primary" (click)="openAddProductoModal()">
             <i class="fas fa-plus"></i> Agregar Producto
           </button>
@@ -564,7 +570,7 @@
             <div class="search-input-wrapper">
               <i class="fas fa-search"></i>
               <input type="text" [(ngModel)]="searchTermProductos"
-                placeholder="Buscar por nombre, categorÃ­a o cÃ³digo...">
+                placeholder="Buscar por nombre, categoría o código...">
             </div>
             <div class="filter-wrapper">
               <select [(ngModel)]="filterEstadoProductos" class="form-control" style="padding: 0.6rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); outline: none;">
@@ -588,7 +594,7 @@
                   <th>ID</th>
                   <th>Imagen</th>
                   <th>Nombre</th>
-                  <th>CategorÃ­a</th>
+                  <th>Categoría</th>
                   <th>Stock</th>
                   <th>P. Compra</th>
                   <th>P. Venta</th>
@@ -614,7 +620,7 @@
                       style="font-weight: 600;">
                       {{ prod.stockActual }}
                     </span>
-                    <small style="opacity: 0.6;"> / mÃ­n: {{ prod.stockMinimo }}</small>
+                    <small style="opacity: 0.6;"> / mín: {{ prod.stockMinimo }}</small>
                   </td>
                   <td>${{ prod.precioCompra }}</td>
                   <td>${{ prod.precioVenta }}</td>
@@ -649,7 +655,7 @@
               </tbody>
             </table>
           </div>
-          <!-- PaginaciÃ³n Productos -->
+          <!-- Paginación Productos -->
           <div class="pagination-controls" *ngIf="filteredProductosList.length > itemsPerPage">
             <span class="pagination-info">Mostrando {{ (currentPageProductos - 1) * itemsPerPage + 1 }} - {{
               getMath().min(currentPageProductos * itemsPerPage, filteredProductosList.length) }} de {{
@@ -657,7 +663,7 @@
             <div class="pagination-buttons">
               <button class="btn-page" (click)="prevPage('productos')" [disabled]="currentPageProductos === 1"><i
                   class="fas fa-chevron-left"></i></button>
-              <span class="page-number">PÃ¡gina {{ currentPageProductos }} de {{ getTotalPages(filteredProductosList)
+              <span class="page-number">Página {{ currentPageProductos }} de {{ getTotalPages(filteredProductosList)
                 }}</span>
               <button class="btn-page" (click)="nextPage('productos', filteredProductosList)"
                 [disabled]="currentPageProductos === getTotalPages(filteredProductosList)"><i
@@ -668,13 +674,14 @@
       </div>
     </section>
 
-    <!-- GESTIÃ“N DE CATEGORÃAS -->
+    <!-- GESTIÃ“N DE CATEGORÍAS -->
     <section *ngIf="activeSection === 'categorias'" class="content-section">
       <div class="section-header">
-        <h1><i class="fas fa-tags"></i> GestiÃ³n de CategorÃ­as</h1>
+        <h1><i class="fas fa-tags"></i> Gestión de Categorías</h1>
         <div class="header-actions">
+          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
           <button class="btn-primary" (click)="openAddCategoriaModal()">
-            <i class="fas fa-plus"></i> Nueva CategorÃ­a
+            <i class="fas fa-plus"></i> Nueva Categoría
           </button>
           
           <button class="theme-btn" (click)="toggleDarkMode()">
@@ -686,16 +693,16 @@
 
       <div class="card">
         <div class="card-header">
-          <h5><i class="fas fa-layer-group"></i> Listado de CategorÃ­as</h5>
+          <h5><i class="fas fa-layer-group"></i> Listado de Categorías</h5>
         </div>
         <div class="card-body">
           <div class="table-container">
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>CÃ³digo</th>
+                  <th>Código</th>
                   <th>Nombre</th>
-                  <th>DescripciÃ³n</th>
+                  <th>Descripción</th>
                   <th>Estado</th>
                   <th>Acciones</th>
                 </tr>
@@ -704,7 +711,7 @@
                 <tr *ngFor="let cat of categorias">
                   <td><strong>{{ cat.codigo }}</strong></td>
                   <td>{{ cat.nombre }}</td>
-                  <td>{{ cat.descripcion || 'Sin descripciÃ³n' }}</td>
+                  <td>{{ cat.descripcion || 'Sin descripción' }}</td>
                   <td>
                     <span class="status-pill" [class.active]="cat.isActive">
                       {{ cat.isActive ? 'Activa' : 'Inactiva' }}
@@ -738,6 +745,7 @@
       <div class="section-header">
         <h1><i class="fas fa-warehouse"></i> Inventario General</h1>
         <div class="header-actions">
+          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
           
           <button class="theme-btn" (click)="toggleDarkMode()">
             <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
@@ -755,13 +763,13 @@
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>CÃ³digo / SKU</th>
+                  <th>Código / SKU</th>
                   <th>Producto</th>
-                  <th>CategorÃ­a</th>
+                  <th>Categoría</th>
                   <th>Existencias</th>
-                  <th>Stock MÃ­nimo</th>
+                  <th>Stock Mínimo</th>
                   <th>Precio Venta</th>
-                  <th>UbicaciÃ³n</th>
+                  <th>Ubicación</th>
                   <th>Lote</th>
                   <th>Vencimiento</th>
                 </tr>
@@ -809,8 +817,9 @@
     <!-- CONFIGURACIÃ“N (Settings) -->
     <section *ngIf="activeSection === 'configuracion'" class="content-section">
       <div class="section-header">
-        <h1><i class="fas fa-cog"></i> ConfiguraciÃ³n de Perfil</h1>
+        <h1><i class="fas fa-cog"></i> Configuración de Perfil</h1>
         <div class="header-actions">
+          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
           
           <button class="theme-btn" (click)="toggleDarkMode()">
             <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
@@ -821,7 +830,7 @@
 
       <div class="card">
         <div class="card-header">
-          <h5><i class="fas fa-user-edit"></i> InformaciÃ³n Personal</h5>
+          <h5><i class="fas fa-user-edit"></i> Información Personal</h5>
         </div>
         <div class="card-body">
           <div class="profile-settings-layout">
@@ -835,7 +844,7 @@
                   <input type="file" (change)="onAdminProfileImageSelected($event)" accept="image/*" hidden>
                 </label>
               </div>
-              <p class="photo-hint">TamaÃ±o recomendado: 500x500px</p>
+              <p class="photo-hint">Tamaño recomendado: 500x500px</p>
             </div>
 
             <!-- Columna de Datos (Grid de 2 columnas) -->
@@ -850,20 +859,20 @@
                   <input type="text" [(ngModel)]="adminUser.apellidos" placeholder="Tus apellidos">
                 </div>
                 <div class="form-group">
-                  <label><i class="fas fa-envelope"></i> Correo ElectrÃ³nico</label>
+                  <label><i class="fas fa-envelope"></i> Correo Electrónico</label>
                   <input type="email" [(ngModel)]="adminUser.correo" placeholder="admin@ejemplo.com">
                 </div>
                 <div class="form-group">
-                  <label><i class="fas fa-phone"></i> TelÃ©fono</label>
-                  <input type="text" [(ngModel)]="adminUser.telefono" placeholder="NÃºmero de contacto">
+                  <label><i class="fas fa-phone"></i> Teléfono</label>
+                  <input type="text" [(ngModel)]="adminUser.telefono" placeholder="Número de contacto">
                 </div>
                 <div class="form-group">
-                  <label><i class="fas fa-id-card"></i> NÃºmero Documento</label>
-                  <input type="text" [(ngModel)]="adminUser.numDocumento" placeholder="ID / CÃ©dula">
+                  <label><i class="fas fa-id-card"></i> Número Documento</label>
+                  <input type="text" [(ngModel)]="adminUser.numDocumento" placeholder="ID / Cédula">
                 </div>
                 <div class="form-group">
-                  <label><i class="fas fa-map-marker-alt"></i> DirecciÃ³n</label>
-                  <input type="text" [(ngModel)]="adminUser.direccion" placeholder="DirecciÃ³n de residencia">
+                  <label><i class="fas fa-map-marker-alt"></i> Dirección</label>
+                  <input type="text" [(ngModel)]="adminUser.direccion" placeholder="Dirección de residencia">
                 </div>
               </div>
               <div class="form-actions">
@@ -884,17 +893,17 @@
           </div>
           <div class="card-body">
             <p style="margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.9rem;">
-              Protege tu cuenta actualizando tu contraseÃ±a regularmente.
+              Protege tu cuenta actualizando tu contraseña regularmente.
             </p>
             <div class="form-group" style="margin-bottom: 1.5rem;">
-              <label><i class="fas fa-lock"></i> Nueva ContraseÃ±a</label>
+              <label><i class="fas fa-lock"></i> Nueva Contraseña</label>
               <div style="position: relative;">
-                <input type="password" [(ngModel)]="newPassword" name="newPassword" placeholder="MÃ­nimo 8 caracteres"
+                <input type="password" [(ngModel)]="newPassword" name="newPassword" placeholder="Mínimo 8 caracteres"
                   style="width: 100%;">
               </div>
             </div>
             <button class="btn-secondary" style="width: 100%; justify-content: center;" (click)="cambiarPassword()">
-              <i class="fas fa-key"></i> Cambiar ContraseÃ±a
+              <i class="fas fa-key"></i> Cambiar Contraseña
             </button>
           </div>
         </div>
@@ -902,12 +911,12 @@
 
         <div class="card">
           <div class="card-header" style="background: #fef2f2 !important;">
-            <h5 style="color: #a81111;"><i class="fas fa-exclamation-triangle"></i> DesactivaciÃ³n de cuenta</h5>
+            <h5 style="color: #a81111;"><i class="fas fa-exclamation-triangle"></i> Desactivación de cuenta</h5>
           </div>
           <div class="card-body"
             style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 1.5rem; padding: 2rem;">
             <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">
-              La desactivaciÃ³n de cuenta es una acciÃ³n reversible.
+              La desactivación de cuenta es una acción reversible.
             </p>
             <button class="btn-icon delete"
               style="width: auto; padding: 0.6rem 1.5rem; border-radius: 8px; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;"
@@ -924,6 +933,7 @@
       <div class="section-header">
         <h1><i class="fas fa-ticket-alt"></i> Soporte / Tickets</h1>
         <div class="header-actions">
+          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
           <button class="btn-primary" (click)="openTicketModal()">
             <i class="fas fa-plus"></i> Nuevo Ticket
           </button>
@@ -980,7 +990,7 @@
 
       <div *ngIf="misTickets.length === 0" class="empty-state">
         <i class="fas fa-ticket-alt"></i>
-        <p>No has creado ningÃºn ticket aÃºn</p>
+        <p>No has creado ningún ticket aún</p>
       </div>
     </section>
 
@@ -1003,9 +1013,9 @@
           <label>Tipo *</label>
           <select [(ngModel)]="newService.tipoServicio">
             <option value="CONSULTA">Consulta</option>
-            <option value="CIRUGIA">CirugÃ­a</option>
-            <option value="VACUNACION">VacunaciÃ³n</option>
-            <option value="ESTETICA">EstÃ©tica</option>
+            <option value="CIRUGIA">Cirugía</option>
+            <option value="VACUNACION">Vacunación</option>
+            <option value="ESTETICA">Estética</option>
           </select>
         </div>
         <div class="form-group">
@@ -1032,7 +1042,7 @@
           </div>
         </div>
         <div class="form-group full">
-          <label>DescripciÃ³n</label>
+          <label>Descripción</label>
           <textarea [(ngModel)]="newService.descripcion" rows="3"></textarea>
         </div>
       </div>
@@ -1060,9 +1070,9 @@
           <label>Tipo *</label>
           <select [(ngModel)]="editingService.tipoServicio">
             <option value="CONSULTA">Consulta</option>
-            <option value="CIRUGIA">CirugÃ­a</option>
-            <option value="VACUNACION">VacunaciÃ³n</option>
-            <option value="ESTETICA">EstÃ©tica</option>
+            <option value="CIRUGIA">Cirugía</option>
+            <option value="VACUNACION">Vacunación</option>
+            <option value="ESTETICA">Estética</option>
           </select>
         </div>
         <div class="form-group">
@@ -1088,7 +1098,7 @@
           </div>
         </div>
         <div class="form-group full">
-          <label>DescripciÃ³n</label>
+          <label>Descripción</label>
           <textarea [(ngModel)]="editingService.descripcion" rows="3"></textarea>
         </div>
       </div>
@@ -1111,7 +1121,7 @@
     <div class="modal-body">
       <div style="margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
         <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-          <i class="fas fa-id-card"></i> InformaciÃ³n Personal
+          <i class="fas fa-id-card"></i> Información Personal
         </h4>
       </div>
       <div class="form-grid">
@@ -1121,26 +1131,26 @@
         </div>
         <div class="form-group">
           <label><i class="fas fa-user"></i> Apellido *</label>
-          <input type="text" [(ngModel)]="newUser.lastName" placeholder="Ej: PÃ©rez">
+          <input type="text" [(ngModel)]="newUser.lastName" placeholder="Ej: Pérez">
         </div>
         <div class="form-group">
           <label><i class="fas fa-user-circle"></i> Nombre de Usuario *</label>
           <input type="text" [(ngModel)]="newUser.username" placeholder="Ej: juanperez123">
         </div>
         <div class="form-group">
-          <label><i class="fas fa-envelope"></i> Correo ElectrÃ³nico *</label>
+          <label><i class="fas fa-envelope"></i> Correo Electrónico *</label>
           <input type="email" [(ngModel)]="newUser.email" placeholder="correo@ejemplo.com">
         </div>
         <div class="form-group">
-          <label><i class="fas fa-lock"></i> ContraseÃ±a *</label>
-          <input type="password" [(ngModel)]="newUser.password" placeholder="MÃ­nimo 6 caracteres">
+          <label><i class="fas fa-lock"></i> Contraseña *</label>
+          <input type="password" [(ngModel)]="newUser.password" placeholder="Mínimo 6 caracteres">
         </div>
         <div class="form-group">
-          <label><i class="fas fa-phone"></i> TelÃ©fono</label>
+          <label><i class="fas fa-phone"></i> Teléfono</label>
           <input type="text" [(ngModel)]="newUser.phone" placeholder="+57 300...">
         </div>
         <div class="form-group">
-          <label><i class="fas fa-map-marker-alt"></i> DirecciÃ³n</label>
+          <label><i class="fas fa-map-marker-alt"></i> Dirección</label>
           <input type="text" [(ngModel)]="newUser.address" placeholder="Calle 123 #45-67">
         </div>
       </div>
@@ -1183,11 +1193,11 @@
           <input type="number" [(ngModel)]="editingUser.age">
         </div>
         <div class="form-group">
-          <label><i class="fas fa-phone"></i> TelÃ©fono</label>
+          <label><i class="fas fa-phone"></i> Teléfono</label>
           <input type="text" [(ngModel)]="editingUser.phone">
         </div>
         <div class="form-group full">
-          <label><i class="fas fa-map-marker-alt"></i> DirecciÃ³n</label>
+          <label><i class="fas fa-map-marker-alt"></i> Dirección</label>
           <input type="text" [(ngModel)]="editingUser.address">
         </div>
       </div>
@@ -1214,34 +1224,34 @@
     <div class="modal-body">
       <div style="margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
         <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-          <i class="fas fa-info-circle"></i> InformaciÃ³n de la ClÃ­nica
+          <i class="fas fa-info-circle"></i> Información de la Clínica
         </h4>
       </div>
       <div class="form-grid">
         <div class="form-group full">
           <label><i class="fas fa-building"></i> Nombre de la Sede *</label>
-          <input type="text" [(ngModel)]="newVeterinaria.nombre" placeholder="Ej: ClÃ­nica San Francisco">
+          <input type="text" [(ngModel)]="newVeterinaria.nombre" placeholder="Ej: Clínica San Francisco">
         </div>
         <div class="form-group">
           <label><i class="fas fa-id-card-alt"></i> NIT / RUT *</label>
           <input type="text" [(ngModel)]="newVeterinaria.rut" placeholder="Ej: 900.123.456-1">
         </div>
         <div class="form-group">
-          <label><i class="fas fa-phone-alt"></i> TelÃ©fono *</label>
+          <label><i class="fas fa-phone-alt"></i> Teléfono *</label>
           <input type="tel" [(ngModel)]="newVeterinaria.telefono" placeholder="Ej: +57 300...">
         </div>
         <div class="form-group">
-          <label><i class="fas fa-envelope"></i> Correo ElectrÃ³nico *</label>
+          <label><i class="fas fa-envelope"></i> Correo Electrónico *</label>
           <input type="email" [(ngModel)]="newVeterinaria.email" placeholder="contacto@veterinaria.com">
         </div>
         <div class="form-group">
-          <label><i class="fas fa-map-marker-alt"></i> DirecciÃ³n *</label>
+          <label><i class="fas fa-map-marker-alt"></i> Dirección *</label>
           <input type="text" [(ngModel)]="newVeterinaria.direccion" placeholder="Ej: Calle 45 #12-34">
         </div>
         <div class="form-group full">
-          <label><i class="fas fa-align-left"></i> DescripciÃ³n</label>
+          <label><i class="fas fa-align-left"></i> Descripción</label>
           <textarea [(ngModel)]="newVeterinaria.descripcion" rows="3"
-            placeholder="Escribe aquÃ­ los servicios o informaciÃ³n de la sede..."></textarea>
+            placeholder="Escribe aquí los servicios o información de la sede..."></textarea>
         </div>
       </div>
     </div>
@@ -1266,7 +1276,7 @@
     <div class="modal-body">
       <div style="margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
         <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-          <i class="fas fa-info-circle"></i> InformaciÃ³n de la ClÃ­nica
+          <i class="fas fa-info-circle"></i> Información de la Clínica
         </h4>
       </div>
       <div class="form-grid">
@@ -1279,19 +1289,19 @@
           <input type="text" [(ngModel)]="editingVeterinaria.rut">
         </div>
         <div class="form-group">
-          <label><i class="fas fa-phone-alt"></i> TelÃ©fono</label>
+          <label><i class="fas fa-phone-alt"></i> Teléfono</label>
           <input type="tel" [(ngModel)]="editingVeterinaria.telefono">
         </div>
         <div class="form-group">
-          <label><i class="fas fa-envelope"></i> Correo ElectrÃ³nico</label>
+          <label><i class="fas fa-envelope"></i> Correo Electrónico</label>
           <input type="email" [(ngModel)]="editingVeterinaria.email">
         </div>
         <div class="form-group">
-          <label><i class="fas fa-map-marker-alt"></i> DirecciÃ³n</label>
+          <label><i class="fas fa-map-marker-alt"></i> Dirección</label>
           <input type="text" [(ngModel)]="editingVeterinaria.direccion">
         </div>
         <div class="form-group full">
-          <label><i class="fas fa-align-left"></i> DescripciÃ³n</label>
+          <label><i class="fas fa-align-left"></i> Descripción</label>
           <textarea [(ngModel)]="editingVeterinaria.descripcion" rows="3"></textarea>
         </div>
       </div>
@@ -1327,9 +1337,9 @@
           <input type="text" [(ngModel)]="newProducto.nombre" placeholder="Ej: Ivermectina 1%">
         </div>
         <div class="form-group">
-          <label><i class="fas fa-list-ul"></i> CategorÃ­a *</label>
+          <label><i class="fas fa-list-ul"></i> Categoría *</label>
           <select [(ngModel)]="newProducto.categoriaId">
-            <option [ngValue]="0">Seleccionar CategorÃ­a</option>
+            <option [ngValue]="0">Seleccionar Categoría</option>
             <option *ngFor="let cat of categorias" [ngValue]="cat.id">{{ cat.nombre }}</option>
           </select>
         </div>
@@ -1341,7 +1351,7 @@
           </select>
         </div>
         <div class="form-group">
-          <label><i class="fas fa-barcode"></i> CÃ³digo de Barras</label>
+          <label><i class="fas fa-barcode"></i> Código de Barras</label>
           <input type="text" [(ngModel)]="newProducto.codigoBarras" placeholder="SKU-123">
         </div>
         <div class="form-group">
@@ -1351,7 +1361,7 @@
             <option value="ml">Mililitros (ml)</option>
             <option value="mg">Miligramos (mg)</option>
             <option value="tabletas">Tabletas</option>
-            <option value="capsulas">CÃ¡psulas</option>
+            <option value="capsulas">Cápsulas</option>
             <option value="kg">Kilogramos (kg)</option>
           </select>
         </div>
@@ -1360,7 +1370,7 @@
           <input type="number" [(ngModel)]="newProducto.stockActual" min="0">
         </div>
         <div class="form-group">
-          <label><i class="fas fa-exclamation-triangle"></i> Stock MÃ­nimo *</label>
+          <label><i class="fas fa-exclamation-triangle"></i> Stock Mínimo *</label>
           <input type="number" [(ngModel)]="newProducto.stockMinimo" min="0">
         </div>
         <div class="form-group">
@@ -1373,7 +1383,7 @@
         </div>
         <div class="form-group">
           <label><i class="fas fa-layer-group"></i> Lote</label>
-          <input type="text" [(ngModel)]="newProducto.lote" placeholder="CÃ³d. Lote">
+          <input type="text" [(ngModel)]="newProducto.lote" placeholder="Cód. Lote">
         </div>
         <div class="form-group">
           <label><i class="fas fa-calendar-times"></i> Vencimiento</label>
@@ -1392,9 +1402,9 @@
           </div>
         </div>
         <div class="form-group full">
-          <label><i class="fas fa-align-left"></i> DescripciÃ³n del Producto</label>
+          <label><i class="fas fa-align-left"></i> Descripción del Producto</label>
           <textarea [(ngModel)]="newProducto.descripcion" rows="2"
-            placeholder="Escribe aquÃ­ los beneficios o indicaciones..."></textarea>
+            placeholder="Escribe aquí los beneficios o indicaciones..."></textarea>
         </div>
       </div>
     </div>
@@ -1428,7 +1438,7 @@
           <input type="text" [(ngModel)]="editingProducto.nombre">
         </div>
         <div class="form-group">
-          <label><i class="fas fa-list-ul"></i> CategorÃ­a</label>
+          <label><i class="fas fa-list-ul"></i> Categoría</label>
           <select [(ngModel)]="editingProducto.categoriaId">
             <option *ngFor="let cat of categorias" [ngValue]="cat.id">{{ cat.nombre }}</option>
           </select>
@@ -1440,7 +1450,7 @@
           </select>
         </div>
         <div class="form-group">
-          <label><i class="fas fa-barcode"></i> CÃ³digo de Barras</label>
+          <label><i class="fas fa-barcode"></i> Código de Barras</label>
           <input type="text" [(ngModel)]="editingProducto.codigoBarras">
         </div>
         <div class="form-group">
@@ -1450,7 +1460,7 @@
             <option value="ml">Mililitros (ml)</option>
             <option value="mg">Miligramos (mg)</option>
             <option value="tabletas">Tabletas</option>
-            <option value="capsulas">CÃ¡psulas</option>
+            <option value="capsulas">Cápsulas</option>
             <option value="kg">Kilogramos (kg)</option>
           </select>
         </div>
@@ -1459,7 +1469,7 @@
           <input type="number" [(ngModel)]="editingProducto.stockActual" min="0">
         </div>
         <div class="form-group">
-          <label><i class="fas fa-exclamation-triangle"></i> Stock MÃ­nimo</label>
+          <label><i class="fas fa-exclamation-triangle"></i> Stock Mínimo</label>
           <input type="number" [(ngModel)]="editingProducto.stockMinimo" min="0">
         </div>
         <div class="form-group">
@@ -1491,7 +1501,7 @@
           </div>
         </div>
         <div class="form-group full">
-          <label><i class="fas fa-align-left"></i> DescripciÃ³n del Producto</label>
+          <label><i class="fas fa-align-left"></i> Descripción del Producto</label>
           <textarea [(ngModel)]="editingProducto.descripcion" rows="2"></textarea>
         </div>
       </div>
@@ -1509,39 +1519,39 @@
 <div class="modal-overlay" *ngIf="showAddCategoriaModal" (click)="closeAddCategoriaModal()">
   <div class="modal-box" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h3>Registrar Nueva CategorÃ­a</h3>
+      <h3>Registrar Nueva Categoría</h3>
       <button class="close-btn" (click)="closeAddCategoriaModal()">&times;</button>
     </div>
     <div class="modal-body">
       <div class="form-grid">
         <div class="form-group full">
-          <label>Nombre de CategorÃ­a *</label>
+          <label>Nombre de Categoría *</label>
           <input type="text" [(ngModel)]="newCategoria.nombre" placeholder="Ej: Alimentos">
         </div>
 
         <div class="form-group">
-          <label>CÃ³digo Interno *</label>
+          <label>Código Interno *</label>
           <input type="text" [(ngModel)]="newCategoria.codigo" placeholder="Ej: CAT-001">
         </div>
 
         <div class="form-group full">
-          <label>DescripciÃ³n</label>
-          <textarea [(ngModel)]="newCategoria.descripcion" placeholder="Escribe una breve descripciÃ³n..."
+          <label>Descripción</label>
+          <textarea [(ngModel)]="newCategoria.descripcion" placeholder="Escribe una breve descripción..."
             rows="3"></textarea>
         </div>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn-secondary" (click)="closeAddCategoriaModal()">Cancelar</button>
-      <button class="btn-primary" (click)="guardarCategoria()">Registrar CategorÃ­a</button>
+      <button class="btn-primary" (click)="guardarCategoria()">Registrar Categoría</button>
     </div>
   </div>
 </div>
-<!-- Modal Editar CategorÃ­a -->
+<!-- Modal Editar Categoría -->
 <div class="modal-overlay" *ngIf="showEditCategoriaModal" (click)="closeEditCategoriaModal()">
   <div class="modal-box" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h3>Editar CategorÃ­a</h3>
+      <h3>Editar Categoría</h3>
       <button class="close-btn" (click)="closeEditCategoriaModal()">&times;</button>
     </div>
     <div class="modal-body">
@@ -1552,12 +1562,12 @@
         </div>
 
         <div class="form-group">
-          <label>CÃ³digo *</label>
+          <label>Código *</label>
           <input type="text" [(ngModel)]="editingCategoria.codigo">
         </div>
 
         <div class="form-group full">
-          <label>DescripciÃ³n</label>
+          <label>Descripción</label>
           <textarea [(ngModel)]="editingCategoria.descripcion" rows="3"></textarea>
         </div>
       </div>
@@ -1580,7 +1590,7 @@
     <div class="modal-body">
       <div style="margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
         <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-          <i class="fas fa-id-card"></i> InformaciÃ³n del Veterinario
+          <i class="fas fa-id-card"></i> Información del Veterinario
         </h4>
       </div>
 
@@ -1591,34 +1601,34 @@
         </div>
         <div class="form-group">
           <label><i class="fas fa-user"></i> Apellidos *</label>
-          <input type="text" [(ngModel)]="newVeterinario.lastName" placeholder="Ej: PÃ©rez GarcÃ­a">
+          <input type="text" [(ngModel)]="newVeterinario.lastName" placeholder="Ej: Pérez García">
         </div>
         <div class="form-group">
           <label><i class="fas fa-user-circle"></i> Nombre de Usuario *</label>
           <input type="text" [(ngModel)]="newVeterinario.username" placeholder="Ej: dr_perez">
         </div>
         <div class="form-group">
-          <label><i class="fas fa-envelope"></i> Correo ElectrÃ³nico *</label>
+          <label><i class="fas fa-envelope"></i> Correo Electrónico *</label>
           <input type="email" [(ngModel)]="newVeterinario.email" placeholder="correo@ejemplo.com">
         </div>
         <div class="form-group">
-          <label><i class="fas fa-lock"></i> ContraseÃ±a *</label>
-          <input type="password" [(ngModel)]="newVeterinario.password" placeholder="MÃ­nimo 6 caracteres">
+          <label><i class="fas fa-lock"></i> Contraseña *</label>
+          <input type="password" [(ngModel)]="newVeterinario.password" placeholder="Mínimo 6 caracteres">
         </div>
         <div class="form-group">
-          <label><i class="fas fa-phone"></i> TelÃ©fono</label>
+          <label><i class="fas fa-phone"></i> Teléfono</label>
           <input type="text" [(ngModel)]="newVeterinario.phone" placeholder="+57 300...">
         </div>
         <div class="form-group">
           <label><i class="fas fa-id-card"></i> Tipo Documento</label>
           <select [(ngModel)]="newVeterinario.documentType">
             <option value="">Seleccionar</option>
-            <option value="CÃ©dula">CÃ©dula</option>
+            <option value="Cédula">Cédula</option>
             <option value="Pasaporte">Pasaporte</option>
           </select>
         </div>
         <div class="form-group">
-          <label><i class="fas fa-hashtag"></i> NÃºmero Documento *</label>
+          <label><i class="fas fa-hashtag"></i> Número Documento *</label>
           <input type="text" [(ngModel)]="newVeterinario.documentNumber" placeholder="12345678">
         </div>
         <div class="form-group">
@@ -1626,28 +1636,28 @@
           <input type="number" [(ngModel)]="newVeterinario.age" min="18">
         </div>
         <div class="form-group">
-          <label><i class="fas fa-map-marker-alt"></i> DirecciÃ³n</label>
+          <label><i class="fas fa-map-marker-alt"></i> Dirección</label>
           <input type="text" [(ngModel)]="newVeterinario.address" placeholder="Calle 123 #45-67">
         </div>
       </div>
 
       <div style="margin: 2rem 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
         <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-          <i class="fas fa-graduation-cap"></i> InformaciÃ³n Profesional
+          <i class="fas fa-graduation-cap"></i> Información Profesional
         </h4>
       </div>
 
       <div class="form-grid">
         <div class="form-group">
           <label><i class="fas fa-stethoscope"></i> Especialidad *</label>
-          <input type="text" [(ngModel)]="newVeterinario.especialidad" placeholder="Ej: CirugÃ­a, DermatologÃ­a...">
+          <input type="text" [(ngModel)]="newVeterinario.especialidad" placeholder="Ej: Cirugía, Dermatología...">
         </div>
         <div class="form-group">
-          <label><i class="fas fa-certificate"></i> MatrÃ­cula Profesional *</label>
+          <label><i class="fas fa-certificate"></i> Matrícula Profesional *</label>
           <input type="text" [(ngModel)]="newVeterinario.matricula" placeholder="MV-12345">
         </div>
         <div class="form-group">
-          <label><i class="fas fa-clock"></i> AÃ±os de Experiencia</label>
+          <label><i class="fas fa-clock"></i> Años de Experiencia</label>
           <input type="number" [(ngModel)]="newVeterinario.aniosExperiencia" min="0">
         </div>
         <div class="form-group">
@@ -1683,7 +1693,7 @@
     <div class="modal-body">
       <div style="margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
         <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-          <i class="fas fa-id-card"></i> InformaciÃ³n del Veterinario
+          <i class="fas fa-id-card"></i> Información del Veterinario
         </h4>
       </div>
 
@@ -1697,11 +1707,11 @@
           <input type="text" [(ngModel)]="editingUsuario.lastName">
         </div>
         <div class="form-group">
-          <label><i class="fas fa-envelope"></i> Correo ElectrÃ³nico</label>
+          <label><i class="fas fa-envelope"></i> Correo Electrónico</label>
           <input type="email" [(ngModel)]="editingUsuario.email">
         </div>
         <div class="form-group">
-          <label><i class="fas fa-phone"></i> TelÃ©fono</label>
+          <label><i class="fas fa-phone"></i> Teléfono</label>
           <input type="text" [(ngModel)]="editingUsuario.phone">
         </div>
         <div class="form-group">
@@ -1709,20 +1719,20 @@
           <input type="number" [(ngModel)]="editingUsuario.age" min="18">
         </div>
         <div class="form-group">
-          <label><i class="fas fa-map-marker-alt"></i> DirecciÃ³n</label>
+          <label><i class="fas fa-map-marker-alt"></i> Dirección</label>
           <input type="text" [(ngModel)]="editingUsuario.address">
         </div>
       </div>
 
       <div style="margin: 2rem 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light);">
         <h4 style="color: var(--primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-          <i class="fas fa-graduation-cap"></i> InformaciÃ³n Profesional
+          <i class="fas fa-graduation-cap"></i> Información Profesional
         </h4>
       </div>
 
       <div class="form-grid">
         <div class="form-group">
-          <label><i class="fas fa-certificate"></i> MatrÃ­cula Profesional <small>(Lectura)</small></label>
+          <label><i class="fas fa-certificate"></i> Matrícula Profesional <small>(Lectura)</small></label>
           <input type="text" [(ngModel)]="editingVeterinario.matricula" readonly
             style="background-color: #f5f5f5; cursor: not-allowed;">
         </div>
@@ -1731,20 +1741,13 @@
           <input type="text" [(ngModel)]="editingVeterinario.especialidad">
         </div>
         <div class="form-group">
-          <label><i class="fas fa-clock"></i> AÃ±os de Experiencia</label>
+          <label><i class="fas fa-clock"></i> Años de Experiencia</label>
           <input type="number" [(ngModel)]="editingVeterinario.aniosExperiencia">
         </div>
         <div class="form-group">
           <label><i class="fas fa-university"></i> Universidad <small>(Lectura)</small></label>
           <input type="text" [(ngModel)]="editingVeterinario.universidad" readonly
             style="background-color: #f5f5f5; cursor: not-allowed;">
-        </div>
-        <div class="form-group">
-          <label><i class="fas fa-hospital"></i> Veterinaria Principal</label>
-          <select [(ngModel)]="editingVeterinario.veterinariaPrincipalId">
-            <option [ngValue]="0">Seleccionar Veterinaria</option>
-            <option *ngFor="let vet of veterinarias" [ngValue]="vet.id">{{ vet.nombre }}</option>
-          </select>
         </div>
       </div>
     </div>
@@ -1781,7 +1784,7 @@
           </select>
         </div>
         <div class="form-group full">
-          <label>DescripciÃ³n *</label>
+          <label>Descripción *</label>
           <textarea [(ngModel)]="newTicket.descripcion" rows="5"
             placeholder="Describe detalladamente tu problema o consulta..."></textarea>
         </div>

@@ -26,6 +26,16 @@ export class UsersService {
   ) { }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
+    // 0. Verificar si el documento ya está en uso por una cuenta activa
+    if (createUserDto.documentNumber) {
+      const existingDoc = await this.usersRepository.findOne({
+        where: { documentNumber: createUserDto.documentNumber, tieneCuenta: true }
+      });
+      if (existingDoc) {
+        throw new ConflictException('El número de documento ya está registrado en otra cuenta.');
+      }
+    }
+
     // 1. Verificar si ya existe un usuario con el mismo username o email
     const existingByUserOrEmail = await this.usersRepository.findOne({
       where: [
@@ -288,17 +298,22 @@ export class UsersService {
     // Clonar el DTO para no modificar el original y manejar campos especiales
     const updateData: any = { ...updateUserDto };
 
-    // Validación de duplicados si se cambia email o username
-    if (updateData.username || updateData.email) {
+    // Validación de duplicados si se cambia email, username o documento
+    if (updateData.username || updateData.email || updateData.documentNumber) {
+      const orConditions: any[] = [];
+      if (updateData.username) orConditions.push({ username: updateData.username });
+      if (updateData.email) orConditions.push({ email: updateData.email });
+      if (updateData.documentNumber) orConditions.push({ documentNumber: updateData.documentNumber });
+
       const existingUser = await this.usersRepository.findOne({
-        where: [
-          { username: updateData.username },
-          { email: updateData.email },
-        ],
+        where: orConditions,
       });
 
       if (existingUser && existingUser.id !== id) {
-        throw new ConflictException('Username or email already exists');
+        if (existingUser.documentNumber === updateData.documentNumber) {
+          throw new ConflictException('El número de documento ya está en uso por otro usuario.');
+        }
+        throw new ConflictException('El nombre de usuario o correo ya está en uso.');
       }
     }
 

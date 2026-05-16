@@ -41,6 +41,15 @@ export class VeterinariasController {
     return this.veterinariasService.findAll();
   }
 
+  @Get('by-admin/:adminId')
+  @ApiOperation({ summary: 'Obtener veterinaria por ID de administrador' })
+  @ApiParam({ name: 'adminId', description: 'ID del administrador' })
+  @ApiResponse({ status: 200, description: 'Veterinaria encontrada', type: Veterinaria })
+  @ApiResponse({ status: 404, description: 'Veterinaria no encontrada' })
+  findByAdminId(@Param('adminId') adminId: string) {
+    return this.veterinariasService.findByAdminId(+adminId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Obtener una veterinaria por ID' })
   @ApiParam({ name: 'id', description: 'ID de la veterinaria' })

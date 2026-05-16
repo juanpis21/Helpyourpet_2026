@@ -110,7 +110,8 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
     direccion: '',
     tipoDocumento: '',
     numDocumento: '',
-    imagen: ''
+    imagen: '',
+    veterinariaId: null
   };
   adminProfilePreview: string | null = null;
   selectedAdminFile: File | null = null;
@@ -1167,6 +1168,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
   // CONFIGURACIÓN ADMIN
   loadAdminProfile(): void {
     const currentUser = this.authService.getCurrentUser();
+    console.log('🔍 [DEBUG] Cargando perfil del admin. Usuario actual:', currentUser);
     if (currentUser) {
       const avatar = currentUser.avatar || '';
       this.adminUser = {
@@ -1180,8 +1182,28 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
         tipoDocumento: currentUser.documentType || '',
         numDocumento: currentUser.documentNumber || '',
         imagen: avatar && avatar.startsWith('/uploads/') ? `${this.baseUrl}${avatar}` : avatar,
-        roleId: currentUser.roleId
+        roleId: currentUser.roleId,
+        veterinariaId: null
       };
+
+      console.log('🔍 [DEBUG] Buscando veterinaria para admin ID:', currentUser.id);
+      // Obtener veterinaria asociada al admin
+      this.veterinariasService.getByAdminId(currentUser.id).subscribe({
+        next: (veterinaria) => {
+          console.log('🔍 [DEBUG] Veterinaria encontrada:', veterinaria);
+          if (veterinaria) {
+            this.adminUser.veterinariaId = veterinaria.id;
+            console.log('✅ [DEBUG] Veterinaria ID asignada al admin:', this.adminUser.veterinariaId);
+            // Recargar veterinarios con el filtro de veterinaria
+            this.cargarVeterinarios();
+          } else {
+            console.log('⚠️ [DEBUG] No se encontró veterinaria para este admin');
+          }
+        },
+        error: (err) => {
+          console.error('❌ [DEBUG] Error al cargar veterinaria del admin:', err);
+        }
+      });
     }
   }
 
@@ -1283,10 +1305,26 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
   // ========== CRUD VETERINARIOS ==========
   cargarVeterinarios(): void {
+    console.log('🔍 [DEBUG] Admin veterinariaId:', this.adminUser.veterinariaId);
     this.usersService.getUsersByRoles(['veterinario']).subscribe({
       next: (data: any) => {
-        console.log('Veterinarios (Users) cargados:', data);
-        this.veterinarios = Array.isArray(data) ? data : [];
+        console.log('🔍 [DEBUG] Veterinarios (Users) cargados:', data);
+        const allVets = Array.isArray(data) ? data : [];
+
+        // Filtrar veterinarios por la veterinaria del admin
+        if (this.adminUser.veterinariaId) {
+          console.log('🔍 [DEBUG] Filtrando veterinarios por veterinaria ID:', this.adminUser.veterinariaId);
+          this.veterinarios = allVets.filter((vet: any) => {
+            const vetVetId = vet.perfilVeterinario?.veterinariaPrincipal?.id;
+            console.log(`🔍 [DEBUG] Veterinario ${vet.username}: veterinariaPrincipal.id = ${vetVetId}`);
+            return vetVetId === this.adminUser.veterinariaId;
+          });
+          console.log(`✅ [DEBUG] Veterinarios filtrados por veterinaria ${this.adminUser.veterinariaId}:`, this.veterinarios.length);
+        } else {
+          // Si el admin no tiene veterinaria asociada, mostrar todos (fallback)
+          this.veterinarios = allVets;
+          console.log('⚠️ [DEBUG] Admin sin veterinaria asociada, mostrando todos los veterinarios');
+        }
       },
       error: (err: any) => {
         console.error('Error al cargar veterinarios:', err);
@@ -1419,8 +1457,8 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
       isActive: true
     };
 
-    // Si la veterinaria viene como objeto, extraemos el ID para el select
-    if (this.editingVeterinario.veterinariaPrincipal && !this.editingVeterinario.veterinariaPrincipalId) {
+    // Siempre extraer el ID de veterinariaPrincipal si existe el objeto
+    if (this.editingVeterinario.veterinariaPrincipal && this.editingVeterinario.veterinariaPrincipal.id) {
       this.editingVeterinario.veterinariaPrincipalId = this.editingVeterinario.veterinariaPrincipal.id;
     }
 
@@ -1462,7 +1500,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
           telefonoProfesional: this.editingVeterinario.telefonoProfesional || undefined,
           emailProfesional: this.editingVeterinario.emailProfesional || undefined,
           biografia: this.editingVeterinario.biografia || undefined,
-          veterinariaPrincipalId: this.editingVeterinario.veterinariaPrincipalId || null,
+          // No incluir veterinariaPrincipalId para evitar que se modifique al editar
           isActive: this.editingVeterinario.isActive,
           usuarioId: this.editingUsuario.id
         };

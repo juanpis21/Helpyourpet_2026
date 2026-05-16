@@ -139,4 +139,12 @@ export class VeterinariasService {
       });
     } catch (e) { console.error('Error logging audit:', e); }
   }
+
+  async findByAdminId(adminId: number): Promise<Veterinaria | null> {
+    return this.veterinariasRepository.findOne({
+      where: { adminId },
+      relations: ['admin'],
+      select: ['id', 'nombre', 'direccion', 'telefono', 'email', 'descripcion', 'rut', 'isActive', 'adminId', 'createdAt', 'updatedAt']
+    });
+  }
 }

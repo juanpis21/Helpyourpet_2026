@@ -102,6 +102,78 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
   };
   editingAnnouncement: Partial<Announcement> = {};
 
+  // --- Pagination & Search ---
+  adminSearchTerm: string = '';
+  adminPage: number = 1;
+  adminPageSize: number = 5;
+
+  get filteredAdmins() {
+    if (!this.adminSearchTerm) return this.allUsers;
+    const term = this.adminSearchTerm.toLowerCase();
+    return this.allUsers.filter(u => 
+      u.fullName?.toLowerCase().includes(term) || 
+      u.firstName?.toLowerCase().includes(term) || 
+      u.username?.toLowerCase().includes(term) || 
+      u.email?.toLowerCase().includes(term)
+    );
+  }
+
+  get paginatedAdmins() {
+    const start = (this.adminPage - 1) * this.adminPageSize;
+    return this.filteredAdmins.slice(start, start + this.adminPageSize);
+  }
+
+  get adminTotalPages() {
+    return Math.ceil(this.filteredAdmins.length / this.adminPageSize) || 1;
+  }
+
+  vetSearchTerm: string = '';
+  vetPage: number = 1;
+  vetPageSize: number = 5;
+
+  get filteredVets() {
+    if (!this.vetSearchTerm) return this.allVets;
+    const term = this.vetSearchTerm.toLowerCase();
+    return this.allVets.filter(v => 
+      v.nombre?.toLowerCase().includes(term) || 
+      v.direccion?.toLowerCase().includes(term) ||
+      v.email?.toLowerCase().includes(term) ||
+      v.admin?.username?.toLowerCase().includes(term)
+    );
+  }
+
+  get paginatedVets() {
+    const start = (this.vetPage - 1) * this.vetPageSize;
+    return this.filteredVets.slice(start, start + this.vetPageSize);
+  }
+
+  get vetTotalPages() {
+    return Math.ceil(this.filteredVets.length / this.vetPageSize) || 1;
+  }
+
+  // --- Pagination & Search: Historial ---
+  historialSearchDate: string = '';
+  historialPage: number = 1;
+  historialPageSize: number = 10;
+
+  get filteredHistorial() {
+    if (!this.historialSearchDate) return this.historialCitas;
+    return this.historialCitas.filter(h => {
+      if (!h.createdAt) return false;
+      // h.createdAt is ISO string like 2026-05-16T...
+      return h.createdAt.startsWith(this.historialSearchDate);
+    });
+  }
+
+  get paginatedHistorial() {
+    const start = (this.historialPage - 1) * this.historialPageSize;
+    return this.filteredHistorial.slice(start, start + this.historialPageSize);
+  }
+
+  get historialTotalPages() {
+    return Math.ceil(this.filteredHistorial.length / this.historialPageSize) || 1;
+  }
+
   // Inject Router
   private router = inject(Router);
 
@@ -146,6 +218,7 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
         if (this.activeTab === 'dashboard') {
           setTimeout(() => this.initDashboardCharts(), 300);
         }
+        this.cdr.detectChanges();
       },
       error: (err) => console.error('Error loading all users:', err)
     });
@@ -156,12 +229,16 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
         if (this.activeTab === 'dashboard') {
           setTimeout(() => this.initDashboardCharts(), 300);
         }
+        this.cdr.detectChanges();
       },
       error: (err) => console.error('Error loading all pets:', err)
     });
 
     this.veterinariasService.getAll().subscribe({
-      next: (vets) => this.allVets = vets,
+      next: (vets) => {
+        this.allVets = vets;
+        this.cdr.detectChanges();
+      },
       error: (err) => console.error('Error loading all vets:', err)
     });
   }
@@ -170,9 +247,9 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
     this.historialLoading = true;
     const token = localStorage.getItem('access_token');
     const headers = { Authorization: `Bearer ${token}` };
-    this.http.get<any[]>(`${this.API_BASE}/audit-logs?limit=50`, { headers }).subscribe({
+    this.http.get<any[]>(`${this.API_BASE}/audit-logs?limit=2000`, { headers }).subscribe({
       next: (data) => {
-        this.historialCitas = data.slice(0, 50);
+        this.historialCitas = data;
         this.historialLoading = false;
         this.cdr.detectChanges();
       },
@@ -431,6 +508,24 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
     return user?.avatar || 'assets/images/Default.png';
   }
 
+  formatDateCorrectly(dateStr: string): Date {
+    if (!dateStr) return new Date();
+    // Si la fecha viene sin 'Z' y sin offset, le agregamos 'Z' para forzarla a UTC
+    // Esto asegura que el navegador reste las 5 horas de Colombia correctamente.
+    const hasTimezone = dateStr.includes('Z') || dateStr.includes('+') || (dateStr.includes('-') && dateStr.lastIndexOf('-') > 10);
+    if (!hasTimezone) {
+      return new Date(dateStr + 'Z');
+    }
+    return new Date(dateStr);
+  }
+
+  getAdminFullName(): string {
+    const user = this.authService.getCurrentUser();
+    if (user?.fullName) return user.fullName;
+    if (user?.firstName || user?.lastName) return `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
+    return user?.username || 'Usuario';
+  }
+
   // ===== ROLES =====
   loadRoles(): void {
     this.rolesService.getRoles().subscribe({
@@ -637,6 +732,18 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
     this.editingVeterinaria = {};
   }
 
+  toggleVeterinariaStatus(vet: Veterinaria): void {
+    const action = vet.isActive ? 'desactivar' : 'activar';
+    if (confirm(`¿Estás seguro de que quieres ${action} esta veterinaria?`)) {
+      this.veterinariasService.update(vet.id, { isActive: !vet.isActive }).subscribe({
+        next: () => {
+          this.loadGlobalData();
+        },
+        error: (err) => alert(`Error al ${action} veterinaria: ` + (err.error?.message || err.message))
+      });
+    }
+  }
+
   guardarEdicionVeterinaria(): void {
     if (!this.editingVeterinaria.id || !this.editingVeterinaria.nombre || !this.editingVeterinaria.direccion) {
       alert('Por favor, completa los campos obligatorios');
@@ -693,7 +800,7 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
     // Validaciones
     if (!this.newAdmin.firstName || !this.newAdmin.lastName || !this.newAdmin.email ||
       !this.newAdmin.documentType || !this.newAdmin.documentNumber ||
-      !this.newAdmin.age || !this.newAdmin.roleId || !this.newAdmin.password || !this.newAdmin.confirmPassword) {
+      !this.newAdmin.age || !this.newAdmin.password) {
       alert('Por favor, completa todos los campos obligatorios');
       return;
     }
@@ -708,10 +815,6 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    if (this.newAdmin.password !== this.newAdmin.confirmPassword) {
-      alert('Las contraseñas no coinciden');
-      return;
-    }
 
     if (this.newAdmin.age < 18) {
       alert('El administrador debe ser mayor de 18 años');
@@ -735,6 +838,10 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
     const lastName = this.newAdmin.lastName.trim().toLowerCase();
     const username = `${firstName}.${lastName}`;
 
+    // Obtener ID del rol 'admin' dinámicamente o usar 2 por defecto
+    const adminRole = this.roles.find(r => r.name.toLowerCase() === 'admin');
+    const assignedRoleId = adminRole ? adminRole.id : 2;
+
     // Preparar el payload para enviar al backend
     const adminPayload = {
       username: username,
@@ -746,7 +853,7 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
       documentNumber: this.newAdmin.documentNumber.trim(),
       address: this.newAdmin.address?.trim() || null,
       age: parseInt(this.newAdmin.age),
-      roleId: this.newAdmin.roleId,
+      roleId: assignedRoleId,
       password: this.newAdmin.password,
       isActive: true
     };

@@ -52,4 +52,8 @@ export class VeterinariasService {
   delete(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });
   }
+
+  getByAdminId(adminId: number): Observable<Veterinaria | null> {
+    return this.http.get<Veterinaria | null>(`${this.apiUrl}/by-admin/${adminId}`, { headers: this.getAuthHeaders() });
+  }
 }

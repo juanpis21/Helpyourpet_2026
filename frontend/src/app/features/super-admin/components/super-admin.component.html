@@ -10,8 +10,8 @@
       <h3>HelpYourPet</h3>
       <div class="user-profile">
         <img [src]="getAdminProfileImage()" alt="Foto" class="profile-avatar">
-        <h5>Super Administrador</h5>
-        <p>{{ getAdminRoleName() | titlecase }}</p>
+        <h5>{{ getAdminFullName() }}</h5>
+        <p>{{ getAdminRoleName() | uppercase }}</p>
       </div>
     </div>
 
@@ -63,6 +63,9 @@
         <h1><i class="fas fa-chart-line"></i> Panel de Control Maestro</h1>
         <div class="header-actions">
           <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="top-bar-btn" (click)="toggleDarkMode()" title="Cambiar Tema">
+            <i class="fas" [ngClass]="modoOscuro ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
         </div>
       </div>
 
@@ -130,8 +133,15 @@
 
       <!-- Historial de Acciones -->
       <div class="card">
-        <div class="card-header">
-          <h5><i class="fas fa-history"></i> Historial de Acciones (Admins y Veterinarios)</h5>
+        <div class="card-header table-header-actions">
+          <h5><i class="fas fa-history"></i> Tabla de Historial de Acciones</h5>
+          <div style="display: flex; gap: 1rem; align-items: center;">
+            <div class="search-box">
+              <i class="fas fa-calendar-alt"></i>
+              <input type="date" [(ngModel)]="historialSearchDate" (change)="historialPage = 1" style="padding-left: 2.5rem;">
+            </div>
+            <span class="results-count">Total: {{ filteredHistorial.length }}</span>
+          </div>
         </div>
         <div class="card-body">
           <div *ngIf="historialLoading" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
@@ -149,14 +159,13 @@
                   <th>Fecha</th>
                   <th>Usuario</th>
                   <th>Rol</th>
-                  <th>Entidad</th>
                   <th>Acción</th>
                   <th>Descripción</th>
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let h of historialCitas">
-                  <td>{{ h.createdAt | date:'short' }}</td>
+                <tr *ngFor="let h of paginatedHistorial">
+                  <td>{{ formatDateCorrectly(h.createdAt) | date:'dd/MM/yyyy, hh:mm a' }}</td>
                   <td>
                     <div class="user-info">
                       <img [src]="getFullImageUrl(h.user?.avatar)" class="avatar-sm">
@@ -164,7 +173,6 @@
                     </div>
                   </td>
                   <td><span class="badge">{{ h.user?.role?.name || 'N/A' }}</span></td>
-                  <td><span class="badge">{{ h.entity }}</span></td>
                   <td>
                     <span class="tipo-badge" [ngClass]="getTipoCambioClass(h.action)">
                       {{ getTipoCambioLabel(h.action) }}
@@ -174,6 +182,13 @@
                 </tr>
               </tbody>
             </table>
+          </div>
+          <div class="pagination-controls" *ngIf="!historialLoading && filteredHistorial.length > 0">
+            <span>Página {{ historialPage }} de {{ historialTotalPages }}</span>
+            <div class="pagination-buttons">
+              <button class="btn-secondary" [disabled]="historialPage === 1" (click)="historialPage = historialPage - 1">Anterior</button>
+              <button class="btn-secondary" [disabled]="historialPage === historialTotalPages" (click)="historialPage = historialPage + 1">Siguiente</button>
+            </div>
           </div>
         </div>
       </div>
@@ -185,6 +200,9 @@
         <h1><i class="fas fa-user-tag"></i> Gestión de Roles</h1>
         <div class="header-actions">
           <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="top-bar-btn" (click)="toggleDarkMode()" title="Cambiar Tema">
+            <i class="fas" [ngClass]="modoOscuro ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
           <button class="btn-primary" (click)="openNewRoleModal()">
             <i class="fas fa-plus"></i> Nuevo Rol
           </button>
@@ -232,6 +250,9 @@
         </h1>
         <div class="header-actions">
           <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="top-bar-btn" (click)="toggleDarkMode()" title="Cambiar Tema">
+            <i class="fas" [ngClass]="modoOscuro ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
           <button class="btn-primary" (click)="openNewAdminModal()">
             <i class="fas fa-plus"></i> Nuevo Administrador
           </button>
@@ -239,16 +260,22 @@
       </div>
 
       <div class="card">
-        <div class="card-header">
+        <div class="card-header table-header-actions">
           <h5><i class="fas fa-list"></i> Todos los Administradores Registrados</h5>
-          <span class="results-count">Mostrando {{ allUsers.length }} registros</span>
+          <div style="display: flex; gap: 1rem; align-items: center;">
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input type="text" [(ngModel)]="adminSearchTerm" (input)="adminPage = 1" placeholder="Buscar administrador...">
+            </div>
+            <span class="results-count">Total: {{ filteredAdmins.length }}</span>
+          </div>
         </div>
         <div class="card-body">
           <div class="table-container">
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>Usuario / Nombre</th>
+                  <th>Nombre</th>
                   <th>Email</th>
                   <th>Teléfono</th>
                   <th>Rol</th>
@@ -257,14 +284,11 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let user of allUsers; trackBy: trackByUserId">
+                <tr *ngFor="let user of paginatedAdmins; trackBy: trackByUserId">
                   <td>
                     <div class="user-info">
                       <img [src]="getFullImageUrl(user.avatar)" class="avatar-sm">
-                      <div class="user-details">
-                        <span class="username">{{ user.username }}</span>
-                        <span class="fullname">{{ user.fullName || (user.firstName + ' ' + user.lastName) }}</span>
-                      </div>
+                      <span class="fullname">{{ user.fullName || (user.firstName + ' ' + user.lastName) }}</span>
                     </div>
                   </td>
                   <td>{{ user.email }}</td>
@@ -288,6 +312,16 @@
               </tbody>
             </table>
           </div>
+          <div class="pagination-controls" *ngIf="filteredAdmins.length > 0">
+            <span>Página {{ adminPage }} de {{ adminTotalPages }}</span>
+            <div class="pagination-buttons">
+              <button class="btn-secondary" [disabled]="adminPage === 1" (click)="adminPage = adminPage - 1">Anterior</button>
+              <button class="btn-secondary" [disabled]="adminPage === adminTotalPages" (click)="adminPage = adminPage + 1">Siguiente</button>
+            </div>
+          </div>
+          <div *ngIf="filteredAdmins.length === 0" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+            No se encontraron administradores que coincidan con la búsqueda.
+          </div>
         </div>
       </div>
     </section>
@@ -298,6 +332,9 @@
         <h1><i class="fas fa-paw"></i> Maestro de Mascotas</h1>
         <div class="header-actions">
           <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="top-bar-btn" (click)="toggleDarkMode()" title="Cambiar Tema">
+            <i class="fas" [ngClass]="modoOscuro ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
         </div>
       </div>
 
@@ -337,6 +374,9 @@
         <h1><i class="fas fa-hospital"></i> Maestro de Veterinarias</h1>
         <div class="header-actions">
           <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="top-bar-btn" (click)="toggleDarkMode()" title="Cambiar Tema">
+            <i class="fas" [ngClass]="modoOscuro ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
           <button class="btn-primary" (click)="openAddVeterinariaModal()">
             <i class="fas fa-plus"></i> Registrar Veterinaria
           </button>
@@ -344,7 +384,16 @@
       </div>
 
       <div class="card">
-        <div class="card-header"><h5><i class="fas fa-list"></i> Registro de Sedes</h5></div>
+        <div class="card-header table-header-actions">
+          <h5><i class="fas fa-list"></i> Registro de Sedes</h5>
+          <div style="display: flex; gap: 1rem; align-items: center;">
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input type="text" [(ngModel)]="vetSearchTerm" (input)="vetPage = 1" placeholder="Buscar sede o admin...">
+            </div>
+            <span class="results-count">Total: {{ filteredVets.length }}</span>
+          </div>
+        </div>
         <div class="card-body">
           <div class="table-container">
             <table class="data-table">
@@ -359,7 +408,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let vet of allVets">
+                <tr *ngFor="let vet of paginatedVets">
                   <td><strong>{{ vet.nombre }}</strong></td>
                   <td>
                     <div class="user-info" *ngIf="vet.admin">
@@ -377,12 +426,31 @@
                   </td>
                   <td>
                     <div class="actions">
-                      <button class="btn-icon edit" (click)="openEditVeterinariaModal(vet)"><i class="fas fa-edit"></i></button>
+                      <button class="btn-icon edit" (click)="openEditVeterinariaModal(vet)" title="Editar Veterinaria">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button class="btn-icon" 
+                              [class.delete]="vet.isActive" 
+                              [class.edit]="!vet.isActive"
+                              (click)="toggleVeterinariaStatus(vet)"
+                              [title]="vet.isActive ? 'Desactivar Veterinaria' : 'Activar Veterinaria'">
+                        <i class="fas" [ngClass]="vet.isActive ? 'fa-ban' : 'fa-check-circle'"></i>
+                      </button>
                     </div>
                   </td>
                 </tr>
               </tbody>
             </table>
+          </div>
+          <div class="pagination-controls" *ngIf="filteredVets.length > 0">
+            <span>Página {{ vetPage }} de {{ vetTotalPages }}</span>
+            <div class="pagination-buttons">
+              <button class="btn-secondary" [disabled]="vetPage === 1" (click)="vetPage = vetPage - 1">Anterior</button>
+              <button class="btn-secondary" [disabled]="vetPage === vetTotalPages" (click)="vetPage = vetPage + 1">Siguiente</button>
+            </div>
+          </div>
+          <div *ngIf="filteredVets.length === 0" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+            No se encontraron sedes que coincidan con la búsqueda.
           </div>
         </div>
       </div>
@@ -394,6 +462,9 @@
         <h1><i class="fas fa-ticket-alt"></i> Tickets de Soporte PQR</h1>
         <div class="header-actions">
           <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="top-bar-btn" (click)="toggleDarkMode()" title="Cambiar Tema">
+            <i class="fas" [ngClass]="modoOscuro ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
         </div>
       </div>
 
@@ -471,6 +542,9 @@
             <i class="fas fa-plus"></i> Nuevo Anuncio
           </button>
           <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="top-bar-btn" (click)="toggleDarkMode()" title="Cambiar Tema">
+            <i class="fas" [ngClass]="modoOscuro ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
         </div>
       </div>
 
@@ -531,6 +605,9 @@
         <h1><i class="fas fa-shield-alt"></i> Control de Permisos</h1>
         <div class="header-actions">
           <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="top-bar-btn" (click)="toggleDarkMode()" title="Cambiar Tema">
+            <i class="fas" [ngClass]="modoOscuro ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
 
         </div>
       </div>
@@ -568,6 +645,9 @@
         <h1><i class="fas fa-cogs"></i> Configuración Global</h1>
         <div class="header-actions">
           <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="top-bar-btn" (click)="toggleDarkMode()" title="Cambiar Tema">
+            <i class="fas" [ngClass]="modoOscuro ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
         </div>
       </div>
 
@@ -912,6 +992,15 @@
                  placeholder="Ej: +57 300 123 4567">
         </div>
         <div class="form-group">
+          <label>Edad *</label>
+          <input type="number" 
+                 name="age"
+                 [(ngModel)]="newAdmin.age" 
+                 placeholder="Solo mayores de 18 años"
+                 min="18"
+                 max="120">
+        </div>
+        <div class="form-group">
           <label>Tipo de Documento *</label>
           <select name="documentType" [(ngModel)]="newAdmin.documentType" class="form-control">
             <option [ngValue]="undefined">-- Selecciona tu tipo de documento --</option>
@@ -935,38 +1024,12 @@
                  [(ngModel)]="newAdmin.address" 
                  placeholder="Ej: Calle 123 #45-67">
         </div>
-        <div class="form-group">
-          <label>Edad *</label>
-          <input type="number" 
-                 name="age"
-                 [(ngModel)]="newAdmin.age" 
-                 placeholder="Solo mayores de 18 años"
-                 min="18"
-                 max="120">
-        </div>
-        <div class="form-group">
-          <label>Rol *</label>
-          <select name="roleId" [(ngModel)]="newAdmin.roleId" class="form-control">
-            <option [ngValue]="undefined">-- Seleccionar Rol --</option>
-            <ng-container *ngFor="let role of roles">
-              <option *ngIf="role.name.toLowerCase().includes('admin')" 
-                      [value]="role.id">{{ role.name | titlecase }}</option>
-            </ng-container>
-          </select>
-        </div>
         <div class="form-group full">
           <label>Contraseña *</label>
           <input type="password" 
                  name="password"
                  [(ngModel)]="newAdmin.password" 
                  placeholder="Mínimo 6 caracteres">
-        </div>
-        <div class="form-group full">
-          <label>Confirmar Contraseña *</label>
-          <input type="password" 
-                 name="confirmPassword"
-                 [(ngModel)]="newAdmin.confirmPassword" 
-                 placeholder="Repite la contraseña">
         </div>
       </div>
     </div>
