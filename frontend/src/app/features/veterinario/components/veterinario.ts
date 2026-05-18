@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import Swal from 'sweetalert2';
 import { Chart, registerables } from 'chart.js';
 Chart.register(...registerables);
 import { FormsModule } from '@angular/forms';
@@ -11,6 +12,7 @@ import { ThemeService } from '../../../core/services/theme.service';
 import { PublicacionesService } from '../../inicio/services/publicaciones.service';
 import { TicketsService } from '../../../core/services/tickets.service';
 import type { CreateTicketDto } from '../../../core/services/tickets.service';
+import { PreloaderComponent } from '../../../shared/components/preloader/preloader';
 
 interface Mascota {
   id?: number;
@@ -57,7 +59,7 @@ interface Usuario {
 @Component({
   selector: 'app-veterinario',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PreloaderComponent],
   templateUrl: './veterinario.html',
   styleUrl: './veterinario.scss',
 })
@@ -103,6 +105,8 @@ export class Veterinario implements OnInit {
   };
 
   newPassword: string = '';
+
+  toasts: any[] = [];
 
   // Gráficos
   growthChart: any;
@@ -345,6 +349,7 @@ export class Veterinario implements OnInit {
             ...pub,
             imagen: pub.imagen && pub.imagen.startsWith('/uploads/') ? `http://localhost:3000${pub.imagen}` : pub.imagen
           }));
+          this.cdr.detectChanges();
         },
         error: (err) => console.error('Error al cargar publicaciones:', err)
       });
@@ -352,15 +357,30 @@ export class Veterinario implements OnInit {
   }
 
   eliminarPublicacion(id: number): void {
-    if (confirm('¿Estás seguro de que quieres eliminar esta publicación?')) {
-      this.publicacionesService.eliminarPublicacion(id).subscribe({
-        next: () => {
-          this.cargarPublicacionesUsuario();
-          alert('Publicación eliminada exitosamente');
-        },
-        error: (err) => alert('Error al eliminar publicación: ' + (err.error?.message || err.message))
-      });
-    }
+    Swal.fire({
+      title: '¿Eliminar publicación?',
+      text: '¿Estás seguro de que quieres eliminar esta publicación?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.publicacionesService.eliminarPublicacion(id).subscribe({
+          next: () => {
+            this.cargarPublicacionesUsuario();
+            this.showToast('Publicación eliminada exitosamente', 'success');
+            this.cdr.detectChanges();
+          },
+          error: (err) => {
+            this.showToast('Error al eliminar publicación: ' + (err.error?.message || err.message), 'error');
+            this.cdr.detectChanges();
+          }
+        });
+      }
+    });
   }
 
   onProfileImageSelected(event: any): void {
@@ -396,27 +416,43 @@ export class Veterinario implements OnInit {
         this.authService.updateCurrentUser(response);
         this.vetUser = response;
         this.selectedProfileFile = null;
-        alert('Perfil actualizado correctamente');
+        this.showToast('Perfil actualizado correctamente', 'success');
+        this.cdr.detectChanges();
       },
-      error: (error) => alert('Error al actualizar el perfil: ' + (error.error?.message || error.message))
+      error: (error) => {
+        this.showToast('Error al actualizar el perfil: ' + (error.error?.message || error.message), 'error');
+        this.cdr.detectChanges();
+      }
     });
   }
 
   eliminarCuenta(): void {
-    if (this.vetUser && confirm('¿Estás seguro de que deseas desactivar tu cuenta?')) {
-      this.userService.deleteUser(this.vetUser.id).subscribe({
-        next: () => {
-          alert('Cuenta desactivada exitosamente.');
-          this.cerrarSesion();
-        },
-        error: (error) => alert('Error al eliminar la cuenta: ' + (error.error?.message || error.message))
-      });
-    }
+    if (!this.vetUser) return;
+    Swal.fire({
+      title: '¿Desactivar cuenta?',
+      text: '¿Estás seguro de que deseas desactivar tu cuenta?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, desactivar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.userService.deleteUser(this.vetUser.id).subscribe({
+          next: () => {
+            this.showToast('Cuenta desactivada exitosamente.', 'success');
+            this.cerrarSesion();
+          },
+          error: (error) => this.showToast('Error al eliminar la cuenta: ' + (error.error?.message || error.message), 'error')
+        });
+      }
+    });
   }
 
   cambiarPassword(): void {
     if (!this.newPassword || this.newPassword.length < 6) {
-      alert('⚠️ La contraseña debe tener al menos 6 caracteres');
+      this.showToast('La contraseña debe tener al menos 6 caracteres', 'warning');
       return;
     }
 
@@ -429,14 +465,14 @@ export class Veterinario implements OnInit {
 
     this.userService.updateUser(currentUser.id, formData).subscribe({
       next: () => {
-        alert('✅ Contraseña actualizada correctamente. Por seguridad, debes iniciar sesión de nuevo.');
+        this.showToast('Contraseña actualizada correctamente. Por seguridad, debes iniciar sesión de nuevo.', 'success');
         this.newPassword = '';
         this.cerrarSesion(); // Cerrar sesión tras cambiar contraseña
       },
       error: (err) => {
         const errorMsg = err.error?.message;
         const detail = Array.isArray(errorMsg) ? errorMsg.join(', ') : errorMsg;
-        alert('❌ Error al cambiar la contraseña: ' + (detail || err.message));
+        this.showToast('Error al cambiar la contraseña: ' + (detail || err.message), 'error');
       }
     });
   }
@@ -473,7 +509,10 @@ export class Veterinario implements OnInit {
 
   loadMyTickets(): void {
     this.ticketsService.getMyTickets().subscribe({
-      next: (tickets) => this.misTickets = tickets,
+      next: (tickets) => {
+        this.misTickets = tickets;
+        this.cdr.detectChanges();
+      },
       error: (err) => console.error('Error loading my tickets:', err)
     });
   }
@@ -484,6 +523,30 @@ export class Veterinario implements OnInit {
 
   toggleDarkMode(): void {
     this.themeService.toggleDarkMode();
+  }
+
+  showToast(message: string, type: 'success' | 'error' | 'warning' | 'info' = 'success'): void {
+    const id = Date.now() + Math.random();
+    const newToast = { id, message, type, closing: false };
+    this.toasts = [...this.toasts, newToast];
+
+    setTimeout(() => {
+      this.closeToast(newToast);
+    }, 4100);
+  }
+
+  closeToast(toast: any): void {
+    const exists = this.toasts.find(x => x.id === toast.id);
+    if (!exists || exists.closing) return;
+
+    this.toasts = this.toasts.map(t =>
+      t.id === toast.id ? { ...t, closing: true } : t
+    );
+
+    setTimeout(() => {
+      this.toasts = this.toasts.filter(x => x.id !== toast.id);
+      this.cdr.detectChanges();
+    }, 400);
   }
 
   // Lógica de Gráficos
@@ -660,6 +723,7 @@ export class Veterinario implements OnInit {
       next: (data) => {
         this.mascotas = data;
         if (this.activeSection === 'dashboard') this.renderCharts();
+        this.cdr.detectChanges();
       },
       error: (err) => console.error('Error cargando mascotas de la veterinaria:', err)
     });
@@ -670,6 +734,7 @@ export class Veterinario implements OnInit {
       next: (data) => {
         console.log('👥 Clientes de la veterinaria cargados:', data);
         this.usuarios = data;
+        this.cdr.detectChanges();
       },
       error: (err) => console.error('Error cargando usuarios de la veterinaria:', err)
     });
@@ -681,6 +746,7 @@ export class Veterinario implements OnInit {
         this.usuariosSinCuenta = data;
         console.log('👥 Usuarios de la veterinaria cargados:', data.length);
         if (this.activeSection === 'dashboard') this.renderCharts();
+        this.cdr.detectChanges();
       },
       error: (err) => console.error('Error cargando usuarios de la veterinaria:', err)
     });
@@ -705,20 +771,22 @@ export class Veterinario implements OnInit {
 
   registrarUsuario(): void {
     if (!this.newUser.firstName || !this.newUser.lastName || !this.newUser.documentNumber) {
-      alert('Por favor complete los campos obligatorios (Nombres, Apellidos y Documento)');
+      this.showToast('Por favor complete los campos obligatorios (Nombres, Apellidos y Documento)', 'warning');
       return;
     }
 
     this.userService.registerUserByVet(this.newUser).subscribe({
       next: (res) => {
-        alert('Usuario registrado con éxito');
+        this.showToast('Usuario registrado con éxito', 'success');
         this.cargarUsuarios(); // Para el select de mascotas
         this.cargarUsuariosSinCuenta(); // Para la tabla de usuarios
         this.closeAddUserModal();
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error al registrar usuario:', err);
-        alert('Error al registrar usuario: ' + (err.error?.message || err.message));
+        this.showToast('Error al registrar usuario: ' + (err.error?.message || err.message), 'error');
+        this.cdr.detectChanges();
       }
     });
   }
@@ -741,13 +809,16 @@ export class Veterinario implements OnInit {
     
     this.http.patch(`${this.API_BASE}/users/${this.editingUser.id}`, this.editingUser, this.getHeaders()).subscribe({
       next: () => {
-        alert('Usuario actualizado con éxito');
+        this.showToast('Usuario actualizado con éxito', 'success');
+        this.cargarUsuarios();
         this.cargarUsuariosSinCuenta();
         this.closeEditUserModal();
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error al actualizar usuario:', err);
-        alert('Error al actualizar usuario: ' + (err.error?.message || err.message));
+        this.showToast('Error al actualizar usuario: ' + (err.error?.message || err.message), 'error');
+        this.cdr.detectChanges();
       }
     });
   }
@@ -776,12 +847,12 @@ export class Veterinario implements OnInit {
 
   registrarMascota(): void {
     if (!this.newPet.ownerId) {
-      alert('Por favor seleccione un dueño');
+      this.showToast('Por favor seleccione un dueño', 'warning');
       return;
     }
 
     if (this.newPet.age < 0 || this.newPet.weight < 0) {
-      alert('La edad y el peso no pueden ser valores negativos');
+      this.showToast('La edad y el peso no pueden ser valores negativos', 'warning');
       return;
     }
 
@@ -803,16 +874,19 @@ export class Veterinario implements OnInit {
 
     this.http.post(`${this.API_BASE}/pets`, formData, this.getHeaders()).subscribe({
       next: () => {
-        alert('Mascota registrada con éxito');
+        this.showToast('Mascota registrada con éxito', 'success');
         this.cargarMascotas();
         this.closeAddPetModal();
         this.newPet = {
           name: '', species: '', breed: '', age: 0, gender: 'Macho', 
           color: '', weight: 0, description: '', ownerId: undefined
         };
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error al registrar mascota:', err);
+        this.showToast('Error al registrar mascota: ' + (err.error?.message || err.message), 'error');
+        this.cdr.detectChanges();
       }
     });
   }
@@ -854,13 +928,15 @@ export class Veterinario implements OnInit {
 
     this.http.patch(`${this.API_BASE}/pets/${this.editingPet.id}`, formData, this.getHeaders()).subscribe({
       next: () => {
-        alert('Mascota actualizada con éxito');
+        this.showToast('Mascota actualizada con éxito', 'success');
         this.cargarMascotas();
         this.closeEditPetModal();
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error al actualizar mascota:', err);
-        alert('Error al actualizar mascota: ' + (err.error?.message || err.message));
+        this.showToast('Error al actualizar mascota: ' + (err.error?.message || err.message), 'error');
+        this.cdr.detectChanges();
       }
     });
   }
@@ -889,27 +965,57 @@ export class Veterinario implements OnInit {
   }
 
   finalizarCita(id: number): void {
-    if (confirm('¿Estás seguro de que deseas marcar esta cita como finalizada?')) {
-      this.http.patch(`${this.API_BASE}/citas/${id}`, { estado: 'Completada' }, this.getHeaders()).subscribe({
-        next: () => {
-          alert('✅ Cita finalizada con éxito');
-          this.cargarCitas();
-        },
-        error: (err) => alert('❌ Error al finalizar cita: ' + (err.error?.message || err.message))
-      });
-    }
+    Swal.fire({
+      title: '¿Finalizar cita?',
+      text: '¿Estás seguro de que deseas marcar esta cita como finalizada?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#2e7d32',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, finalizar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.http.patch(`${this.API_BASE}/citas/${id}`, { estado: 'Completada' }, this.getHeaders()).subscribe({
+          next: () => {
+            this.showToast('Cita finalizada con éxito', 'success');
+            this.cargarCitas();
+            this.cdr.detectChanges();
+          },
+          error: (err) => {
+            this.showToast('Error al finalizar cita: ' + (err.error?.message || err.message), 'error');
+            this.cdr.detectChanges();
+          }
+        });
+      }
+    });
   }
 
   eliminarCita(id: number): void {
-    if (confirm('¿Estás seguro de que deseas eliminar esta cita? Esta acción no se puede deshacer.')) {
-      this.http.delete(`${this.API_BASE}/citas/${id}`, this.getHeaders()).subscribe({
-        next: () => {
-          alert('🗑️ Cita eliminada con éxito');
-          this.cargarCitas();
-        },
-        error: (err) => alert('❌ Error al eliminar cita: ' + (err.error?.message || err.message))
-      });
-    }
+    Swal.fire({
+      title: '¿Eliminar cita?',
+      text: '¿Estás seguro de que deseas eliminar esta cita? Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.http.delete(`${this.API_BASE}/citas/${id}`, this.getHeaders()).subscribe({
+          next: () => {
+            this.showToast('Cita eliminada con éxito', 'success');
+            this.cargarCitas();
+            this.cdr.detectChanges();
+          },
+          error: (err) => {
+            this.showToast('Error al eliminar cita: ' + (err.error?.message || err.message), 'error');
+            this.cdr.detectChanges();
+          }
+        });
+      }
+    });
   }
 
   openProgramarCitaModal(): void {
@@ -924,12 +1030,12 @@ export class Veterinario implements OnInit {
     const mascotaSeleccionada = this.mascotas.find(m => m.id === this.newCita.petId);
     
     if (!mascotaSeleccionada) {
-      alert('Por favor selecciona una mascota');
+      this.showToast('Por favor selecciona una mascota', 'warning');
       return;
     }
 
     if (!this.newCita.fecha || !this.newCita.motivo) {
-      alert('Por favor completa la fecha y el motivo');
+      this.showToast('Por favor completa la fecha y el motivo', 'warning');
       return;
     }
 
@@ -947,15 +1053,17 @@ export class Veterinario implements OnInit {
 
     this.http.post(`${this.API_BASE}/citas`, payload, this.getHeaders()).subscribe({
       next: () => {
-        alert('✅ Cita programada con éxito');
+        this.showToast('Cita programada con éxito', 'success');
         this.cargarCitas();
         this.showAddCitaModal = false;
         this.newCita = { fecha: '', motivo: '', userId: null, petId: null };
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('❌ Error al registrar cita:', err);
         const msg = err.error?.message || 'Error desconocido';
-        alert('❌ Error al registrar cita: ' + (Array.isArray(msg) ? msg.join(', ') : msg));
+        this.showToast('Error al registrar cita: ' + (Array.isArray(msg) ? msg.join(', ') : msg), 'error');
+        this.cdr.detectChanges();
       }
     });
   }
@@ -1003,7 +1111,6 @@ export class Veterinario implements OnInit {
 
   actualizarPublicacion(): void {
     if (!this.editingPublicacion.id || !this.editingPublicacion.descripcion) {
-      alert('Por favor complete los campos obligatorios (Descripción).');
       return;
     }
 
@@ -1016,13 +1123,15 @@ export class Veterinario implements OnInit {
 
     this.http.patch(`${this.API_BASE}/publicaciones/${this.editingPublicacion.id}`, formData, this.getHeaders()).subscribe({
       next: () => {
-        alert('Publicación actualizada con éxito');
+        this.showToast('Publicación actualizada con éxito', 'success');
         this.cargarPublicacionesUsuario();
         this.closeEditPublicacionModal();
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error al actualizar publicación:', err);
-        alert('Error al actualizar publicación: ' + (err.error?.message || err.message));
+        this.showToast('Error al actualizar publicación: ' + (err.error?.message || err.message), 'error');
+        this.cdr.detectChanges();
       }
     });
   }
@@ -1059,7 +1168,7 @@ export class Veterinario implements OnInit {
           console.error('Error cargando historia:', err);
           this.hcLoading = false;
           this.cdr.detectChanges();
-          alert('Error al cargar la historia clínica: ' + (err.error?.message || err.message));
+          this.showToast('Error al cargar la historia clínica: ' + (err.error?.message || err.message), 'error');
         }
       });
   }
@@ -1092,8 +1201,13 @@ export class Veterinario implements OnInit {
         next: (updated) => {
           Object.assign(this.historiaActual, updated);
           this.hcEditando = false;
+          this.showToast('Historia clínica actualizada con éxito', 'success');
+          this.cdr.detectChanges();
         },
-        error: (err) => alert('Error al guardar: ' + (err.error?.message || err.message))
+        error: (err) => {
+          this.showToast('Error al guardar: ' + (err.error?.message || err.message), 'error');
+          this.cdr.detectChanges();
+        }
       });
   }
 
@@ -1133,13 +1247,12 @@ export class Veterinario implements OnInit {
   guardarNuevaConsulta(): void {
     if (!this.historiaActual) return;
     
-    // Validación de fecha para consultas
-    const now = new Date().getTime();
-    
-    if (this.nuevaConsulta.fechaConsulta) {
+    // Validación de fecha para consultas (solo para nuevas consultas)
+    if (!this.nuevaConsulta.id && this.nuevaConsulta.fechaConsulta) {
+      const now = new Date().getTime();
       const selectedDate = new Date(this.nuevaConsulta.fechaConsulta).getTime();
       if (selectedDate < now - 60000) { // Margen de 1 minuto
-        alert('La fecha y hora de la consulta no puede ser en el pasado.');
+        this.showToast('La fecha y hora de la consulta no puede ser en el pasado.', 'warning');
         return;
       }
     }
@@ -1154,7 +1267,7 @@ export class Veterinario implements OnInit {
       const selectedNextDate = new Date(Number(year), Number(month) - 1, Number(day));
       
       if (selectedNextDate.getTime() < today.getTime()) {
-        alert('La fecha de la próxima cita no puede ser en el pasado.');
+        this.showToast('La fecha de la próxima cita no puede ser en el pasado.', 'warning');
         return;
       }
     }
@@ -1181,10 +1294,11 @@ export class Veterinario implements OnInit {
             if (this.nuevaConsulta.peso) {
               this.actualizarPesoMascota(this.historiaActual.mascotaId, this.nuevaConsulta.peso);
             }
+            this.showToast('Consulta actualizada con éxito', 'success');
             this.showNuevaConsultaModal = false;
             this.cdr.detectChanges();
           },
-          error: (err) => alert('Error al actualizar consulta: ' + (err.error?.message || err.message))
+          error: (err) => this.showToast('Error al actualizar consulta: ' + (err.error?.message || err.message), 'error')
         });
     } else {
       this.http.post<any>(`${this.API_BASE}/historias-clinicas/consultas`, payload, { headers })
@@ -1194,10 +1308,11 @@ export class Veterinario implements OnInit {
             if (this.nuevaConsulta.peso) {
               this.actualizarPesoMascota(this.historiaActual.mascotaId, this.nuevaConsulta.peso);
             }
+            this.showToast('Consulta creada con éxito', 'success');
             this.showNuevaConsultaModal = false;
             this.cdr.detectChanges();
           },
-          error: (err) => alert('Error al crear consulta: ' + (err.error?.message || err.message))
+          error: (err) => this.showToast('Error al crear consulta: ' + (err.error?.message || err.message), 'error')
         });
     }
   }
@@ -1236,23 +1351,27 @@ export class Veterinario implements OnInit {
 
   createTicket(): void {
     if (!this.newTicket.asunto || !this.newTicket.descripcion) {
-      alert('Por favor, completa los campos obligatorios');
+      this.showToast('Por favor, completa los campos obligatorios', 'warning');
+      this.cdr.detectChanges();
       return;
     }
 
     if (this.newTicket.asunto.length < 5) {
-      alert('El asunto debe tener al menos 5 caracteres');
+      this.showToast('El asunto debe tener al menos 5 caracteres', 'warning');
+      this.cdr.detectChanges();
       return;
     }
 
     if (this.newTicket.descripcion.length < 10) {
-      alert('La descripción debe tener al menos 10 caracteres');
+      this.showToast('La descripción debe tener al menos 10 caracteres', 'warning');
+      this.cdr.detectChanges();
       return;
     }
 
     const user = this.authService.getCurrentUser();
     if (!user) {
-      alert('Debes estar logueado para crear un ticket');
+      this.showToast('Debes estar logueado para crear un ticket', 'warning');
+      this.cdr.detectChanges();
       return;
     }
 
@@ -1260,11 +1379,13 @@ export class Veterinario implements OnInit {
       next: () => {
         this.closeTicketModal();
         this.loadMyTickets();
-        alert('Ticket creado correctamente. Te responderemos pronto.');
+        this.showToast('Ticket creado correctamente. Te responderemos pronto.', 'success');
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error creating ticket:', err);
-        alert('Error al crear ticket. Por favor intenta nuevamente.');
+        this.showToast('Error al crear ticket. Por favor intenta nuevamente.', 'error');
+        this.cdr.detectChanges();
       }
     });
   }
