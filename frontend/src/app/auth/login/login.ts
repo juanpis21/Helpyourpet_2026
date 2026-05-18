@@ -14,7 +14,7 @@ import Swal from 'sweetalert2';
 })
 export class Login {
   credentials = {
-    username: '',
+    email: '',
     password: ''
   };
   isLoading = false;
@@ -32,7 +32,7 @@ export class Login {
   onSubmit(): void {
     if (this.isLoading) return;
 
-    if (!this.credentials.username || !this.credentials.password) {
+    if (!this.credentials.email || !this.credentials.password) {
       Swal.fire({
         icon: 'warning',
         title: '¡Campos incompletos!',

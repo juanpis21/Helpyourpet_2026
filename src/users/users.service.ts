@@ -36,16 +36,13 @@ export class UsersService {
       }
     }
 
-    // 1. Verificar si ya existe un usuario con el mismo username o email
-    const existingByUserOrEmail = await this.usersRepository.findOne({
-      where: [
-        { username: createUserDto.username },
-        { email: createUserDto.email },
-      ],
+    // 1. Verificar si ya existe un usuario con el mismo email
+    const existingByEmail = await this.usersRepository.findOne({
+      where: { email: createUserDto.email },
     });
 
-    if (existingByUserOrEmail) {
-      throw new ConflictException('El nombre de usuario o correo electrónico ya está en uso.');
+    if (existingByEmail) {
+      throw new ConflictException('El correo electrónico ya está en uso.');
     }
 
     // 2. PASO 6: Lógica para vincular cuenta pre-registrada por veterinario
@@ -111,8 +108,8 @@ export class UsersService {
         action: AuditAction.CREATE,
         entity: 'User',
         entityId: savedUser.id,
-        description: `Usuario ${savedUser.username} se registró en el sistema`,
-        newValue: { username: savedUser.username, email: savedUser.email, roleId: savedUser.roleId }
+        description: `Usuario ${savedUser.email} se registró en el sistema`,
+        newValue: { email: savedUser.email, roleId: savedUser.roleId }
       });
     } catch (e) { console.error('Error logging audit:', e); }
 
@@ -128,18 +125,10 @@ export class UsersService {
       relations: ['role']
     });
 
-    // Buscar la veterinaria del creador para vincular al usuario
-    const perfilCreador = await this.perfilesRepository.findOne({
-      where: { usuario: { id: createdById } },
-      relations: ['veterinariaPrincipal']
-    });
-    const vetId = perfilCreador?.veterinariaPrincipal?.id;
-
     if (existingUser) {
       console.log('🔄 [UsersService] Usuario ya existe, actualizando información y vinculando al veterinario.');
       
       if (!existingUser.createdById) existingUser.createdById = createdById;
-      if (!existingUser.veterinariaId) existingUser.veterinariaId = vetId;
 
       Object.assign(existingUser, {
         firstName: registerDto.firstName,
@@ -162,7 +151,6 @@ export class UsersService {
       roleId,
       tieneCuenta: false,
       createdById,
-      veterinariaId: vetId,
       isActive: true,
       fullName: `${registerDto.firstName} ${registerDto.lastName}`
     });
@@ -265,24 +253,11 @@ export class UsersService {
     return user;
   }
 
-  async findByUsername(identifier: string): Promise<User> {
-    const user = await this.usersRepository.findOne({
-      where: [
-        { username: identifier },
-        { email: identifier },
-      ],
-      relations: ['pets', 'role'],
-      select: ['id', 'username', 'email', 'password', 'fullName', 'firstName', 'lastName', 'phone', 'documentType', 'documentNumber', 'age', 'address', 'avatar', 'roleId', 'isActive', 'createdAt', 'updatedAt'],
-    });
-
-    return user || null;
-  }
-
   async findByEmail(email: string): Promise<User> {
     return this.usersRepository.findOne({
       where: { email },
       relations: ['pets', 'role'],
-      select: ['id', 'username', 'email', 'password', 'fullName', 'firstName', 'lastName', 'phone', 'documentType', 'documentNumber', 'age', 'address', 'avatar', 'roleId', 'isActive', 'createdAt', 'updatedAt'],
+      select: ['id', 'email', 'password', 'fullName', 'firstName', 'lastName', 'phone', 'documentType', 'documentNumber', 'age', 'address', 'avatar', 'roleId', 'isActive', 'createdAt', 'updatedAt'],
     });
   }
 
@@ -301,10 +276,9 @@ export class UsersService {
     // Clonar el DTO para no modificar el original y manejar campos especiales
     const updateData: any = { ...updateUserDto };
 
-    // Validación de duplicados si se cambia email, username o documento
-    if (updateData.username || updateData.email || updateData.documentNumber) {
+    // Validación de duplicados si se cambia email o documento
+    if (updateData.email || updateData.documentNumber) {
       const orConditions: any[] = [];
-      if (updateData.username) orConditions.push({ username: updateData.username });
       if (updateData.email) orConditions.push({ email: updateData.email });
       if (updateData.documentNumber) orConditions.push({ documentNumber: updateData.documentNumber });
 
@@ -316,7 +290,7 @@ export class UsersService {
         if (existingUser.documentNumber === updateData.documentNumber) {
           throw new ConflictException('El número de documento ya está en uso por otro usuario.');
         }
-        throw new ConflictException('El nombre de usuario o correo ya está en uso.');
+        throw new ConflictException('El correo ya está en uso.');
       }
     }
 
@@ -326,7 +300,7 @@ export class UsersService {
         console.warn('⚠️ [UsersService] Se recibió una contraseña vacía, ignorando actualización de password.');
         delete updateData.password;
       } else {
-        console.log(`🔐 [UsersService] Hasheando nueva contraseña para usuario ${user.username}...`);
+        console.log(`🔐 [UsersService] Hasheando nueva contraseña para usuario ${user.email}...`);
         updateData.password = await bcrypt.hash(updateData.password, 10);
         console.log('✅ [UsersService] Contraseña hasheada correctamente.');
       }
@@ -357,9 +331,9 @@ export class UsersService {
         action: AuditAction.UPDATE,
         entity: 'User',
         entityId: id,
-        description: `Usuario ${updatedUser.username} actualizó su perfil`,
-        oldValue: { username: user.username, email: user.email, isActive: user.isActive },
-        newValue: { username: updatedUser.username, email: updatedUser.email, isActive: updatedUser.isActive }
+        description: `Usuario ${updatedUser.email} actualizó su perfil`,
+        oldValue: { email: user.email, isActive: user.isActive },
+        newValue: { email: updatedUser.email, isActive: updatedUser.isActive }
       });
     } catch (e) { console.error('Error logging audit:', e); }
 
@@ -377,7 +351,7 @@ export class UsersService {
         action: AuditAction.STATUS_CHANGE,
         entity: 'User',
         entityId: id,
-        description: `Usuario ${user.username} fue desactivado`,
+        description: `Usuario ${user.email} fue desactivado`,
         oldValue: { isActive: true },
         newValue: { isActive: false }
       });

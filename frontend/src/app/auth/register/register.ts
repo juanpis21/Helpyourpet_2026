@@ -148,7 +148,7 @@ export class Register {
 
     // Mapear datos del formulario al DTO del backend
     const userDto = {
-      username: this.formData.correo.split('@')[0] + Math.floor(Math.random() * 1000),
+
       email: this.formData.correo,
       password: this.formData.password,
       fullName: `${this.formData.nombres} ${this.formData.apellidos}`,

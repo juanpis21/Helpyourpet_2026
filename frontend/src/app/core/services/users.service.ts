@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 interface CreateUserDto {
-  username: string;
+
   email: string;
   password: string;
   fullName?: string;
@@ -17,11 +17,10 @@ interface CreateUserDto {
   isActive?: boolean;
   roleId?: number;
   avatar?: string;
-  veterinariaId?: number;
 }
 
 interface UpdateUserDto {
-  username?: string;
+
   email?: string;
   fullName?: string;
   firstName?: string;
@@ -34,12 +33,11 @@ interface UpdateUserDto {
   isActive?: boolean;
   roleId?: number;
   avatar?: string;
-  veterinariaId?: number;
 }
 
 interface User {
   id: number;
-  username: string;
+
   email: string;
   fullName: string;
   firstName: string;
@@ -52,7 +50,6 @@ interface User {
   isActive: boolean;
   roleId?: number;
   role?: { id: number; name: string; description: string };
-  veterinariaId?: number;
   createdAt: string;
   updatedAt: string;
 }

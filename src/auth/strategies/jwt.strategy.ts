@@ -18,7 +18,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     
     const user = { 
       userId: payload.sub, 
-      username: payload.username, 
+      email: payload.email, 
       role: payload.role,  // Cambiado de roles a role
       roleId: payload.role?.id  // Agregar roleId directamente
     };

@@ -13,10 +13,10 @@
 			</div>
 			<div class="sidebar-user">
 				<div class="user-avatar">
-					{{ getInitials(currentUser?.username || 'Vet') }}
+					{{ getInitials(currentUser?.fullName || currentUser?.email || 'Vet') }}
 				</div>
 				<div class="user-info">
-					<h4>Dr. {{ currentUser?.username || 'Veterinario' }}</h4>
+					<h4>Dr. {{ currentUser?.fullName || currentUser?.email || 'Veterinario' }}</h4>
 					<span>Veterinario</span>
 				</div>
 			</div>
@@ -104,7 +104,7 @@
 			<section id="inicio" class="content-section active">
 				<div class="welcome-section">
 					<h1>
-						{{ getGreeting() }}, Dr. {{ currentUser?.username || 'Veterinario' }} 👋
+						{{ getGreeting() }}, Dr. {{ currentUser?.fullName || currentUser?.email || 'Veterinario' }} 👋
 					</h1>
 					<p>Bienvenido a tu panel de control. Aquí puedes gestionar todas las actividades de la clínica.</p>
 

@@ -7,7 +7,7 @@ interface LoginResponse {
   access_token: string;
   user: {
     id: number;
-    username: string;
+
     email: string;
     fullName: string;
     firstName: string;
@@ -32,7 +32,7 @@ interface LoginResponse {
 }
 
 interface LoginCredentials {
-  username: string;
+  email: string;
   password: string;
 }
 

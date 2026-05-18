@@ -110,7 +110,7 @@ export class Inicio implements OnInit {
       const user = this.authService.currentUser();
       if (user) {
         this.usuarioLogueado = {
-          nombre: user.fullName || user.username || 'Usuario',
+          nombre: user.fullName || 'Usuario',
           email: user.email,
           avatar: user.avatar 
             ? (user.avatar.startsWith('/uploads/') ? `http://localhost:3000${user.avatar}` : user.avatar) 
@@ -122,7 +122,7 @@ export class Inicio implements OnInit {
           const reloadedUser = this.authService.currentUser();
           if (reloadedUser) {
             this.usuarioLogueado = {
-              nombre: reloadedUser.fullName || reloadedUser.username || 'Usuario',
+              nombre: reloadedUser.fullName || 'Usuario',
               email: reloadedUser.email,
               avatar: reloadedUser.avatar 
                 ? (reloadedUser.avatar.startsWith('/uploads/') ? `http://localhost:3000${reloadedUser.avatar}` : reloadedUser.avatar) 
@@ -162,7 +162,7 @@ export class Inicio implements OnInit {
               id: pub.id,
               autorId: pub.autorId,
               usuario: {
-                nombre: autor ? (autor.fullName || `${autor.firstName || ''} ${autor.lastName || ''}`.trim() || autor.username || 'Usuario') : 'Usuario',
+                nombre: autor ? (autor.fullName || `${autor.firstName || ''} ${autor.lastName || ''}`.trim() || 'Usuario') : 'Usuario',
                 avatar: autor?.avatar 
                   ? (autor.avatar.startsWith('/uploads/') ? `http://localhost:3000${autor.avatar}` : autor.avatar)
                   : 'assets/images/Default.png'

@@ -460,7 +460,7 @@
 
                 <tr *ngFor="let user of paginatedUsuariosList">
 
-                  <td><strong>{{ user.username }}</strong></td>
+                  <td><strong>{{ user.fullName || user.email }}</strong></td>
 
                   <td>{{ user.firstName }}</td>
 
@@ -998,17 +998,7 @@
 
             </div>
 
-            <div class="filter-wrapper">
 
-              <select [(ngModel)]="filterVeterinariaVeterinarios" class="form-control" style="padding: 0.6rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); outline: none;">
-
-                <option value="todas">Todas las Sedes</option>
-
-                <option *ngFor="let vet of veterinarias" [value]="vet.id">{{ vet.nombre }}</option>
-
-              </select>
-
-            </div>
 
           </div>
 
@@ -1048,7 +1038,7 @@
 
                   <td>{{ user.id }}</td>
 
-                  <td><strong>{{ user.username }}</strong></td>
+                  <td><strong>{{ user.fullName || user.email }}</strong></td>
 
                   <td>{{ user.firstName }} {{ user.lastName }}</td>
 
@@ -2332,13 +2322,7 @@
 
         </div>
 
-        <div class="form-group">
 
-          <label><i class="fas fa-user-circle"></i> Nombre de Usuario *</label>
-
-          <input type="text" [(ngModel)]="newUser.username" placeholder="Ej: juanperez123">
-
-        </div>
 
         <div class="form-group">
 
@@ -3132,6 +3116,20 @@
 
         </div>
 
+        <div class="form-group">
+
+          <label><i class="fas fa-hospital"></i> Sede / Veterinaria *</label>
+
+          <select [(ngModel)]="newCategoria.veterinariaId" class="form-control" style="padding: 0.6rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); outline: none; width: 100%;">
+
+            <option [ngValue]="0">Seleccionar Veterinaria</option>
+
+            <option *ngFor="let vet of veterinarias" [ngValue]="vet.id">{{ vet.nombre }}</option>
+
+          </select>
+
+        </div>
+
 
 
         <div class="form-group full">
@@ -3193,6 +3191,20 @@
           <label>Código *</label>
 
           <input type="text" [(ngModel)]="editingCategoria.codigo">
+
+        </div>
+
+        <div class="form-group">
+
+          <label><i class="fas fa-hospital"></i> Sede / Veterinaria *</label>
+
+          <select [(ngModel)]="editingCategoria.veterinariaId" class="form-control" style="padding: 0.6rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); outline: none; width: 100%;">
+
+            <option [ngValue]="0">Seleccionar Veterinaria</option>
+
+            <option *ngFor="let vet of veterinarias" [ngValue]="vet.id">{{ vet.nombre }}</option>
+
+          </select>
 
         </div>
 
@@ -3272,13 +3284,7 @@
 
         </div>
 
-        <div class="form-group">
 
-          <label><i class="fas fa-user-circle"></i> Nombre de Usuario *</label>
-
-          <input type="text" [(ngModel)]="newVeterinario.username" placeholder="Ej: dr_perez">
-
-        </div>
 
         <div class="form-group">
 

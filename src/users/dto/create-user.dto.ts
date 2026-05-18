@@ -4,17 +4,6 @@ import { Type } from 'class-transformer';
 
 export class CreateUserDto {
   @ApiProperty({ 
-    description: 'Nombre de usuario', 
-    example: 'juanp',
-    minLength: 3,
-    maxLength: 50
-  })
-  @IsString()
-  @MinLength(3)
-  @MaxLength(50)
-  username: string;
-
-  @ApiProperty({ 
     description: 'Email del usuario', 
     example: 'juan@example.com'
   })
@@ -136,9 +125,5 @@ export class CreateUserDto {
   @IsString()
   avatar?: string;
 
-  @ApiProperty({ description: 'ID de la veterinaria asociada', required: false })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  veterinariaId?: number;
+
 }

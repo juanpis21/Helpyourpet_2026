@@ -64,9 +64,9 @@
             <input 
                 #usernameInput
                 type="text" 
-                placeholder="Correo electrónico o celular" 
-                [(ngModel)]="credentials.username"
-                name="username"
+                placeholder="Correo electrónico" 
+                [(ngModel)]="credentials.email"
+                name="email"
                 [disabled]="isLoading"
                 (keydown.enter)="onSubmit()"
                 required

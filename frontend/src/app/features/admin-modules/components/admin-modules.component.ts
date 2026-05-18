@@ -275,8 +275,6 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
   newUser: any = {
 
-    username: '',
-
     email: '',
 
     password: '',
@@ -438,8 +436,6 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
   // Datos Veterinarios
 
   newVeterinario: any = {
-
-    username: '',
 
     email: '',
 
@@ -1019,7 +1015,21 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
     this.usersService.getUsersByRoles(['usuario']).subscribe({
 
-      next: (data) => this.usuarios = data,
+      next: (data) => {
+
+        if (this.adminUser && this.adminUser.veterinariaId) {
+
+          const vetIds = [...this.veterinarios.map(v => v.id), this.adminUser.id];
+
+          this.usuarios = data.filter((u: any) => vetIds.includes(u.createdById));
+
+        } else {
+
+          this.usuarios = data;
+
+        }
+
+      },
 
       error: (err) => console.error('Error al cargar usuarios:', err)
 
@@ -1051,7 +1061,15 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
       next: (data) => {
 
-        this.servicios = data;
+        if (this.adminUser && this.adminUser.veterinariaId) {
+
+          this.servicios = data.filter(s => s.veterinariaId === this.adminUser.veterinariaId);
+
+        } else {
+
+          this.servicios = data;
+
+        }
 
         this.isLoading = false;
 
@@ -1247,8 +1265,6 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
       (v.lastName || '').toLowerCase().includes(term) ||
 
-      (v.username || '').toLowerCase().includes(term) ||
-
       (v.perfilVeterinario?.especialidad || '').toLowerCase().includes(term) ||
 
       (v.perfilVeterinario?.matricula || '').toLowerCase().includes(term)
@@ -1407,7 +1423,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
     this.showAddUserModal = false;
 
-    this.newUser = { username: '', email: '', password: '', firstName: '', lastName: '', roleId: null };
+    this.newUser = { email: '', password: '', firstName: '', lastName: '', roleId: null };
 
   }
 
@@ -1415,7 +1431,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
   guardarUsuario(): void {
 
-    if (!this.newUser.username || !this.newUser.email || !this.newUser.password) {
+    if (!this.newUser.email || !this.newUser.password) {
 
       this.showToast('Por favor, completa los campos obligatorios');
 
@@ -1769,7 +1785,19 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
     this.veterinariasService.getAll().subscribe({
 
-      next: (data) => this.veterinarias = data,
+      next: (data) => {
+
+        if (this.adminUser && this.adminUser.veterinariaId) {
+
+          this.veterinarias = data.filter(v => v.id === this.adminUser.veterinariaId);
+
+        } else {
+
+          this.veterinarias = data;
+
+        }
+
+      },
 
       error: (err) => console.error('Error al cargar veterinarias:', err)
 
@@ -1941,7 +1969,19 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
     this.productosService.getAll().subscribe({
 
-      next: (data) => this.productos = data,
+      next: (data) => {
+
+        if (this.adminUser && this.adminUser.veterinariaId) {
+
+          this.productos = data.filter(p => p.veterinariaId === this.adminUser.veterinariaId);
+
+        } else {
+
+          this.productos = data;
+
+        }
+
+      },
 
       error: (err) => console.error('Error al cargar productos:', err)
 
@@ -1955,7 +1995,19 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
     this.categoriasService.getAll().subscribe({
 
-      next: (data) => this.categorias = data,
+      next: (data) => {
+
+        if (this.adminUser && this.adminUser.veterinariaId) {
+
+          this.categorias = data.filter(c => c.veterinariaId === this.adminUser.veterinariaId);
+
+        } else {
+
+          this.categorias = data;
+
+        }
+
+      },
 
       error: (err) => console.error('Error al cargar categorías:', err)
 
@@ -2283,6 +2335,22 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
   openAddCategoriaModal(): void {
 
+    this.newCategoria = {
+
+      nombre: '',
+
+      descripcion: '',
+
+      codigo: '',
+
+      color: '#4ade80',
+
+      isActive: true,
+
+      veterinariaId: this.adminUser.veterinariaId || 0
+
+    };
+
     this.showAddCategoriaModal = true;
 
   }
@@ -2293,7 +2361,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
     this.showAddCategoriaModal = false;
 
-    this.newCategoria = { nombre: '', descripcion: '', codigo: '', color: '#4ade80', isActive: true };
+    this.newCategoria = { nombre: '', descripcion: '', codigo: '', color: '#4ade80', isActive: true, veterinariaId: 0 };
 
   }
 
@@ -2480,6 +2548,22 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
             // Recargar veterinarios con el filtro de veterinaria
 
             this.cargarVeterinarios();
+
+            // Recargar veterinarias filtradas para el admin
+
+            this.cargarVeterinarias();
+
+            // Recargar servicios filtrados para el admin
+
+            this.cargarServicios();
+
+            // Recargar categorías filtradas para el admin
+
+            this.cargarCategorias();
+
+            // Recargar productos filtrados para el admin
+
+            this.cargarProductos();
 
           } else {
 
@@ -2721,7 +2805,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
             const vetVetId = vet.perfilVeterinario?.veterinariaPrincipal?.id;
 
-            console.log(`🔍 [DEBUG] Veterinario ${vet.username}: veterinariaPrincipal.id = ${vetVetId}`);
+            console.log(`🔍 [DEBUG] Veterinario ${vet.email}: veterinariaPrincipal.id = ${vetVetId}`);
 
             return vetVetId === this.adminUser.veterinariaId;
 
@@ -2738,6 +2822,12 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
           console.log('⚠️ [DEBUG] Admin sin veterinaria asociada, mostrando todos los veterinarios');
 
         }
+
+
+
+        // Recargar usuarios filtrados según los veterinarios de esta veterinaria
+
+        this.cargarUsuarios();
 
       },
 
@@ -2768,8 +2858,6 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
     this.showAddVeterinarioModal = false;
 
     this.newVeterinario = {
-
-      username: '',
 
       email: '',
 
@@ -2807,24 +2895,19 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
     };
 
+    this.cdr.detectChanges();
+
   }
 
 
 
   guardarVeterinario(): void {
-
     // Validar campos obligatorios
-
-    if (!this.newVeterinario.username || !this.newVeterinario.email || !this.newVeterinario.password ||
-
+    if (!this.newVeterinario.email || !this.newVeterinario.password ||
       !this.newVeterinario.firstName || !this.newVeterinario.lastName || !this.newVeterinario.especialidad ||
-
       !this.newVeterinario.matricula) {
-
       this.showToast('Por favor, completa todos los campos obligatorios (*)', 'warning');
-
       return;
-
     }
 
 
@@ -2858,8 +2941,6 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
     // Datos del usuario
 
     const userData = {
-
-      username: this.newVeterinario.username,
 
       email: this.newVeterinario.email,
 
@@ -3026,6 +3107,8 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
     this.editingVeterinario = {};
 
     this.editingUsuario = {};
+
+    this.cdr.detectChanges();
 
   }
 

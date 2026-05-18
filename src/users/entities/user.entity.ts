@@ -14,10 +14,6 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ApiProperty({ description: 'Nombre de usuario', example: 'juanp', required: false })
-  @Column({ unique: true, nullable: true })
-  username: string;
-
   @ApiProperty({ description: 'Email del usuario', example: 'juan@example.com', required: false })
   @Column({ unique: true, nullable: true })
   email: string;
@@ -65,6 +61,10 @@ export class User {
   @Column({ nullable: true })
   createdById: number;
 
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: 'createdById' })
+  createdBy: User;
+
   @ApiProperty({ description: 'Estado del usuario', example: true })
   @Column({ default: true })
   isActive: boolean;
@@ -104,9 +104,6 @@ export class User {
   @OneToMany(() => Ticket, ticket => ticket.user)
   tickets: Ticket[];
 
-  @ApiProperty({ description: 'ID de la veterinaria asociada', required: false })
-  @Column({ nullable: true })
-  veterinariaId: number;
 
   @OneToOne(() => PerfilVeterinario, perfilVeterinario => perfilVeterinario.usuario)
   perfilVeterinario: PerfilVeterinario;

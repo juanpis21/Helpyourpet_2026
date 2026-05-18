@@ -359,7 +359,7 @@
                     </div>
                   </td>
                   <td>{{ pet.species }} / {{ pet.breed }}</td>
-                  <td>{{ pet.owner?.username || 'ID: ' + pet.ownerId }}</td>
+                  <td>{{ pet.owner?.fullName || pet.owner?.email || 'ID: ' + pet.ownerId }}</td>
                 </tr>
               </tbody>
             </table>
@@ -413,7 +413,7 @@
                   <td>
                     <div class="user-info" *ngIf="vet.admin">
                       <img [src]="getFullImageUrl(vet.admin.avatar)" class="avatar-sm">
-                      <span>{{ vet.admin.username }}</span>
+                      <span>{{ vet.admin.fullName || vet.admin.email }}</span>
                     </div>
                     <span class="text-secondary" *ngIf="!vet.admin">Sin asignar</span>
                   </td>
@@ -492,7 +492,7 @@
                 <tr *ngFor="let ticket of allTickets">
                   <td>#{{ ticket.id }}</td>
                   <td><strong>{{ ticket.asunto }}</strong></td>
-                  <td>{{ ticket.user?.username || 'N/A' }}</td>
+                  <td>{{ ticket.user?.fullName || ticket.user?.email || 'N/A' }}</td>
                   <td>
                     <span class="badge" [class.badge-high]="ticket.prioridad === 'Alta'" 
                                        [class.badge-medium]="ticket.prioridad === 'Media'" 
@@ -681,7 +681,7 @@
         </div>
         <div class="detail-row">
           <label>Usuario:</label>
-          <span>{{ selectedTicket?.user?.username || 'N/A' }}</span>
+          <span>{{ selectedTicket?.user?.fullName || selectedTicket?.user?.email || 'N/A' }}</span>
         </div>
         <div class="detail-row">
           <label>Prioridad:</label>
@@ -869,7 +869,7 @@
           <select [(ngModel)]="newVeterinaria.adminId" class="form-control">
             <option [ngValue]="undefined">-- Seleccionar Administrador --</option>
             <option *ngFor="let admin of allUsers" [ngValue]="admin.id">
-              {{ admin.username }} ({{ admin.fullName || admin.firstName }})
+              {{ admin.email }} ({{ admin.fullName || admin.firstName }})
             </option>
           </select>
         </div>
@@ -939,7 +939,7 @@
           <select [(ngModel)]="editingVeterinaria.adminId" class="form-control">
             <option [ngValue]="undefined">-- Seleccionar Administrador --</option>
             <option *ngFor="let admin of allUsers" [ngValue]="admin.id">
-              {{ admin.username }} ({{ admin.fullName || admin.firstName }})
+              {{ admin.email }} ({{ admin.fullName || admin.firstName }})
             </option>
           </select>
         </div>

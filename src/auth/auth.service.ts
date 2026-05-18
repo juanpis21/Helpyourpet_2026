@@ -22,29 +22,29 @@ export class AuthService {
     private auditLogsService: AuditLogsService,
   ) {}
 
-  async validateUser(username: string, password: string): Promise<any> {
-    console.log(`🔍 [AuthService] Intentando validar usuario: ${username}`);
-    const user = await this.usersService.findByUsername(username);
+  async validateUser(email: string, password: string): Promise<any> {
+    console.log(`🔍 [AuthService] Intentando validar usuario: ${email}`);
+    const user = await this.usersService.findByEmail(email);
 
     if (!user) {
-      console.warn(`❌ [AuthService] Usuario no encontrado: ${username}`);
+      console.warn(`❌ [AuthService] Usuario no encontrado: ${email}`);
       return null;
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (isPasswordValid) {
-      console.log(`✅ [AuthService] Usuario validado con éxito: ${username}`);
+      console.log(`✅ [AuthService] Usuario validado con éxito: ${email}`);
       const { password, ...result } = user;
       return result;
     }
 
-    console.warn(`❌ [AuthService] Contraseña incorrecta para el usuario: ${username}`);
+    console.warn(`❌ [AuthService] Contraseña incorrecta para el usuario: ${email}`);
     return null;
   }
 
   async login(loginDto: LoginDto): Promise<AuthResponse> {
-    const { username, password } = loginDto;
-    const user = await this.validateUser(username, password);
+    const { email, password } = loginDto;
+    const user = await this.validateUser(email, password);
     
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -55,7 +55,7 @@ export class AuthService {
     }
 
     const payload = { 
-      username: user.username, 
+      email: user.email, 
       sub: user.id, 
       role: user.role ?? 'usuario'
     };
@@ -70,7 +70,7 @@ export class AuthService {
         action: AuditAction.LOGIN,
         entity: 'Auth',
         entityId: user.id,
-        description: `${userWithRoles.username} (${userWithRoles.role?.name || 'usuario'}) inició sesión`,
+        description: `${userWithRoles.email} (${userWithRoles.role?.name || 'usuario'}) inició sesión`,
         newValue: { role: userWithRoles.role?.name }
       });
     } catch (e) { console.error('Error logging audit:', e); }

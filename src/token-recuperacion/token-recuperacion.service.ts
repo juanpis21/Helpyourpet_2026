@@ -46,7 +46,7 @@ export class TokenRecuperacionService {
         html: `
           <div style="font-family: Arial, sans-serif; text-align: center; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
             <h2 style="color: #4CAF50;">Clínica Veterinaria HelpyourPet</h2>
-            <p style="font-size: 16px;">Hola <b>${usuario.fullName || usuario.username}</b>,</p>
+            <p style="font-size: 16px;">Hola <b>${usuario.fullName || usuario.email}</b>,</p>
             <p>Has solicitado restablecer tu contraseña. Haz clic en el botón de abajo para continuar:</p>
             <div style="margin: 30px 0;">
               <a href="${urlRecuperacion}" 

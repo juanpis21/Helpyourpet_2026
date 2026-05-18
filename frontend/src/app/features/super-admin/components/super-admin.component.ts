@@ -113,7 +113,6 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
     return this.allUsers.filter(u =>
       u.fullName?.toLowerCase().includes(term) ||
       u.firstName?.toLowerCase().includes(term) ||
-      u.username?.toLowerCase().includes(term) ||
       u.email?.toLowerCase().includes(term)
     );
   }
@@ -137,8 +136,7 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
     return this.allVets.filter(v =>
       v.nombre?.toLowerCase().includes(term) ||
       v.direccion?.toLowerCase().includes(term) ||
-      v.email?.toLowerCase().includes(term) ||
-      v.admin?.username?.toLowerCase().includes(term)
+      v.email?.toLowerCase().includes(term)
     );
   }
 
@@ -446,7 +444,7 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
       const originalStatus = user.isActive;
       const newStatus = !originalStatus;
 
-      console.log('🔄 [toggleUserStatus] Cambiando estado de usuario:', user.username, 'de', originalStatus, 'a', newStatus);
+      console.log('🔄 [toggleUserStatus] Cambiando estado de usuario:', user.email, 'de', originalStatus, 'a', newStatus);
 
       // Encontrar el índice del usuario en el array
       const index = this.allUsers.findIndex(u => u.id === user.id);
@@ -464,7 +462,7 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
 
       this.usersService.updateUser(user.id, { isActive: newStatus }).subscribe({
         next: (response) => {
-          console.log('✅ Estado actualizado en servidor:', response.username, response.isActive);
+          console.log('✅ Estado actualizado en servidor:', response.email, response.isActive);
           // Actualizar el objeto en el array con la respuesta del servidor
           this.allUsers = [...this.allUsers];
           this.allUsers[index] = { ...this.allUsers[index], ...response };
@@ -521,7 +519,7 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
     const user = this.authService.getCurrentUser();
     if (user?.fullName) return user.fullName;
     if (user?.firstName || user?.lastName) return `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
-    return user?.username || 'Usuario';
+    return user?.fullName || 'Usuario';
   }
 
   // ===== ROLES =====
@@ -831,10 +829,8 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    // Generar username automáticamente basado en nombre y apellido
     const firstName = this.newAdmin.firstName.trim().toLowerCase();
     const lastName = this.newAdmin.lastName.trim().toLowerCase();
-    const username = `${firstName}.${lastName}`;
 
     // Obtener ID del rol 'admin' dinámicamente o usar 2 por defecto
     const adminRole = this.roles.find(r => r.name.toLowerCase() === 'admin');
@@ -842,7 +838,6 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
 
     // Preparar el payload para enviar al backend
     const adminPayload = {
-      username: username,
       firstName: this.newAdmin.firstName.trim(),
       lastName: this.newAdmin.lastName.trim(),
       email: this.newAdmin.email.trim().toLowerCase(),

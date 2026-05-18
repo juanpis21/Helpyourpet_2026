@@ -40,7 +40,7 @@ export class Navbar implements OnInit {
       this.usuarioLogueado = {
         id: user.id,
         roleId: Number(user.roleId || user.role?.id),
-        nombre: user.fullName || user.username || 'Usuario',
+        nombre: user.fullName || 'Usuario',
         email: user.email,
         avatar: this.getFullAvatarUrl(user.avatar)
       };
