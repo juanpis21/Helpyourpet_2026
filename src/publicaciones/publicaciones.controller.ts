@@ -79,6 +79,13 @@ export class PublicacionesController {
     return await this.publicacionesService.findByAutor(+autorId);
   }
 
+  @Get('veterinaria/:veterinariaId')
+  @ApiOperation({ summary: 'Obtener publicaciones por veterinaria' })
+  @ApiResponse({ status: 200, description: 'Lista de publicaciones de todos los vets de la veterinaria', type: [Publicacion] })
+  async findByVeterinaria(@Param('veterinariaId') veterinariaId: string) {
+    return await this.publicacionesService.findByVeterinaria(+veterinariaId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Obtener una publicación por ID' })
   @ApiResponse({ status: 200, description: 'Publicación encontrada', type: Publicacion })

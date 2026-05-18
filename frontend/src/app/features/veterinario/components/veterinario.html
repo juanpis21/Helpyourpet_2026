@@ -64,7 +64,7 @@
   </nav>
 
   <!-- ===== MAIN CONTENT ===== -->
-  <main class="main-content">
+  <main class="main-content" (click)="closeAllMenus()">
 
     <!-- DASHBOARD -->
     <section *ngIf="activeSection === 'dashboard'" class="content-section animate-in">
@@ -135,16 +135,20 @@
 
       <!-- Historial de Acciones -->
       <div class="card" style="margin-top: 2rem;">
-        <div class="card-header table-header-actions" style="background: linear-gradient(90deg, var(--primary-color) 0%, #2a5298 100%) !important; padding: 1.2rem 1.8rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-          <h5 style="margin: 0; color: white !important; font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 0.8rem; letter-spacing: 0.3px;">
+        <div class="card-header table-header-actions"
+          style="background: linear-gradient(90deg, var(--primary-color) 0%, #2a5298 100%) !important; padding: 1.2rem 1.8rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <h5
+            style="margin: 0; color: white !important; font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 0.8rem; letter-spacing: 0.3px;">
             <i class="fas fa-history"></i> Tabla de Historial de Acciones
           </h5>
           <div style="display: flex; gap: 1rem; align-items: center;">
             <div class="search-box">
               <i class="fas fa-calendar-alt" style="margin-right: 0.5rem; color: #fff;"></i>
-              <input type="date" [(ngModel)]="historialSearchDate" (change)="historialPage = 1" style="padding-left: 2.5rem; color: var(--text-primary);">
+              <input type="date" [(ngModel)]="historialSearchDate" (change)="historialPage = 1"
+                style="padding-left: 2.5rem; color: var(--text-primary);">
             </div>
-            <span class="results-count" style="color: white; font-weight: 600;">Total: {{ filteredHistorial.length }}</span>
+            <span class="results-count" style="color: white; font-weight: 600;">Total: {{ filteredHistorial.length
+              }}</span>
           </div>
         </div>
         <div class="card-body" style="padding: 2rem;">
@@ -172,11 +176,14 @@
                   <td>{{ formatDateCorrectly(h.createdAt) | date:'dd/MM/yyyy, hh:mm a' }}</td>
                   <td>
                     <div class="user-info" style="display: flex; align-items: center; gap: 0.8rem;">
-                      <img [src]="getFullImageUrl(h.user?.avatar)" class="avatar-sm" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+                      <img [src]="getFullImageUrl(h.user?.avatar)" class="avatar-sm"
+                        style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
                       <span>{{ h.user?.firstName }} {{ h.user?.lastName }}</span>
                     </div>
                   </td>
-                  <td><span class="badge" style="background: var(--pastel-blue); color: var(--primary-color); padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600;">{{ h.user?.role?.name || 'N/A' }}</span></td>
+                  <td><span class="badge"
+                      style="background: var(--pastel-blue); color: var(--primary-color); padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600;">{{
+                      h.user?.role?.name || 'N/A' }}</span></td>
                   <td>
                     <span class="tipo-badge" [ngClass]="getTipoCambioClass(h.action)">
                       {{ getTipoCambioLabel(h.action) }}
@@ -187,11 +194,15 @@
               </tbody>
             </table>
           </div>
-          <div class="pagination-controls" *ngIf="!historialLoading && filteredHistorial.length > 0" style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color); font-size: 0.9rem; color: var(--text-secondary);">
+          <div class="pagination-controls" *ngIf="!historialLoading && filteredHistorial.length > 0"
+            style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color); font-size: 0.9rem; color: var(--text-secondary);">
             <span>Página {{ historialPage }} de {{ historialTotalPages }}</span>
             <div class="pagination-buttons" style="display: flex; gap: 0.5rem;">
-              <button class="btn-secondary" [disabled]="historialPage === 1" (click)="historialPage = historialPage - 1" style="cursor: pointer; padding: 0.4rem 0.8rem; font-size: 0.85rem; font-weight: 600;">Anterior</button>
-              <button class="btn-secondary" [disabled]="historialPage === historialTotalPages" (click)="historialPage = historialPage + 1" style="cursor: pointer; padding: 0.4rem 0.8rem; font-size: 0.85rem; font-weight: 600;">Siguiente</button>
+              <button class="btn-secondary" [disabled]="historialPage === 1" (click)="historialPage = historialPage - 1"
+                style="cursor: pointer; padding: 0.4rem 0.8rem; font-size: 0.85rem; font-weight: 600;">Anterior</button>
+              <button class="btn-secondary" [disabled]="historialPage === historialTotalPages"
+                (click)="historialPage = historialPage + 1"
+                style="cursor: pointer; padding: 0.4rem 0.8rem; font-size: 0.85rem; font-weight: 600;">Siguiente</button>
             </div>
           </div>
         </div>
@@ -449,14 +460,37 @@
         </div>
       </div>
 
+      <!-- Buscador y filtro de veterinario -->
+      <div class="search-bar-container" style="gap: 1rem; flex-wrap: wrap; align-items: center;">
+        <div class="search-input-wrapper">
+          <i class="fas fa-search"></i>
+          <input type="text" [(ngModel)]="searchTermPublicaciones" placeholder="Buscar por descripción...">
+        </div>
+        <div class="search-input-wrapper" style="max-width: 280px;">
+          <i class="fas fa-user-md"></i>
+          <select [(ngModel)]="filtroVeterinarioId">
+            <option [ngValue]="null">Todos los veterinarios</option>
+            <option *ngFor="let v of veterinariosClinica" [ngValue]="v.id">
+              {{ v.firstName }} {{ v.lastName }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div *ngIf="filteredPublicaciones.length === 0 && publicaciones.length > 0" class="empty-state large">
+        <i class="fas fa-search"></i>
+        <h3>Sin resultados</h3>
+        <p>No se encontraron publicaciones con ese criterio.</p>
+      </div>
+
       <div *ngIf="publicaciones.length === 0" class="empty-state large">
         <i class="fas fa-heart"></i>
-        <h3>No has publicado nada aún</h3>
+        <h3>No hay publicaciones aún</h3>
         <p>¡Comparte algo con la comunidad! 🐾</p>
       </div>
 
-      <div *ngIf="publicaciones.length > 0" class="publicaciones-grid">
-        <div *ngFor="let pub of publicaciones" class="publicacion-card">
+      <div *ngIf="filteredPublicaciones.length > 0" class="publicaciones-grid">
+        <div *ngFor="let pub of filteredPublicaciones" class="publicacion-card">
           <div *ngIf="pub.imagen" class="publicacion-image">
             <img [src]="pub.imagen" [alt]="pub.descripcion" class="pub-img">
           </div>
@@ -468,10 +502,17 @@
             </div>
           </div>
           <div class="publicacion-actions">
-            <button class="btn-edit-small" (click)="openEditPublicacionModal(pub)" title="Editar Publicación"><i
-                class="fas fa-pencil-alt"></i></button>
-            <button class="btn-delete-small" (click)="eliminarPublicacion(pub.id)" title="Eliminar Publicación"><i
-                class="fas fa-trash"></i></button>
+            <button class="btn-menu-dots" (click)="togglePubMenu(pub.id, $event)">
+              <i class="fas fa-ellipsis-v"></i>
+            </button>
+            <div class="pub-dropdown" *ngIf="activePubMenuId === pub.id">
+              <button class="dropdown-item edit" (click)="openEditPublicacionModal(pub)">
+                <i class="fas fa-pencil-alt"></i> Editar
+              </button>
+              <button class="dropdown-item delete" (click)="eliminarPublicacion(pub.id)">
+                <i class="fas fa-trash-alt"></i> Eliminar
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -600,7 +641,8 @@
             <h6><i class="fas fa-exclamation-triangle"></i> Desactivación de cuenta</h6>
           </div>
           <div class="card-body">
-            <p class="config-hint" style="text-align: left; margin: 0 0 2.5rem; line-height: 1.6;">Al desactivar tu cuenta, perderás el acceso a la plataforma de forma permanente. Esta acción no se puede deshacer.</p>
+            <p class="config-hint" style="text-align: left; margin: 0 0 2.5rem; line-height: 1.6;">Al desactivar tu
+              cuenta, perderás el acceso a la plataforma de forma permanente. Esta acción no se puede deshacer.</p>
             <div class="danger-action" style="display: flex; justify-content: center;">
               <button class="btn-danger-light" (click)="eliminarCuenta()">
                 <i class="fas fa-user-slash"></i> Desactivar mi Cuenta
@@ -847,7 +889,7 @@
               <span class="hc-consulta-date"><i class="fas fa-calendar-alt"></i> {{ c.fechaConsulta | date:'dd/MM/yyyy
                 HH:mm' }}</span>
               <button class="btn-icon-primary" (click)="editarConsulta(c)" title="Editar consulta"
-                      style="background-color: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; border-radius: 10px; width: 38px; height: 38px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 5px rgba(22, 163, 74, 0.1);">
+                style="background-color: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; border-radius: 10px; width: 38px; height: 38px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 5px rgba(22, 163, 74, 0.1);">
                 <i class="fas fa-edit" style="font-size: 1.1rem;"></i>
               </button>
             </div>
@@ -1024,9 +1066,12 @@
           <label>Tipo de Documento *</label>
           <select [(ngModel)]="newUser.documentType">
             <option value="Cédula">Cédula</option>
+            <option value="Dni">DNI</option>
             <option value="Pasaporte">Pasaporte</option>
-            <option value="Tarjeta Identidad">Tarjeta Identidad</option>
-            <option value="Registro Civil">Registro Civil</option>
+            <option value="Cedula de Extranjería">Cédula de Extranjería</option>
+            <option value="Permiso de Residencia">Permiso de Residencia</option>
+            <option value="Documento Nacional">Documento Nacional</option>
+            <option value="Licvencia de Conducir">Licecncia de Conducir</option>
           </select>
         </div>
         <div class="form-group">
@@ -1143,7 +1188,7 @@
         </div>
         <div class="form-group">
           <label>Tipo de Documento *</label>
-          <select [(ngModel)]="editingUser.documentType">
+          <select [(ngModel)]="editingUser.documentType" disabled class="readonly-field">
             <option value="Cédula">Cédula</option>
             <option value="Pasaporte">Pasaporte</option>
             <option value="Cédula Extranjería">Cédula Extranjería</option>
@@ -1152,7 +1197,7 @@
         </div>
         <div class="form-group">
           <label>Número de Documento *</label>
-          <input type="text" [(ngModel)]="editingUser.documentNumber">
+          <input type="text" [(ngModel)]="editingUser.documentNumber" readonly class="readonly-field">
         </div>
         <div class="form-group">
           <label>Teléfono</label>

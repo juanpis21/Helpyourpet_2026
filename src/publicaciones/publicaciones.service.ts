@@ -62,6 +62,18 @@ export class PublicacionesService {
       .getMany();
   }
 
+  async findByVeterinaria(veterinariaId: number): Promise<Publicacion[]> {
+    console.log(`Backend: Buscando publicaciones de la veterinaria ${veterinariaId}...`);
+    return this.publicacionesRepository.createQueryBuilder('publicacion')
+      .leftJoinAndSelect('publicacion.autor', 'autor')
+      .innerJoin('perfiles_veterinarios', 'pv', 'pv."usuarioId" = autor.id')
+      .innerJoin('veterinarias', 'v', 'v.id = pv."veterinariaPrincipalId"')
+      .where('v.id = :veterinariaId', { veterinariaId })
+      .andWhere('publicacion.isActive = :isActive', { isActive: true })
+      .orderBy('publicacion.createdAt', 'DESC')
+      .getMany();
+  }
+
   async findOne(id: number): Promise<Publicacion> {
     const publicacion = await this.publicacionesRepository.findOne({ 
       where: { id, isActive: true }
@@ -88,3 +100,4 @@ export class PublicacionesService {
     await this.publicacionesRepository.update(id, { isActive: false });
   }
 }
+

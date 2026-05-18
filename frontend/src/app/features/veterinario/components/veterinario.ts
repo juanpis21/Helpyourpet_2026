@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 import { Chart, registerables } from 'chart.js';
@@ -64,6 +64,12 @@ interface Usuario {
   styleUrl: './veterinario.scss',
 })
 export class Veterinario implements OnInit {
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    if (window.innerWidth > 1280) {
+      this.sidebarOpen = true;
+    }
+  }
   private authService = inject(AuthService);
   private userService = inject(UsersService);
   private http = inject(HttpClient);
@@ -91,6 +97,7 @@ export class Veterinario implements OnInit {
   usuarios: any[] = [];
   publicaciones: any[] = [];
   citas: any[] = [];
+  veterinariaId: number | null = null;
 
   usuario: Usuario = {
     id: 0, nombres: '', apellidos: '', correo: '', telefono: '',
@@ -121,6 +128,11 @@ export class Veterinario implements OnInit {
 
   // Mascotas
   searchTermMascotas: string = '';
+  // Publicaciones
+  searchTermPublicaciones: string = '';
+  filtroVeterinarioId: number | null = null;
+  veterinariosClinica: any[] = [];
+  activePubMenuId: number | null = null;
   showAddPetModal: boolean = false;
   showAddUserModal: boolean = false;
   showAddCitaModal: boolean = false;
@@ -217,6 +229,23 @@ export class Veterinario implements OnInit {
       m.owner?.firstName?.toLowerCase().includes(term) ||
       m.owner?.lastName?.toLowerCase().includes(term)
     );
+  }
+
+  get filteredPublicaciones() {
+    let result = this.publicaciones;
+
+    // Filtrar por veterinario seleccionado
+    if (this.filtroVeterinarioId !== null) {
+      result = result.filter(p => p.autorId === this.filtroVeterinarioId);
+    }
+
+    // Filtrar por término de búsqueda en descripción
+    const term = this.searchTermPublicaciones.trim().toLowerCase();
+    if (term) {
+      result = result.filter(p => p.descripcion?.toLowerCase().includes(term));
+    }
+
+    return result;
   }
 
   get paginatedMascotas() {
@@ -358,7 +387,14 @@ export class Veterinario implements OnInit {
                 this.usuario.matricula = perfil.matricula;
                 this.usuario.aniosExperiencia = perfil.aniosExperiencia;
                 this.usuario.nombreVeterinaria = perfil.veterinariaPrincipal?.nombre || 'No asignada';
+                if (perfil.veterinariaPrincipal?.id) {
+                  this.veterinariaId = perfil.veterinariaPrincipal.id;
+                }
                 this.cdr.detectChanges();
+                // Recargar publicaciones ahora que tenemos el ID de veterinaria
+                this.cargarPublicacionesUsuario();
+                // Cargar veterinarios de la misma clínica para el filtro
+                this.cargarVeterinariosClinica();
               }
             },
             error: (err) => console.error('Error al cargar perfil veterinario:', err)
@@ -368,18 +404,65 @@ export class Veterinario implements OnInit {
   }
 
   cargarPublicacionesUsuario(): void {
-    if (this.vetUser && this.vetUser.id) {
+    if (!this.vetUser || !this.vetUser.id) return;
+
+    const mapImagen = (publicaciones: any[]) => publicaciones.map(pub => ({
+      ...pub,
+      imagen: pub.imagen && pub.imagen.startsWith('/uploads/') ? `http://localhost:3000${pub.imagen}` : pub.imagen
+    }));
+
+    if (this.veterinariaId) {
+      // Traer publicaciones de todos los vets de la misma veterinaria
+      this.publicacionesService.getPublicacionesPorVeterinaria(this.veterinariaId).subscribe({
+        next: (publicaciones) => {
+          this.publicaciones = mapImagen(publicaciones);
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error al cargar publicaciones por veterinaria:', err);
+          // Fallback: cargar solo las propias si falla el endpoint
+          this.publicacionesService.getPublicacionesPorAutor(this.vetUser.id).subscribe({
+            next: (pubs) => { this.publicaciones = mapImagen(pubs); this.cdr.detectChanges(); },
+            error: (e) => console.error('Error al cargar publicaciones:', e)
+          });
+        }
+      });
+    } else {
+      // Si aún no tenemos veterinariaId, cargar solo las propias (se reemplazará cuando llegue el perfil)
       this.publicacionesService.getPublicacionesPorAutor(this.vetUser.id).subscribe({
         next: (publicaciones) => {
-          this.publicaciones = publicaciones.map(pub => ({
-            ...pub,
-            imagen: pub.imagen && pub.imagen.startsWith('/uploads/') ? `http://localhost:3000${pub.imagen}` : pub.imagen
-          }));
+          this.publicaciones = mapImagen(publicaciones);
           this.cdr.detectChanges();
         },
         error: (err) => console.error('Error al cargar publicaciones:', err)
       });
     }
+  }
+
+  cargarVeterinariosClinica(): void {
+    if (!this.veterinariaId) return;
+    this.http.get<any[]>(`${this.API_BASE}/perfiles-veterinarios/veterinaria/${this.veterinariaId}`, this.getHeaders())
+      .subscribe({
+        next: (perfiles) => {
+          // Cada perfil tiene la relación usuario con firstName y lastName
+          this.veterinariosClinica = perfiles.map(p => ({
+            id: p.usuario?.id,
+            firstName: p.usuario?.firstName || '',
+            lastName: p.usuario?.lastName || ''
+          })).filter(v => v.id != null);
+          this.cdr.detectChanges();
+        },
+        error: (err) => console.error('Error al cargar veterinarios de la clínica:', err)
+      });
+  }
+
+  togglePubMenu(id: number, event: Event): void {
+    event.stopPropagation();
+    this.activePubMenuId = this.activePubMenuId === id ? null : id;
+  }
+
+  closeAllMenus(): void {
+    this.activePubMenuId = null;
   }
 
   eliminarPublicacion(id: number): void {
@@ -526,6 +609,9 @@ export class Veterinario implements OnInit {
 
   setSection(section: string): void {
     this.activeSection = section;
+    if (window.innerWidth <= 1280) {
+      this.sidebarOpen = false;
+    }
     if (section === 'tickets') {
       this.loadMyTickets();
     } else if (section === 'dashboard') {

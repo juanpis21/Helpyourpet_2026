@@ -32,6 +32,13 @@ export class PublicacionesService {
     });
   }
 
+  // Obtener publicaciones de todos los veterinarios de una misma veterinaria
+  getPublicacionesPorVeterinaria(veterinariaId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/veterinaria/${veterinariaId}`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
   // Crear una nueva publicación (soporta FormData para subida de imágenes)
   crearPublicacion(publicacion: any): Observable<any> {
     if (publicacion instanceof FormData) {
