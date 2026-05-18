@@ -135,4 +135,10 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   avatar?: string;
+
+  @ApiProperty({ description: 'ID de la veterinaria asociada', required: false })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  veterinariaId?: number;
 }

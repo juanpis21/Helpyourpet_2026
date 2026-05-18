@@ -17,6 +17,7 @@ interface CreateUserDto {
   isActive?: boolean;
   roleId?: number;
   avatar?: string;
+  veterinariaId?: number;
 }
 
 interface UpdateUserDto {
@@ -33,6 +34,7 @@ interface UpdateUserDto {
   isActive?: boolean;
   roleId?: number;
   avatar?: string;
+  veterinariaId?: number;
 }
 
 interface User {
@@ -50,6 +52,7 @@ interface User {
   isActive: boolean;
   roleId?: number;
   role?: { id: number; name: string; description: string };
+  veterinariaId?: number;
   createdAt: string;
   updatedAt: string;
 }

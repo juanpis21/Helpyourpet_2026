@@ -104,6 +104,10 @@ export class User {
   @OneToMany(() => Ticket, ticket => ticket.user)
   tickets: Ticket[];
 
+  @ApiProperty({ description: 'ID de la veterinaria asociada', required: false })
+  @Column({ nullable: true })
+  veterinariaId: number;
+
   @OneToOne(() => PerfilVeterinario, perfilVeterinario => perfilVeterinario.usuario)
   perfilVeterinario: PerfilVeterinario;
 

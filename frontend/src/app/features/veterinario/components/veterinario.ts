@@ -78,6 +78,13 @@ export class Veterinario implements OnInit {
   darkMode: boolean = false;
   today: Date = new Date();
 
+  // Historial de Acciones
+  historialCitas: any[] = [];
+  historialLoading: boolean = false;
+  historialSearchDate: string = '';
+  historialPage: number = 1;
+  historialPageSize: number = 10;
+
   // Datos
   vetUser: any = null;
   mascotas: any[] = [];
@@ -267,6 +274,24 @@ export class Veterinario implements OnInit {
     return Math.ceil(this.filteredUsuarios.length / this.usersPageSize);
   }
 
+  // Getters para Historial de Acciones
+  get filteredHistorial() {
+    if (!this.historialSearchDate) return this.historialCitas;
+    return this.historialCitas.filter(h => {
+      if (!h.createdAt) return false;
+      return h.createdAt.startsWith(this.historialSearchDate);
+    });
+  }
+
+  get paginatedHistorial() {
+    const start = (this.historialPage - 1) * this.historialPageSize;
+    return this.filteredHistorial.slice(start, start + this.historialPageSize);
+  }
+
+  get historialTotalPages() {
+    return Math.ceil(this.filteredHistorial.length / this.historialPageSize) || 1;
+  }
+
   nextUsersPage() {
     if (this.usersCurrentPage < this.totalUsersPages) {
       this.usersCurrentPage++;
@@ -300,6 +325,7 @@ export class Veterinario implements OnInit {
       this.cargarDatos();
       this.cargarPublicacionesUsuario();
       this.loadMyTickets();
+      this.loadHistorial();
     }
   }
 
@@ -503,8 +529,67 @@ export class Veterinario implements OnInit {
     if (section === 'tickets') {
       this.loadMyTickets();
     } else if (section === 'dashboard') {
+      this.loadHistorial();
       this.renderCharts();
     }
+  }
+
+  loadHistorial(): void {
+    if (!this.vetUser || !this.vetUser.id) return;
+    this.historialLoading = true;
+    const token = localStorage.getItem('access_token');
+    const headers = { Authorization: `Bearer ${token}` };
+    this.http.get<any[]>(`${this.API_BASE}/audit-logs/user/${this.vetUser.id}`, { headers }).subscribe({
+      next: (data) => {
+        this.historialCitas = data;
+        this.historialLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error loading historial:', err);
+        this.historialCitas = [];
+        this.historialLoading = false;
+      }
+    });
+  }
+
+  getTipoCambioLabel(tipo: string): string {
+    const map: { [key: string]: string } = {
+      'CREATE': 'Creación',
+      'UPDATE': 'Actualización',
+      'DELETE': 'Eliminación',
+      'LOGIN': 'Inicio Sesión',
+      'LOGOUT': 'Cierre Sesión',
+      'STATUS_CHANGE': 'Cambio Estado'
+    };
+    return map[tipo] || tipo;
+  }
+
+  getTipoCambioClass(tipo: string): string {
+    const map: { [key: string]: string } = {
+      'CREATE': 'tipo-creacion',
+      'UPDATE': 'tipo-actualizacion',
+      'DELETE': 'tipo-cancelacion',
+      'LOGIN': 'tipo-completacion',
+      'LOGOUT': 'tipo-actualizacion',
+      'STATUS_CHANGE': 'tipo-completacion'
+    };
+    return map[tipo] || '';
+  }
+
+  formatDateCorrectly(dateStr: string): Date {
+    if (!dateStr) return new Date();
+    const hasTimezone = dateStr.includes('Z') || dateStr.includes('+') || (dateStr.includes('-') && dateStr.lastIndexOf('-') > 10);
+    if (!hasTimezone) {
+      return new Date(dateStr + 'Z');
+    }
+    return new Date(dateStr);
+  }
+
+  getFullImageUrl(path: string | null | undefined): string {
+    if (!path) return 'assets/images/Default.png';
+    if (path.startsWith('http')) return path;
+    return `http://localhost:3000${path}`;
   }
 
   loadMyTickets(): void {

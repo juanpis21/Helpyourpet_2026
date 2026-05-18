@@ -1939,4 +1939,94 @@
   }
 }
 
+/* ===== ADICIONALES PARA HISTORIAL DE ACCIONES ===== */
+.search-box {
+  position: relative;
+  width: 300px;
+  
+  i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+  }
+  
+  input {
+    width: 100%;
+    padding: 0.6rem 1rem 0.6rem 2.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-body);
+    color: var(--text-primary);
+    font-family: inherit;
+    transition: all 0.3s ease;
+    
+    &:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(107, 154, 214, 0.2);
+    }
+  }
+}
+
+.results-count {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+
+  .pagination-buttons {
+    display: flex;
+    gap: 0.5rem;
+    
+    button {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.85rem;
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+.tipo-badge {
+  padding: 0.3rem 0.7rem;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.tipo-creacion {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.tipo-actualizacion {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.tipo-cancelacion {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.tipo-completacion {
+  background: #fef3c7;
+  color: #d97706;
+}
+
 

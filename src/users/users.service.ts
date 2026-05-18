@@ -122,22 +122,25 @@ export class UsersService {
   async registerByVeterinario(registerDto: RegisterUserByVetDto, createdById: number): Promise<User> {
     console.log('📝 [UsersService] Registrando usuario por veterinario:', registerDto.documentNumber);
 
-    // Buscar si ya existe el usuario por documento
+    // 1. Buscar si ya existe el usuario por documento
     const existingUser = await this.usersRepository.findOne({
       where: { documentNumber: registerDto.documentNumber },
       relations: ['role']
     });
 
+    // Buscar la veterinaria del creador para vincular al usuario
+    const perfilCreador = await this.perfilesRepository.findOne({
+      where: { usuario: { id: createdById } },
+      relations: ['veterinariaPrincipal']
+    });
+    const vetId = perfilCreador?.veterinariaPrincipal?.id;
+
     if (existingUser) {
       console.log('🔄 [UsersService] Usuario ya existe, actualizando información y vinculando al veterinario.');
       
-      // Si el usuario existe pero no tiene un creador asignado o es de tipo usuario sin cuenta
-      // lo vinculamos al veterinario actual para que pueda verlo en su lista
-      if (!existingUser.createdById) {
-        existingUser.createdById = createdById;
-      }
+      if (!existingUser.createdById) existingUser.createdById = createdById;
+      if (!existingUser.veterinariaId) existingUser.veterinariaId = vetId;
 
-      // Actualizamos datos básicos si vienen en el DTO
       Object.assign(existingUser, {
         firstName: registerDto.firstName,
         lastName: registerDto.lastName,
@@ -151,15 +154,15 @@ export class UsersService {
       return this.usersRepository.save(existingUser);
     }
 
-    // Si no existe, buscamos el rol 'usuario' dinámicamente
     const usuarioRole = await this.rolesRepository.findOne({ where: { name: 'usuario' } });
-    const roleId = usuarioRole ? usuarioRole.id : 4; // Fallback a 4 si no se encuentra
+    const roleId = usuarioRole ? usuarioRole.id : 4;
 
     const user = this.usersRepository.create({
       ...registerDto,
       roleId,
       tieneCuenta: false,
       createdById,
+      veterinariaId: vetId,
       isActive: true,
       fullName: `${registerDto.firstName} ${registerDto.lastName}`
     });
