@@ -36,9 +36,9 @@ export class Pet {
 
   @ApiProperty({ 
     description: 'Edad de la mascota', 
-    example: 3 
+    example: '3 años' 
   })
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, default: 'Desconocido' })
   age: string;
 
   @ApiProperty({ 
