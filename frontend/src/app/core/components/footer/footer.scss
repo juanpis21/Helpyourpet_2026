@@ -1,107 +1,198 @@
 .footer {
-	background: linear-gradient(135deg, #0b3f72, #143049);
-	color: white;
-	padding: 2rem 1rem;
-	position: relative;
-	z-index: 10;
+  background: linear-gradient(135deg, #0b3f72, #143049);
+  color: white;
+  padding: 3rem 1.5rem 2rem 1.5rem;
+  position: relative;
+  z-index: 10;
 }
 
 .footer-container {
-	max-width: 1200px;
-	margin: 0 auto;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .footer-top {
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: space-between;
-	gap: 2rem;
-	align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 2.5rem;
+  align-items: flex-start;
 }
 
-.social-links a {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	width: 40px;
-	height: 40px;
-	background: rgba(255, 255, 255, 0.1);
-	border-radius: 50%;
-	color: white;
-	margin-right: 10px;
-	transition: all 0.3s;
-	text-decoration: none;
-}
-
-.social-links a:hover {
-	background: #e91e63;
-	transform: translateY(-3px);
-}
-
-.copyright {
-	border-top: 1px solid rgba(255, 255, 255, 0.1);
-	padding-top: 20px;
-	margin-top: 40px;
-	text-align: center;
-	opacity: 0.7;
+.footer-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  
+  .logo-img {
+    height: 90px;
+    object-fit: contain;
+    display: block;
+  }
 }
 
 .footer-brand {
-	font-size: 1.5rem;
+  font-family: 'Fira Sans', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  background: linear-gradient(to right, #ffffff, #99c6ed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
+.footer-about {
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  
+  .quote {
+    font-style: italic;
+    opacity: 0.85;
+    font-size: 1.05rem;
+    color: #c6eee6;
+    margin: 0;
+  }
+  
+  .description {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #e2e8f0;
+    margin: 0;
+  }
+}
+
+.footer-contact {
+  display: flex;
+  flex-direction: column;
+  
+  .contact-title {
+    font-family: 'Fira Sans', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 0 0 15px 0;
+    color: #ffffff;
+    position: relative;
+    padding-bottom: 5px;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 40px;
+      height: 2px;
+      background: #c6eee6;
+      border-radius: 2px;
+    }
+  }
+  
+  .contact-links {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .contact-link {
+    color: #e2e8f0;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    transition: all 0.25s ease;
+    
+    i {
+      color: #99c6ed;
+      width: 20px;
+      font-size: 1rem;
+      transition: transform 0.25s ease;
+    }
+    
+    &:hover {
+      color: #ffffff;
+      transform: translateX(3px);
+      
+      i {
+        transform: scale(1.2);
+        color: #c6eee6;
+      }
+    }
+  }
+}
+
+.copyright {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 20px;
+  margin-top: 40px;
+  text-align: center;
+  
+  p {
+    font-size: 0.88rem;
+    color: #cbd5e1;
+    opacity: 0.85;
+    margin: 0;
+  }
+}
+
+/* ===== RESPONSIVE STYLES ===== */
 @media (max-width: 768px) {
   .footer {
-  	padding: 1.5rem 0;
+    padding: 2.5rem 1rem 1.5rem 1rem;
   }
   
   .footer-top {
-  	flex-direction: column;
-  	gap: 1.5rem;
-  	text-align: center;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 2rem;
   }
   
-  .footer-contact {
-  	width: 100%;
-  	max-width: 100%;
-  }
-  
-  .footer-logo img {
-  	height: 70px;
-  	margin: 0 auto;
-  }
-  
-  .footer-brand {
-  	font-size: 1.3rem !important;
-  	margin-top: 8px;
+  .footer-logo {
+    align-items: center;
+    
+    .logo-img {
+      height: 75px;
+    }
   }
   
   .footer-about {
-  	padding: 0 15px;
+    align-items: center;
+    max-width: 100%;
+    padding: 0 1rem;
   }
   
-  .footer-about p {
-  	font-size: 0.9rem;
-  	line-height: 1.5;
-  }
-  
-  .footer-contact h5 {
-  	font-size: 1.1rem !important;
-  	margin-bottom: 12px;
-  }
-  
-  .footer-contact a {
-  	font-size: 0.85rem;
-  	padding: 5px 0;
+  .footer-contact {
+    align-items: center;
+    width: 100%;
+    
+    .contact-title {
+      &::after {
+        left: 50%;
+        transform: translateX(-50%);
+      }
+    }
+    
+    .contact-links {
+      align-items: center;
+    }
+    
+    .contact-link {
+      &:hover {
+        transform: none;
+      }
+    }
   }
   
   .copyright {
-  	margin-top: 25px;
-  	padding-top: 15px;
-  }
-  
-  .copyright p {
-  	font-size: 0.8rem;
-  	padding: 0 10px;
+    margin-top: 30px;
+    padding-top: 15px;
+    
+    p {
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
   }
 }

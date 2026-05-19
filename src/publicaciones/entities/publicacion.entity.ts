@@ -67,4 +67,18 @@ export class Publicacion {
   })
   @Column('int', { array: true, default: [] })
   reportadoresIds: number[];
+
+  @ApiProperty({ 
+    description: 'IDs de los usuarios que han dado like a esta publicación', 
+    example: [1, 2, 3] 
+  })
+  @Column('int', { array: true, default: [] })
+  likesUserIds: number[];
+
+  @ApiProperty({ 
+    description: 'Lista de comentarios de la publicación en formato JSON', 
+    example: '[]' 
+  })
+  @Column({ type: 'text', default: '[]' })
+  comentariosRaw: string;
 }

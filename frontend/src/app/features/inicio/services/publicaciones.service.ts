@@ -80,4 +80,18 @@ export class PublicacionesService {
       headers: this.getAuthHeaders()
     });
   }
+
+  // Dar o quitar like a una publicación
+  darLike(id: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${id}/like`, {}, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  // Agregar un comentario a una publicación
+  agregarComentario(id: number, contenido: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${id}/comentarios`, { contenido }, {
+      headers: this.getAuthHeaders()
+    });
+  }
 }

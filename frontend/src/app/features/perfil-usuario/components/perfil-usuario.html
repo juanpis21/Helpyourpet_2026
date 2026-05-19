@@ -118,6 +118,88 @@
           </div>
         </div>
       </div>
+
+      <!-- ===== DASHBOARD CHARTS SECTION ===== -->
+      <div class="dashboard-charts-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; margin-bottom: 2rem;">
+        <!-- Bar Chart Card -->
+        <div class="card" style="margin-bottom: 0;">
+          <div class="card-header" style="background: linear-gradient(135deg, var(--primary-color) 0%, #2c5aa0 100%) !important;">
+            <h5><i class="fas fa-chart-bar"></i> Actividad de Publicaciones</h5>
+          </div>
+          <div class="card-body" style="height: 300px; position: relative;">
+            <canvas id="barChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Donut Chart Card -->
+        <div class="card" style="margin-bottom: 0;">
+          <div class="card-header" style="background: linear-gradient(135deg, var(--primary-color) 0%, #2c5aa0 100%) !important;">
+            <h5><i class="fas fa-chart-pie"></i> Distribución de Mascotas</h5>
+          </div>
+          <div class="card-body" style="height: 300px; position: relative;">
+            <canvas id="donutChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== HISTORIAL DE ACTIVIDAD (TABLA) ===== -->
+      <div class="card">
+        <div class="card-header" style="background: linear-gradient(135deg, var(--primary-color) 0%, #2a5298 100%) !important;">
+          <h5><i class="fas fa-history"></i> Historial de Actividad Reciente</h5>
+        </div>
+        <div class="card-body">
+          <div *ngIf="actividades.length === 0" class="empty-state" style="padding: 2rem 0;">
+            <i class="fas fa-history" style="font-size: 2.5rem; color: var(--text-secondary); opacity: 0.5;"></i>
+            <p style="margin-top: 0.5rem; color: var(--text-secondary);">No tienes actividades registradas aún.</p>
+          </div>
+
+          <div *ngIf="actividades.length > 0" class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Acción</th>
+                  <th>Descripción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let act of getPaginatedActividades()">
+                  <td style="white-space: nowrap;"><strong>{{ act.fecha | date:'medium' }}</strong></td>
+                  <td>
+                    <span class="status-pill" 
+                      [ngStyle]="{
+                        'background-color': 
+                          act.accion === 'Registro de mascota' ? '#E6F4EA' : 
+                          act.accion === 'Nueva publicación' ? '#FFF4E5' : 
+                          act.accion === 'Comentario realizado' ? '#FCE8E6' : 
+                          act.accion === 'Actualización de perfil' ? '#E8F0FE' : '#E8EAF0',
+                        'color': 
+                          act.accion === 'Registro de mascota' ? '#1E8E3E' : 
+                          act.accion === 'Nueva publicación' ? '#B26A00' : 
+                          act.accion === 'Comentario realizado' ? '#D93025' : 
+                          act.accion === 'Actualización de perfil' ? '#1A73E8' : '#5A6577'
+                      }">
+                      {{ act.accion }}
+                    </span>
+                  </td>
+                  <td>{{ act.descripcion }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Paginación de Actividades -->
+          <div class="pagination-container" *ngIf="getTotalPagesActividades() > 1" style="margin-top: 1.5rem;">
+            <button class="btn-pagination-prev" (click)="prevPageActividades()" [disabled]="pageActividades === 1">
+              <i class="fas fa-chevron-left"></i> Anterior
+            </button>
+            <span class="pagination-info">Página {{ pageActividades }} de {{ getTotalPagesActividades() }}</span>
+            <button class="btn-pagination-next" (click)="nextPageActividades()" [disabled]="pageActividades === getTotalPagesActividades()">
+              Siguiente <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- ===== MIS MASCOTAS ===== -->
@@ -356,7 +438,10 @@
             <p class="pub-descripcion">{{ pub.descripcion }}</p>
             <div class="pub-meta">
               <span class="pub-date"><i class="fas fa-calendar"></i> {{ pub.createdAt | date:'medium' }}</span>
-              <span class="pub-likes"><i class="fas fa-heart"></i> {{ pub.likes || 0 }}</span>
+              <div class="pub-stats" style="display: flex; gap: 0.8rem; align-items: center;">
+                <span class="pub-likes" style="display: flex; align-items: center; gap: 0.3rem;"><i class="fas fa-heart" style="color: var(--accent-color, #ef4444);"></i> {{ pub.likes || 0 }}</span>
+                <span class="pub-comments" style="display: flex; align-items: center; gap: 0.3rem;"><i class="fas fa-comment" style="color: var(--primary-color, #1d3976);"></i> {{ pub.comentariosCount || 0 }}</span>
+              </div>
             </div>
           </div>
           <div class="publicacion-actions">

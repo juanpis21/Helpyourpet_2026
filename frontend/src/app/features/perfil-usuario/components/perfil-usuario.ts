@@ -3,6 +3,9 @@ import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { Chart, registerables } from 'chart.js';
+Chart.register(...registerables);
 import { ThemeService } from '../../../core/services/theme.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { UsersService } from '../../../core/services/users.service';
@@ -223,7 +226,8 @@ export class PerfilUsuario implements OnInit {
     private mascotasService: MascotasService,
     private publicacionesService: PublicacionesService,
     private cdr: ChangeDetectorRef,
-    private ticketsService: TicketsService
+    private ticketsService: TicketsService,
+    private http: HttpClient
   ) { }
 
   ngOnInit(): void {
@@ -269,6 +273,9 @@ export class PerfilUsuario implements OnInit {
         this.router.navigate(['/login']);
         return;
       }
+
+      await this.cargarHistorialActividades();
+      this.renderCharts();
     } catch (error) {
       console.error('❌ Error al inicializar datos del usuario:', error);
     }
@@ -333,7 +340,9 @@ export class PerfilUsuario implements OnInit {
           next: (publicaciones) => {
             this.publicaciones = publicaciones.map(pub => ({
               ...pub,
-              imagen: pub.imagen && pub.imagen.startsWith('/uploads/') ? `http://localhost:3000${pub.imagen}` : pub.imagen
+              imagen: pub.imagen && pub.imagen.startsWith('/uploads/') ? `http://localhost:3000${pub.imagen}` : pub.imagen,
+              likes: pub.likesUserIds ? pub.likesUserIds.length : 0,
+              comentariosCount: pub.comentarios ? pub.comentarios.length : 0
             }));
             console.log('✅ Publicaciones del usuario cargadas:', publicaciones.length);
           },
@@ -419,6 +428,11 @@ export class PerfilUsuario implements OnInit {
     this.seccionActiva = seccion;
     if (seccion === 'tickets') {
       this.loadMyTickets();
+    }
+    if (seccion === 'dashboard') {
+      this.cargarHistorialActividades().then(() => {
+        this.renderCharts();
+      });
     }
   }
 
@@ -1127,6 +1141,287 @@ export class PerfilUsuario implements OnInit {
   prevPagePublicaciones(): void {
     if (this.pagePublicaciones > 1) {
       this.pagePublicaciones--;
+    }
+  }
+
+  // ===== DASHBOARD METRICS, CHARTS & ACTIVITY HISTORY =====
+  barChart: any = null;
+  donutChart: any = null;
+  actividades: any[] = [];
+  pageActividades = 1;
+  limitActividades = 5;
+
+  renderCharts(): void {
+    if (this.seccionActiva !== 'dashboard') return;
+
+    setTimeout(() => {
+      this.renderBarChart();
+      this.renderDonutChart();
+    }, 150);
+  }
+
+  renderBarChart(): void {
+    const canvas = document.getElementById('barChart') as HTMLCanvasElement;
+    if (!canvas) return;
+
+    if (this.barChart) {
+      this.barChart.destroy();
+    }
+
+    const monthStats: { [key: string]: { publications: number, likes: number, comments: number } } = {};
+
+    this.publicaciones.forEach(pub => {
+      const date = pub.createdAt ? new Date(pub.createdAt) : new Date();
+      const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      if (!monthStats[month]) {
+        monthStats[month] = { publications: 0, likes: 0, comments: 0 };
+      }
+      monthStats[month].publications++;
+      monthStats[month].likes += pub.likesUserIds ? pub.likesUserIds.length : 0;
+      monthStats[month].comments += pub.comentarios ? pub.comentarios.length : 0;
+    });
+
+    const sortedMonths = Object.keys(monthStats).sort();
+    if (sortedMonths.length === 0) {
+      const date = new Date();
+      const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      monthStats[month] = { publications: 0, likes: 0, comments: 0 };
+      sortedMonths.push(month);
+    }
+
+    const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+    const labels = sortedMonths.map(m => {
+      const [year, month] = m.split('-');
+      return `${monthNames[parseInt(month, 10) - 1]} ${year}`;
+    });
+
+    const publicationsData = sortedMonths.map(m => monthStats[m].publications);
+    const likesData = sortedMonths.map(m => monthStats[m].likes);
+    const commentsData = sortedMonths.map(m => monthStats[m].comments);
+
+    this.barChart = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Publicaciones',
+            data: publicationsData,
+            backgroundColor: '#1d3976',
+            borderRadius: 6,
+          },
+          {
+            label: 'Likes',
+            data: likesData,
+            backgroundColor: '#ef4444',
+            borderRadius: 6,
+          },
+          {
+            label: 'Comentarios',
+            data: commentsData,
+            backgroundColor: '#66B566',
+            borderRadius: 6,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: {
+              font: {
+                family: "'Fredoka', sans-serif",
+                weight: 'bold'
+              },
+              color: this.darkMode ? '#f3f4f6' : '#1f2937'
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1,
+              font: {
+                family: "'Fredoka', sans-serif"
+              },
+              color: this.darkMode ? '#9ca3af' : '#4b5563'
+            },
+            grid: {
+              color: this.darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'
+            }
+          },
+          x: {
+            ticks: {
+              font: {
+                family: "'Fredoka', sans-serif"
+              },
+              color: this.darkMode ? '#9ca3af' : '#4b5563'
+            },
+            grid: {
+              display: false
+            }
+          }
+        }
+      }
+    });
+  }
+
+  renderDonutChart(): void {
+    const canvas = document.getElementById('donutChart') as HTMLCanvasElement;
+    if (!canvas) return;
+
+    if (this.donutChart) {
+      this.donutChart.destroy();
+    }
+
+    let perros = 0;
+    let gatos = 0;
+    let otros = 0;
+
+    this.mascotas.forEach(pet => {
+      const species = (pet.species || '').toLowerCase();
+      if (species.includes('perro') || species.includes('can')) {
+        perros++;
+      } else if (species.includes('gato') || species.includes('felin')) {
+        gatos++;
+      } else {
+        otros++;
+      }
+    });
+
+    const hasData = (perros + gatos + otros) > 0;
+    const dataValues = hasData ? [perros, gatos, otros] : [1, 1, 1];
+    const dataLabels = hasData ? ['Perros', 'Gatos', 'Otros'] : ['Sin Mascotas', '', ''];
+
+    this.donutChart = new Chart(canvas, {
+      type: 'doughnut',
+      data: {
+        labels: dataLabels,
+        datasets: [
+          {
+            data: dataValues,
+            backgroundColor: hasData 
+              ? ['#1d3976', '#66B566', '#FFE082'] 
+              : ['#e5e7eb', '#f3f4f6', '#f9fafb'],
+            borderWidth: 2,
+            borderColor: this.darkMode ? '#1f2937' : '#ffffff'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '65%',
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              font: {
+                family: "'Fredoka', sans-serif",
+                weight: 'bold'
+              },
+              color: this.darkMode ? '#f3f4f6' : '#1f2937'
+            }
+          }
+        }
+      }
+    });
+  }
+
+  async cargarHistorialActividades(): Promise<void> {
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) return;
+
+    const list: any[] = [];
+
+    // 1. Registro de mascotas
+    this.mascotas.forEach(pet => {
+      list.push({
+        fecha: pet.createdAt ? new Date(pet.createdAt) : new Date(),
+        accion: 'Registro de mascota',
+        descripcion: `Registraste a tu mascota ${pet.name} (${pet.species})`
+      });
+    });
+
+    // 2. Nuevas publicaciones
+    this.publicaciones.forEach(pub => {
+      list.push({
+        fecha: pub.createdAt ? new Date(pub.createdAt) : new Date(),
+        accion: 'Nueva publicación',
+        descripcion: `Publicaste: "${pub.descripcion.substring(0, 60)}${pub.descripcion.length > 60 ? '...' : ''}"`
+      });
+    });
+
+    // 3. Comentarios realizados
+    this.publicaciones.forEach(pub => {
+      if (pub.comentarios) {
+        pub.comentarios.forEach((c: any) => {
+          if (c.autorId === currentUser.id) {
+            list.push({
+              fecha: c.createdAt ? new Date(c.createdAt) : new Date(),
+              accion: 'Comentario realizado',
+              descripcion: `Comentaste en una publicación: "${c.contenido.substring(0, 60)}${c.contenido.length > 60 ? '...' : ''}"`
+            });
+          }
+        });
+      }
+    });
+
+    // 4. Auditorías desde el Backend
+    try {
+      const logs = await this.http.get<any[]>(`http://localhost:3000/audit-logs/user/${currentUser.id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`
+        }
+      }).toPromise();
+
+      if (logs && Array.isArray(logs)) {
+        logs.forEach(log => {
+          const date = log.createdAt ? new Date(log.createdAt) : new Date();
+          if (log.entity === 'User' || (log.action === 'UPDATE' && log.entity === 'User')) {
+            list.push({
+              fecha: date,
+              accion: 'Actualización de perfil',
+              descripcion: log.description || 'Actualizaste la información de tu perfil'
+            });
+          } else if (log.action === 'LOGIN') {
+            list.push({
+              fecha: date,
+              accion: 'Inicio de sesión',
+              descripcion: 'Iniciaste sesión en la plataforma'
+            });
+          }
+        });
+      }
+    } catch (err) {
+      console.error('Error fetching audit logs:', err);
+    }
+
+    // Ordenar de más reciente a más antigua
+    this.actividades = list.sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
+  }
+
+  getPaginatedActividades(): any[] {
+    const startIndex = (this.pageActividades - 1) * this.limitActividades;
+    return this.actividades.slice(startIndex, startIndex + this.limitActividades);
+  }
+
+  getTotalPagesActividades(): number {
+    return Math.ceil(this.actividades.length / this.limitActividades);
+  }
+
+  prevPageActividades(): void {
+    if (this.pageActividades > 1) {
+      this.pageActividades--;
+    }
+  }
+
+  nextPageActividades(): void {
+    if (this.pageActividades < this.getTotalPagesActividades()) {
+      this.pageActividades++;
     }
   }
 }

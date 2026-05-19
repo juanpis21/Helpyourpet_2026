@@ -1032,10 +1032,12 @@
 .publicacion-imagen {
   width: 100%;
   border-radius: 12px;
-  max-height: 450px;
-  object-fit: cover;
+  max-height: 500px;
+  object-fit: contain;
+  background: var(--hover-bg, rgba(0, 0, 0, 0.03));
   transition: transform 0.3s ease;
   box-shadow: var(--shadow-sm);
+  display: block;
 }
 
 .publicacion-imagen:hover {

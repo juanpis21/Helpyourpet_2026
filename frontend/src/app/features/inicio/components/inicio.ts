@@ -163,7 +163,7 @@ export class Inicio implements OnInit {
             }
             return {
               id: pub.id,
-              autorId: pub.autorId,
+              autorId: pub.autorId || pub.userId || (pub.autor ? pub.autor.id : undefined),
               usuario: {
                 nombre: autor ? (autor.fullName || `${autor.firstName || ''} ${autor.lastName || ''}`.trim() || 'Usuario') : 'Usuario',
                 avatar: autor?.avatar 
@@ -173,10 +173,18 @@ export class Inicio implements OnInit {
               contenido: pub.descripcion,
               imagen: pub.imagen && pub.imagen.startsWith('/uploads/') ? `http://localhost:3000${pub.imagen}` : pub.imagen,
               fecha: new Date(pub.createdAt),
-              likes: pub.likes || 0,
-              comentarios: [],
+              likes: pub.likesUserIds ? pub.likesUserIds.length : 0,
+              comentarios: Array.isArray(pub.comentarios) ? pub.comentarios.map((c: any) => ({
+                id: c.id,
+                usuario: {
+                  nombre: c.nombre || 'Usuario',
+                  avatar: c.avatar || 'assets/images/Default.png'
+                },
+                contenido: c.contenido,
+                fecha: new Date(c.createdAt)
+              })) : [],
               compartidos: 0,
-              likedByUser: false,
+              likedByUser: pub.likesUserIds ? pub.likesUserIds.includes(this.usuarioLogueado?.userId || this.usuarioLogueado?.id) : false,
               mostrarComentarios: false
             };
           });
@@ -333,6 +341,8 @@ export class Inicio implements OnInit {
 
   darLike(publicacion: Publicacion): void {
     publicacion.likeAnimating = true;
+    const previousLiked = publicacion.likedByUser;
+    
     if (publicacion.likedByUser) {
       publicacion.likes--;
     } else {
@@ -340,7 +350,23 @@ export class Inicio implements OnInit {
     }
     publicacion.likedByUser = !publicacion.likedByUser;
 
-    // Remove animation class after animation ends
+    this.publicacionesService.darLike(publicacion.id).subscribe({
+      next: (res) => {
+        publicacion.likes = res.likesCount;
+        publicacion.likedByUser = res.likedByUser;
+      },
+      error: (err) => {
+        console.error('Error al dar like:', err);
+        // Revertir
+        if (publicacion.likedByUser) {
+          publicacion.likes--;
+        } else {
+          publicacion.likes++;
+        }
+        publicacion.likedByUser = !publicacion.likedByUser;
+      }
+    });
+
     setTimeout(() => {
       publicacion.likeAnimating = false;
     }, 600);
@@ -353,23 +379,38 @@ export class Inicio implements OnInit {
   agregarComentario(publicacion: Publicacion): void {
     const contenido = this.nuevoComentario[publicacion.id];
     if (contenido && contenido.trim()) {
-      const nuevoComentario: Comentario = {
-        id: publicacion.comentarios.length + 1,
-        usuario: {
-          nombre: this.usuarioLogueado?.nombre || 'Usuario',
-          avatar: this.usuarioLogueado?.avatar || 'assets/images/Default.png'
-        },
-        contenido: contenido,
-        fecha: new Date(),
-        justAdded: true
-      };
-      publicacion.comentarios.push(nuevoComentario);
+      const comentarioTexto = contenido.trim();
       this.nuevoComentario[publicacion.id] = '';
 
-      // Remove animation class after animation ends
-      setTimeout(() => {
-        nuevoComentario.justAdded = false;
-      }, 600);
+      this.publicacionesService.agregarComentario(publicacion.id, comentarioTexto).subscribe({
+        next: (res) => {
+          const nuevoComentario: Comentario = {
+            id: res.id,
+            usuario: {
+              nombre: res.nombre,
+              avatar: res.avatar
+            },
+            contenido: res.contenido,
+            fecha: new Date(res.createdAt),
+            justAdded: true
+          };
+          publicacion.comentarios.push(nuevoComentario);
+
+          setTimeout(() => {
+            nuevoComentario.justAdded = false;
+          }, 600);
+        },
+        error: (err) => {
+          console.error('Error al agregar comentario:', err);
+          this.nuevoComentario[publicacion.id] = comentarioTexto;
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudo guardar tu comentario. Por favor intenta de nuevo.',
+            confirmButtonColor: '#1d3976'
+          });
+        }
+      });
     }
   }
 
@@ -531,7 +572,7 @@ export class Inicio implements OnInit {
   }
 
   irAPerfil(): void {
-    this.router.navigate(['/perfil']);
+    this.router.navigate(['/perfil-usuario']);
   }
 
   irATienda(): void {

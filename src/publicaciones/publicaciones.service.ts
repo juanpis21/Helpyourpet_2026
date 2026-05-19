@@ -12,30 +12,91 @@ export class PublicacionesService {
     @InjectRepository(Publicacion)
     private readonly publicacionesRepository: Repository<Publicacion>,
     private readonly usersService: UsersService,
-  ) {}
+  ) { }
 
-  async create(createPublicacionDto: CreatePublicacionDto): Promise<Publicacion> {
+  private async resolvePublicacionesComentarios(pubs: Publicacion[]): Promise<any[]> {
+    const userIds = new Set<number>();
+    const parsedPubs = pubs.map(pub => {
+      let comentarios = [];
+      if (pub.comentariosRaw) {
+        try {
+          comentarios = JSON.parse(pub.comentariosRaw);
+          if (!Array.isArray(comentarios)) comentarios = [];
+        } catch (e) {
+          comentarios = [];
+        }
+      }
+      comentarios.forEach((c: any) => {
+        if (c.autorId) userIds.add(c.autorId);
+      });
+      // Convert entity to plain object to allow adding resolved fields safely
+      const plainPub = Object.assign({}, pub);
+      return { ...plainPub, comentarios };
+    });
+
+    if (userIds.size === 0) {
+      return parsedPubs.map(pub => {
+        const { comentariosRaw, ...rest } = pub;
+        return {
+          ...rest,
+          comentarios: []
+        };
+      });
+    }
+
+    const users = await this.usersService.findAll();
+    const userMap = new Map<number, any>();
+    users.forEach(u => userMap.set(u.id, u));
+
+    return parsedPubs.map(pub => {
+      const resolvedComentarios = pub.comentarios.map((c: any) => {
+        const user = userMap.get(c.autorId);
+        let avatarUrl = 'assets/images/Default.png';
+        if (user?.avatar) {
+          avatarUrl = user.avatar.startsWith('http') ? user.avatar : `http://localhost:3000${user.avatar}`;
+        }
+        return {
+          id: c.id,
+          autorId: c.autorId,
+          contenido: c.contenido,
+          createdAt: c.createdAt,
+          nombre: user ? (user.fullName || `${user.firstName} ${user.lastName}`) : 'Usuario',
+          avatar: avatarUrl
+        };
+      });
+
+      const { comentariosRaw, ...rest } = pub;
+      return {
+        ...rest,
+        comentarios: resolvedComentarios
+      };
+    });
+  }
+
+  async create(createPublicacionDto: CreatePublicacionDto): Promise<any> {
     if (!createPublicacionDto.autorId) {
       throw new ConflictException('Se requiere un ID de autor para crear la publicación');
     }
-    
+
     // Validar que el autor existe
     await this.usersService.findOne(createPublicacionDto.autorId);
 
     const publicacion = this.publicacionesRepository.create(createPublicacionDto);
     const savedPublicacion = await this.publicacionesRepository.save(publicacion);
-    
-    // Retornar la publicación sin relaciones para evitar errores de dependencia circular
+
     const result = Array.isArray(savedPublicacion) ? savedPublicacion[0] : savedPublicacion;
-    return this.publicacionesRepository.findOne({
+    const dbPub = await this.publicacionesRepository.findOne({
       where: { id: result.id },
-      select: ['id', 'descripcion', 'imagen', 'autorId', 'isActive', 'createdAt', 'updatedAt']
+      relations: ['autor']
     });
+
+    const resolved = await this.resolvePublicacionesComentarios([dbPub]);
+    return resolved[0];
   }
 
-  async findAll(): Promise<Publicacion[]> {
+  async findAll(): Promise<any[]> {
     console.log('Backend: Buscando todas las publicaciones activas...');
-    
+
     // Log para depuración: contar inactivas
     const inactiveCount = await this.publicacionesRepository.count({ where: { isActive: false } });
     if (inactiveCount > 0) {
@@ -47,24 +108,25 @@ export class PublicacionesService {
       .where('publicacion.isActive = :isActive', { isActive: true })
       .orderBy('publicacion.createdAt', 'DESC')
       .getMany();
-    
+
     console.log(`Backend: Se encontraron ${pubs.length} publicaciones activas en total.`);
-    return pubs;
+    return await this.resolvePublicacionesComentarios(pubs);
   }
 
-  async findByAutor(autorId: number): Promise<Publicacion[]> {
+  async findByAutor(autorId: number): Promise<any[]> {
     console.log(`Backend: Buscando publicaciones para el autor ${autorId}...`);
-    return this.publicacionesRepository.createQueryBuilder('publicacion')
+    const pubs = await this.publicacionesRepository.createQueryBuilder('publicacion')
       .leftJoinAndSelect('publicacion.autor', 'autor')
       .where('publicacion.autorId = :autorId', { autorId })
       .andWhere('publicacion.isActive = :isActive', { isActive: true })
       .orderBy('publicacion.createdAt', 'DESC')
       .getMany();
+    return await this.resolvePublicacionesComentarios(pubs);
   }
 
-  async findByVeterinaria(veterinariaId: number): Promise<Publicacion[]> {
+  async findByVeterinaria(veterinariaId: number): Promise<any[]> {
     console.log(`Backend: Buscando publicaciones de la veterinaria ${veterinariaId}...`);
-    return this.publicacionesRepository.createQueryBuilder('publicacion')
+    const pubs = await this.publicacionesRepository.createQueryBuilder('publicacion')
       .leftJoinAndSelect('publicacion.autor', 'autor')
       .innerJoin('perfiles_veterinarios', 'pv', 'pv."usuarioId" = autor.id')
       .innerJoin('veterinarias', 'v', 'v.id = pv."veterinariaPrincipalId"')
@@ -72,49 +134,52 @@ export class PublicacionesService {
       .andWhere('publicacion.isActive = :isActive', { isActive: true })
       .orderBy('publicacion.createdAt', 'DESC')
       .getMany();
+    return await this.resolvePublicacionesComentarios(pubs);
   }
 
-  async findOne(id: number): Promise<Publicacion> {
-    const publicacion = await this.publicacionesRepository.findOne({ 
-      where: { id, isActive: true }
+  async findOne(id: number): Promise<any> {
+    const publicacion = await this.publicacionesRepository.findOne({
+      where: { id, isActive: true },
+      relations: ['autor']
     });
-    
+
     if (!publicacion) {
       throw new NotFoundException(`Publicación con ID ${id} no encontrada`);
     }
-    
-    return publicacion;
+
+    const resolved = await this.resolvePublicacionesComentarios([publicacion]);
+    return resolved[0];
   }
 
-  async update(id: number, updatePublicacionDto: UpdatePublicacionDto): Promise<Publicacion> {
-    const publicacion = await this.findOne(id);
-    
+  async update(id: number, updatePublicacionDto: UpdatePublicacionDto): Promise<any> {
+    await this.findOne(id);
     await this.publicacionesRepository.update(id, updatePublicacionDto);
-    
     return this.findOne(id);
   }
 
   async remove(id: number): Promise<void> {
-    const publicacion = await this.findOne(id);
-    
+    await this.findOne(id);
     await this.publicacionesRepository.update(id, { isActive: false });
   }
 
-  async reportar(id: number, userId: number): Promise<Publicacion> {
-    const publicacion = await this.findOne(id);
-    if (!publicacion.reportadoresIds) {
-      publicacion.reportadoresIds = [];
+  async reportar(id: number, userId: number): Promise<any> {
+    const dbPub = await this.publicacionesRepository.findOne({ where: { id, isActive: true } });
+    if (!dbPub) {
+      throw new NotFoundException(`Publicación con ID ${id} no encontrada`);
     }
-    if (!publicacion.reportadoresIds.includes(userId)) {
-      publicacion.reportadoresIds.push(userId);
-      await this.publicacionesRepository.save(publicacion);
+    if (!dbPub.reportadoresIds) {
+      dbPub.reportadoresIds = [];
     }
-    return publicacion;
+    if (!dbPub.reportadoresIds.includes(userId)) {
+      dbPub.reportadoresIds.push(userId);
+      await this.publicacionesRepository.save(dbPub);
+    }
+    return this.findOne(id);
   }
 
-  async findReportadasByVeterinaria(veterinariaId: number): Promise<Publicacion[]> {
+  async findReportadasByVeterinaria(veterinariaId: number): Promise<any[]> {
     console.log(`Backend: Buscando publicaciones reportadas de la veterinaria ${veterinariaId}...`);
-    return this.publicacionesRepository.createQueryBuilder('publicacion')
+    const pubs = await this.publicacionesRepository.createQueryBuilder('publicacion')
       .leftJoinAndSelect('publicacion.autor', 'autor')
       // Join for Direct Veterinarian
       .leftJoin('perfiles_veterinarios', 'pv_direct', 'pv_direct."usuarioId" = autor.id')
@@ -133,12 +198,91 @@ export class PublicacionesService {
         `v_direct.id = :veterinariaId OR ` +
         `pv_creator."veterinariaPrincipalId" = :veterinariaId OR ` +
         `v_creator.id = :veterinariaId` +
-        `)`, 
+        `)`,
         { veterinariaId }
       )
       .orderBy('publicacion.createdAt', 'DESC')
-      .getMany()
-      .then(pubs => pubs.filter(p => p.reportadoresIds && p.reportadoresIds.length > 0));
+      .getMany();
+
+    const filtered = pubs.filter(p => p.reportadoresIds && p.reportadoresIds.length > 0);
+    return await this.resolvePublicacionesComentarios(filtered);
+  }
+
+  async toggleLike(id: number, userId: number): Promise<any> {
+    const publicacion = await this.publicacionesRepository.findOne({ where: { id, isActive: true } });
+    if (!publicacion) {
+      throw new NotFoundException(`Publicación con ID ${id} no encontrada`);
+    }
+    if (!publicacion.likesUserIds) {
+      publicacion.likesUserIds = [];
+    }
+
+    const index = publicacion.likesUserIds.indexOf(userId);
+    if (index > -1) {
+      // Remover like (Dislike)
+      publicacion.likesUserIds.splice(index, 1);
+    } else {
+      // Agregar like
+      publicacion.likesUserIds.push(userId);
+    }
+
+    await this.publicacionesRepository.save(publicacion);
+
+    return {
+      likesCount: publicacion.likesUserIds.length,
+      likedByUser: !(index > -1),
+      likesUserIds: publicacion.likesUserIds
+    };
+  }
+
+  async agregarComentario(id: number, userId: number, contenido: string): Promise<any> {
+    const user = await this.usersService.findOne(userId);
+    const dbPub = await this.publicacionesRepository.findOne({ where: { id, isActive: true } });
+    if (!dbPub) {
+      throw new NotFoundException(`Publicación con ID ${id} no encontrada`);
+    }
+    let comentarios = [];
+
+    if (dbPub.comentariosRaw) {
+      try {
+        comentarios = JSON.parse(dbPub.comentariosRaw);
+        if (!Array.isArray(comentarios)) {
+          comentarios = [];
+        }
+      } catch (e) {
+        comentarios = [];
+      }
+    }
+
+    const nuevoComentarioDb = {
+      id: Date.now(),
+      autorId: userId,
+      contenido: contenido,
+      createdAt: new Date().toISOString()
+    };
+
+    comentarios.push(nuevoComentarioDb);
+
+    const comentariosLimpios = comentarios.map((c: any) => ({
+      id: c.id,
+      autorId: c.autorId || c.usuarioId || userId,
+      contenido: c.contenido,
+      createdAt: c.createdAt || c.fecha || new Date().toISOString()
+    }));
+
+    dbPub.comentariosRaw = JSON.stringify(comentariosLimpios);
+
+    await this.publicacionesRepository.save(dbPub);
+
+    let avatarUrl = 'assets/images/Default.png';
+    if (user.avatar) {
+      avatarUrl = user.avatar.startsWith('http') ? user.avatar : `http://localhost:3000${user.avatar}`;
+    }
+
+    return {
+      ...nuevoComentarioDb,
+      nombre: user.fullName || `${user.firstName} ${user.lastName}`,
+      avatar: avatarUrl
+    };
   }
 }
-

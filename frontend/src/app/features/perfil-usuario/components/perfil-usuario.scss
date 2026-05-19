@@ -1514,7 +1514,8 @@ textarea {
       font-size: 0.85rem;
 
       .pub-date,
-      .pub-likes {
+      .pub-likes,
+      .pub-comments {
         display: flex;
         align-items: center;
         gap: 0.3rem;
@@ -1909,7 +1910,8 @@ textarea {
       font-size: 0.85rem;
 
       .pub-date,
-      .pub-likes {
+      .pub-likes,
+      .pub-comments {
         display: flex;
         align-items: center;
         gap: 0.5rem;

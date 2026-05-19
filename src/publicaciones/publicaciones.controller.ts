@@ -146,4 +146,20 @@ export class PublicacionesController {
   async remove(@Param('id') id: string) {
     return await this.publicacionesService.remove(+id);
   }
+
+  @Post(':id/like')
+  @ApiOperation({ summary: 'Dar o quitar like a una publicación' })
+  @ApiResponse({ status: 200, description: 'Like toggled exitosamente' })
+  async toggleLike(@Param('id') id: string, @Request() req) {
+    const { userId } = req.user;
+    return await this.publicacionesService.toggleLike(+id, userId);
+  }
+
+  @Post(':id/comentarios')
+  @ApiOperation({ summary: 'Agregar un comentario a una publicación' })
+  @ApiResponse({ status: 201, description: 'Comentario creado exitosamente' })
+  async agregarComentario(@Param('id') id: string, @Body('contenido') contenido: string, @Request() req) {
+    const { userId } = req.user;
+    return await this.publicacionesService.agregarComentario(+id, userId, contenido);
+  }
 }
