@@ -878,6 +878,19 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
   reportesPublicaciones: any[] = [];
   reportesLoading: boolean = false;
 
+  showViewPublicacionModal: boolean = false;
+  selectedPublicacionReportada: any = null;
+
+  verPublicacionReportada(pub: any): void {
+    this.selectedPublicacionReportada = pub;
+    this.showViewPublicacionModal = true;
+  }
+
+  closeViewPublicacionModal(): void {
+    this.showViewPublicacionModal = false;
+    this.selectedPublicacionReportada = null;
+  }
+
   cargarReportesPublicaciones(): void {
     if (this.adminUser && this.adminUser.veterinariaId) {
       this.reportesLoading = true;
@@ -1061,12 +1074,14 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
       next: (data) => {
 
-        if (this.adminUser && this.adminUser.veterinariaId) {
-
-          const vetIds = [...this.veterinarios.map(v => v.id), this.adminUser.id];
-
-          this.usuarios = data.filter((u: any) => vetIds.includes(u.createdById));
-
+        if (this.adminUser && this.adminUser.id) {
+          const misVetsIds = this.veterinarias ? this.veterinarias.map(v => v.id) : [];
+          if (misVetsIds.length > 0 || this.adminUser.veterinariaId) {
+            const vetIds = [...this.veterinarios.map(v => v.id), this.adminUser.id];
+            this.usuarios = data.filter((u: any) => vetIds.includes(u.createdById));
+          } else {
+            this.usuarios = data;
+          }
         } else {
 
           this.usuarios = data;
@@ -1105,10 +1120,9 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
       next: (data) => {
 
-        if (this.adminUser && this.adminUser.veterinariaId) {
-
-          this.servicios = data.filter(s => s.veterinariaId === this.adminUser.veterinariaId);
-
+        if (this.adminUser && this.adminUser.id) {
+          const misVetsIds = this.veterinarias.map(v => v.id);
+          this.servicios = data.filter(s => misVetsIds.includes(s.veterinariaId as number) || s.veterinariaId === this.adminUser.veterinariaId);
         } else {
 
           this.servicios = data;
@@ -1826,21 +1840,13 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
   // ========== CRUD VETERINARIAS ==========
 
   cargarVeterinarias(): void {
-
     this.veterinariasService.getAll().subscribe({
-
       next: (data) => {
-
-        if (this.adminUser && this.adminUser.veterinariaId) {
-
-          this.veterinarias = data.filter(v => v.id === this.adminUser.veterinariaId);
-
+        if (this.adminUser && this.adminUser.id) {
+          this.veterinarias = data.filter(v => v.adminId === this.adminUser.id);
         } else {
-
           this.veterinarias = data;
-
         }
-
       },
 
       error: (err) => console.error('Error al cargar veterinarias:', err)
@@ -2015,10 +2021,9 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
       next: (data) => {
 
-        if (this.adminUser && this.adminUser.veterinariaId) {
-
-          this.productos = data.filter(p => p.veterinariaId === this.adminUser.veterinariaId);
-
+        if (this.adminUser && this.adminUser.id) {
+          const misVetsIds = this.veterinarias.map(v => v.id);
+          this.productos = data.filter(p => misVetsIds.includes(p.veterinariaId as number) || p.veterinariaId === this.adminUser.veterinariaId);
         } else {
 
           this.productos = data;
@@ -2041,10 +2046,9 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
       next: (data) => {
 
-        if (this.adminUser && this.adminUser.veterinariaId) {
-
-          this.categorias = data.filter(c => c.veterinariaId === this.adminUser.veterinariaId);
-
+        if (this.adminUser && this.adminUser.id) {
+          const misVetsIds = this.veterinarias.map(v => v.id);
+          this.categorias = data.filter(c => misVetsIds.includes(c.veterinariaId as number) || c.veterinariaId === this.adminUser.veterinariaId);
         } else {
 
           this.categorias = data;
@@ -2575,56 +2579,32 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
       console.log('🔍 [DEBUG] Buscando veterinaria para admin ID:', currentUser.id);
 
-      // Obtener veterinaria asociada al admin
-
-      this.veterinariasService.getByAdminId(currentUser.id).subscribe({
-
-        next: (veterinaria) => {
-
-          console.log('🔍 [DEBUG] Veterinaria encontrada:', veterinaria);
-
-          if (veterinaria) {
-
-            this.adminUser.veterinariaId = veterinaria.id;
-
-            console.log('✅ [DEBUG] Veterinaria ID asignada al admin:', this.adminUser.veterinariaId);
-
-            // Recargar veterinarios con el filtro de veterinaria
-
-            this.cargarVeterinarios();
-
-            // Recargar veterinarias filtradas para el admin
-
-            this.cargarVeterinarias();
-
-            // Recargar servicios filtrados para el admin
-
-            this.cargarServicios();
-
-            // Recargar categorías filtradas para el admin
-
-            this.cargarCategorias();
-
-            // Recargar reportes de publicaciones filtrados para el admin
-            this.cargarReportesPublicaciones();
+      // Obtener veterinarias asociadas al admin
+      this.veterinariasService.getAll().subscribe({
+        next: (todas) => {
+          const misVeterinarias = todas.filter(v => v.adminId === currentUser.id);
+          console.log('🔍 [DEBUG] Veterinarias encontradas para el admin:', misVeterinarias);
+          
+          if (misVeterinarias.length > 0) {
+            this.veterinarias = misVeterinarias;
+            // Guardamos la primera como principal para referencias rápidas o por retrocompatibilidad
+            this.adminUser.veterinariaId = misVeterinarias[0].id;
             
-            // Recargar productos filtrados para el admin
+            console.log('✅ [DEBUG] Veterinaria principal asignada al admin:', this.adminUser.veterinariaId);
+            
+            // Recargar datos filtrados para el admin
+            this.cargarVeterinarios();
+            this.cargarServicios();
+            this.cargarCategorias();
+            this.cargarReportesPublicaciones();
             this.cargarProductos();
-
           } else {
-
-            console.log('⚠️ [DEBUG] No se encontró veterinaria para este admin');
-
+            console.log('⚠️ [DEBUG] No se encontraron veterinarias para este admin');
           }
-
         },
-
         error: (err) => {
-
-          console.error('❌ [DEBUG] Error al cargar veterinaria del admin:', err);
-
+          console.error('❌ [DEBUG] Error al cargar veterinarias del admin:', err);
         }
-
       });
 
     }
@@ -2841,23 +2821,16 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
 
 
-        // Filtrar veterinarios por la veterinaria del admin
-
-        if (this.adminUser.veterinariaId) {
-
-          console.log('🔍 [DEBUG] Filtrando veterinarios por veterinaria ID:', this.adminUser.veterinariaId);
-
+        // Filtrar veterinarios por las veterinarias del admin
+        const misVetsIds = this.veterinarias ? this.veterinarias.map(v => v.id) : [];
+        if (misVetsIds.length > 0) {
+          console.log('🔍 [DEBUG] Filtrando veterinarios por veterinarias IDs:', misVetsIds);
           this.veterinarios = allVets.filter((vet: any) => {
-
             const vetVetId = vet.perfilVeterinario?.veterinariaPrincipal?.id;
-
             console.log(`🔍 [DEBUG] Veterinario ${vet.email}: veterinariaPrincipal.id = ${vetVetId}`);
-
-            return vetVetId === this.adminUser.veterinariaId;
-
+            return misVetsIds.includes(vetVetId as number) || vetVetId === this.adminUser.veterinariaId;
           });
-
-          console.log(`✅ [DEBUG] Veterinarios filtrados por veterinaria ${this.adminUser.veterinariaId}:`, this.veterinarios.length);
+          console.log(`✅ [DEBUG] Veterinarios filtrados:`, this.veterinarios.length);
 
         } else {
 

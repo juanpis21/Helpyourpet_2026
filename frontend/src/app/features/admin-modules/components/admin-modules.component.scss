@@ -1450,3 +1450,31 @@
   color: #d97706;
 }
 
+@media (max-width: 992px) {
+  .sidebar {
+    transform: translateX(-100%);
+    &.active { transform: translateX(0); }
+  }
+  .main-content {
+    left: 0;
+    width: 100%;
+    padding: 1rem;
+  }
+  .top-bar-btn.mobile-toggle {
+    display: flex !important;
+  }
+}
+
+@media (min-width: 993px) {
+  .main-content {
+    left: 250px !important;
+    width: calc(100% - 250px) !important;
+    z-index: 5;
+  }
+  .sidebar {
+    transform: translateX(0) !important;
+  }
+  .sidebar-overlay {
+    display: none !important;
+  }
+}
