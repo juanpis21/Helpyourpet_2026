@@ -2318,4 +2318,20 @@
   .section-header h1 {
     font-size: 1.2rem;
   }
+
+  .config-layout {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 2rem !important;
+  }
+
+  .config-form {
+    width: 100% !important;
+    .form-grid {
+      grid-template-columns: 1fr !important;
+      .full, .form-group.full {
+        grid-column: span 1 !important;
+      }
+    }
+  }
 }

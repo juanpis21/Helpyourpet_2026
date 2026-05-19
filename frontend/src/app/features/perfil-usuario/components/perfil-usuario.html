@@ -247,7 +247,7 @@
               </td>
               <td><strong>{{ mascota.name }}</strong></td>
               <td>{{ mascota.species }}</td>
-              <td>{{ mascota.age }} años</td>
+              <td>{{ formatPetAge(mascota.age) }}</td>
               <td>{{ mascota.gender === 'M' ? 'Macho' : 'Hembra' }}</td>
               <td>{{ mascota.breed }}</td>
               <td>{{ mascota.weight }} kg</td>
@@ -781,7 +781,7 @@
           <div class="card-icon"><i class="fas fa-birthday-cake"></i></div>
           <div class="card-content">
             <span class="label">Edad</span>
-            <span class="value">{{ selectedMascotaForModal?.age }} años</span>
+            <span class="value">{{ formatPetAge(selectedMascotaForModal?.age) }}</span>
           </div>
         </div>
         <div class="info-card">

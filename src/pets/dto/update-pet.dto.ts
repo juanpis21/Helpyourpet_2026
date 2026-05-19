@@ -32,15 +32,12 @@ export class UpdatePetDto {
 
   @ApiProperty({ 
     description: 'Edad de la mascota', 
-    example: 3,
+    example: '3 años',
     required: false
   })
   @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  @Max(50)
-  age?: number;
+  @IsString()
+  age?: string;
 
   @ApiProperty({ 
     description: 'Género de la mascota', 

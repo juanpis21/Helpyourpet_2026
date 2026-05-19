@@ -28,17 +28,12 @@ export class CreatePetDto {
   breed: string;
 
   @ApiProperty({ 
-    description: 'Edad de la mascota en años (0-50, obligatorio)', 
-    example: 3,
-    required: true,
-    minimum: 0,
-    maximum: 50
+    description: 'Edad de la mascota (ej: 3 años, 6 meses, etc.)', 
+    example: '3 años',
+    required: true
   })
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  @Max(50)
-  age: number;
+  @IsString()
+  age: string;
 
   @ApiProperty({ 
     description: 'Género: M (Macho) o F (Hembra) (obligatorio)', 

@@ -37,10 +37,13 @@ export class Navbar implements OnInit {
   private loadUser(): void {
     const user = this.authService.getCurrentUser();
     if (user) {
+      const isVet = Number(user.roleId || user.role?.id) === 3;
       this.usuarioLogueado = {
         id: user.id,
         roleId: Number(user.roleId || user.role?.id),
-        nombre: user.fullName || 'Usuario',
+        nombre: isVet 
+          ? (user.fullName || (user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Usuario'))
+          : (user.fullName || 'Usuario'),
         email: user.email,
         avatar: this.getFullAvatarUrl(user.avatar)
       };

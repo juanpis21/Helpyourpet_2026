@@ -20,7 +20,7 @@ interface Mascota {
   name: string;
   species: string;
   breed: string;
-  age: number;
+  age: any;
   gender: string;
   color: string;
   weight: number;
@@ -229,6 +229,25 @@ export class PerfilUsuario implements OnInit {
     private ticketsService: TicketsService,
     private http: HttpClient
   ) { }
+
+  formatPetAge(ageInput: any): string {
+    if (ageInput === undefined || ageInput === null) return 'N/A';
+    if (typeof ageInput === 'string' && /[a-zA-Z]/.test(ageInput)) {
+      return ageInput;
+    }
+    const age = Number(ageInput);
+    if (isNaN(age)) return ageInput || 'N/A';
+    if (age === 0) return '0 años';
+    if (age % 1 === 0) {
+      return `${age} ${age === 1 ? 'año' : 'años'}`;
+    }
+    const years = Math.floor(age);
+    const months = Math.round((age - years) * 12);
+    if (years === 0) {
+      return `${months} ${months === 1 ? 'mes' : 'meses'}`;
+    }
+    return `${years} ${years === 1 ? 'año' : 'años'} y ${months} ${months === 1 ? 'mes' : 'meses'}`;
+  }
 
   ngOnInit(): void {
     this.darkMode = this.themeService.isDarkMode;

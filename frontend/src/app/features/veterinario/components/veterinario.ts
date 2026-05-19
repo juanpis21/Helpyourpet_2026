@@ -19,7 +19,7 @@ interface Mascota {
   name: string;
   species: string;
   breed?: string;
-  age: number;
+  age: any;
   gender: string;
   color: string;
   weight: number;
@@ -198,13 +198,18 @@ export class Veterinario implements OnInit {
     name: '',
     species: '',
     breed: '',
-    age: 0,
+    age: '',
     gender: 'M',
     color: '',
     weight: 0,
     description: '',
     ownerId: undefined
   };
+
+  newPetAgeVal: number = 0;
+  newPetAgeUnit: 'years' | 'months' = 'years';
+  editingPetAgeVal: number = 0;
+  editingPetAgeUnit: 'years' | 'months' = 'years';
 
   newUser: any = {
     firstName: '',
@@ -663,6 +668,25 @@ export class Veterinario implements OnInit {
     return map[tipo] || '';
   }
 
+  formatPetAge(ageInput: any): string {
+    if (ageInput === undefined || ageInput === null) return 'N/A';
+    if (typeof ageInput === 'string' && /[a-zA-Z]/.test(ageInput)) {
+      return ageInput;
+    }
+    const age = Number(ageInput);
+    if (isNaN(age)) return ageInput || 'N/A';
+    if (age === 0) return '0 años';
+    if (age % 1 === 0) {
+      return `${age} ${age === 1 ? 'año' : 'años'}`;
+    }
+    const years = Math.floor(age);
+    const months = Math.round((age - years) * 12);
+    if (years === 0) {
+      return `${months} ${months === 1 ? 'mes' : 'meses'}`;
+    }
+    return `${years} ${years === 1 ? 'año' : 'años'} y ${months} ${months === 1 ? 'mes' : 'meses'}`;
+  }
+
   formatDateCorrectly(dateStr: string): Date {
     if (!dateStr) return new Date();
     const hasTimezone = dateStr.includes('Z') || dateStr.includes('+') || (dateStr.includes('-') && dateStr.lastIndexOf('-') > 10);
@@ -1016,15 +1040,23 @@ export class Veterinario implements OnInit {
     this.imagePreview = null;
   }
 
+
   registrarMascota(): void {
     if (!this.newPet.ownerId) {
       this.showToast('Por favor seleccione un dueño', 'warning');
       return;
     }
 
-    if (this.newPet.age < 0 || this.newPet.weight < 0) {
+    if (this.newPetAgeVal < 0 || this.newPet.weight < 0) {
       this.showToast('La edad y el peso no pueden ser valores negativos', 'warning');
       return;
+    }
+
+    // Calcular la edad basada en la unidad elegida
+    if (this.newPetAgeUnit === 'months') {
+      this.newPet.age = `${this.newPetAgeVal} ${this.newPetAgeVal === 1 ? 'mes' : 'meses'}`;
+    } else {
+      this.newPet.age = `${this.newPetAgeVal} ${this.newPetAgeVal === 1 ? 'año' : 'años'}`;
     }
 
     // Usar FormData para permitir subida de imagen
@@ -1032,7 +1064,7 @@ export class Veterinario implements OnInit {
     formData.append('name', this.newPet.name);
     formData.append('species', this.newPet.species);
     formData.append('breed', this.newPet.breed || '');
-    formData.append('age', String(this.newPet.age));
+    formData.append('age', this.newPet.age);
     formData.append('gender', this.newPet.gender);
     formData.append('color', this.newPet.color);
     formData.append('weight', String(this.newPet.weight));
@@ -1049,9 +1081,11 @@ export class Veterinario implements OnInit {
         this.cargarMascotas();
         this.closeAddPetModal();
         this.newPet = {
-          name: '', species: '', breed: '', age: 0, gender: 'Macho', 
+          name: '', species: '', breed: '', age: '', gender: 'Macho', 
           color: '', weight: 0, description: '', ownerId: undefined
         };
+        this.newPetAgeVal = 0;
+        this.newPetAgeUnit = 'years';
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -1062,19 +1096,54 @@ export class Veterinario implements OnInit {
     });
   }
 
+  parseEditingPetAge(ageInput: any): void {
+    if (ageInput === undefined || ageInput === null) {
+      this.editingPetAgeVal = 0;
+      this.editingPetAgeUnit = 'years';
+      return;
+    }
+    const ageStr = String(ageInput).trim();
+    if (ageStr.includes('mes')) {
+      const match = ageStr.match(/^([0-9.]+)/);
+      this.editingPetAgeVal = match ? Number(match[1]) : 0;
+      this.editingPetAgeUnit = 'months';
+    } else if (ageStr.includes('año') || ageStr.includes('afo') || ageStr.includes('a') || ageStr.includes('ñ')) {
+      const match = ageStr.match(/^([0-9.]+)/);
+      this.editingPetAgeVal = match ? Number(match[1]) : 0;
+      this.editingPetAgeUnit = 'years';
+    } else {
+      const num = Number(ageStr);
+      if (!isNaN(num)) {
+        if (num % 1 === 0) {
+          this.editingPetAgeVal = num;
+          this.editingPetAgeUnit = 'years';
+        } else {
+          this.editingPetAgeVal = Math.round(num * 12);
+          this.editingPetAgeUnit = 'months';
+        }
+      } else {
+        this.editingPetAgeVal = 0;
+        this.editingPetAgeUnit = 'years';
+      }
+    }
+  }
+
   openEditPetModal(pet: any): void {
     this.editingPet = { ...pet };
     this.editingPet.ownerId = pet.owner?.id || pet.ownerId;
     this.showEditPetModal = true;
     this.imagePreview = pet.foto ? `${this.API_BASE}${pet.foto}` : null;
+    this.parseEditingPetAge(pet.age);
   }
 
   closeEditPetModal(): void {
     this.showEditPetModal = false;
     this.editingPet = {
-      name: '', species: '', breed: '', age: 0, gender: 'M',
+      name: '', species: '', breed: '', age: '', gender: 'M',
       color: '', weight: 0, description: '', ownerId: undefined
     };
+    this.editingPetAgeVal = 0;
+    this.editingPetAgeUnit = 'years';
     this.selectedFile = null;
     this.imagePreview = null;
   }
@@ -1082,11 +1151,22 @@ export class Veterinario implements OnInit {
   actualizarMascota(): void {
     if (!this.editingPet.id) return;
 
+    if (this.editingPetAgeVal < 0 || this.editingPet.weight < 0) {
+      this.showToast('La edad y el peso no pueden ser valores negativos', 'warning');
+      return;
+    }
+
+    if (this.editingPetAgeUnit === 'months') {
+      this.editingPet.age = `${this.editingPetAgeVal} ${this.editingPetAgeVal === 1 ? 'mes' : 'meses'}`;
+    } else {
+      this.editingPet.age = `${this.editingPetAgeVal} ${this.editingPetAgeVal === 1 ? 'año' : 'años'}`;
+    }
+
     const formData = new FormData();
     formData.append('name', this.editingPet.name);
     formData.append('species', this.editingPet.species);
     formData.append('breed', this.editingPet.breed || '');
-    formData.append('age', String(this.editingPet.age));
+    formData.append('age', this.editingPet.age);
     formData.append('gender', this.editingPet.gender);
     formData.append('color', this.editingPet.color);
     formData.append('weight', String(this.editingPet.weight));
