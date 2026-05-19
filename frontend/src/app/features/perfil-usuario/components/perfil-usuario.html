@@ -156,7 +156,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let mascota of mascotas">
+            <tr *ngFor="let mascota of getPaginatedMascotas()">
               <td>
                 <div *ngIf="mascota.foto" class="table-photo">
                   <img [src]="mascota.foto" [alt]="mascota.name" class="table-img">
@@ -170,15 +170,30 @@
               <td>{{ mascota.breed }}</td>
               <td>{{ mascota.weight }} kg</td>
               <td>
-                <div class="action-buttons">
-                  <button class="btn-delete" (click)="eliminarMascota(mascota.id)"><i class="fas fa-ban"></i>
-                    Desactivar</button>
+                <div class="action-buttons" style="display: flex; gap: 0.5rem; justify-content: center;">
+                  <button class="btn-ver-mascota" (click)="verMascota(mascota)">
+                    <i class="fas fa-eye"></i> Ver
+                  </button>
+                  <button class="btn-delete" (click)="eliminarMascota(mascota.id)">
+                    <i class="fas fa-ban"></i> Desactivar
+                  </button>
                 </div>
               </td>
-
             </tr>
           </tbody>
         </table>
+
+        <!-- Paginación de Mascotas -->
+        <div class="pagination-container" *ngIf="getTotalPagesMascotas() > 1">
+          <button class="btn-pagination-prev" (click)="prevPageMascotas()" [disabled]="pageMascotas === 1">
+            <i class="fas fa-chevron-left"></i> Anterior
+          </button>
+          <span class="pagination-info">Página {{ pageMascotas }} de {{ getTotalPagesMascotas() }}</span>
+          <button class="btn-pagination-next" (click)="nextPageMascotas()" [disabled]="pageMascotas === getTotalPagesMascotas()">
+            Siguiente <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+
       </div>
     </section>
 
@@ -235,7 +250,7 @@
 
         <!-- Timeline de registros -->
         <div *ngIf="historialClinico.length > 0" class="timeline">
-          <div *ngFor="let registro of historialClinico" class="timeline-item">
+          <div *ngFor="let registro of getPaginatedHistorial()" class="timeline-item">
             <div class="timeline-marker" [ngClass]="'marker-' + registro.tipo"></div>
             <div class="timeline-card">
               <div class="timeline-card-header">
@@ -273,6 +288,17 @@
             </div>
           </div>
         </div>
+
+        <!-- Paginación de Historial Clínico -->
+        <div class="pagination-container" *ngIf="getTotalPagesHistorial() > 1" style="margin-top: 1.5rem;">
+          <button class="btn-pagination-prev" (click)="prevPageHistorial()" [disabled]="pageHistorial === 1">
+            <i class="fas fa-chevron-left"></i> Anterior
+          </button>
+          <span class="pagination-info">Página {{ pageHistorial }} de {{ getTotalPagesHistorial() }}</span>
+          <button class="btn-pagination-next" (click)="nextPageHistorial()" [disabled]="pageHistorial === getTotalPagesHistorial()">
+            Siguiente <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
       </div>
     </section>
 
@@ -293,8 +319,7 @@
         <i class="fas fa-shopping-cart"></i>
         <h4>No tienes compras registradas.</h4>
         <p>¡Visita nuestra tienda para encontrar productos para tu mascota!</p>
-        <button class="btn-primary" (click)="irATienda()"><i class="fas fa-shopping-cart"></i> Ir a la
-          Tienda</button>
+        <button class="btn-primary btn-premium-tienda" (click)="irATienda()"><i class="fas fa-shopping-bag"></i> Explorar Tienda</button>
       </div>
     </section>
 
@@ -321,7 +346,7 @@
       </div>
 
       <div *ngIf="publicaciones.length > 0" class="publicaciones-grid">
-        <div *ngFor="let pub of publicaciones" class="publicacion-card">
+        <div *ngFor="let pub of getPaginatedPublicaciones()" class="publicacion-card">
           <div *ngIf="pub.imagen" class="publicacion-image">
             <img
               [src]="pub.imagen && pub.imagen.startsWith('/uploads/') ? 'http://localhost:3000' + pub.imagen : pub.imagen"
@@ -339,6 +364,9 @@
               <i class="fas fa-ellipsis-v"></i>
             </button>
             <div class="pub-dropdown" *ngIf="activePubMenuId === pub.id">
+              <button class="dropdown-item edit" (click)="abrirEditarPublicacionModal(pub)">
+                <i class="fas fa-edit"></i> Editar
+              </button>
               <button class="dropdown-item delete" (click)="eliminarPublicacion(pub.id)">
                 <i class="fas fa-trash-alt"></i> Eliminar
               </button>
@@ -346,6 +374,18 @@
           </div>
         </div>
       </div>
+
+      <!-- Paginación de Publicaciones -->
+      <div class="pagination-container" *ngIf="getTotalPagesPublicaciones() > 1" style="margin-top: 1.5rem;">
+        <button class="btn-pagination-prev" (click)="prevPagePublicaciones()" [disabled]="pagePublicaciones === 1">
+          <i class="fas fa-chevron-left"></i> Anterior
+        </button>
+        <span class="pagination-info">Página {{ pagePublicaciones }} de {{ getTotalPagesPublicaciones() }}</span>
+        <button class="btn-pagination-next" (click)="nextPagePublicaciones()" [disabled]="pagePublicaciones === getTotalPagesPublicaciones()">
+          Siguiente <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+
     </section>
 
     <!-- ===== TICKETS / SOPORTE ===== -->
@@ -366,7 +406,9 @@
 
       <!-- Mis Tickets -->
       <div class="card" *ngIf="misTickets.length > 0">
-        <div class="card-header"><h5><i class="fas fa-list"></i> Mis Tickets</h5></div>
+        <div class="card-header">
+          <h5><i class="fas fa-list"></i> Mis Tickets</h5>
+        </div>
         <div class="card-body">
           <div class="table-container">
             <table class="data-table">
@@ -384,17 +426,16 @@
                   <td>#{{ ticket.id }}</td>
                   <td><strong>{{ ticket.asunto }}</strong></td>
                   <td>
-                    <span class="badge" [class.badge-high]="ticket.prioridad === 'Alta'" 
-                                       [class.badge-medium]="ticket.prioridad === 'Media'" 
-                                       [class.badge-low]="ticket.prioridad === 'Baja'">
+                    <span class="badge" [class.badge-high]="ticket.prioridad === 'Alta'"
+                      [class.badge-medium]="ticket.prioridad === 'Media'"
+                      [class.badge-low]="ticket.prioridad === 'Baja'">
                       {{ ticket.prioridad }}
                     </span>
                   </td>
                   <td>
-                    <span class="status-pill" 
-                          [class.status-open]="ticket.estado === 'Abierto'"
-                          [class.status-in-progress]="ticket.estado === 'En Proceso'"
-                          [class.status-closed]="ticket.estado === 'Cerrado'">
+                    <span class="status-pill" [class.status-open]="ticket.estado === 'Abierto'"
+                      [class.status-in-progress]="ticket.estado === 'En Proceso'"
+                      [class.status-closed]="ticket.estado === 'Cerrado'">
                       {{ ticket.estado }}
                     </span>
                   </td>
@@ -611,7 +652,8 @@
         </div>
         <div class="form-group full-width">
           <label>Descripción *</label>
-          <textarea [(ngModel)]="newTicket.descripcion" rows="5" placeholder="Describe detalladamente tu problema o consulta..."></textarea>
+          <textarea [(ngModel)]="newTicket.descripcion" rows="5"
+            placeholder="Describe detalladamente tu problema o consulta..."></textarea>
         </div>
       </div>
     </div>
@@ -622,4 +664,84 @@
   </div>
 </div>
 
+<!-- Modal de Ver Mascota (Detalles) -->
+<div class="modal-overlay" *ngIf="showVerMascotaModal" (click)="closeVerMascotaModal()">
+  <div class="modal-box pet-ver-modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header pet-ver-modal-header">
+      <h3 class="pet-ver-modal-title">
+        <i class="fas fa-paw"></i> Detalle de {{ selectedMascotaForModal?.name }}
+        <span class="pet-badge-inline">{{ selectedMascotaForModal?.species?.toUpperCase() }}</span>
+      </h3>
+      <button class="close-btn" (click)="closeVerMascotaModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body pet-ver-modal-body">
+      <!-- Foto de la mascota -->
+      <div class="pet-ver-photo-wrapper">
+        <div class="pet-ver-photo-container">
+          <img *ngIf="selectedMascotaForModal?.foto" [src]="selectedMascotaForModal.foto" class="pet-ver-photo" alt="Foto de mascota">
+          <i *ngIf="!selectedMascotaForModal?.foto" class="fas fa-paw pet-ver-no-photo-icon"></i>
+        </div>
+      </div>
 
+      <!-- Cuadrícula de Datos de la Mascota -->
+      <div class="info-grid pet-ver-info-grid">
+        <div class="info-card">
+          <div class="card-icon"><i class="fas fa-paw"></i></div>
+          <div class="card-content">
+            <span class="label">Especie</span>
+            <span class="value">{{ selectedMascotaForModal?.species }}</span>
+          </div>
+        </div>
+        <div class="info-card">
+          <div class="card-icon"><i class="fas fa-birthday-cake"></i></div>
+          <div class="card-content">
+            <span class="label">Edad</span>
+            <span class="value">{{ selectedMascotaForModal?.age }} años</span>
+          </div>
+        </div>
+        <div class="info-card">
+          <div class="card-icon"><i class="fas fa-venus-mars"></i></div>
+          <div class="card-content">
+            <span class="label">Género</span>
+            <span class="value">{{ selectedMascotaForModal?.gender === 'M' ? 'Macho' : 'Hembra' }}</span>
+          </div>
+        </div>
+        <div class="info-card">
+          <div class="card-icon"><i class="fas fa-dna"></i></div>
+          <div class="card-content">
+            <span class="label">Raza</span>
+            <span class="value">{{ selectedMascotaForModal?.breed || 'Mestizo' }}</span>
+          </div>
+        </div>
+        <div class="info-card">
+          <div class="card-icon"><i class="fas fa-weight"></i></div>
+          <div class="card-content">
+            <span class="label">Peso</span>
+            <span class="value">{{ selectedMascotaForModal?.weight }} kg</span>
+          </div>
+        </div>
+        <div class="info-card">
+          <div class="card-icon"><i class="fas fa-palette"></i></div>
+          <div class="card-content">
+            <span class="label">Color</span>
+            <span class="value">{{ selectedMascotaForModal?.color || 'No especificado' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Descripción -->
+      <div class="detail-section pet-ver-desc-section">
+        <div class="section-title">
+          <i class="fas fa-info-circle"></i>
+          <span>Descripción / Temperamento</span>
+        </div>
+        <div class="section-content highlight">
+          {{ selectedMascotaForModal?.description || 'Sin observaciones o descripción.' }}
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeVerMascotaModal()"><i class="fas fa-times"></i> Cerrar</button>
+    </div>
+  </div>
+</div>

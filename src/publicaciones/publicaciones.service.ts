@@ -99,5 +99,46 @@ export class PublicacionesService {
     
     await this.publicacionesRepository.update(id, { isActive: false });
   }
+
+  async reportar(id: number, userId: number): Promise<Publicacion> {
+    const publicacion = await this.findOne(id);
+    if (!publicacion.reportadoresIds) {
+      publicacion.reportadoresIds = [];
+    }
+    if (!publicacion.reportadoresIds.includes(userId)) {
+      publicacion.reportadoresIds.push(userId);
+      await this.publicacionesRepository.save(publicacion);
+    }
+    return publicacion;
+  }
+
+  async findReportadasByVeterinaria(veterinariaId: number): Promise<Publicacion[]> {
+    console.log(`Backend: Buscando publicaciones reportadas de la veterinaria ${veterinariaId}...`);
+    return this.publicacionesRepository.createQueryBuilder('publicacion')
+      .leftJoinAndSelect('publicacion.autor', 'autor')
+      // Join for Direct Veterinarian
+      .leftJoin('perfiles_veterinarios', 'pv_direct', 'pv_direct."usuarioId" = autor.id')
+      // Join for Direct Admin
+      .leftJoin('veterinarias', 'v_direct', 'v_direct."adminId" = autor.id')
+      // Join for Creator (either Veterinarian or Admin who created the author)
+      .leftJoin('users', 'creator', 'creator.id = autor.createdById')
+      // Join for Creator who is a Veterinarian
+      .leftJoin('perfiles_veterinarios', 'pv_creator', 'pv_creator."usuarioId" = creator.id')
+      // Join for Creator who is an Admin
+      .leftJoin('veterinarias', 'v_creator', 'v_creator."adminId" = creator.id')
+      .where('publicacion.isActive = :isActive', { isActive: true })
+      .andWhere(
+        `(` +
+        `pv_direct."veterinariaPrincipalId" = :veterinariaId OR ` +
+        `v_direct.id = :veterinariaId OR ` +
+        `pv_creator."veterinariaPrincipalId" = :veterinariaId OR ` +
+        `v_creator.id = :veterinariaId` +
+        `)`, 
+        { veterinariaId }
+      )
+      .orderBy('publicacion.createdAt', 'DESC')
+      .getMany()
+      .then(pubs => pubs.filter(p => p.reportadoresIds && p.reportadoresIds.length > 0));
+  }
 }
 

@@ -29,6 +29,7 @@ interface Publicacion {
   likeAnimating?: boolean;
   shareAnimating?: boolean;
   justPublished?: boolean;
+  opcionesAbiertas?: boolean;
 }
 
 interface Comentario {
@@ -110,6 +111,7 @@ export class Inicio implements OnInit {
       const user = this.authService.currentUser();
       if (user) {
         this.usuarioLogueado = {
+          id: user.id,
           nombre: user.fullName || 'Usuario',
           email: user.email,
           avatar: user.avatar 
@@ -122,6 +124,7 @@ export class Inicio implements OnInit {
           const reloadedUser = this.authService.currentUser();
           if (reloadedUser) {
             this.usuarioLogueado = {
+              id: reloadedUser.id,
               nombre: reloadedUser.fullName || 'Usuario',
               email: reloadedUser.email,
               avatar: reloadedUser.avatar 
@@ -402,6 +405,120 @@ export class Inicio implements OnInit {
         year: fecha.getFullYear() !== ahora.getFullYear() ? 'numeric' : undefined
       });
     }
+  }
+
+  toggleOpciones(pub: Publicacion): void {
+    pub.opcionesAbiertas = !pub.opcionesAbiertas;
+  }
+
+  reportarPublicacion(pub: Publicacion): void {
+    pub.opcionesAbiertas = false;
+    
+    // Check if the user is trying to report their own publication
+    const loggedInUserId = this.usuarioLogueado?.id;
+    if (pub.autorId === loggedInUserId) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Acción no permitida',
+        text: 'No puedes reportar tu propia publicación.',
+        confirmButtonColor: '#1d3976'
+      });
+      return;
+    }
+
+    Swal.fire({
+      title: '¿Está seguro de reportar esta publicación?',
+      text: 'Esta acción notificará a los administradores para que sea revisada.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, reportar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.publicacionesService.reportarPublicacion(pub.id).subscribe({
+          next: () => {
+            Swal.fire({
+              icon: 'success',
+              title: 'Reportada',
+              text: 'La publicación ha sido reportada exitosamente.',
+              confirmButtonColor: '#1d3976'
+            });
+          },
+          error: (err) => {
+            console.error('Error al reportar publicación:', err);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'Hubo un problema al procesar el reporte.',
+              confirmButtonColor: '#1d3976'
+            });
+          }
+        });
+      }
+    });
+  }
+
+  abrirEditarPublicacionModal(pub: any): void {
+    pub.opcionesAbiertas = false;
+    Swal.fire({
+      title: 'Editar Publicación',
+      input: 'textarea',
+      inputLabel: 'Contenido de la publicación',
+      inputValue: pub.contenido || pub.descripcion || '',
+      inputPlaceholder: 'Escribe algo sobre tu mascota...',
+      showCancelButton: true,
+      confirmButtonText: '<i class="fas fa-save"></i> Guardar Cambios',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#1d3976',
+      cancelButtonColor: '#6b7280',
+      preConfirm: (texto) => {
+        if (!texto || !texto.trim()) {
+          Swal.showValidationMessage('La descripción no puede estar vacía');
+        }
+        return texto;
+      }
+    }).then((result) => {
+      if (result.isConfirmed && result.value) {
+        this.publicacionesService.actualizarPublicacion(pub.id, { descripcion: result.value }).subscribe({
+          next: () => {
+            Swal.fire('¡Éxito!', 'Publicación actualizada correctamente', 'success');
+            this.cargarPublicaciones();
+          },
+          error: (err) => {
+            console.error('Error al actualizar publicación:', err);
+            Swal.fire('Error', 'Error al actualizar la publicación', 'error');
+          }
+        });
+      }
+    });
+  }
+
+  eliminarPublicacion(id: number): void {
+    Swal.fire({
+      title: '¿Eliminar publicación?',
+      text: '¿Estás seguro de que quieres eliminar esta publicación?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.publicacionesService.eliminarPublicacion(id).subscribe({
+          next: () => {
+            Swal.fire('Eliminada', 'Publicación eliminada exitosamente', 'success');
+            this.cargarPublicaciones();
+          },
+          error: (err) => {
+            console.error('❌ Error al eliminar publicación:', err);
+            Swal.fire('Error', 'Error al eliminar la publicación: ' + (err.error?.message || 'Error desconocido'), 'error');
+          }
+        });
+      }
+    });
   }
 
   getUser(): any {

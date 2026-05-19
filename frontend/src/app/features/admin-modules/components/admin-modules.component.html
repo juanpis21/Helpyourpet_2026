@@ -121,6 +121,12 @@
       </li>
 
       <li>
+        <a [class.active]="activeSection === 'reportes-publicaciones'" (click)="setSection('reportes-publicaciones')">
+          <i class="fas fa-flag"></i><span>Reporte de Publicaciones</span>
+        </a>
+      </li>
+
+      <li>
 
         <a [class.active]="activeSection === 'configuracion'" (click)="setSection('configuracion')">
 
@@ -2042,7 +2048,80 @@
 
     </section>
 
+    <!-- REPORTES DE PUBLICACIONES -->
+    <section *ngIf="activeSection === 'reportes-publicaciones'" class="content-section">
+      <div class="section-header">
+        <h1><i class="fas fa-flag"></i> Reportes de Publicaciones</h1>
+        <div class="header-actions">
+          <button class="top-bar-btn mobile-toggle" (click)="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <button class="theme-btn" (click)="toggleDarkMode()">
+            <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+          </button>
+        </div>
+      </div>
 
+      <div class="card">
+        <div class="card-header">
+          <h5><i class="fas fa-list"></i> Publicaciones Reportadas</h5>
+        </div>
+        <div class="card-body">
+          <div *ngIf="reportesLoading" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+            <i class="fas fa-spinner fa-spin" style="font-size: 2rem;"></i>
+            <p style="margin-top: 0.5rem;">Cargando reportes...</p>
+          </div>
+          
+          <div *ngIf="!reportesLoading && reportesPublicaciones.length === 0" class="empty-state" style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+            <i class="fas fa-flag-checkered" style="font-size: 3rem; margin-bottom: 1rem; color: var(--border-color);"></i>
+            <p style="font-size: 1.1rem; font-weight: 500;">No hay publicaciones reportadas en esta veterinaria</p>
+          </div>
+
+          <div class="table-container" *ngIf="!reportesLoading && reportesPublicaciones.length > 0">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Autor</th>
+                  <th>Publicación</th>
+                  <th>Fecha de Creación</th>
+                  <th>Cant. Reportes</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let rep of reportesPublicaciones">
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 0.8rem;">
+                      <img [src]="rep.autor?.avatar ? (rep.autor?.avatar.startsWith('/uploads/') ? baseUrl + rep.autor?.avatar : rep.autor?.avatar) : 'assets/images/Default.png'" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+                      <span>{{ rep.autor?.fullName || (rep.autor?.firstName + ' ' + rep.autor?.lastName) }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div style="max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                      {{ rep.descripcion || 'Sin descripción' }}
+                      <span *ngIf="rep.imagen" style="color: var(--primary-color); font-size: 0.8rem; display: block;">
+                        <i class="fas fa-image"></i> Tiene imagen
+                      </span>
+                    </div>
+                  </td>
+                  <td>{{ rep.createdAt | date:'dd/MM/yyyy, hh:mm a' }}</td>
+                  <td>
+                    <span class="badge" style="background: #fde8e8; color: #e53e3e; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600;">
+                      {{ rep.reportadoresIds?.length || 0 }} reporte(s)
+                    </span>
+                  </td>
+                  <td>
+                    <div class="actions">
+                      <button class="btn-icon edit" (click)="eliminarPublicacionReportada(rep.id)" title="Dar de baja / Eliminar" style="color: #e53e3e;">
+                        <i class="fas fa-trash-alt"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
 
   </main>
 

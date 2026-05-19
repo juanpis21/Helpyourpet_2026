@@ -27,10 +27,10 @@ import { CategoriasService, Categoria } from '../../../core/services/categorias.
 import { RolesService, Role } from '../../../core/services/roles.service';
 
 import { ThemeService } from '../../../core/services/theme.service';
-
 import { TicketsService } from '../../../core/services/tickets.service';
-
 import type { CreateTicketDto } from '../../../core/services/tickets.service';
+import { PublicacionesService } from '../../inicio/services/publicaciones.service';
+import Swal from 'sweetalert2';
 
 
 
@@ -648,9 +648,8 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
     private http: HttpClient,
 
     private ticketsService: TicketsService,
-
+    private publicacionesService: PublicacionesService,
     private cdr: ChangeDetectorRef
-
   ) { }
 
 
@@ -875,16 +874,61 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
 
 
+  // ========== REPORTES DE PUBLICACIONES ==========
+  reportesPublicaciones: any[] = [];
+  reportesLoading: boolean = false;
+
+  cargarReportesPublicaciones(): void {
+    if (this.adminUser && this.adminUser.veterinariaId) {
+      this.reportesLoading = true;
+      this.publicacionesService.getReportadasPorVeterinaria(this.adminUser.veterinariaId).subscribe({
+        next: (data) => {
+          this.reportesPublicaciones = data;
+          this.reportesLoading = false;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error al cargar reportes de publicaciones:', err);
+          this.reportesLoading = false;
+        }
+      });
+    }
+  }
+
+  eliminarPublicacionReportada(id: number): void {
+    Swal.fire({
+      title: '¿Está seguro de eliminar esta publicación?',
+      text: 'Esta acción no se puede deshacer y la publicación se dará de baja.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.publicacionesService.eliminarPublicacion(id).subscribe({
+          next: () => {
+            this.showToast('Publicación eliminada exitosamente');
+            this.cargarReportesPublicaciones();
+          },
+          error: (err) => {
+            console.error('Error al eliminar publicación reportada:', err);
+            this.showToast('Error al eliminar la publicación', 'error');
+          }
+        });
+      }
+    });
+  }
+
   setSection(section: string): void {
-
     this.activeSection = section;
-
+    if (section === 'reportes-publicaciones') {
+      this.cargarReportesPublicaciones();
+    }
     if (section === 'dashboard') {
-
       this.loadHistorial();
-
       setTimeout(() => this.initCharts(), 100);
-
     }
 
     if (section === 'tickets') {
@@ -2561,8 +2605,10 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
             this.cargarCategorias();
 
+            // Recargar reportes de publicaciones filtrados para el admin
+            this.cargarReportesPublicaciones();
+            
             // Recargar productos filtrados para el admin
-
             this.cargarProductos();
 
           } else {

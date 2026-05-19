@@ -66,4 +66,18 @@ export class PublicacionesService {
       headers: this.getAuthHeaders()
     });
   }
+
+  // Reportar una publicación
+  reportarPublicacion(id: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${id}/reportar`, {}, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  // Obtener publicaciones reportadas por veterinaria
+  getReportadasPorVeterinaria(veterinariaId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/reportadas/veterinaria/${veterinariaId}`, {
+      headers: this.getAuthHeaders()
+    });
+  }
 }

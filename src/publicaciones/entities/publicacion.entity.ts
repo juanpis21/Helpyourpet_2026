@@ -60,4 +60,11 @@ export class Publicacion {
   })
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @ApiProperty({ 
+    description: 'IDs de los usuarios que han reportado esta publicación', 
+    example: [1, 2, 3] 
+  })
+  @Column('int', { array: true, default: [] })
+  reportadoresIds: number[];
 }

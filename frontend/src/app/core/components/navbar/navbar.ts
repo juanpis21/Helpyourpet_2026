@@ -84,6 +84,18 @@ export class Navbar implements OnInit {
     return this.router.url === '/inicio';
   }
 
+  get isTienda(): boolean {
+    return this.router.url === '/tienda';
+  }
+
+  get isSobreNosotros(): boolean {
+    return this.router.url === '/sobre-nosotros';
+  }
+
+  get isPerfil(): boolean {
+    return this.router.url === '/perfil-usuario' || this.router.url === '/veterinario';
+  }
+
   get isVeterinario(): boolean {
     return this.usuarioLogueado?.roleId === 3;
   }

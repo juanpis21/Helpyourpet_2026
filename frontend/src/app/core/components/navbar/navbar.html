@@ -32,11 +32,11 @@
             <i class="fas fa-home"></i>
             <span>Inicio</span>
           </a>
-          <a (click)="irAPerfil(); toggleProfileMenu()" class="dropdown-item">
+          <a *ngIf="!isPerfil" (click)="irAPerfil(); toggleProfileMenu()" class="dropdown-item">
             <i class="fas fa-user"></i>
             <span>Mi Perfil</span>
           </a>
-          <a *ngIf="hasAccess('tienda') && !isVeterinario" (click)="irATienda(); toggleProfileMenu()" class="dropdown-item">
+          <a *ngIf="!isTienda && hasAccess('tienda') && !isVeterinario" (click)="irATienda(); toggleProfileMenu()" class="dropdown-item">
             <i class="fas fa-shopping-cart"></i>
             <span>PetShop</span>
           </a>
@@ -44,7 +44,7 @@
             <i class="fas fa-ticket-alt"></i>
             <span>Soporte / Tickets</span>
           </a>
-          <a *ngIf="hasAccess('sobre-nosotros') && !isVeterinario" (click)="irASobreNosotros(); toggleProfileMenu()" class="dropdown-item">
+          <a *ngIf="!isSobreNosotros && hasAccess('sobre-nosotros') && !isVeterinario" (click)="irASobreNosotros(); toggleProfileMenu()" class="dropdown-item">
             <i class="fas fa-users"></i>
             <span>Sobre Nosotros</span>
           </a>

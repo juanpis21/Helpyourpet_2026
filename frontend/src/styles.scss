@@ -21,17 +21,36 @@ body {
 }
 
 /* ===== PREMIUM SWAL MODAL STYLES COMPACT ===== */
-.premium-swal-popup {
+body div.swal2-container div.swal2-popup.premium-swal-popup {
   border-radius: 20px !important;
   padding: 0 !important;
   overflow: hidden !important;
   background: #ffffff !important;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15) !important;
+
+  .swal2-header {
+    display: none !important;
+  }
+
+  .swal2-title,
+  h2.swal2-title,
+  .premium-swal-title {
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    text-align: left !important;
+    box-sizing: border-box !important;
+  }
 }
 
 .premium-swal-title {
   padding: 0 !important;
   margin: 0 !important;
+  display: block !important;
+  width: 100% !important;
+  text-align: left !important;
 }
 
 .modal-premium-header {
@@ -298,7 +317,7 @@ body {
 
 [data-theme="dark"] {
 
-  .premium-swal-popup,
+  body div.swal2-container div.swal2-popup.premium-swal-popup,
   .modal-premium-body {
     background: #111827 !important;
   }
@@ -345,5 +364,142 @@ body {
         border-color: rgba(251, 191, 36, 0.2) !important;
       }
     }
+  }
+}
+
+/* ===== GLOBAL PET DETAIL MODAL ===== */
+.pet-detail-modal-header {
+  background: linear-gradient(135deg, #26427d 0%, #3b82f6 100%) !important;
+  display: flex !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  padding: 1.2rem 1.8rem !important;
+  color: white !important;
+  text-align: left !important;
+  position: relative !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+
+  .header-main {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    z-index: 1;
+  }
+}
+
+.pet-detail-modal-close {
+  display: flex !important;
+  position: absolute !important;
+  top: 12px !important;
+  right: 15px !important;
+  color: white !important;
+  font-size: 1.5rem !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  z-index: 10 !important;
+  opacity: 0.8 !important;
+
+  &:hover {
+    opacity: 1 !important;
+    transform: scale(1.1) !important;
+  }
+}
+
+.pet-detail-icon-circle {
+  width: 60px !important;
+  height: 60px !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-radius: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 1.3rem !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+  backdrop-filter: blur(5px) !important;
+}
+
+.pet-detail-icon {
+  color: white !important;
+}
+
+.pet-detail-badge {
+  font-size: 0.85rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  font-weight: 800 !important;
+  background: rgba(0, 0, 0, 0.2) !important;
+  padding: 2px 8px !important;
+  border-radius: 6px !important;
+  display: inline-block !important;
+  width: fit-content !important;
+}
+
+.pet-detail-name {
+  color: white !important;
+  font-family: 'Baloo 2', sans-serif !important;
+  font-size: 1.6rem !important;
+  margin: 0 !important;
+  font-weight: 700 !important;
+  line-height: 1.1 !important;
+}
+
+.pet-detail-modal-body {
+  padding: 0.5rem 1.5rem 1.5rem 1.5rem !important;
+  text-align: left !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1.2rem !important;
+  background: #ffffff !important;
+}
+
+.pet-detail-photo-wrapper {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin-bottom: 0.2rem !important;
+}
+
+.pet-detail-photo-container {
+  width: 100px !important;
+  height: 100px !important;
+  border-radius: 50% !important;
+  border: 3px solid #1d3976 !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12) !important;
+  overflow: hidden !important;
+  background: #f8fafc !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.pet-detail-photo {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.pet-detail-no-photo-icon {
+  font-size: 3rem !important;
+  color: #cbd5e1 !important;
+}
+
+.pet-detail-desc-section {
+  margin-top: 0.5rem !important;
+}
+
+[data-theme="dark"] {
+  .pet-detail-modal-body {
+    background: #111827 !important;
+  }
+
+  .pet-detail-photo-container {
+    border-color: #3b82f6 !important;
+    background: #1f2937 !important;
+  }
+
+  .pet-detail-no-photo-icon {
+    color: #4b5563 !important;
   }
 }

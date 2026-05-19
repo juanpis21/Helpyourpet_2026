@@ -83,9 +83,22 @@
               <time class="tiempo-publicacion">{{getTiempoTranscurrido(pub.fecha)}}</time>
             </div>
           </div>
-          <button class="btn-opciones" aria-label="Opciones de publicación">
-            <i class="fas fa-ellipsis-h"></i>
-          </button>
+          <div class="pub-opciones-container" style="position: relative;">
+            <button class="btn-opciones" (click)="toggleOpciones(pub)" aria-label="Opciones de publicación">
+              <i class="fas fa-ellipsis-h"></i>
+            </button>
+            <div class="dropdown-opciones" *ngIf="pub.opcionesAbiertas" style="position: absolute; right: 0; top: 100%; background: var(--bg-card, #fff); border: 1px solid var(--border-color, #dbdbdb); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 10; min-width: 170px; padding: 0.5rem 0;">
+              <button class="dropdown-item report-btn" *ngIf="pub.autorId !== usuarioLogueado?.id" (click)="reportarPublicacion(pub)" style="width: 100%; padding: 0.6rem 1rem; border: none; background: none; text-align: left; font-size: 0.9rem; color: #dc3545; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 500; transition: background 0.2s;">
+                <i class="fas fa-flag"></i> Reportar publicación
+              </button>
+              <button class="dropdown-item edit-btn" *ngIf="pub.autorId === usuarioLogueado?.id" (click)="abrirEditarPublicacionModal(pub)" style="width: 100%; padding: 0.6rem 1rem; border: none; background: none; text-align: left; font-size: 0.9rem; color: #0284c7; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 500; transition: background 0.2s;">
+                <i class="fas fa-edit"></i> Editar publicación
+              </button>
+              <button class="dropdown-item delete-btn" *ngIf="pub.autorId === usuarioLogueado?.id" (click)="eliminarPublicacion(pub.id)" style="width: 100%; padding: 0.6rem 1rem; border: none; background: none; text-align: left; font-size: 0.9rem; color: #dc3545; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 500; transition: background 0.2s;">
+                <i class="fas fa-trash-alt"></i> Eliminar publicación
+              </button>
+            </div>
+          </div>
         </header>
 
         <!-- Contenido -->

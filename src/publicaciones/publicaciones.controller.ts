@@ -86,6 +86,21 @@ export class PublicacionesController {
     return await this.publicacionesService.findByVeterinaria(+veterinariaId);
   }
 
+  @Post(':id/reportar')
+  @ApiOperation({ summary: 'Reportar una publicación' })
+  @ApiResponse({ status: 200, description: 'Publicación reportada' })
+  async reportar(@Param('id') id: string, @Request() req) {
+    const { userId } = req.user;
+    return await this.publicacionesService.reportar(+id, userId);
+  }
+
+  @Get('reportadas/veterinaria/:veterinariaId')
+  @ApiOperation({ summary: 'Obtener publicaciones reportadas de una veterinaria' })
+  @ApiResponse({ status: 200, description: 'Lista de publicaciones reportadas', type: [Publicacion] })
+  async findReportadasByVeterinaria(@Param('veterinariaId') veterinariaId: string) {
+    return await this.publicacionesService.findReportadasByVeterinaria(+veterinariaId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Obtener una publicación por ID' })
   @ApiResponse({ status: 200, description: 'Publicación encontrada', type: Publicacion })

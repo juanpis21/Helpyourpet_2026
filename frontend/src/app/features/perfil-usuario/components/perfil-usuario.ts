@@ -89,6 +89,14 @@ export class PerfilUsuario implements OnInit {
   mascotas: any[] = [];
   publicaciones: any[] = [];
 
+  // Pagination State
+  pageMascotas = 1;
+  limitMascotas = 6;
+  pageHistorial = 1;
+  limitHistorial = 5;
+  pagePublicaciones = 1;
+  limitPublicaciones = 6;
+
   // Modal state
   showAddPetModal = false;
   showEditPetModal = false;
@@ -143,6 +151,8 @@ export class PerfilUsuario implements OnInit {
 
   // Ticket modal
   showTicketModal: boolean = false;
+  showVerMascotaModal: boolean = false;
+  selectedMascotaForModal: any = null;
   misTickets: any[] = [];
   newTicket: CreateTicketDto = {
     asunto: '',
@@ -206,7 +216,7 @@ export class PerfilUsuario implements OnInit {
   private historialIdCounter = 1;
 
   constructor(
-    private router: Router, 
+    private router: Router,
     private themeService: ThemeService,
     private authService: AuthService,
     private usersService: UsersService,
@@ -214,7 +224,7 @@ export class PerfilUsuario implements OnInit {
     private publicacionesService: PublicacionesService,
     private cdr: ChangeDetectorRef,
     private ticketsService: TicketsService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.darkMode = this.themeService.isDarkMode;
@@ -226,7 +236,7 @@ export class PerfilUsuario implements OnInit {
   private async initializeUserData(): Promise<void> {
     try {
       const currentUser = this.authService.getCurrentUser();
-      
+
       if (currentUser) {
         // User already exists in auth service
         await Promise.all([
@@ -363,6 +373,41 @@ export class PerfilUsuario implements OnInit {
             console.error('❌ Error al eliminar publicación:', err);
             this.cargarPublicacionesUsuario();
             Swal.fire('Error', 'Error al eliminar la publicación: ' + (err.error?.message || 'Error desconocido'), 'error');
+          }
+        });
+      }
+    });
+  }
+
+  abrirEditarPublicacionModal(pub: any): void {
+    this.closeAllMenus();
+    Swal.fire({
+      title: 'Editar Publicación',
+      input: 'textarea',
+      inputLabel: 'Descripción de la publicación',
+      inputValue: pub.descripcion || pub.contenido || '',
+      inputPlaceholder: 'Escribe algo sobre tu mascota...',
+      showCancelButton: true,
+      confirmButtonText: '<i class="fas fa-save"></i> Guardar Cambios',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#1d3976',
+      cancelButtonColor: '#6b7280',
+      preConfirm: (texto) => {
+        if (!texto || !texto.trim()) {
+          Swal.showValidationMessage('La descripción no puede estar vacía');
+        }
+        return texto;
+      }
+    }).then((result) => {
+      if (result.isConfirmed && result.value) {
+        this.publicacionesService.actualizarPublicacion(pub.id, { descripcion: result.value }).subscribe({
+          next: () => {
+            Swal.fire('¡Éxito!', 'Publicación actualizada correctamente', 'success');
+            this.cargarPublicacionesUsuario();
+          },
+          error: (err) => {
+            console.error('Error al actualizar publicación:', err);
+            Swal.fire('Error', 'Error al actualizar la publicación', 'error');
           }
         });
       }
@@ -584,6 +629,16 @@ export class PerfilUsuario implements OnInit {
     });
   }
 
+  verMascota(mascota: any): void {
+    this.selectedMascotaForModal = mascota;
+    this.showVerMascotaModal = true;
+  }
+
+  closeVerMascotaModal(): void {
+    this.showVerMascotaModal = false;
+    this.selectedMascotaForModal = null;
+  }
+
   getGeneroTexto(genero: string): string {
     switch (genero) {
       case 'M': return 'Macho';
@@ -692,7 +747,7 @@ export class PerfilUsuario implements OnInit {
   eliminarCuenta(): void {
     const currentUser = this.authService.getCurrentUser();
     if (!currentUser) return;
-    
+
     Swal.fire({
       title: '¿Desactivar cuenta?',
       text: '¿Estás seguro de que deseas desactivar tu cuenta? Esta acción te cerrará la sesión y no podrás ingresar hasta que sea reactivada.',
@@ -721,6 +776,7 @@ export class PerfilUsuario implements OnInit {
   // ===== HISTORIAL CLÍNICO =====
 
   onMascotaHistorialChange(): void {
+    this.pageHistorial = 1;
     if (this.mascotaSeleccionadaHistorial) {
       this.cargarHistorial(this.mascotaSeleccionadaHistorial);
     } else {
@@ -948,7 +1004,7 @@ export class PerfilUsuario implements OnInit {
   }
 
   // ===== PASSWORD UPDATE =====
-  
+
   getTotalHistorialRegistros(): number {
     let total = 0;
     this.mascotas.forEach(mascota => {
@@ -992,5 +1048,85 @@ export class PerfilUsuario implements OnInit {
         Swal.fire('Error', 'Error al cambiar la contraseña: ' + (detail || err.message), 'error');
       }
     });
+  }
+
+  // ===== PAGINATION HELPMETHODS =====
+
+  // Mascotas
+  getPaginatedMascotas(): any[] {
+    const maxPages = this.getTotalPagesMascotas();
+    if (this.pageMascotas > maxPages && maxPages > 0) {
+      this.pageMascotas = maxPages;
+    }
+    const startIndex = (this.pageMascotas - 1) * this.limitMascotas;
+    return this.mascotas.slice(startIndex, startIndex + this.limitMascotas);
+  }
+
+  getTotalPagesMascotas(): number {
+    return Math.ceil(this.mascotas.length / this.limitMascotas);
+  }
+
+  nextPageMascotas(): void {
+    if (this.pageMascotas < this.getTotalPagesMascotas()) {
+      this.pageMascotas++;
+    }
+  }
+
+  prevPageMascotas(): void {
+    if (this.pageMascotas > 1) {
+      this.pageMascotas--;
+    }
+  }
+
+  // Historial Clínico
+  getPaginatedHistorial(): any[] {
+    const maxPages = this.getTotalPagesHistorial();
+    if (this.pageHistorial > maxPages && maxPages > 0) {
+      this.pageHistorial = maxPages;
+    }
+    const startIndex = (this.pageHistorial - 1) * this.limitHistorial;
+    return this.historialClinico.slice(startIndex, startIndex + this.limitHistorial);
+  }
+
+  getTotalPagesHistorial(): number {
+    return Math.ceil(this.historialClinico.length / this.limitHistorial);
+  }
+
+  nextPageHistorial(): void {
+    if (this.pageHistorial < this.getTotalPagesHistorial()) {
+      this.pageHistorial++;
+    }
+  }
+
+  prevPageHistorial(): void {
+    if (this.pageHistorial > 1) {
+      this.pageHistorial--;
+    }
+  }
+
+  // Publicaciones
+  getPaginatedPublicaciones(): any[] {
+    const maxPages = this.getTotalPagesPublicaciones();
+    if (this.pagePublicaciones > maxPages && maxPages > 0) {
+      this.pagePublicaciones = maxPages;
+    }
+    const startIndex = (this.pagePublicaciones - 1) * this.limitPublicaciones;
+    return this.publicaciones.slice(startIndex, startIndex + this.limitPublicaciones);
+  }
+
+  getTotalPagesPublicaciones(): number {
+    return Math.ceil(this.publicaciones.length / this.limitPublicaciones);
+  }
+
+  nextPagePublicaciones(): void {
+    if (this.pagePublicaciones < this.getTotalPagesPublicaciones()) {
+      this.pagePublicaciones++;
+    }
+  }
+
+  prevPagePublicaciones(): void {
+    if (this.pagePublicaciones > 1) {
+      this.pagePublicaciones--;
+    }
   }
 }
