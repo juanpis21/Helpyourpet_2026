@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { AuthService } from './auth.service';
 
 export interface Announcement {
@@ -16,14 +16,14 @@ export interface Announcement {
 export interface CreateAnnouncementDto {
   titulo: string;
   mensaje: string;
-  fechaExpiracion?: string;
+  fechaExpiracion?: string | null;
   isActive?: boolean;
 }
 
 export interface UpdateAnnouncementDto {
   titulo?: string;
   mensaje?: string;
-  fechaExpiracion?: string;
+  fechaExpiracion?: string | null;
   isActive?: boolean;
 }
 
@@ -32,6 +32,8 @@ export interface UpdateAnnouncementDto {
 })
 export class AnnouncementsService {
   private apiUrl = 'http://localhost:3000/announcements';
+
+  newAnnouncement$ = new Subject<Announcement>();
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 

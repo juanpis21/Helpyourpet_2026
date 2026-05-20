@@ -44,6 +44,10 @@ export class Ticket {
   })
   prioridad: TicketPriority;
 
+  @ApiProperty({ description: 'Respuesta del super-admin al ticket', required: false })
+  @Column('text', { nullable: true })
+  respuesta: string;
+
   @ApiProperty({ description: 'ID del usuario que creó el ticket' })
   @Column()
   userId: number;

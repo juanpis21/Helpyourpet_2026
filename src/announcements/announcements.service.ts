@@ -15,13 +15,13 @@ export class AnnouncementsService {
     private auditLogsService: AuditLogsService,
   ) {}
 
-  async create(createAnnouncementDto: CreateAnnouncementDto): Promise<Announcement> {
+  async create(createAnnouncementDto: CreateAnnouncementDto, userId: number): Promise<Announcement> {
     const announcement = this.announcementsRepository.create(createAnnouncementDto);
     const saved = await this.announcementsRepository.save(announcement);
 
     try {
       await this.auditLogsService.log({
-        userId: 1,
+        userId,
         action: AuditAction.CREATE,
         entity: 'Announcement',
         entityId: saved.id,
@@ -62,14 +62,14 @@ export class AnnouncementsService {
     return announcement;
   }
 
-  async update(id: number, updateAnnouncementDto: UpdateAnnouncementDto): Promise<Announcement> {
+  async update(id: number, updateAnnouncementDto: UpdateAnnouncementDto, userId: number): Promise<Announcement> {
     const announcement = await this.findOne(id);
     Object.assign(announcement, updateAnnouncementDto);
     const saved = await this.announcementsRepository.save(announcement);
 
     try {
       await this.auditLogsService.log({
-        userId: 1,
+        userId,
         action: AuditAction.UPDATE,
         entity: 'Announcement',
         entityId: id,
@@ -81,13 +81,13 @@ export class AnnouncementsService {
     return saved;
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number, userId: number): Promise<void> {
     const announcement = await this.findOne(id);
     await this.announcementsRepository.remove(announcement);
 
     try {
       await this.auditLogsService.log({
-        userId: 1,
+        userId,
         action: AuditAction.DELETE,
         entity: 'Announcement',
         entityId: id,

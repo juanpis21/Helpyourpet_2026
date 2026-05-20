@@ -462,6 +462,30 @@ export class PerfilUsuario implements OnInit {
     });
   }
 
+  deleteTicket(ticketId: number): void {
+    Swal.fire({
+      title: '¿Eliminar ticket?',
+      text: 'Esta acción no se puede deshacer',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.ticketsService.delete(ticketId).subscribe({
+          next: () => {
+            Swal.fire('Eliminado', 'El ticket ha sido eliminado', 'success');
+            this.loadMyTickets();
+          },
+          error: (err) => {
+            console.error('Error deleting ticket:', err);
+            Swal.fire('Error', 'No se pudo eliminar el ticket', 'error');
+          }
+        });
+      }
+    });
+  }
+
   toggleSidebar(): void {
     this.sidebarAbierto = !this.sidebarAbierto;
   }

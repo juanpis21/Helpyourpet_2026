@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AnnouncementsService } from './announcements.service';
 import { CreateAnnouncementDto } from './dto/create-announcement.dto';
@@ -18,8 +18,8 @@ export class AnnouncementsController {
   @UseGuards(RolesGuard)
   @Roles('superadmin')
   @ApiOperation({ summary: 'Crear un nuevo anuncio (Solo Super-Admin)' })
-  create(@Body() createAnnouncementDto: CreateAnnouncementDto) {
-    return this.announcementsService.create(createAnnouncementDto);
+  create(@Body() createAnnouncementDto: CreateAnnouncementDto, @Request() req) {
+    return this.announcementsService.create(createAnnouncementDto, req.user.id);
   }
 
   @Get()
@@ -46,15 +46,15 @@ export class AnnouncementsController {
   @UseGuards(RolesGuard)
   @Roles('superadmin')
   @ApiOperation({ summary: 'Actualizar un anuncio (Solo Super-Admin)' })
-  update(@Param('id') id: string, @Body() updateAnnouncementDto: UpdateAnnouncementDto) {
-    return this.announcementsService.update(+id, updateAnnouncementDto);
+  update(@Param('id') id: string, @Body() updateAnnouncementDto: UpdateAnnouncementDto, @Request() req) {
+    return this.announcementsService.update(+id, updateAnnouncementDto, req.user.id);
   }
 
   @Delete(':id')
   @UseGuards(RolesGuard)
   @Roles('superadmin')
   @ApiOperation({ summary: 'Eliminar un anuncio (Solo Super-Admin)' })
-  remove(@Param('id') id: string) {
-    return this.announcementsService.remove(+id);
+  remove(@Param('id') id: string, @Request() req) {
+    return this.announcementsService.remove(+id, req.user.id);
   }
 }

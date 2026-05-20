@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, ForbiddenException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { TicketsService } from './tickets.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
@@ -57,10 +57,12 @@ export class TicketsController {
   }
 
   @Delete(':id')
-  @UseGuards(RolesGuard)
-  @Roles('superadmin')
-  @ApiOperation({ summary: 'Eliminar un ticket (Solo Super-Admin)' })
-  remove(@Param('id') id: string) {
+  @ApiOperation({ summary: 'Eliminar un ticket (Super-Admin o dueño del ticket)' })
+  async remove(@Param('id') id: string, @Request() req) {
+    const ticket = await this.ticketsService.findOne(+id);
+    if (req.user.role?.name !== 'superadmin' && ticket.userId !== req.user.userId) {
+      throw new ForbiddenException('No tienes permiso para eliminar este ticket');
+    }
     return this.ticketsService.remove(+id);
   }
 }

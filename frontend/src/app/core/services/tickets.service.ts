@@ -9,6 +9,7 @@ export interface Ticket {
   descripcion: string;
   estado: 'Abierto' | 'En Proceso' | 'Cerrado';
   prioridad: 'Baja' | 'Media' | 'Alta';
+  respuesta: string | null;
   userId: number;
   user: any;
   createdAt: string;
@@ -26,6 +27,7 @@ export interface UpdateTicketDto {
   prioridad?: 'Baja' | 'Media' | 'Alta';
   asunto?: string;
   descripcion?: string;
+  respuesta?: string;
 }
 
 @Injectable({

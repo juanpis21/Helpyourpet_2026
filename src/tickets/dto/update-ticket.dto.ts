@@ -38,4 +38,12 @@ export class UpdateTicketDto {
   @IsOptional()
   @IsString()
   descripcion?: string;
+
+  @ApiProperty({ 
+    description: 'Respuesta del super-admin al ticket', 
+    required: false
+  })
+  @IsOptional()
+  @IsString()
+  respuesta?: string;
 }

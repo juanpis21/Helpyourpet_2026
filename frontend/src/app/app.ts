@@ -3,11 +3,12 @@ import { RouterOutlet, Router } from '@angular/router';
 import { Navbar } from './core/components/navbar/navbar';
 import { Footer } from './core/components/footer/footer';
 import { CommonModule } from '@angular/common';
+import { AnnouncementToastComponent } from './shared/components/announcement-toast/announcement-toast.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, Navbar, Footer, CommonModule],
+  imports: [RouterOutlet, Navbar, Footer, CommonModule, AnnouncementToastComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
@@ -16,10 +17,10 @@ export class App {
   protected readonly title = signal('adso_3063267-angular');
 
   /** Rutas donde NO se muestra el navbar global */
-  private readonly noNavbarRoutes = ['/', '/login', '/register', '/recovery', '/perfil-usuario', '/admin', '/super-admin', '/veterinario'];
+  private readonly noNavbarRoutes = ['/', '/login', '/register', '/recovery', '/perfil-usuario', '/perfil-veterinario', '/admin', '/super-admin', '/veterinario'];
 
   /** Rutas donde NO se muestra el footer global */
-  private readonly noFooterRoutes = ['/', '/login', '/register', '/recovery', '/perfil-usuario', '/admin', '/super-admin', '/veterinario'];
+  private readonly noFooterRoutes = ['/', '/login', '/register', '/recovery', '/perfil-usuario', '/perfil-veterinario', '/admin', '/super-admin', '/veterinario'];
 
   get showNavbar(): boolean {
     const url = this.router.url.split('?')[0];
@@ -34,4 +35,4 @@ export class App {
   get showLayout(): boolean {
     return this.showNavbar;
   }
-}
+}

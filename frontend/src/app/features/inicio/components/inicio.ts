@@ -62,8 +62,6 @@ export class Inicio implements OnInit {
   showScrollTop: boolean = false;
   nuevoComentario: { [key: number]: string } = {};
   currentPlaceholder: string = '';
-  activeAnnouncements: Announcement[] = [];
-  showAnnouncementBanner: boolean = true;
   showTicketModal: boolean = false;
   newTicket: CreateTicketDto = {
     asunto: '',
@@ -141,9 +139,6 @@ export class Inicio implements OnInit {
 
       // Load real publications
       await this.cargarPublicaciones();
-      
-      // Load active announcements
-      this.loadActiveAnnouncements();
     } catch (error) {
       console.error('Error al inicializar inicio:', error);
     }
@@ -198,22 +193,6 @@ export class Inicio implements OnInit {
         resolve();
       });
     });
-  }
-
-  private loadActiveAnnouncements(): void {
-    this.announcementsService.getActive().subscribe({
-      next: (announcements) => {
-        this.activeAnnouncements = announcements;
-      },
-      error: (err) => {
-        console.error('Error loading active announcements:', err);
-        this.activeAnnouncements = [];
-      }
-    });
-  }
-
-  closeAnnouncementBanner(): void {
-    this.showAnnouncementBanner = false;
   }
 
   // ===== TICKETS =====

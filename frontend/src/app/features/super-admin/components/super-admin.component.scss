@@ -603,7 +603,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+  z-index: 1000;
+}
+
+/* SweetAlert2 debe aparecer sobre los modales */
+:host ::ng-deep .swal2-container {
+  z-index: 10000 !important;
 }
 
 .modal-box {

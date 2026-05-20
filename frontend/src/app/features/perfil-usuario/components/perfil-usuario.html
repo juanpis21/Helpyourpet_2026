@@ -503,7 +503,9 @@
                   <th>Asunto</th>
                   <th>Prioridad</th>
                   <th>Estado</th>
+                  <th>Respuesta</th>
                   <th>Fecha</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -524,7 +526,16 @@
                       {{ ticket.estado }}
                     </span>
                   </td>
+                  <td>
+                    <span *ngIf="ticket.respuesta" class="respuesta-text">{{ ticket.respuesta }}</span>
+                    <span *ngIf="!ticket.respuesta" class="text-muted">Sin respuesta</span>
+                  </td>
                   <td>{{ ticket.createdAt | date:'short' }}</td>
+                  <td>
+                    <button class="btn-delete-ticket" (click)="deleteTicket(ticket.id)" title="Eliminar ticket">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </td>
                 </tr>
               </tbody>
             </table>

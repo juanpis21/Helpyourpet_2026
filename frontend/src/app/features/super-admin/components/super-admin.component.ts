@@ -1,4 +1,5 @@
 import { Component, OnInit, AfterViewInit, ViewEncapsulation, inject, ChangeDetectorRef, ChangeDetectionStrategy, NgZone } from '@angular/core';
+import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
@@ -570,13 +571,13 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
         next: () => {
           this.loadRoles();
           this.closeRoleModal();
-          setTimeout(() => window.location.reload(), 500);
+          Swal.fire('¡Actualizado!', 'Rol actualizado correctamente', 'success');
         },
         error: (err) => {
           const msg = err.error?.message;
           const errorDetail = Array.isArray(msg) ? msg[0] : msg;
           console.error('❌ Error updating role:', errorDetail || err.message);
-          alert('Error al actualizar: ' + (errorDetail || 'Error desconocido'));
+          Swal.fire('Error', 'Error al actualizar: ' + (errorDetail || 'Error desconocido'), 'error');
         }
       });
     } else {
@@ -584,13 +585,13 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
         next: () => {
           this.loadRoles();
           this.closeRoleModal();
-          setTimeout(() => window.location.reload(), 500);
+          Swal.fire('¡Creado!', 'Rol creado correctamente', 'success');
         },
         error: (err) => {
           const msg = err.error?.message;
           const errorDetail = Array.isArray(msg) ? msg[0] : msg;
           console.error('❌ Error creating role:', errorDetail || err.message);
-          alert('Error al crear: ' + (errorDetail || 'Error desconocido'));
+          Swal.fire('Error', 'Error al crear: ' + (errorDetail || 'Error desconocido'), 'error');
         }
       });
     }
@@ -711,10 +712,9 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
       next: () => {
         this.closeAddVeterinariaModal();
         this.loadGlobalData();
-        alert('Veterinaria registrada correctamente');
-        setTimeout(() => window.location.reload(), 500);
+        Swal.fire('¡Registrada!', 'Veterinaria registrada correctamente', 'success');
       },
-      error: (err) => alert('Error al registrar veterinaria: ' + (err.error?.message || err.message))
+      error: (err) => Swal.fire('Error', 'Error al registrar veterinaria: ' + (err.error?.message || err.message), 'error')
     });
   }
 
@@ -750,10 +750,9 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
       next: () => {
         this.closeEditVeterinariaModal();
         this.loadGlobalData();
-        alert('Veterinaria actualizada correctamente');
-        setTimeout(() => window.location.reload(), 500);
+        Swal.fire('¡Actualizada!', 'Veterinaria actualizada correctamente', 'success');
       },
-      error: (err) => alert('Error al actualizar veterinaria: ' + (err.error?.message || err.message))
+      error: (err) => Swal.fire('Error', 'Error al actualizar veterinaria: ' + (err.error?.message || err.message), 'error')
     });
   }
 
@@ -858,9 +857,8 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
       next: (response) => {
         console.log('✅ Administrador creado exitosamente:', response);
         this.closeNewAdminModal();
-        this.loadGlobalData(); // Recargar la lista de administradores
-        alert('Administrador creado correctamente');
-        setTimeout(() => window.location.reload(), 500);
+        this.loadGlobalData();
+        Swal.fire('¡Creado!', 'Administrador creado correctamente', 'success');
       },
       error: (err) => {
         console.error('❌ Error al crear administrador:', err);
@@ -877,6 +875,7 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
       next: (tickets) => {
         console.log('Tickets cargados:', tickets);
         this.allTickets = tickets;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error loading tickets:', err);
@@ -925,10 +924,19 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    // Aquí podrías implementar el envío de la respuesta
-    // Por ahora, solo mostraremos un mensaje de confirmación
-    alert('Respuesta enviada correctamente');
-    this.closeTicketDetailsModal();
+    if (!this.selectedTicket) return;
+
+    this.ticketsService.update(this.selectedTicket.id, { respuesta: this.ticketResponse }).subscribe({
+      next: () => {
+        alert('Respuesta enviada correctamente');
+        this.closeTicketDetailsModal();
+        this.loadTickets();
+      },
+      error: (err) => {
+        console.error('Error sending response:', err);
+        alert('Error al enviar la respuesta');
+      }
+    });
   }
 
   // ===== ANNOUNCEMENTS =====
@@ -968,26 +976,42 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
 
   createAnnouncement(): void {
     if (!this.newAnnouncement.titulo || !this.newAnnouncement.mensaje) {
-      alert('Por favor, completa los campos obligatorios');
+      Swal.fire('Error', 'Por favor, completa los campos obligatorios', 'error');
       return;
     }
 
-    const confirmMessage = `¿Estás seguro de enviar este mensaje a todos los usuarios?\n\nTítulo: ${this.newAnnouncement.titulo}\nMensaje: ${this.newAnnouncement.mensaje.substring(0, 100)}${this.newAnnouncement.mensaje.length > 100 ? '...' : ''}`;
+    const announcementData = {
+      titulo: this.newAnnouncement.titulo,
+      mensaje: this.newAnnouncement.mensaje,
+      fechaExpiracion: this.newAnnouncement.fechaExpiracion || null,
+      isActive: this.newAnnouncement.isActive ?? true
+    };
 
-    if (!confirm(confirmMessage)) {
-      return;
-    }
+    this.closeCreateAnnouncementModal();
 
-    this.announcementsService.create(this.newAnnouncement).subscribe({
-      next: () => {
-        this.closeCreateAnnouncementModal();
-        this.loadAnnouncements();
-        alert('✅ Anuncio enviado correctamente a todos los usuarios activos');
-        setTimeout(() => window.location.reload(), 500);
-      },
-      error: (err) => {
-        console.error('Error creating announcement:', err);
-        alert('❌ Error al enviar anuncio. Por favor intenta nuevamente.');
+    Swal.fire({
+      title: '¿Enviar mensaje global?',
+      html: `<strong>Título:</strong> ${announcementData.titulo}<br><strong>Mensaje:</strong> ${announcementData.mensaje.substring(0, 100)}${announcementData.mensaje.length > 100 ? '...' : ''}`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, enviar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.announcementsService.create(announcementData).subscribe({
+          next: (created) => {
+            this.announcementsService.newAnnouncement$.next(created);
+            this.loadAnnouncements();
+            Swal.fire('¡Enviado!', 'Anuncio enviado correctamente a todos los usuarios activos', 'success');
+          },
+          error: (err) => {
+            console.error('Error creating announcement:', err);
+            const errorMsg = err.error?.message || err.message || 'Error desconocido';
+            Swal.fire('Error', `Error al enviar anuncio: ${Array.isArray(errorMsg) ? errorMsg[0] : errorMsg}`, 'error');
+          }
+        });
+      } else {
+        this.openCreateAnnouncementModal();
       }
     });
   }
@@ -1004,7 +1028,7 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
 
   updateAnnouncement(): void {
     if (!this.editingAnnouncement.id || !this.editingAnnouncement.titulo || !this.editingAnnouncement.mensaje) {
-      alert('Por favor, completa los campos obligatorios');
+      Swal.fire('Error', 'Por favor, completa los campos obligatorios', 'error');
       return;
     }
 
@@ -1019,25 +1043,37 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
       next: () => {
         this.closeEditAnnouncementModal();
         this.loadAnnouncements();
-        alert('Anuncio actualizado correctamente');
-        setTimeout(() => window.location.reload(), 500);
+        Swal.fire('¡Actualizado!', 'Anuncio actualizado correctamente', 'success');
       },
       error: (err) => {
         console.error('Error updating announcement:', err);
-        alert('Error al actualizar anuncio');
+        Swal.fire('Error', 'Error al actualizar anuncio', 'error');
       }
     });
   }
 
   deleteAnnouncement(announcementId: number): void {
-    if (confirm('¿Estás seguro de eliminar este anuncio?')) {
-      this.announcementsService.delete(announcementId).subscribe({
-        next: () => this.loadAnnouncements(),
-        error: (err) => {
-          console.error('Error deleting announcement:', err);
-          alert('Error al eliminar anuncio');
-        }
-      });
-    }
+    Swal.fire({
+      title: '¿Eliminar anuncio?',
+      text: 'Esta acción no se puede deshacer',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#d33'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.announcementsService.delete(announcementId).subscribe({
+          next: () => {
+            this.loadAnnouncements();
+            Swal.fire('¡Eliminado!', 'Anuncio eliminado correctamente', 'success');
+          },
+          error: (err) => {
+            console.error('Error deleting announcement:', err);
+            Swal.fire('Error', 'Error al eliminar anuncio', 'error');
+          }
+        });
+      }
+    });
   }
 }
