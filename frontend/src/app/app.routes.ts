@@ -6,10 +6,7 @@ import { Inicio } from './features/inicio/components/inicio';
 import { SobreNosotros } from './features/sobre-nosotros/components/sobre-nosotros';
 import { Adopcion } from './features/adopcion/components/adopcion';
 import { Tienda } from './features/tienda/components/tienda';
-import { Reporte } from './features/reporte/components/reporte';
-import { Calificacion } from './features/calificacion/components/calificacion';
 import { Veterinario } from './features/veterinario/components/veterinario';
-import { PerfilVeterinario } from './features/perfil-veterinario/components/perfil-veterinario';
 import { PerfilUsuario } from './features/perfil-usuario/components/perfil-usuario';
 import { AdminModulesComponent } from './features/admin-modules/components/admin-modules.component';
 import { SuperAdminComponent } from './features/super-admin/components/super-admin.component';
@@ -48,18 +45,6 @@ export const routes: Routes = [
     data: { module: 'tienda' }
   },
   { 
-    path: 'reporte', 
-    component: Reporte,
-    canActivate: [permissionGuard],
-    data: { module: 'reporte' }
-  },
-  { 
-    path: 'calificacion', 
-    component: Calificacion,
-    canActivate: [permissionGuard],
-    data: { module: 'calificacion' }
-  },
-  { 
     path: 'veterinario', 
     component: Veterinario,
     canActivate: [permissionGuard],
@@ -82,12 +67,6 @@ export const routes: Routes = [
     component: PerfilUsuario,
     canActivate: [permissionGuard],
     data: { module: 'perfil-usuario' }
-  },
-  { 
-    path: 'perfil-veterinario', 
-    component: PerfilVeterinario,
-    canActivate: [permissionGuard],
-    data: { module: 'perfil-veterinario' }
   },
   { 
     path: 'admin', 
