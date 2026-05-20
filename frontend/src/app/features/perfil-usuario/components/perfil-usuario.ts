@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, HostListener } from '@angular/core';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -256,6 +256,13 @@ export class PerfilUsuario implements OnInit {
     this.initializeUserData();
   }
 
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    if (window.innerWidth >= 992) {
+      this.sidebarAbierto = true;
+    }
+  }
+
   private async initializeUserData(): Promise<void> {
     try {
       const currentUser = this.authService.getCurrentUser();
@@ -407,37 +414,65 @@ export class PerfilUsuario implements OnInit {
     });
   }
 
+  // Publication edit state
+  editingPublicacion: any = null;
+  editingPublicacionImage: File | null = null;
+  editingPublicacionImagePreview: string | null = null;
+  showEditarPublicacionModal = false;
+
   abrirEditarPublicacionModal(pub: any): void {
     this.closeAllMenus();
-    Swal.fire({
-      title: 'Editar Publicación',
-      input: 'textarea',
-      inputLabel: 'Descripción de la publicación',
-      inputValue: pub.descripcion || pub.contenido || '',
-      inputPlaceholder: 'Escribe algo sobre tu mascota...',
-      showCancelButton: true,
-      confirmButtonText: '<i class="fas fa-save"></i> Guardar Cambios',
-      cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#1d3976',
-      cancelButtonColor: '#6b7280',
-      preConfirm: (texto) => {
-        if (!texto || !texto.trim()) {
-          Swal.showValidationMessage('La descripción no puede estar vacía');
-        }
-        return texto;
-      }
-    }).then((result) => {
-      if (result.isConfirmed && result.value) {
-        this.publicacionesService.actualizarPublicacion(pub.id, { descripcion: result.value }).subscribe({
-          next: () => {
-            Swal.fire('¡Éxito!', 'Publicación actualizada correctamente', 'success');
-            this.cargarPublicacionesUsuario();
-          },
-          error: (err) => {
-            console.error('Error al actualizar publicación:', err);
-            Swal.fire('Error', 'Error al actualizar la publicación', 'error');
-          }
-        });
+    this.editingPublicacion = { ...pub };
+    this.editingPublicacionImage = null;
+    this.editingPublicacionImagePreview = pub.imagen && pub.imagen.startsWith('/uploads/') ? 'http://localhost:3000' + pub.imagen : pub.imagen;
+    this.showEditarPublicacionModal = true;
+  }
+
+  closeEditarPublicacionModal(): void {
+    this.showEditarPublicacionModal = false;
+    this.editingPublicacion = null;
+    this.editingPublicacionImage = null;
+    this.editingPublicacionImagePreview = null;
+  }
+
+  onPublicacionImageSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.editingPublicacionImage = file;
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.editingPublicacionImagePreview = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  eliminarPublicacionImagen(): void {
+    this.editingPublicacionImage = null;
+    this.editingPublicacionImagePreview = null;
+  }
+
+  guardarEdicionPublicacion(): void {
+    if (!this.editingPublicacion.descripcion || !this.editingPublicacion.descripcion.trim()) {
+      Swal.fire('Error', 'La descripción no puede estar vacía', 'error');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('descripcion', this.editingPublicacion.descripcion);
+    if (this.editingPublicacionImage) {
+      formData.append('imagen', this.editingPublicacionImage, this.editingPublicacionImage.name);
+    }
+
+    this.publicacionesService.actualizarPublicacion(this.editingPublicacion.id, formData).subscribe({
+      next: () => {
+        Swal.fire('¡Éxito!', 'Publicación actualizada correctamente', 'success');
+        this.closeEditarPublicacionModal();
+        this.cargarPublicacionesUsuario();
+      },
+      error: (err) => {
+        console.error('Error al actualizar publicación:', err);
+        Swal.fire('Error', 'Error al actualizar la publicación', 'error');
       }
     });
   }
@@ -883,7 +918,6 @@ export class PerfilUsuario implements OnInit {
 
     Swal.fire({
       title: `<div class="modal-premium-header ${registro.tipo}">
-                <button type="button" class="swal2-close" aria-label="Close this dialog" style="display: flex;" onclick="Swal.close()">×</button>
                 <div class="header-main">
                   <div class="icon-circle">
                     <i class="${icon}"></i>

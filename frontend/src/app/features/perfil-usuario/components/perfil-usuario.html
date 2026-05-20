@@ -295,7 +295,7 @@
       <!-- Selector de mascota -->
       <div class="historial-selector" *ngIf="mascotas.length > 0">
         <label class="selector-label"><i class="fas fa-paw"></i> Selecciona una mascota:</label>
-        <select [(ngModel)]="mascotaSeleccionadaHistorial" (ngModelChange)="onMascotaHistorialChange()"
+        <select [(ngModel)]="mascotaSeleccionadaHistorial" (change)="onMascotaHistorialChange()"
           class="mascota-select">
           <option [ngValue]="null">-- Seleccionar mascota --</option>
           <option *ngFor="let m of mascotas" [ngValue]="m.id">{{ m.name }} ({{ m.species }})</option>
@@ -760,6 +760,44 @@
   </div>
 </div>
 
+<!-- Modal de Editar Publicación -->
+<div class="modal-overlay" *ngIf="showEditarPublicacionModal" (click)="closeEditarPublicacionModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3><i class="fas fa-edit"></i> Editar Publicación</h3>
+      <button class="close-btn" (click)="closeEditarPublicacionModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full-width">
+          <label>Imagen de la publicación</label>
+          <div class="image-upload-section">
+            <div *ngIf="editingPublicacionImagePreview" class="image-preview">
+              <img [src]="editingPublicacionImagePreview" alt="Preview">
+              <button class="remove-image-btn" (click)="eliminarPublicacionImagen()">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <label class="btn-outline small" *ngIf="!editingPublicacionImagePreview">
+              <i class="fas fa-upload"></i> Subir Imagen
+              <input type="file" accept="image/*" (change)="onPublicacionImageSelected($event)" hidden>
+            </label>
+          </div>
+        </div>
+        <div class="form-group full-width">
+          <label>Descripción *</label>
+          <textarea [(ngModel)]="editingPublicacion.descripcion" rows="5"
+            placeholder="Escribe algo sobre tu mascota..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeEditarPublicacionModal()"><i class="fas fa-times"></i> Cancelar</button>
+      <button class="btn-primary" (click)="guardarEdicionPublicacion()"><i class="fas fa-save"></i> Guardar Cambios</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal de Ver Mascota (Detalles) -->
 <div class="modal-overlay" *ngIf="showVerMascotaModal" (click)="closeVerMascotaModal()">
   <div class="modal-box pet-ver-modal-box" (click)="$event.stopPropagation()">
@@ -835,9 +873,6 @@
           {{ selectedMascotaForModal?.description || 'Sin observaciones o descripción.' }}
         </div>
       </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-secondary" (click)="closeVerMascotaModal()"><i class="fas fa-times"></i> Cerrar</button>
     </div>
   </div>
 </div>
