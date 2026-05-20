@@ -1521,6 +1521,22 @@ textarea {
     border: 2px solid var(--border-color);
   }
 
+  &.square-preview {
+    margin: 1rem auto;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+    
+    .square-img {
+      width: 200px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+  }
+
   .remove-image-btn {
     position: absolute;
     top: -8px;
@@ -1542,6 +1558,38 @@ textarea {
       background: #dc2626;
       transform: scale(1.1);
     }
+  }
+}
+
+.pub-image-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  
+  .pub-image-preview {
+    width: 300px;
+    height: 180px;
+    border-radius: 8px;
+    background-size: cover;
+    background-position: center;
+    border: 3px solid var(--primary-color);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 1rem;
+    background-color: #f1f5f9;
+  }
+
+  .upload-btn {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    i { margin-right: 0.5rem; }
+    &:hover { background: var(--secondary-color); transform: scale(1.05); }
   }
 }
 
@@ -1596,16 +1644,21 @@ textarea {
   }
 
   .publicacion-image {
-    width: 100%;
-    height: 200px;
-    overflow: hidden;
+  width: 150px;
+  height: 150px;
+  overflow: hidden;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-    .pub-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+  .pub-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
   }
+}
 
   .publicacion-content {
     padding: 1rem;
@@ -1981,15 +2034,13 @@ textarea {
 
   .publicacion-image {
     width: 100%;
-    height: 220px;
+    height: 200px;
     overflow: hidden;
-    position: relative;
 
     .pub-img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 0.5s ease;
     }
   }
 

@@ -28,6 +28,9 @@ export class Tienda implements OnInit, OnDestroy {
 
   // Modo oscuro
   modoOscuro: boolean = false;
+
+  // Loading flag for products
+  cargandoProductos: boolean = false;
   private themeSub!: Subscription;
 
   // Perfil
@@ -113,6 +116,8 @@ export class Tienda implements OnInit, OnDestroy {
 
   seleccionarTienda(tienda: any): void {
     this.tiendaSeleccionada = tienda;
+    // Show preloader while loading products
+    this.cargandoProductos = true;
     this.cargarProductosTienda(tienda.id);
 
     // Cambiar a vista de productos
@@ -168,10 +173,13 @@ export class Tienda implements OnInit, OnDestroy {
             };
           });
         this.cdr.detectChanges();
+        // Loading complete
+        this.cargandoProductos = false;
       },
       error: (error) => {
         console.error('❌ Error al cargar productos:', error);
         this.productos = [];
+        this.cargandoProductos = false;
       }
     });
   }
@@ -257,7 +265,7 @@ export class Tienda implements OnInit, OnDestroy {
 
     this.carouselInterval = setInterval(() => {
       this.siguienteSlide();
-    }, 5000); // Cambiar slide cada 5 segundos
+    }, 3000); // Cambiar slide cada 3 segundos
   }
 
   siguienteSlide(): void {

@@ -120,10 +120,12 @@
       </div>
 
       <!-- ===== DASHBOARD CHARTS SECTION ===== -->
-      <div class="dashboard-charts-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; margin-bottom: 2rem;">
+      <div class="dashboard-charts-grid"
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; margin-bottom: 2rem;">
         <!-- Bar Chart Card -->
         <div class="card" style="margin-bottom: 0;">
-          <div class="card-header" style="background: linear-gradient(135deg, var(--primary-color) 0%, #2c5aa0 100%) !important;">
+          <div class="card-header"
+            style="background: linear-gradient(135deg, var(--primary-color) 0%, #2c5aa0 100%) !important;">
             <h5><i class="fas fa-chart-bar"></i> Actividad de Publicaciones</h5>
           </div>
           <div class="card-body" style="height: 300px; position: relative;">
@@ -133,7 +135,8 @@
 
         <!-- Donut Chart Card -->
         <div class="card" style="margin-bottom: 0;">
-          <div class="card-header" style="background: linear-gradient(135deg, var(--primary-color) 0%, #2c5aa0 100%) !important;">
+          <div class="card-header"
+            style="background: linear-gradient(135deg, var(--primary-color) 0%, #2c5aa0 100%) !important;">
             <h5><i class="fas fa-chart-pie"></i> Distribución de Mascotas</h5>
           </div>
           <div class="card-body" style="height: 300px; position: relative;">
@@ -144,7 +147,8 @@
 
       <!-- ===== HISTORIAL DE ACTIVIDAD (TABLA) ===== -->
       <div class="card">
-        <div class="card-header" style="background: linear-gradient(135deg, var(--primary-color) 0%, #2a5298 100%) !important;">
+        <div class="card-header"
+          style="background: linear-gradient(135deg, var(--primary-color) 0%, #2a5298 100%) !important;">
           <h5><i class="fas fa-history"></i> Historial de Actividad Reciente</h5>
         </div>
         <div class="card-body">
@@ -166,8 +170,7 @@
                 <tr *ngFor="let act of getPaginatedActividades()">
                   <td style="white-space: nowrap;"><strong>{{ act.fecha | date:'medium' }}</strong></td>
                   <td>
-                    <span class="status-pill" 
-                      [ngStyle]="{
+                    <span class="status-pill" [ngStyle]="{
                         'background-color': 
                           act.accion === 'Registro de mascota' ? '#E6F4EA' : 
                           act.accion === 'Nueva publicación' ? '#FFF4E5' : 
@@ -194,7 +197,8 @@
               <i class="fas fa-chevron-left"></i> Anterior
             </button>
             <span class="pagination-info">Página {{ pageActividades }} de {{ getTotalPagesActividades() }}</span>
-            <button class="btn-pagination-next" (click)="nextPageActividades()" [disabled]="pageActividades === getTotalPagesActividades()">
+            <button class="btn-pagination-next" (click)="nextPageActividades()"
+              [disabled]="pageActividades === getTotalPagesActividades()">
               Siguiente <i class="fas fa-chevron-right"></i>
             </button>
           </div>
@@ -271,7 +275,8 @@
             <i class="fas fa-chevron-left"></i> Anterior
           </button>
           <span class="pagination-info">Página {{ pageMascotas }} de {{ getTotalPagesMascotas() }}</span>
-          <button class="btn-pagination-next" (click)="nextPageMascotas()" [disabled]="pageMascotas === getTotalPagesMascotas()">
+          <button class="btn-pagination-next" (click)="nextPageMascotas()"
+            [disabled]="pageMascotas === getTotalPagesMascotas()">
             Siguiente <i class="fas fa-chevron-right"></i>
           </button>
         </div>
@@ -295,8 +300,7 @@
       <!-- Selector de mascota -->
       <div class="historial-selector" *ngIf="mascotas.length > 0">
         <label class="selector-label"><i class="fas fa-paw"></i> Selecciona una mascota:</label>
-        <select [(ngModel)]="mascotaSeleccionadaHistorial" (change)="onMascotaHistorialChange()"
-          class="mascota-select">
+        <select [(ngModel)]="mascotaSeleccionadaHistorial" (change)="onMascotaHistorialChange()" class="mascota-select">
           <option [ngValue]="null">-- Seleccionar mascota --</option>
           <option *ngFor="let m of mascotas" [ngValue]="m.id">{{ m.name }} ({{ m.species }})</option>
         </select>
@@ -377,7 +381,8 @@
             <i class="fas fa-chevron-left"></i> Anterior
           </button>
           <span class="pagination-info">Página {{ pageHistorial }} de {{ getTotalPagesHistorial() }}</span>
-          <button class="btn-pagination-next" (click)="nextPageHistorial()" [disabled]="pageHistorial === getTotalPagesHistorial()">
+          <button class="btn-pagination-next" (click)="nextPageHistorial()"
+            [disabled]="pageHistorial === getTotalPagesHistorial()">
             Siguiente <i class="fas fa-chevron-right"></i>
           </button>
         </div>
@@ -401,7 +406,8 @@
         <i class="fas fa-shopping-cart"></i>
         <h4>No tienes compras registradas.</h4>
         <p>¡Visita nuestra tienda para encontrar productos para tu mascota!</p>
-        <button class="btn-primary btn-premium-tienda" (click)="irATienda()"><i class="fas fa-shopping-bag"></i> Explorar Tienda</button>
+        <button class="btn-primary btn-premium-tienda" (click)="irATienda()"><i class="fas fa-shopping-bag"></i>
+          Explorar Tienda</button>
       </div>
     </section>
 
@@ -439,8 +445,11 @@
             <div class="pub-meta">
               <span class="pub-date"><i class="fas fa-calendar"></i> {{ pub.createdAt | date:'medium' }}</span>
               <div class="pub-stats" style="display: flex; gap: 0.8rem; align-items: center;">
-                <span class="pub-likes" style="display: flex; align-items: center; gap: 0.3rem;"><i class="fas fa-heart" style="color: var(--accent-color, #ef4444);"></i> {{ pub.likes || 0 }}</span>
-                <span class="pub-comments" style="display: flex; align-items: center; gap: 0.3rem;"><i class="fas fa-comment" style="color: var(--primary-color, #1d3976);"></i> {{ pub.comentariosCount || 0 }}</span>
+                <span class="pub-likes" style="display: flex; align-items: center; gap: 0.3rem;"><i class="fas fa-heart"
+                    style="color: var(--accent-color, #ef4444);"></i> {{ pub.likes || 0 }}</span>
+                <span class="pub-comments" style="display: flex; align-items: center; gap: 0.3rem;"><i
+                    class="fas fa-comment" style="color: var(--primary-color, #1d3976);"></i> {{ pub.comentariosCount ||
+                  0 }}</span>
               </div>
             </div>
           </div>
@@ -466,7 +475,8 @@
           <i class="fas fa-chevron-left"></i> Anterior
         </button>
         <span class="pagination-info">Página {{ pagePublicaciones }} de {{ getTotalPagesPublicaciones() }}</span>
-        <button class="btn-pagination-next" (click)="nextPagePublicaciones()" [disabled]="pagePublicaciones === getTotalPagesPublicaciones()">
+        <button class="btn-pagination-next" (click)="nextPagePublicaciones()"
+          [disabled]="pagePublicaciones === getTotalPagesPublicaciones()">
           Siguiente <i class="fas fa-chevron-right"></i>
         </button>
       </div>
@@ -592,10 +602,7 @@
                   <label>Apellidos</label>
                   <input type="text" [(ngModel)]="usuario.apellidos" placeholder="Ingresa tus apellidos">
                 </div>
-                <div class="form-group">
-                  <label>Edad</label>
-                  <input type="number" [(ngModel)]="usuario.edad" placeholder="Tu edad">
-                </div>
+
                 <div class="form-group">
                   <label>Correo Electrónico</label>
                   <input type="email" [(ngModel)]="usuario.correo" placeholder="correo@ejemplo.com">
@@ -764,36 +771,31 @@
 <div class="modal-overlay" *ngIf="showEditarPublicacionModal" (click)="closeEditarPublicacionModal()">
   <div class="modal-box" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h3><i class="fas fa-edit"></i> Editar Publicación</h3>
-      <button class="close-btn" (click)="closeEditarPublicacionModal()"><i class="fas fa-times"></i></button>
+      <h3><i class="fas fa-pencil-alt"></i> Editar Publicación</h3>
+      <button class="close-btn" (click)="closeEditarPublicacionModal()">&times;</button>
     </div>
     <div class="modal-body">
+      <div class="pub-image-upload">
+        <div class="pub-image-preview"
+          [style.backgroundImage]="editingPublicacionImagePreview ? 'url(' + editingPublicacionImagePreview + ')' : 'url(assets/images/Default.png)'">
+        </div>
+        <label for="pub-photo-edit" class="upload-btn">
+          <i class="fas fa-camera"></i> Cambiar Foto
+        </label>
+        <input type="file" id="pub-photo-edit" (change)="onPublicacionImageSelected($event)" style="display: none;"
+          accept="image/*">
+      </div>
+
       <div class="form-grid">
         <div class="form-group full-width">
-          <label>Imagen de la publicación</label>
-          <div class="image-upload-section">
-            <div *ngIf="editingPublicacionImagePreview" class="image-preview">
-              <img [src]="editingPublicacionImagePreview" alt="Preview">
-              <button class="remove-image-btn" (click)="eliminarPublicacionImagen()">
-                <i class="fas fa-times"></i>
-              </button>
-            </div>
-            <label class="btn-outline small" *ngIf="!editingPublicacionImagePreview">
-              <i class="fas fa-upload"></i> Subir Imagen
-              <input type="file" accept="image/*" (change)="onPublicacionImageSelected($event)" hidden>
-            </label>
-          </div>
-        </div>
-        <div class="form-group full-width">
           <label>Descripción *</label>
-          <textarea [(ngModel)]="editingPublicacion.descripcion" rows="5"
-            placeholder="Escribe algo sobre tu mascota..."></textarea>
+          <textarea [(ngModel)]="editingPublicacion.descripcion" rows="4"></textarea>
         </div>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" (click)="closeEditarPublicacionModal()"><i class="fas fa-times"></i> Cancelar</button>
-      <button class="btn-primary" (click)="guardarEdicionPublicacion()"><i class="fas fa-save"></i> Guardar Cambios</button>
+      <button class="btn-primary" (click)="closeEditarPublicacionModal()">Cancelar</button>
+      <button class="btn-primary" (click)="guardarEdicionPublicacion()">Guardar Cambios</button>
     </div>
   </div>
 </div>
@@ -812,7 +814,8 @@
       <!-- Foto de la mascota -->
       <div class="pet-ver-photo-wrapper">
         <div class="pet-ver-photo-container">
-          <img *ngIf="selectedMascotaForModal?.foto" [src]="selectedMascotaForModal.foto" class="pet-ver-photo" alt="Foto de mascota">
+          <img *ngIf="selectedMascotaForModal?.foto" [src]="selectedMascotaForModal.foto" class="pet-ver-photo"
+            alt="Foto de mascota">
           <i *ngIf="!selectedMascotaForModal?.foto" class="fas fa-paw pet-ver-no-photo-icon"></i>
         </div>
       </div>
