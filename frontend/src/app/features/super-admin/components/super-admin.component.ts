@@ -53,6 +53,12 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
 
   readonly API_BASE = 'http://localhost:3000';
 
+  get minFecha(): string {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    return now.toISOString().slice(0, 16);
+  }
+
   // Role Selection for Modules
   selectedRoleForModules: Role | null = null;
   roleModules: string[] = [];

@@ -1,6 +1,8 @@
 import { Component, OnInit, OnDestroy, NgZone, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
+import { Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { AnnouncementsService, Announcement } from '../../../core/services/announcements.service';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -48,31 +50,67 @@ export class AnnouncementToastComponent implements OnInit, OnDestroy {
   animating = false;
   currentAnnouncement: Announcement | null = null;
   private sub!: Subscription;
+  private routerSub!: Subscription;
   private pollTimer: any;
   private dismissed = false;
   private currentAnnouncementId: number | null = null;
   private shownInSession: Set<number> = new Set();
+  private dismissedIds: Set<number> = new Set();
+  private isInitialized = false;
+  private readonly STORAGE_KEY = 'dismissed_announcements';
+
+  private allowedRoutes = ['/inicio', '/perfil-usuario', '/veterinario'];
 
   constructor(
     private announcementsService: AnnouncementsService, 
     private authService: AuthService,
     private ngZone: NgZone,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     console.log('[AnnouncementToast] Componente inicializado');
+    this.loadDismissedFromStorage();
+    
     this.sub = this.announcementsService.newAnnouncement$.subscribe(a => {
       console.log('[AnnouncementToast] Nuevo anuncio recibido via Subject:', a);
-      this.show(a);
+      this.ngZone.run(() => this.show(a));
     });
-    this.checkAnnouncements();
-    this.tryPoll();
+
+    this.routerSub = this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      console.log('[AnnouncementToast] Navegación detectada, verificando anuncios...');
+      setTimeout(() => this.checkAnnouncements(), 500);
+    });
+
+    setTimeout(() => {
+      this.isInitialized = true;
+      this.checkAnnouncements();
+      this.tryPoll();
+    }, 1000);
   }
 
-  ngOnDestroy(): void { this.sub?.unsubscribe(); clearInterval(this.pollTimer); }
+  ngOnDestroy(): void { 
+    this.sub?.unsubscribe(); 
+    this.routerSub?.unsubscribe();
+    clearInterval(this.pollTimer);
+    clearTimeout(this.dismissTimer);
+  }
 
   private checkAnnouncements(): void {
+    if (!this.isInitialized) {
+      console.log('[AnnouncementToast] Componente aún no inicializado');
+      return;
+    }
+
+    const currentRoute = this.router.url.split('?')[0];
+    if (!this.allowedRoutes.includes(currentRoute)) {
+      console.log('[AnnouncementToast] Ruta no permitida para mostrar anuncios:', currentRoute);
+      return;
+    }
+
     const user = this.authService.getCurrentUser();
     console.log('[AnnouncementToast] Usuario actual:', user);
     if (!user || user.role?.name === 'superadmin') {
@@ -82,22 +120,29 @@ export class AnnouncementToastComponent implements OnInit, OnDestroy {
     console.log('[AnnouncementToast] Consultando anuncios activos...');
     this.announcementsService.getActive().subscribe({
       next: (list) => {
-        console.log('[AnnouncementToast] Anuncios activos recibidos:', list);
-        if (list.length === 0) {
-          console.log('[AnnouncementToast] No hay anuncios activos');
-          return;
-        }
-        const latestAnnouncement = list[0];
-        console.log('[AnnouncementToast] Último anuncio:', latestAnnouncement);
-        
-        if (!this.visible && !this.shownInSession.has(latestAnnouncement.id)) {
-          console.log('[AnnouncementToast] Mostrando nuevo anuncio');
-          this.show(latestAnnouncement);
-        } else if (this.currentAnnouncementId !== latestAnnouncement.id && !this.shownInSession.has(latestAnnouncement.id)) {
-          console.log('[AnnouncementToast] Anuncio editado o nuevo, mostrando');
-          this.dismiss();
-          setTimeout(() => this.show(latestAnnouncement), 500);
-        }
+        this.ngZone.run(() => {
+          console.log('[AnnouncementToast] Anuncios activos recibidos:', list);
+          if (list.length === 0) {
+            console.log('[AnnouncementToast] No hay anuncios activos');
+            return;
+          }
+          const latestAnnouncement = list[0];
+          console.log('[AnnouncementToast] Último anuncio:', latestAnnouncement);
+          
+          if (this.dismissedIds.has(latestAnnouncement.id)) {
+            console.log('[AnnouncementToast] Anuncio ya fue descartado por el usuario');
+            return;
+          }
+          
+          if (!this.visible && !this.shownInSession.has(latestAnnouncement.id)) {
+            console.log('[AnnouncementToast] Mostrando nuevo anuncio');
+            this.show(latestAnnouncement);
+          } else if (this.currentAnnouncementId !== latestAnnouncement.id && !this.shownInSession.has(latestAnnouncement.id)) {
+            console.log('[AnnouncementToast] Anuncio editado o nuevo, mostrando');
+            this.dismiss();
+            setTimeout(() => this.show(latestAnnouncement), 500);
+          }
+        });
       },
       error: (err) => {
         console.error('[AnnouncementToast] Error fetching announcements:', err);
@@ -118,21 +163,31 @@ export class AnnouncementToastComponent implements OnInit, OnDestroy {
       console.log('[AnnouncementToast] No se muestra: anuncio nulo');
       return;
     }
-    this.dismissed = false;
-    this.currentAnnouncement = a;
-    this.currentAnnouncementId = a.id;
-    this.visible = true;
-    this.animating = true;
-    console.log('[AnnouncementToast] Toast visible:', this.visible);
-    
-    clearTimeout(this.dismissTimer);
-    this.dismissTimer = setTimeout(() => {
-      console.log('[AnnouncementToast] Auto-dismiss activado después de 30s');
-      this.ngZone.run(() => {
-        this.shownInSession.add(a.id);
-        this.dismiss();
-      });
-    }, 30000);
+
+    const currentRoute = this.router.url.split('?')[0];
+    if (!this.allowedRoutes.includes(currentRoute)) {
+      console.log('[AnnouncementToast] No se muestra: ruta no permitida:', currentRoute);
+      return;
+    }
+
+    this.ngZone.run(() => {
+      this.dismissed = false;
+      this.currentAnnouncement = a;
+      this.currentAnnouncementId = a.id;
+      this.visible = true;
+      this.animating = true;
+      this.cdr.detectChanges();
+      console.log('[AnnouncementToast] Toast visible:', this.visible);
+      
+      clearTimeout(this.dismissTimer);
+      this.dismissTimer = setTimeout(() => {
+        console.log('[AnnouncementToast] Auto-dismiss activado después de 30s');
+        this.ngZone.run(() => {
+          this.shownInSession.add(a.id);
+          this.dismiss();
+        });
+      }, 30000);
+    });
   }
 
   dismiss(): void {
@@ -140,6 +195,12 @@ export class AnnouncementToastComponent implements OnInit, OnDestroy {
     clearTimeout(this.dismissTimer);
     this.animating = false;
     this.dismissed = true;
+
+    if (this.currentAnnouncementId) {
+      this.dismissedIds.add(this.currentAnnouncementId);
+      this.saveDismissedToStorage();
+    }
+
     this.cdr.detectChanges();
     
     setTimeout(() => {
@@ -151,5 +212,29 @@ export class AnnouncementToastComponent implements OnInit, OnDestroy {
         console.log('[AnnouncementToast] Toast cerrado completamente');
       });
     }, 300);
+  }
+
+  private loadDismissedFromStorage(): void {
+    try {
+      const stored = localStorage.getItem(this.STORAGE_KEY);
+      if (stored) {
+        const ids: number[] = JSON.parse(stored);
+        this.dismissedIds = new Set(ids);
+        console.log('[AnnouncementToast] Anuncios descartados cargados:', ids);
+      }
+    } catch (e) {
+      console.error('[AnnouncementToast] Error loading dismissed announcements:', e);
+      this.dismissedIds = new Set();
+    }
+  }
+
+  private saveDismissedToStorage(): void {
+    try {
+      const ids = Array.from(this.dismissedIds);
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(ids));
+      console.log('[AnnouncementToast] Anuncios descartados guardados:', ids);
+    } catch (e) {
+      console.error('[AnnouncementToast] Error saving dismissed announcements:', e);
+    }
   }
 }
