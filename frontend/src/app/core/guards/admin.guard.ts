@@ -9,20 +9,19 @@ export class AdminGuard implements CanActivate {
   constructor(
     private router: Router,
     private authService: AuthService
-  ) {}
+  ) { }
 
   canActivate(): boolean {
     const currentUser = this.authService.getCurrentUser();
-    
+
     // Verificar si está logueado
     if (!currentUser) {
       this.router.navigate(['/login']);
       return false;
     }
 
-    // Verificar si es admin (roleId: 2) - NO incluir super admin
     if (currentUser.roleId !== 2) {
-      this.router.navigate(['/inicio']); // Redirigir a inicio si no es admin
+      this.router.navigate(['/inicio']);
       return false;
     }
 

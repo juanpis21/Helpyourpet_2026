@@ -1,8 +1,10 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Get, Request, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, Get, Request, UseGuards } from '@nestjs/common';//*funciones del crud//*
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService, AuthResponse } from './auth.service';
+
 import { LoginDto } from './dto/login.dto';
 import { Public } from './decorators/public.decorator';
+
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 interface VerifyPasswordDto {
@@ -13,15 +15,17 @@ interface VerifyPasswordDto {
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
 
+  constructor(private readonly authService: AuthService) { }
   @Post('login')
   @Public()
+
+  //swagger//*
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Iniciar sesión' })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'Login exitoso', 
+  @ApiResponse({
+    status: 200,
+    description: 'Login exitoso',
     schema: {
       type: 'object',
       properties: {
@@ -65,8 +69,10 @@ export class AuthController {
   }
 
   @Post('verify-password')
-  @UseGuards(JwtAuthGuard)
+
+  @UseGuards(JwtAuthGuard)//token//
   @ApiBearerAuth()
+
   @ApiOperation({ summary: 'Verificar contraseña actual del usuario' })
   @ApiResponse({ status: 200, description: 'Contraseña verificada', type: Boolean })
   @ApiResponse({ status: 401, description: 'Contraseña incorrecta' })

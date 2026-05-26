@@ -25,10 +25,12 @@ export const permissionGuard: CanActivateFn = (route, state) => {
     return true;
   }
 
+
+
+
   if (userModules.length > 0) {
-    // Evitar redirección automática al primer módulo si es sensible, priorizar inicio o admin
-    const defaultRoute = userModules.includes('inicio') ? 'inicio' : 
-                        (userModules.includes('dashboard') || userModules.includes('admin') ? 'admin' : userModules[0]);
+    const defaultRoute = userModules.includes('inicio') ? 'inicio' :
+      (userModules.includes('dashboard') || userModules.includes('admin') ? 'admin' : userModules[0]);
     router.navigate([`/${defaultRoute}`]);
   } else {
     router.navigate(['/login']);

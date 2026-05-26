@@ -1761,6 +1761,7 @@
             <div class="profile-data-column">
 
               <div class="form-grid">
+          <h5 class="section-title"><i class="fas fa-info-circle"></i> Detalles del Producto</h5>
 
                 <div class="form-group">
 
@@ -2852,6 +2853,10 @@
           </select>
 
         </div>
+        <div class="form-group">
+          <label><i class="fas fa-map-marker-alt"></i> Ubicación *</label>
+          <input type="text" [(ngModel)]="newProducto.ubicacion" placeholder="Ej: Sala 3">
+        </div>
 
         <div class="form-group">
 
@@ -3017,7 +3022,8 @@
 
       </div>
 
-      <div class="form-grid">
+                <div class="form-grid">
+
 
         <div class="form-group full">
 
@@ -3047,9 +3053,14 @@
 
             <option *ngFor="let vet of veterinarias" [ngValue]="vet.id">{{ vet.nombre }}</option>
 
-          </select>
-
+                  </select>
+          </div>
+        <div class="form-group">
+          <label><i class="fas fa-map-marker-alt"></i> Ubicación *</label>
+          <input type="text" [(ngModel)]="editingProducto.ubicacion" placeholder="Ej: Sala 3">
         </div>
+
+
 
         <div class="form-group">
 
@@ -3083,6 +3094,7 @@
 
         <div class="form-group">
 
+                    <h5 class="section-title"><i class="fas fa-boxes"></i> Inventario</h5>
           <label><i class="fas fa-cubes"></i> Stock Actual</label>
 
           <input type="number" [(ngModel)]="editingProducto.stockActual" min="0">
@@ -3099,6 +3111,7 @@
 
         <div class="form-group">
 
+                    <h5 class="section-title"><i class="fas fa-dollar-sign"></i> Precio</h5>
           <label><i class="fas fa-dollar-sign"></i> Precio Compra</label>
 
           <input type="number" [(ngModel)]="editingProducto.precioCompra" min="0">

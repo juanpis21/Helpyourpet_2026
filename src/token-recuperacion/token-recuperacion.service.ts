@@ -50,8 +50,8 @@ export class TokenRecuperacionService {
             <p>Has solicitado restablecer tu contraseña. Haz clic en el botón de abajo para continuar:</p>
             <div style="margin: 30px 0;">
               <a href="${urlRecuperacion}" 
-                 style="background-color: #2e9e44; color: white; padding: 14px 25px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
-                 Restablecer mi contraseña
+                style="background-color: #2e9e44; color: white; padding: 14px 25px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
+                Restablecer mi contraseña
               </a>
             </div>
             <p style="font-size: 14px; color: #666;">Este enlace expirará en 10 minutos por tu seguridad.</p>
@@ -65,13 +65,12 @@ export class TokenRecuperacionService {
       throw new InternalServerErrorException('Error enviando correo SMTP: ' + e.message);
     }
 
-    return { 
+    return {
       mensaje: 'Recuperación inicializada con éxito. Revisa tu correo electrónico para continuar.'
     };
   }
 
   async resetPassword(dto: ResetPasswordDto): Promise<{ mensaje: string }> {
-    // 1. Validamos que el ticket exista
     const ticket = await this.tokenRepository.findOne({ where: { token: dto.token } });
 
     if (!ticket) {
@@ -88,7 +87,7 @@ export class TokenRecuperacionService {
     if (!usuario) {
       throw new NotFoundException('Usuario asociado al token ya no existe.');
     }
-    
+
     await this.usersService.update(usuario.id, { password: dto.nuevaContrasena });
     await this.tokenRepository.delete(ticket.id);
 

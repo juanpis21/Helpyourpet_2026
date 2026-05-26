@@ -2099,6 +2099,8 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
       veterinariaId: 0,
 
+      ubicacion: '',
+
       isActive: true
 
     };
