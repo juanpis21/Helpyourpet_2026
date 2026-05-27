@@ -1,8 +1,9 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards, Post, Body } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { AuditLogsService } from './audit-logs.service';
 import { AuditLog } from './entities/audit-log.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CreateAuditLogDto } from './dto/create-audit-log.dto';
 
 @ApiTags('audit-logs')
 @Controller('audit-logs')
@@ -33,5 +34,12 @@ export class AuditLogsController {
   @ApiResponse({ status: 200, description: 'Registros de la entidad', type: [AuditLog] })
   findByEntity(@Param('entity') entity: string) {
     return this.auditLogsService.findByEntity(entity);
+  }
+
+  @Post()
+  @ApiOperation({ summary: 'Crear un nuevo registro de auditoría' })
+  @ApiResponse({ status: 201, description: 'Registro de auditoría creado exitosamente', type: AuditLog })
+  create(@Body() createDto: CreateAuditLogDto) {
+    return this.auditLogsService.log(createDto);
   }
 }

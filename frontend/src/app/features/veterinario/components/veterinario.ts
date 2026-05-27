@@ -150,11 +150,43 @@ export class Veterinario implements OnInit {
 
   // Paginación Mascotas
   petsCurrentPage: number = 1;
-  petsPageSize: number = 20;
+  petsPageSize: number = 10;
 
   // Paginación Usuarios
   usersCurrentPage: number = 1;
-  usersPageSize: number = 20;
+  usersPageSize: number = 10;
+
+  // Paginación Consultas Médicas
+  consultasCurrentPage: number = 1;
+  consultasPageSize: number = 5;
+
+  get paginatedConsultas() {
+    const totalPages = Math.ceil(this.consultasActuales.length / this.consultasPageSize);
+    if (this.consultasCurrentPage > totalPages && totalPages > 0) {
+      this.consultasCurrentPage = 1;
+    }
+    const startIndex = (this.consultasCurrentPage - 1) * this.consultasPageSize;
+    return this.consultasActuales.slice(startIndex, startIndex + this.consultasPageSize);
+  }
+
+  get totalConsultasPages() {
+    return Math.ceil(this.consultasActuales.length / this.consultasPageSize);
+  }
+
+  nextConsultasPage() {
+    if (this.consultasCurrentPage < this.totalConsultasPages) {
+      this.consultasCurrentPage++;
+      this.cdr.detectChanges();
+    }
+  }
+
+  prevConsultasPage() {
+    if (this.consultasCurrentPage > 1) {
+      this.consultasCurrentPage--;
+      this.cdr.detectChanges();
+    }
+  }
+
   hcEditando: boolean = false;
   hcEditForm: any = {};
 
@@ -484,6 +516,7 @@ export class Veterinario implements OnInit {
       if (result.isConfirmed) {
         this.publicacionesService.eliminarPublicacion(id).subscribe({
           next: () => {
+            this.registrarAccionAuditoria('DELETE', 'Publicacion', id, `Veterinario eliminó la publicación #${id}`);
             this.cargarPublicacionesUsuario();
             this.showToast('Publicación eliminada exitosamente', 'success');
             this.cdr.detectChanges();
@@ -531,6 +564,7 @@ export class Veterinario implements OnInit {
         this.vetUser = response;
         this.selectedProfileFile = null;
         this.showToast('Perfil actualizado correctamente', 'success');
+        this.registrarAccionAuditoria('UPDATE', 'User', this.vetUser.id, `Veterinario actualizó sus datos de perfil personal`);
         this.cdr.detectChanges();
       },
       error: (error) => {
@@ -690,10 +724,27 @@ export class Veterinario implements OnInit {
   formatDateCorrectly(dateStr: string): Date {
     if (!dateStr) return new Date();
     const hasTimezone = dateStr.includes('Z') || dateStr.includes('+') || (dateStr.includes('-') && dateStr.lastIndexOf('-') > 10);
-    if (!hasTimezone) {
-      return new Date(dateStr + 'Z');
-    }
-    return new Date(dateStr);
+    const date = hasTimezone ? new Date(dateStr) : new Date(dateStr + 'Z');
+    // Corregir desfase de zona horaria por doble conversión UTC/Local del driver de base de datos
+    const offset = date.getTimezoneOffset();
+    return new Date(date.getTime() - offset * 60 * 1000);
+  }
+
+  registrarAccionAuditoria(action: string, entity: string, entityId: number, description: string): void {
+    if (!this.vetUser || !this.vetUser.id) return;
+    this.http.post(`${this.API_BASE}/audit-logs`, {
+      userId: this.vetUser.id,
+      action,
+      entity,
+      entityId,
+      description
+    }, this.getHeaders()).subscribe({
+      next: () => {
+        console.log('✅ Acción de auditoría registrada:', description);
+        this.loadHistorial();
+      },
+      error: (err) => console.error('❌ Error registrando acción de auditoría:', err)
+    });
   }
 
   getFullImageUrl(path: string | null | undefined): string {
@@ -973,6 +1024,7 @@ export class Veterinario implements OnInit {
     this.userService.registerUserByVet(this.newUser).subscribe({
       next: (res) => {
         this.showToast('Usuario registrado con éxito', 'success');
+        this.registrarAccionAuditoria('CREATE', 'User', res?.id || 0, `Veterinario pre-registró al usuario cliente ${this.newUser.firstName} ${this.newUser.lastName} (Documento: ${this.newUser.documentNumber})`);
         this.cargarUsuarios(); // Para el select de mascotas
         this.cargarUsuariosSinCuenta(); // Para la tabla de usuarios
         this.closeAddUserModal();
@@ -1005,6 +1057,7 @@ export class Veterinario implements OnInit {
     this.http.patch(`${this.API_BASE}/users/${this.editingUser.id}`, this.editingUser, this.getHeaders()).subscribe({
       next: () => {
         this.showToast('Usuario actualizado con éxito', 'success');
+        this.registrarAccionAuditoria('UPDATE', 'User', this.editingUser.id, `Veterinario actualizó el perfil del usuario cliente ${this.editingUser.firstName} ${this.editingUser.lastName}`);
         this.cargarUsuarios();
         this.cargarUsuariosSinCuenta();
         this.closeEditUserModal();
@@ -1076,8 +1129,9 @@ export class Veterinario implements OnInit {
     }
 
     this.http.post(`${this.API_BASE}/pets`, formData, this.getHeaders()).subscribe({
-      next: () => {
+      next: (res: any) => {
         this.showToast('Mascota registrada con éxito', 'success');
+        this.registrarAccionAuditoria('CREATE', 'Pet', res?.id || 0, `Veterinario registró la mascota "${this.newPet.name}" (${this.newPet.species})`);
         this.cargarMascotas();
         this.closeAddPetModal();
         this.newPet = {
@@ -1180,6 +1234,7 @@ export class Veterinario implements OnInit {
     this.http.patch(`${this.API_BASE}/pets/${this.editingPet.id}`, formData, this.getHeaders()).subscribe({
       next: () => {
         this.showToast('Mascota actualizada con éxito', 'success');
+        this.registrarAccionAuditoria('UPDATE', 'Pet', this.editingPet.id!, `Veterinario actualizó la mascota "${this.editingPet.name}"`);
         this.cargarMascotas();
         this.closeEditPetModal();
         this.cdr.detectChanges();
@@ -1230,6 +1285,7 @@ export class Veterinario implements OnInit {
         this.http.patch(`${this.API_BASE}/citas/${id}`, { estado: 'Completada' }, this.getHeaders()).subscribe({
           next: () => {
             this.showToast('Cita finalizada con éxito', 'success');
+            this.registrarAccionAuditoria('STATUS_CHANGE', 'Cita', id, `Veterinario finalizó (marcó como completada) la cita #${id}`);
             this.cargarCitas();
             this.cdr.detectChanges();
           },
@@ -1257,6 +1313,7 @@ export class Veterinario implements OnInit {
         this.http.delete(`${this.API_BASE}/citas/${id}`, this.getHeaders()).subscribe({
           next: () => {
             this.showToast('Cita eliminada con éxito', 'success');
+            this.registrarAccionAuditoria('DELETE', 'Cita', id, `Veterinario eliminó la cita #${id}`);
             this.cargarCitas();
             this.cdr.detectChanges();
           },
@@ -1303,8 +1360,9 @@ export class Veterinario implements OnInit {
     console.log('📤 Enviando cita:', payload);
 
     this.http.post(`${this.API_BASE}/citas`, payload, this.getHeaders()).subscribe({
-      next: () => {
+      next: (res: any) => {
         this.showToast('Cita programada con éxito', 'success');
+        this.registrarAccionAuditoria('CREATE', 'Cita', res?.id || 0, `Veterinario programó una cita para la mascota "${mascotaSeleccionada.name}"`);
         this.cargarCitas();
         this.showAddCitaModal = false;
         this.newCita = { fecha: '', motivo: '', userId: null, petId: null };
@@ -1375,6 +1433,7 @@ export class Veterinario implements OnInit {
     this.http.patch(`${this.API_BASE}/publicaciones/${this.editingPublicacion.id}`, formData, this.getHeaders()).subscribe({
       next: () => {
         this.showToast('Publicación actualizada con éxito', 'success');
+        this.registrarAccionAuditoria('UPDATE', 'Publicacion', this.editingPublicacion.id, `Veterinario actualizó la publicación #${this.editingPublicacion.id}`);
         this.cargarPublicacionesUsuario();
         this.closeEditPublicacionModal();
         this.cdr.detectChanges();
@@ -1412,6 +1471,7 @@ export class Veterinario implements OnInit {
         next: (historia) => {
           this.historiaActual = historia;
           this.consultasActuales = historia.consultas || [];
+          this.consultasCurrentPage = 1;
           this.hcLoading = false;
           this.cdr.detectChanges();
         },
@@ -1427,6 +1487,7 @@ export class Veterinario implements OnInit {
   cerrarHistoria(): void {
     this.historiaActual = null;
     this.consultasActuales = [];
+    this.consultasCurrentPage = 1;
     this.hcSelectedOwnerId = null;
     this.hcSelectedPetId = null;
     this.hcMascotasFiltradas = [];
@@ -1453,6 +1514,7 @@ export class Veterinario implements OnInit {
           Object.assign(this.historiaActual, updated);
           this.hcEditando = false;
           this.showToast('Historia clínica actualizada con éxito', 'success');
+          this.registrarAccionAuditoria('UPDATE', 'HistoriaClinica', this.historiaActual.id, `Veterinario actualizó la historia clínica de la mascota "${this.historiaActual.mascota?.name}"`);
           this.cdr.detectChanges();
         },
         error: (err) => {
@@ -1546,6 +1608,7 @@ export class Veterinario implements OnInit {
               this.actualizarPesoMascota(this.historiaActual.mascotaId, this.nuevaConsulta.peso);
             }
             this.showToast('Consulta actualizada con éxito', 'success');
+            this.registrarAccionAuditoria('UPDATE', 'ConsultaMedica', consulta.id, `Veterinario actualizó la consulta médica #${consulta.id} de la mascota "${this.historiaActual.mascota?.name}"`);
             this.showNuevaConsultaModal = false;
             this.cdr.detectChanges();
           },
@@ -1560,6 +1623,7 @@ export class Veterinario implements OnInit {
               this.actualizarPesoMascota(this.historiaActual.mascotaId, this.nuevaConsulta.peso);
             }
             this.showToast('Consulta creada con éxito', 'success');
+            this.registrarAccionAuditoria('CREATE', 'ConsultaMedica', consulta.id, `Veterinario registró una nueva consulta médica para la mascota "${this.historiaActual.mascota?.name}"`);
             this.showNuevaConsultaModal = false;
             this.cdr.detectChanges();
           },

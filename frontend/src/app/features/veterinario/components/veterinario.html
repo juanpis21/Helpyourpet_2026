@@ -883,11 +883,10 @@
             <p>Aún no hay consultas registradas. Presiona <strong>Nueva Consulta</strong> para comenzar.</p>
           </div>
 
-          <div class="hc-consulta-card" *ngFor="let c of consultasActuales; let i = index">
+          <div class="hc-consulta-card" *ngFor="let c of paginatedConsultas; let i = index">
             <div class="hc-consulta-header">
-              <span class="hc-consulta-num">Consulta #{{ consultasActuales.length - i }}</span>
-              <span class="hc-consulta-date"><i class="fas fa-calendar-alt"></i> {{ c.fechaConsulta | date:'dd/MM/yyyy
-                HH:mm' }}</span>
+              <span class="hc-consulta-num">Consulta #{{ consultasActuales.length - ((consultasCurrentPage - 1) * consultasPageSize + i) }}</span>
+              <span class="hc-consulta-date"><i class="fas fa-calendar-alt"></i> {{ c.fechaConsulta | date:'dd/MM/yyyy HH:mm' }}</span>
               <button class="btn-icon-primary" (click)="editarConsulta(c)" title="Editar consulta"
                 style="background-color: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; border-radius: 10px; width: 38px; height: 38px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 5px rgba(22, 163, 74, 0.1);">
                 <i class="fas fa-edit" style="font-size: 1.1rem;"></i>
@@ -929,6 +928,18 @@
                 </div>
               </div>
             </div>
+          </div>
+
+          <!-- Paginación Consultas Médicas -->
+          <div class="pagination-container" *ngIf="consultasActuales.length > consultasPageSize" style="margin-top: 2rem;">
+            <button class="btn-primary small-btn" (click)="prevConsultasPage()" [disabled]="consultasCurrentPage === 1">
+              <i class="fas fa-chevron-left"></i> Volver
+            </button>
+            <span class="page-info">Página {{ consultasCurrentPage }} de {{ totalConsultasPages }}</span>
+            <button class="btn-primary small-btn" (click)="nextConsultasPage()"
+              [disabled]="consultasCurrentPage === totalConsultasPages">
+              Siguiente <i class="fas fa-chevron-right"></i>
+            </button>
           </div>
         </div>
       </div>
