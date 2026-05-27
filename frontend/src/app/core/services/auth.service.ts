@@ -2,6 +2,7 @@ import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
+import { environment } from '../../../environments/environment';
 
 interface LoginResponse {
   access_token: string;
@@ -40,7 +41,7 @@ interface LoginCredentials {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/auth';
+  private apiUrl = `${environment.apiUrl}/auth`;
   private _authStatus = signal<LoginResponse | null>(null);
   
   public currentUser = computed(() => this._authStatus()?.user);
@@ -75,7 +76,7 @@ export class AuthService {
             try {
               localStorage.setItem('access_token', response.access_token);
               this._authStatus.set(response);
-              console.log('✅ [AuthService] Token guardado después de limpiar storage');
+
             } catch (e2: any) {
               console.warn('⚠️ [AuthService] No se pudo guardar ni el token después de limpiar, usando memoria temporal');
               this._authStatus.set(response);
@@ -106,7 +107,7 @@ export class AuthService {
   }
 
   updateCurrentUser(user: any): void {
-    console.log('[AuthService] Actualizando usuario:', user);
+
     const currentStatus = this._authStatus();
     if (currentStatus) {
       const updated = {
@@ -146,7 +147,7 @@ export class AuthService {
       // Si hay token pero no auth_status (caso de localStorage lleno), recargar desde backend
       const token = this.getToken();
       if (token) {
-        console.log('🔄 [AuthService] Token existe pero no auth_status, recargando usuario...');
+
         this.reloadUser();
       }
     }
@@ -181,7 +182,7 @@ export class AuthService {
               console.warn('⚠️ [AuthService] localStorage lleno, no se pudo guardar estado recargado');
             }
           }
-          console.log('🔄 [AuthService] Usuario recargado desde backend');
+
         }
       }
     } catch (e) {

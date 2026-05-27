@@ -218,8 +218,8 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
     this.usersService.getAllUsers().subscribe({
       next: (users) => {
         this.allUsersTotal = users;
-        this.allUsers = users.filter(user => user.role?.name === 'admin' || user.roleId === 2);
-        this.allVeterinarios = users.filter(user => user.role?.name === 'veterinario' || user.roleId === 3);
+        this.allUsers = users.filter(user => user.role?.name?.toLowerCase() === 'admin');
+        this.allVeterinarios = users.filter(user => user.role?.name?.toLowerCase() === 'veterinario');
         if (this.activeTab === 'dashboard') {
           setTimeout(() => this.initDashboardCharts(), 300);
         }
@@ -267,7 +267,7 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
   }
 
   getUsuariosCount(): number {
-    return this.allUsersTotal.filter(u => u.role?.name === 'usuario' || u.roleId === 4).length;
+    return this.allUsersTotal.filter(u => u.role?.name?.toLowerCase() === 'usuario').length;
   }
 
   getAdminsCount(): number {

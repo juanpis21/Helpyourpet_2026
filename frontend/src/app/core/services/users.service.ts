@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 interface CreateUserDto {
 
@@ -58,7 +59,7 @@ interface User {
   providedIn: 'root'
 })
 export class UsersService {
-  private apiUrl = 'http://localhost:3000/users';
+  private apiUrl = `${environment.apiUrl}/users`;
 
   constructor(private http: HttpClient) { }
 
@@ -99,15 +100,15 @@ export class UsersService {
   }
 
   registerUserByVet(registerDto: any): Observable<any> {
-    return this.http.post<any>(`http://localhost:3000/veterinario/registrar-usuario`, registerDto, { headers: this.getAuthHeaders() });
+    return this.http.post<any>(`${environment.apiUrl}/veterinario/registrar-usuario`, registerDto, { headers: this.getAuthHeaders() });
   }
 
   getUsuariosSinCuenta(): Observable<any[]> {
-    return this.http.get<any[]>(`http://localhost:3000/veterinario/usuarios`, { headers: this.getAuthHeaders() });
+    return this.http.get<any[]>(`${environment.apiUrl}/veterinario/usuarios`, { headers: this.getAuthHeaders() });
   }
 
   getUsersByVeterinaria(): Observable<any[]> {
-    return this.http.get<any[]>(`http://localhost:3000/veterinario/by-veterinaria`, { headers: this.getAuthHeaders() });
+    return this.http.get<any[]>(`${environment.apiUrl}/veterinario/by-veterinaria`, { headers: this.getAuthHeaders() });
   }
 
   deleteUser(id: number): Observable<void> {

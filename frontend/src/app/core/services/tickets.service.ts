@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthService } from './auth.service';
+import { environment } from '../../../environments/environment';
 
 export interface Ticket {
   id: number;
@@ -34,7 +35,7 @@ export interface UpdateTicketDto {
   providedIn: 'root',
 })
 export class TicketsService {
-  private apiUrl = 'http://localhost:3000/tickets';
+  private apiUrl = `${environment.apiUrl}/tickets`;
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 

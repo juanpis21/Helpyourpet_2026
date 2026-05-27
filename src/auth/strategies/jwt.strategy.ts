@@ -17,6 +17,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     console.log('JWT Strategy - Payload recibido:', payload);
     
     const user = { 
+      id: payload.sub, 
       userId: payload.sub, 
       email: payload.email, 
       role: payload.role,  // Cambiado de roles a role

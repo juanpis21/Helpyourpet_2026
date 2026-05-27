@@ -20,7 +20,7 @@ export class AdminGuard implements CanActivate {
       return false;
     }
 
-    if (currentUser.roleId !== 2) {
+    if (currentUser.role?.name !== 'admin') {
       this.router.navigate(['/inicio']);
       return false;
     }

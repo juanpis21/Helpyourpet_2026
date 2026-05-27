@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface Module {
   id: number;
@@ -13,7 +14,7 @@ export interface Module {
   providedIn: 'root'
 })
 export class ModulesService {
-  private apiUrl = 'http://localhost:3000/modules';
+  private apiUrl = `${environment.apiUrl}/modules`;
 
   constructor(private http: HttpClient) { }
 

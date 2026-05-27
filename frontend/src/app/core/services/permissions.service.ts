@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface Permission {
   id: number;
@@ -16,7 +17,7 @@ export interface Permission {
   providedIn: 'root'
 })
 export class PermissionsService {
-  private apiUrl = 'http://localhost:3000/permissions';
+  private apiUrl = `${environment.apiUrl}/permissions`;
   private permissions: Permission[] = [];
 
   constructor(private http: HttpClient) {}

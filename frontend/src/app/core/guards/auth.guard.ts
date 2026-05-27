@@ -23,12 +23,11 @@ export class AuthGuard implements CanActivate {
       return false;
     }
 
-    const requiredRoles = route.data['roles'] as number[];
-    if (requiredRoles && requiredRoles.length > 0) {
-      const userRoleId = currentUser.roleId;
-
-      if (!requiredRoles.includes(userRoleId)) {
-        this.redirectByRole(userRoleId);
+    const requiredRoles = (route.data['roles'] as string[])?.map(r => r.toLowerCase()) || [];
+    if (requiredRoles.length > 0) {
+      const userRoleName = currentUser.role?.name?.toLowerCase();
+      if (!userRoleName || !requiredRoles.includes(userRoleName)) {
+        this.redirectByRole(userRoleName);
         return false;
       }
     }
@@ -36,18 +35,19 @@ export class AuthGuard implements CanActivate {
     return true;
   }
 
-  private redirectByRole(roleId: number): void {
-    switch (roleId) {
-      case 1: // Superadmin
+  private redirectByRole(roleName: string | undefined): void {
+    switch (roleName) {
+      case 'superadmin':
         this.router.navigate(['/super-admin']);
         break;
-      case 2: // Admin
+      case 'admin':
         this.router.navigate(['/panel-admin']);
         break;
-      case 3: // Veterinario
+      case 'veterinario':
         this.router.navigate(['/perfil-veterinario']);
         break;
-      case 4: // Usuario
+      case 'usuario':
+      case 'user':
         this.router.navigate(['/inicio']);
         break;
       default:

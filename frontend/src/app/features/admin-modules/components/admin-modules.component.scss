@@ -508,6 +508,18 @@
   &:hover { background: var(--border-color); }
 }
 
+.btn-outline.small {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  background: transparent;
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: var(--transition);
+  &:hover { background: var(--primary-color); color: white; }
+}
+
 .actions { display: flex; gap: 0.5rem; }
 .btn-icon {
   width: 38px;
@@ -865,7 +877,7 @@
   }
 }
 
-/* ===== PERFIL / CONFIGURACIÓN ===== */
+/* ===== PERFIL / CONFIGURACIÃ“N ===== */
 .profile-settings-layout {
   display: flex;
   gap: 3rem;
@@ -1533,3 +1545,110 @@
   }
 }
 
+/* ===== CONFIG LAYOUT ===== */
+.config-layout { display: flex; gap: 1.5rem; }
+.config-photo { text-align: center; min-width: 160px; border-right: 1px solid var(--border-color); padding-right: 1.5rem; }
+.config-avatar { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #9BC3E8; box-shadow: var(--shadow-sm); margin-bottom: 0.5rem; background-color: #f1f5f9; }
+.photo-hint { font-size: 0.75rem; color: var(--text-secondary); margin: 0.3rem 0; }
+.config-form { flex: 1; padding-left: 0.5rem; }
+.form-actions { margin-top: 1.5rem; text-align: center; }
+
+/* ===== DANGER ZONE ===== */
+.card-danger-alt {
+  background: var(--bg-card);
+  border: 1.5px solid #ffedd5;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.2rem;
+  transition: var(--transition);
+  overflow: hidden;
+
+  &:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .card-header.danger-light {
+    background: linear-gradient(90deg, #f97316 0%, #dc2626 100%) !important;
+    padding: 1.2rem 1.8rem;
+    border-bottom: none;
+
+    h6 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-family: 'Fredoka', sans-serif;
+      font-weight: 700;
+      color: white !important;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+
+      i {
+        color: white !important;
+        opacity: 0.9;
+      }
+    }
+  }
+
+  .card-body.center {
+    padding: 1.2rem;
+    text-align: center;
+    color: var(--text-primary);
+  }
+
+  .config-hint {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+  }
+
+  .danger-action {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+}
+
+.btn-danger-light {
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  background: #fff7ed;
+  border: 1px solid #ffedd5;
+  color: #ea580c;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(234, 88, 12, 0.05);
+
+  &:hover {
+    background: #ffedd5;
+    color: #c2410c;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(234, 88, 12, 0.15);
+  }
+}
+
+:host-context([data-theme="dark"]) {
+  .card-danger-alt {
+    border-color: rgba(249, 115, 22, 0.2);
+    
+    .card-header.danger-light {
+      background: linear-gradient(90deg, #ea580c 0%, #b91c1c 100%) !important;
+    }
+  }
+  
+  .btn-danger-light {
+    background: rgba(249, 115, 22, 0.1);
+    border-color: rgba(249, 115, 22, 0.2);
+    color: #ff9736;
+    
+    &:hover {
+      background: rgba(249, 115, 22, 0.2);
+      color: #ffedd5;
+    }
+  }
+}

@@ -1,5 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef, AfterViewInit } from '@angular/core';
 
+export type AdminSection = 'dashboard' | 'usuarios' | 'veterinarios' | 'veterinarias' | 'servicios' | 'categorias' | 'productos' | 'inventario' | 'tickets' | 'reportes-publicaciones' | 'configuracion';
+
 
 
 declare var Chart: any;
@@ -144,6 +146,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
     // Usar spread para asegurar que Angular detecte el cambio de referencia
 
     this.toasts = [...this.toasts, newToast];
+    this.cdr.detectChanges();
 
 
 
@@ -1498,6 +1501,11 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
     }
 
 
+
+    const rolUsuario = this.roles.find(role => role.name.toLowerCase() === 'usuario');
+    if (rolUsuario) {
+      this.newUser.roleId = rolUsuario.id;
+    }
 
     this.usersService.createUser(this.newUser).subscribe({
 

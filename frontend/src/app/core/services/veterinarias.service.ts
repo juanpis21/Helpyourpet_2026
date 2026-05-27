@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface Veterinaria {
   id: number;
@@ -21,7 +22,7 @@ export interface Veterinaria {
   providedIn: 'root'
 })
 export class VeterinariasService {
-  private apiUrl = 'http://localhost:3000/veterinarias';
+  private apiUrl = `${environment.apiUrl}/veterinarias`;
 
   constructor(private http: HttpClient) {}
 

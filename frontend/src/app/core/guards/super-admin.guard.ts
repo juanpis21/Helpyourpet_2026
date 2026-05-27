@@ -21,7 +21,7 @@ export class SuperAdminGuard implements CanActivate {
     }
 
     // Verificar si es superadmin (roleId: 1)
-    if (currentUser.roleId !== 1) {
+    if (currentUser.role?.name?.toLowerCase() !== 'superadmin') {
       this.router.navigate(['/inicio']); // Redirigir a inicio si no es superadmin
       return false;
     }

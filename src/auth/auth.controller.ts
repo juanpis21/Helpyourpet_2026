@@ -76,7 +76,8 @@ export class AuthController {
   @ApiOperation({ summary: 'Verificar contraseña actual del usuario' })
   @ApiResponse({ status: 200, description: 'Contraseña verificada', type: Boolean })
   @ApiResponse({ status: 401, description: 'Contraseña incorrecta' })
-  async verifyPassword(@Body() verifyPasswordDto: VerifyPasswordDto): Promise<boolean> {
-    return this.authService.verifyPassword(verifyPasswordDto.userId, verifyPasswordDto.password);
+  async verifyPassword(@Body() verifyPasswordDto: VerifyPasswordDto, @Request() req): Promise<boolean> {
+    // Se ignora el userId del body por seguridad para evitar IDOR
+    return this.authService.verifyPassword(req.user.id, verifyPasswordDto.password);
   }
 }
