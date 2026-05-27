@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener, ElementRef, ViewChild, ChangeDetectorRef, Inject, PLATFORM_ID, OnDestroy } from '@angular/core';
+import { Component, OnInit, HostListener, ElementRef, ViewChild, ChangeDetectorRef, NgZone, Inject, PLATFORM_ID, OnDestroy } from '@angular/core';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
@@ -88,7 +88,9 @@ export class Inicio implements OnInit {
     private authService: AuthService,
     private publicacionesService: PublicacionesService,
     private announcementsService: AnnouncementsService,
-    private ticketsService: TicketsService
+    private ticketsService: TicketsService,
+    private cdr: ChangeDetectorRef,
+    private ngZone: NgZone
   ) {}
 
   getRandomPlaceholder(): string {
@@ -255,7 +257,10 @@ export class Inicio implements OnInit {
       this.imagenSeleccionada = file;
       const reader = new FileReader();
       reader.onload = (e: any) => {
-        this.imagenPreview = e.target.result;
+        this.ngZone.run(() => {
+          this.imagenPreview = e.target.result;
+          this.cdr.detectChanges();
+        });
       };
       reader.readAsDataURL(file);
     }
@@ -299,10 +304,12 @@ export class Inicio implements OnInit {
           this.nuevaPublicacion = '';
           this.currentPlaceholder = this.getRandomPlaceholder();
           this.eliminarImagen();
+          this.cdr.detectChanges();
 
           // Remove animation class after animation ends
           setTimeout(() => {
             nuevaPublicacion.justPublished = false;
+            this.cdr.detectChanges();
           }, 800);
         },
         error: (err) => {
@@ -374,9 +381,11 @@ export class Inicio implements OnInit {
             justAdded: true
           };
           publicacion.comentarios.push(nuevoComentario);
+          this.cdr.detectChanges();
 
           setTimeout(() => {
             nuevoComentario.justAdded = false;
+            this.cdr.detectChanges();
           }, 600);
         },
         error: (err) => {
