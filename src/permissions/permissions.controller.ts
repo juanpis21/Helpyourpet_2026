@@ -3,6 +3,8 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { PermissionsService } from './permissions.service';
 import { Permission, ModuleName } from './entities/permission.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @ApiTags('permissions')
 @Controller('permissions')
@@ -12,6 +14,8 @@ export class PermissionsController {
   constructor(private readonly permissionsService: PermissionsService) {}
 
   @Get('user/:userId')
+  @UseGuards(RolesGuard)
+  @Roles('superadmin', 'admin')
   @ApiOperation({ summary: 'Obtener permisos de un usuario' })
   async getUserPermissions(@Param('userId') userId: string): Promise<Permission[]> {
     return this.permissionsService.findByUserId(+userId);
@@ -31,12 +35,16 @@ export class PermissionsController {
   }
 
   @Post('default/:userId')
+  @UseGuards(RolesGuard)
+  @Roles('superadmin', 'admin')
   @ApiOperation({ summary: 'Crear permisos por defecto para un usuario' })
   async createDefaultPermissions(@Param('userId') userId: string): Promise<Permission[]> {
     return this.permissionsService.createDefaultPermissions(+userId);
   }
 
   @Put('update/:userId/:moduleName')
+  @UseGuards(RolesGuard)
+  @Roles('superadmin', 'admin')
   @ApiOperation({ summary: 'Actualizar permiso de un módulo' })
   async updatePermission(
     @Param('userId') userId: string,
@@ -47,6 +55,8 @@ export class PermissionsController {
   }
 
   @Post('grant/:userId')
+  @UseGuards(RolesGuard)
+  @Roles('superadmin', 'admin')
   @ApiOperation({ summary: 'Otorgar acceso a módulos' })
   async grantModuleAccess(
     @Param('userId') userId: string,
@@ -56,6 +66,8 @@ export class PermissionsController {
   }
 
   @Post('revoke/:userId')
+  @UseGuards(RolesGuard)
+  @Roles('superadmin', 'admin')
   @ApiOperation({ summary: 'Revocar acceso a módulos' })
   async revokeModuleAccess(
     @Param('userId') userId: string,

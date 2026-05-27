@@ -12,7 +12,9 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFile,
-  BadRequestException
+  BadRequestException,
+  Request,
+  ForbiddenException
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { UsersService } from './users.service';
@@ -21,6 +23,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Public } from '../auth/decorators/public.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
@@ -42,6 +46,8 @@ export class UsersController {
   }
 
   @Get()
+  @UseGuards(RolesGuard)
+  @Roles('superadmin', 'admin')
   @ApiOperation({ summary: 'Obtener todos los usuarios' })
   @ApiResponse({ status: 200, description: 'Lista de usuarios', type: [User] })
   findAll() {
@@ -49,6 +55,8 @@ export class UsersController {
   }
 
   @Get('by-roles')
+  @UseGuards(RolesGuard)
+  @Roles('superadmin', 'admin', 'veterinario')
   @ApiOperation({ summary: 'Obtener usuarios filtrados por roles' })
   @ApiResponse({ status: 200, description: 'Lista de usuarios filtrados por rol', type: [User] })
   findByRoles(@Query('roles') roles: string) {
@@ -61,7 +69,13 @@ export class UsersController {
   @ApiParam({ name: 'id', description: 'ID del usuario' })
   @ApiResponse({ status: 200, description: 'Usuario encontrado', type: User })
   @ApiResponse({ status: 404, description: 'Usuario no encontrado' })
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string, @Request() req: any) {
+    const user = req.user;
+    const isOwner = user.userId === +id || user.id === +id;
+    const isAdmin = user.role?.name === 'admin' || user.role?.name === 'superadmin' || user.role === 'admin' || user.role === 'superadmin';
+    if (!isOwner && !isAdmin) {
+      throw new ForbiddenException('No tienes permiso para acceder a este recurso.');
+    }
     return this.usersService.findOne(+id);
   }
 
@@ -106,7 +120,13 @@ export class UsersController {
     },
     limits: { fileSize: 5 * 1024 * 1024 },
   }))
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @UploadedFile() file?: Express.Multer.File) {
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @Request() req: any, @UploadedFile() file?: Express.Multer.File) {
+    const user = req.user;
+    const isOwner = user.userId === +id || user.id === +id;
+    const isAdmin = user.role?.name === 'admin' || user.role?.name === 'superadmin' || user.role === 'admin' || user.role === 'superadmin';
+    if (!isOwner && !isAdmin) {
+      throw new ForbiddenException('No tienes permiso para modificar este recurso.');
+    }
     if (file) {
       updateUserDto.avatar = `/uploads/profiles/${file.filename}`;
     }
@@ -114,6 +134,8 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @UseGuards(RolesGuard)
+  @Roles('superadmin', 'admin')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Desactivar un usuario (soft delete)' })
   @ApiParam({ name: 'id', description: 'ID del usuario' })

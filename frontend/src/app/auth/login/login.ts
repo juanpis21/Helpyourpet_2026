@@ -51,14 +51,12 @@ export class Login {
     this.errorMessage = '';
 
     this.authService.login(this.credentials).subscribe({
-      next: (response) => {
-        console.log('Login successful:', response);
+      next: () => {
         this.isLoading = false;
         this.redirectByPermissions();
       },
       error: (error) => {
-        this.isLoading = false; // Liberar inmediatamente para evitar que se quede pegado
-        console.error('Login error full details:', error);
+        this.isLoading = false;
         
         let title = 'Error';
         let text = 'Ocurrió un error inesperado.';
@@ -99,20 +97,13 @@ export class Login {
     const userModules = this.authService.userModules();
     const user = this.authService.getCurrentUser();
     
-    // Extraer ID y Nombre del rol de forma robusta
-    const roleId = Number(user?.roleId || user?.role?.id);
+    // Extraer Nombre del rol de forma robusta
     const roleName = user?.role?.name?.toLowerCase().trim() || '';
     
-    console.log('DEBUG REDIRECT:', { 
-      roleId, 
-      roleName, 
-      modules: userModules,
-      hasDashboard: userModules.includes('dashboard'),
-      hasAdmin: userModules.includes('admin')
-    });
+
 
     // 1. SuperAdministrador
-    if (roleId === 1 || roleName === 'superadmin' || roleName === 'super-admin') {
+    if (roleName === 'superadmin' || roleName === 'super-admin') {
       this.router.navigate(['/super-admin']);
       return;
     }
@@ -121,13 +112,13 @@ export class Login {
     const hasAdminModules = userModules.includes('admin') || 
                             userModules.includes('dashboard');
                             
-    if (roleId === 2 || roleName === 'admin' || roleName === 'administrador' || hasAdminModules) {
+    if (roleName === 'admin' || roleName === 'administrador' || hasAdminModules) {
       this.router.navigate(['/admin']);
       return;
     }
 
     // 3. Usuarios estándar / Veterinarios / Otros con acceso a inicio
-    if (userModules.includes('inicio') || roleId === 3 || roleId === 4) {
+    if (userModules.includes('inicio') || roleName === 'veterinario' || roleName === 'usuario') {
       this.router.navigate(['/inicio']);
       return;
     }

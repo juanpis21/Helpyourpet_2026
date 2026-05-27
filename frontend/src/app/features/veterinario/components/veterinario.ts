@@ -49,6 +49,7 @@ interface Usuario {
   direccion: string;
   imagen: string;
   roleId?: number;
+  role?: { id: number; name: string; description: string };
   // Perfil Profesional (Veterinario)
   especialidad?: string;
   matricula?: string;
@@ -410,11 +411,12 @@ export class Veterinario implements OnInit {
         tipoDocumento: currentUser.documentType || '',
         numDocumento: currentUser.documentNumber || '',
         imagen: avatar && avatar.startsWith('/uploads/') ? `http://localhost:3000${avatar}` : avatar,
-        roleId: currentUser.roleId
+        roleId: currentUser.roleId,
+        role: currentUser.role
       };
 
       // Si es veterinario, cargar su perfil profesional
-      if (currentUser.roleId === 3) {
+      if (currentUser.role?.name?.toLowerCase() === 'veterinario') {
         this.http.get<any[]>(`${this.API_BASE}/perfiles-veterinarios/usuario/${currentUser.id}`, this.getHeaders())
           .subscribe({
             next: (perfiles) => {
@@ -944,13 +946,7 @@ export class Veterinario implements OnInit {
   }
 
   getRoleName(): string {
-    const roleMap: { [key: number]: string } = {
-      1: 'Administrador',
-      2: 'Super Administrador',
-      3: 'Veterinario',
-      4: 'Usuario'
-    };
-    return roleMap[this.usuario.roleId || 3] || 'Veterinario';
+    return this.usuario.role?.name || 'Veterinario';
   }
 
   private getHeaders() {

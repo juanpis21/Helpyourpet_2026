@@ -21,7 +21,10 @@ export class TokenRecuperacionService {
   async solicitarRecuperacion(dto: SolicitarRecuperacionDto): Promise<{ mensaje: string }> {
     const usuario = await this.usersService.findByEmail(dto.email);
     if (!usuario) {
-      throw new NotFoundException(`El correo electrónico ${dto.email} no está registrado en la base de datos.`);
+      // Retornamos el mismo mensaje de éxito por seguridad (evita enumeración de usuarios)
+      return {
+        mensaje: 'Recuperación inicializada con éxito. Revisa tu correo electrónico para continuar.'
+      };
     }
 
     await this.tokenRepository.delete({ usuarioId: usuario.id });

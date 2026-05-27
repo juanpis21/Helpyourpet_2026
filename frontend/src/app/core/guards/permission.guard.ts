@@ -13,12 +13,11 @@ export const permissionGuard: CanActivateFn = (route, state) => {
 
   const requiredModule = (route.data['module'] as string) || '';
   const user = authService.getCurrentUser();
-  const roleId = Number(user?.roleId || user?.role?.id);
   const roleName = user?.role?.name?.toLowerCase().trim() || '';
   const userModules = authService.userModules();
 
   const isDashboardAccess = requiredModule.toLowerCase() === 'dashboard';
-  const isAdmin = roleId === 2 || roleName === 'admin';
+  const isAdmin = roleName === 'admin';
   const hasAccess = userModules.includes(requiredModule.toLowerCase());
 
   if (hasAccess || (isDashboardAccess && isAdmin) || roleName === 'superadmin') {

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface Pet {
   id: number;
@@ -21,7 +22,7 @@ export interface Pet {
   providedIn: 'root'
 })
 export class PetsService {
-  private apiUrl = 'http://localhost:3000/pets';
+  private apiUrl = `${environment.apiUrl}/pets`;
 
   constructor(private http: HttpClient) { }
 

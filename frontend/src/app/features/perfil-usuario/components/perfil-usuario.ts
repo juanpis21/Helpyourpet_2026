@@ -43,6 +43,7 @@ interface Usuario {
   direccion: string;
   imagen: string;
   roleId?: number;
+  role?: { id: number; name: string; description: string };
 }
 
 interface HistorialClinico {
@@ -325,7 +326,8 @@ export class PerfilUsuario implements OnInit {
           tipoDocumento: currentUser.documentType || '',
           numDocumento: currentUser.documentNumber || '',
           imagen: avatar && avatar.startsWith('/uploads/') ? `http://localhost:3000${avatar}` : avatar,
-          roleId: currentUser.roleId
+          roleId: currentUser.roleId,
+          role: currentUser.role
         };
       }
       resolve();
@@ -538,13 +540,7 @@ export class PerfilUsuario implements OnInit {
   }
 
   getRoleName(): string {
-    const roleMap: { [key: number]: string } = {
-      1: 'Administrador',
-      2: 'Super Administrador',
-      3: 'Veterinario',
-      4: 'Usuario'
-    };
-    return roleMap[this.usuario.roleId || 4] || 'Usuario';
+    return this.usuario.role?.name || 'Usuario';
   }
 
   cerrarSesion(): void {

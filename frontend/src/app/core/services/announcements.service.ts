@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
 import { AuthService } from './auth.service';
@@ -31,7 +32,7 @@ export interface UpdateAnnouncementDto {
   providedIn: 'root',
 })
 export class AnnouncementsService {
-  private apiUrl = 'http://localhost:3000/announcements';
+  private apiUrl = `${environment.apiUrl}/announcements`;
 
   newAnnouncement$ = new Subject<Announcement>();
 

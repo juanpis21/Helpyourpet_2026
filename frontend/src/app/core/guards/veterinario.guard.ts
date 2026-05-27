@@ -21,7 +21,7 @@ export class VeterinarioGuard implements CanActivate {
     }
 
     // Verificar si es veterinario (roleId = 3)
-    if (currentUser.roleId !== 3) {
+    if (currentUser.role?.name?.toLowerCase() !== 'veterinario') {
       this.router.navigate(['/inicio']); // Redirigir a inicio si no es veterinario
       return false;
     }

@@ -37,10 +37,10 @@ export class Navbar implements OnInit {
   private loadUser(): void {
     const user = this.authService.getCurrentUser();
     if (user) {
-      const isVet = Number(user.roleId || user.role?.id) === 3;
+      const isVet = user.role?.name?.toLowerCase() === 'veterinario';
       this.usuarioLogueado = {
         id: user.id,
-        roleId: Number(user.roleId || user.role?.id),
+        roleName: user.role?.name,
         nombre: isVet 
           ? (user.fullName || (user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Usuario'))
           : (user.fullName || 'Usuario'),
@@ -100,7 +100,7 @@ export class Navbar implements OnInit {
   }
 
   get isVeterinario(): boolean {
-    return this.usuarioLogueado?.roleId === 3;
+    return this.usuarioLogueado?.roleName?.toLowerCase() === 'veterinario';
   }
 
   irAInicio() {
