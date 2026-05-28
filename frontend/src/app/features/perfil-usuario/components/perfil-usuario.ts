@@ -69,10 +69,39 @@ export class PerfilUsuario implements OnInit {
   sidebarAbierto = true;
   darkMode = false;
   activePubMenuId: number | null = null;
+  tabPublicacionesActiva = 'propias';
 
   togglePubMenu(id: number, event: Event): void {
     event.stopPropagation();
     this.activePubMenuId = this.activePubMenuId === id ? null : id;
+  }
+
+  setTabPublicaciones(tab: string): void {
+    this.tabPublicacionesActiva = tab;
+    this.pagePublicaciones = 1;
+  }
+
+  getPublicacionesPropias(): any[] {
+    return this.publicaciones.filter(p => !p.sharedFromId && !p.sharedFrom);
+  }
+
+  getPublicacionesCompartidas(): any[] {
+    return this.publicaciones.filter(p => p.sharedFromId || p.sharedFrom);
+  }
+
+  getPublicacionesPropiasCount(): number {
+    return this.getPublicacionesPropias().length;
+  }
+
+  getPublicacionesCompartidasCount(): number {
+    return this.getPublicacionesCompartidas().length;
+  }
+
+  getPublicacionesFiltradas(): any[] {
+    if (this.tabPublicacionesActiva === 'compartidas') {
+      return this.getPublicacionesCompartidas();
+    }
+    return this.getPublicacionesPropias();
   }
 
 
@@ -389,12 +418,22 @@ export class PerfilUsuario implements OnInit {
       if (currentUser && currentUser.id) {
         this.publicacionesService.getPublicacionesPorAutor(currentUser.id).subscribe({
           next: (publicaciones) => {
-            this.publicaciones = publicaciones.map(pub => ({
-              ...pub,
-              imagen: pub.imagen && pub.imagen.startsWith('/uploads/') ? `http://localhost:3000${pub.imagen}` : pub.imagen,
-              likes: pub.likesUserIds ? pub.likesUserIds.length : 0,
-              comentariosCount: pub.comentarios ? pub.comentarios.length : 0
-            }));
+            this.publicaciones = publicaciones.map(pub => {
+              return {
+                ...pub,
+                imagen: pub.imagen && pub.imagen.startsWith('/uploads/') ? `http://localhost:3000${pub.imagen}` : pub.imagen,
+                likes: pub.likesUserIds ? pub.likesUserIds.length : 0,
+                comentariosCount: pub.comentarios ? pub.comentarios.length : 0,
+                sharedFrom: pub.sharedFrom ? {
+                  ...pub.sharedFrom,
+                  imagen: pub.sharedFrom.imagen && pub.sharedFrom.imagen.startsWith('/uploads/') ? `http://localhost:3000${pub.sharedFrom.imagen}` : pub.sharedFrom.imagen,
+                  autor: pub.sharedFrom.autor ? {
+                    ...pub.sharedFrom.autor,
+                    avatar: pub.sharedFrom.autor.avatar && pub.sharedFrom.autor.avatar.startsWith('/uploads/') ? `http://localhost:3000${pub.sharedFrom.autor.avatar}` : pub.sharedFrom.autor.avatar
+                  } : undefined
+                } : undefined
+              };
+            });
             console.log('✅ Publicaciones del usuario cargadas:', publicaciones.length);
           },
           error: (err) => {
@@ -1220,16 +1259,18 @@ export class PerfilUsuario implements OnInit {
 
   // Publicaciones
   getPaginatedPublicaciones(): any[] {
+    const list = this.getPublicacionesFiltradas();
     const maxPages = this.getTotalPagesPublicaciones();
     if (this.pagePublicaciones > maxPages && maxPages > 0) {
       this.pagePublicaciones = maxPages;
     }
     const startIndex = (this.pagePublicaciones - 1) * this.limitPublicaciones;
-    return this.publicaciones.slice(startIndex, startIndex + this.limitPublicaciones);
+    return list.slice(startIndex, startIndex + this.limitPublicaciones);
   }
 
   getTotalPagesPublicaciones(): number {
-    return Math.ceil(this.publicaciones.length / this.limitPublicaciones);
+    const list = this.getPublicacionesFiltradas();
+    return Math.ceil(list.length / this.limitPublicaciones);
   }
 
   nextPagePublicaciones(): void {
@@ -1446,13 +1487,22 @@ export class PerfilUsuario implements OnInit {
       });
     });
 
-    // 2. Nuevas publicaciones
+    // 2. Nuevas publicaciones y compartidos
     this.publicaciones.forEach(pub => {
-      list.push({
-        fecha: pub.createdAt ? new Date(pub.createdAt) : new Date(),
-        accion: 'Nueva publicación',
-        descripcion: `Publicaste: "${pub.descripcion.substring(0, 60)}${pub.descripcion.length > 60 ? '...' : ''}"`
-      });
+      const isShare = pub.sharedFromId || pub.sharedFrom;
+      if (isShare) {
+        list.push({
+          fecha: pub.createdAt ? new Date(pub.createdAt) : new Date(),
+          accion: 'Publicación compartida',
+          descripcion: `Compartiste la publicación de ${pub.sharedFrom?.autor?.fullName || 'Usuario'}`
+        });
+      } else {
+        list.push({
+          fecha: pub.createdAt ? new Date(pub.createdAt) : new Date(),
+          accion: 'Nueva publicación',
+          descripcion: `Publicaste: "${pub.descripcion.substring(0, 60)}${pub.descripcion.length > 60 ? '...' : ''}"`
+        });
+      }
     });
 
     // 3. Comentarios realizados
@@ -1486,12 +1536,6 @@ export class PerfilUsuario implements OnInit {
               fecha: date,
               accion: 'Actualización de perfil',
               descripcion: log.description || 'Actualizaste la información de tu perfil'
-            });
-          } else if (log.action === 'LOGIN') {
-            list.push({
-              fecha: date,
-              accion: 'Inicio de sesión',
-              descripcion: 'Iniciaste sesión en la plataforma'
             });
           }
         });

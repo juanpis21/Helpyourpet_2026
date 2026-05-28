@@ -134,6 +134,7 @@ export class Recovery implements OnInit {
             confirmButtonColor: '#272c8b',
             confirmButtonText: 'Entendido'
           });
+          setTimeout(() => this.router.navigate(['/login']), 3000);
         },
         error: (error) => {
           this.message = 'Error: ' + (error.error?.message || 'No se pudo procesar la solicitud.');

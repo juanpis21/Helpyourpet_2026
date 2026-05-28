@@ -162,4 +162,12 @@ export class PublicacionesController {
     const { userId } = req.user;
     return await this.publicacionesService.agregarComentario(+id, userId, contenido);
   }
+
+  @Post(':id/compartir')
+  @ApiOperation({ summary: 'Compartir una publicación' })
+  @ApiResponse({ status: 201, description: 'Publicación compartida exitosamente', type: Publicacion })
+  async compartir(@Param('id') id: string, @Request() req) {
+    const { userId } = req.user;
+    return await this.publicacionesService.compartir(+id, userId);
+  }
 }

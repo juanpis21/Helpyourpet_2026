@@ -1719,3 +1719,107 @@
     font-size: 0.85rem;
   }
 }
+
+/* ===== SHARED PUBLICATION CARD (FACEBOOK STYLE) ===== */
+.shared-pub-card {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  margin-top: 0.8rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.02);
+  transition: var(--transition);
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: var(--primary-color);
+  }
+}
+
+:host-context(body.dark-mode) .shared-pub-card {
+  background: rgba(255, 255, 255, 0.03);
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+.shared-pub-header {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 0.8rem;
+}
+
+.shared-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--primary-color);
+}
+
+.shared-info-usuario {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.shared-nombre-usuario {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin: 0;
+  font-family: 'Fira Sans', sans-serif;
+}
+
+.shared-tiempo-publicacion {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.shared-pub-body {
+  margin-top: 0.5rem;
+}
+
+.shared-texto-publicacion {
+  font-size: 0.95rem;
+  color: var(--text-color);
+  line-height: 1.5;
+  margin-bottom: 0.8rem;
+  white-space: pre-wrap;
+}
+
+.shared-imagen-contenedor {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.shared-publicacion-imagen {
+  width: 100%;
+  border-radius: 8px;
+  max-height: 400px;
+  object-fit: contain;
+  background: var(--hover-bg, rgba(0, 0, 0, 0.03));
+  transition: transform 0.3s ease;
+  box-shadow: var(--shadow-sm);
+  display: block;
+
+  &:hover {
+    transform: scale(1.01);
+  }
+}
+
+.accion-compartido {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  margin-left: 0.4rem;
+}
+
+
+
+
+
+
+
+
+

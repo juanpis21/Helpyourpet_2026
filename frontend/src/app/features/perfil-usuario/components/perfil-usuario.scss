@@ -384,6 +384,7 @@
   color: var(--text-primary);
 
   &.center {
+    margin-top: 40px;
     text-align: center;
   }
 }
@@ -1021,7 +1022,8 @@
 
 .form-actions {
   margin-top: 1rem;
-  text-align: center;
+  justify-content: center;
+  display: flex;
 }
 
 .config-bottom-row {
@@ -1471,6 +1473,7 @@ textarea {
     }
 
     .form-group {
+
       input,
       select,
       textarea {
@@ -1527,7 +1530,7 @@ textarea {
     justify-content: center;
     width: 100%;
     max-width: 100%;
-    
+
     .square-img {
       width: 200px;
       height: 200px;
@@ -1566,7 +1569,7 @@ textarea {
   flex-direction: column;
   align-items: center;
   margin-bottom: 1.5rem;
-  
+
   .pub-image-preview {
     width: 300px;
     height: 180px;
@@ -1588,8 +1591,15 @@ textarea {
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
-    i { margin-right: 0.5rem; }
-    &:hover { background: var(--secondary-color); transform: scale(1.05); }
+
+    i {
+      margin-right: 0.5rem;
+    }
+
+    &:hover {
+      background: var(--secondary-color);
+      transform: scale(1.05);
+    }
   }
 }
 
@@ -1644,21 +1654,21 @@ textarea {
   }
 
   .publicacion-image {
-  width: 150px;
-  height: 150px;
-  overflow: hidden;
-  margin: 0 auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    width: 150px;
+    height: 150px;
+    overflow: hidden;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-  .pub-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 8px;
+    .pub-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 8px;
+    }
   }
-}
 
   .publicacion-content {
     padding: 1rem;
@@ -2714,14 +2724,14 @@ textarea {
 }
 
 .btn-premium-tienda {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  background: linear-gradient(135deg, #be491a 0%, #d6b601 100%) !important;
   color: white !important;
-  padding: 0.8rem 1.6rem !important;
+  padding: 0.2rem 1.6rem !important;
   font-size: 0.95rem !important;
   font-weight: 700 !important;
   border-radius: 50px !important;
   border: none !important;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25) !important;
+  box-shadow: 0 4px 15px rgba(246, 78, 1, 0.427) !important;
   cursor: pointer !important;
   transition: all 0.3s ease !important;
   display: inline-flex !important;
@@ -2732,8 +2742,8 @@ textarea {
 
   &:hover {
     transform: translateY(-2px) !important;
-    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4) !important;
-    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+    box-shadow: 0 6px 18px rgba(150, 4, 4, 0.838) !important;
+    background: linear-gradient(15deg, #c9cc07 0%, #c04c22 100%) !important;
   }
 
   &:active {
@@ -2865,5 +2875,146 @@ textarea {
       background: #dc2626;
       border-color: #dc2626;
     }
+  }
+}
+
+/* ===== TABS SUPERIORES PERFIL ===== */
+.profile-pub-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid var(--border-color);
+  margin-bottom: 2rem;
+  padding-bottom: 2px;
+}
+
+.pub-tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 0.75rem 1.25rem;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: var(--transition);
+  border-radius: 8px 8px 0 0;
+
+  i {
+    font-size: 1.1rem;
+    transition: var(--transition);
+  }
+
+  &:hover {
+    color: var(--primary-color);
+    background: rgba(0, 0, 0, 0.02);
+
+    i {
+      transform: translateY(-1px);
+    }
+  }
+
+  &.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+    background: var(--card-header-bg);
+  }
+}
+
+:host-context([data-theme="dark"]) {
+  .pub-tab-btn:hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
+}
+
+/* ===== SHARED CARD IN PROFILE ===== */
+.shared-pub-card {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  margin-top: 0.8rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.02);
+  transition: var(--transition);
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: var(--primary-color);
+  }
+}
+
+:host-context([data-theme="dark"]) .shared-pub-card {
+  background: rgba(255, 255, 255, 0.03);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+.shared-pub-header {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 0.8rem;
+}
+
+.shared-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--primary-color);
+}
+
+.shared-info-usuario {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.shared-nombre-usuario {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  font-family: 'Fira Sans', sans-serif;
+}
+
+.shared-tiempo-publicacion {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.shared-pub-body {
+  margin-top: 0.5rem;
+}
+
+.shared-texto-publicacion {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+  margin-bottom: 0.8rem;
+  white-space: pre-wrap;
+}
+
+.shared-imagen-contenedor {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.shared-publicacion-imagen {
+  width: 100%;
+  border-radius: 8px;
+  max-height: 300px;
+  object-fit: contain;
+  background: var(--hover-bg, rgba(0, 0, 0, 0.03));
+  transition: transform 0.3s ease;
+  box-shadow: var(--shadow-sm);
+  display: block;
+
+  &:hover {
+    transform: scale(1.01);
   }
 }

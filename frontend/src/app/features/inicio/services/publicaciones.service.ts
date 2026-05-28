@@ -94,4 +94,11 @@ export class PublicacionesService {
       headers: this.getAuthHeaders()
     });
   }
+
+  // Compartir una publicación
+  compartirPublicacion(id: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${id}/compartir`, {}, {
+      headers: this.getAuthHeaders()
+    });
+  }
 }
