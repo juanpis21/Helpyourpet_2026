@@ -14,7 +14,7 @@ export class CreateCitaDto {
     example: 'Control general y vacunación' 
   })
   @IsString()
-  @MinLength(5)
+  @MinLength(1)
   @MaxLength(500)
   motivo: string;
 
@@ -57,6 +57,24 @@ export class CreateCitaDto {
   })
   @IsNumber()
   mascotaId: number;
+
+  @ApiProperty({ 
+    description: 'ID del servicio de la cita', 
+    example: 1,
+    required: false
+  })
+  @IsOptional()
+  @IsNumber()
+  servicioId?: number;
+
+  @ApiProperty({ 
+    description: 'ID de la veterinaria asociada a la cita', 
+    example: 1,
+    required: false
+  })
+  @IsOptional()
+  @IsNumber()
+  veterinariaId?: number;
 
   @ApiProperty({ 
     description: 'Indica si la cita está activa en el sistema', 

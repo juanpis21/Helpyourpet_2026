@@ -2107,6 +2107,22 @@
 
         </div>
 
+        <div class="form-group">
+
+          <label>Duración (min) *</label>
+
+          <input type="number" [(ngModel)]="newService.duracionMinutos">
+
+        </div>
+
+        <div class="form-group">
+
+          <label>Tiempo Colchón (min) *</label>
+
+          <input type="number" [(ngModel)]="newService.tiempoColchonMinutos" min="0">
+
+        </div>
+
         <div class="form-group full">
 
           <label>Veterinaria *</label>
@@ -2218,6 +2234,22 @@
           <label>Precio *</label>
 
           <input type="number" [(ngModel)]="editingService.precioBase">
+
+        </div>
+
+        <div class="form-group">
+
+          <label>Duración (min) *</label>
+
+          <input type="number" [(ngModel)]="editingService.duracionMinutos">
+
+        </div>
+
+        <div class="form-group">
+
+          <label>Tiempo Colchón (min) *</label>
+
+          <input type="number" [(ngModel)]="editingService.tiempoColchonMinutos" min="0">
 
         </div>
 
@@ -3433,6 +3465,22 @@
 
         </div>
 
+        <div class="form-group">
+
+          <label><i class="fas fa-clock"></i> Hora de Inicio *</label>
+
+          <input type="time" [(ngModel)]="newVeterinario.horaInicio">
+
+        </div>
+
+        <div class="form-group">
+
+          <label><i class="fas fa-clock"></i> Hora de Fin *</label>
+
+          <input type="time" [(ngModel)]="newVeterinario.horaFin">
+
+        </div>
+
       </div>
 
     </div>
@@ -3600,6 +3648,22 @@
             <option *ngFor="let vet of veterinarias" [ngValue]="vet.id">{{ vet.nombre }}</option>
 
           </select>
+
+        </div>
+
+        <div class="form-group">
+
+          <label><i class="fas fa-clock"></i> Hora de Inicio *</label>
+
+          <input type="time" [(ngModel)]="editingVeterinario.horaInicio">
+
+        </div>
+
+        <div class="form-group">
+
+          <label><i class="fas fa-clock"></i> Hora de Fin *</label>
+
+          <input type="time" [(ngModel)]="editingVeterinario.horaFin">
 
         </div>
 

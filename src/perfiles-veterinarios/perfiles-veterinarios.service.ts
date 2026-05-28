@@ -180,6 +180,12 @@ export class PerfilesVeterinariosService {
     if (updatePerfilVeterinarioDto.biografia !== undefined) {
       perfilVeterinario.biografia = updatePerfilVeterinarioDto.biografia;
     }
+    if (updatePerfilVeterinarioDto.horaInicio !== undefined) {
+      perfilVeterinario.horaInicio = updatePerfilVeterinarioDto.horaInicio;
+    }
+    if (updatePerfilVeterinarioDto.horaFin !== undefined) {
+      perfilVeterinario.horaFin = updatePerfilVeterinarioDto.horaFin;
+    }
     if (updatePerfilVeterinarioDto.isActive !== undefined) {
       perfilVeterinario.isActive = updatePerfilVeterinarioDto.isActive;
     }

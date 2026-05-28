@@ -8,9 +8,11 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
-  UseGuards
+  UseGuards,
+  Query,
+  BadRequestException
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { CitasService } from './citas.service';
 import { CreateCitaDto } from './dto/create-cita.dto';
 import { UpdateCitaDto } from './dto/update-cita.dto';
@@ -39,6 +41,23 @@ export class CitasController {
   @ApiResponse({ status: 200, description: 'Lista de citas', type: [Cita] })
   findAll() {
     return this.citasService.findAll();
+  }
+
+  @Get('horarios-disponibles')
+  @ApiOperation({ summary: 'Obtener horarios disponibles para una fecha y veterinario' })
+  @ApiQuery({ name: 'veterinarioId', required: true, description: 'ID del veterinario' })
+  @ApiQuery({ name: 'fecha', required: true, description: 'Fecha en formato YYYY-MM-DD' })
+  @ApiQuery({ name: 'servicioId', required: false, description: 'ID del servicio (para duración)' })
+  @ApiResponse({ status: 200, description: 'Lista de horas disponibles' })
+  getHorariosDisponibles(
+    @Query('veterinarioId') veterinarioId: string,
+    @Query('fecha') fecha: string,
+    @Query('servicioId') servicioId?: string
+  ) {
+    if (!veterinarioId || !fecha) {
+      throw new BadRequestException('Se requieren veterinarioId y fecha');
+    }
+    return this.citasService.getHorariosDisponibles(+veterinarioId, fecha, servicioId ? +servicioId : undefined);
   }
 
   @Get('usuario/:usuarioId')

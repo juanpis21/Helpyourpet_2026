@@ -366,6 +366,8 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
     duracionMinutos: 30,
 
+    tiempoColchonMinutos: 15,
+
     requiereCita: true,
 
     descripcion: '',
@@ -1635,6 +1637,8 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
       duracionMinutos: 30,
 
+      tiempoColchonMinutos: 15,
+
       requiereCita: true,
 
       descripcion: '',
@@ -1693,9 +1697,25 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
   guardarServicio(): void {
 
-    if (!this.newService.nombre || !this.newService.tipoServicio || this.newService.precioBase === undefined || !this.newService.veterinariaId) {
+    if (!this.newService.nombre || !this.newService.tipoServicio || this.newService.precioBase === undefined || !this.newService.duracionMinutos || !this.newService.veterinariaId) {
 
       this.showToast('Por favor, completa los campos obligatorios y selecciona una veterinaria');
+
+      return;
+
+    }
+
+    if (this.newService.tiempoColchonMinutos === undefined || this.newService.tiempoColchonMinutos === null || String(this.newService.tiempoColchonMinutos).trim() === '') {
+
+      this.showToast('Por favor, completa el tiempo colchón');
+
+      return;
+
+    }
+
+    if (Number(this.newService.tiempoColchonMinutos) < 0) {
+
+      this.showToast('El tiempo colchón no puede ser negativo');
 
       return;
 
@@ -1712,6 +1732,8 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
     formData.append('precioBase', String(this.newService.precioBase || 0));
 
     formData.append('duracionMinutos', String(this.newService.duracionMinutos || 30));
+
+    formData.append('tiempoColchonMinutos', String(this.newService.tiempoColchonMinutos));
 
     formData.append('descripcion', this.newService.descripcion || '');
 
@@ -1777,6 +1799,22 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
     if (!this.editingService.id) return;
 
+    if (this.editingService.tiempoColchonMinutos === undefined || this.editingService.tiempoColchonMinutos === null || String(this.editingService.tiempoColchonMinutos).trim() === '') {
+
+      this.showToast('Por favor, completa el tiempo colchón');
+
+      return;
+
+    }
+
+    if (Number(this.editingService.tiempoColchonMinutos) < 0) {
+
+      this.showToast('El tiempo colchón no puede ser negativo');
+
+      return;
+
+    }
+
 
 
     const formData = new FormData();
@@ -1788,6 +1826,8 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
     formData.append('precioBase', String(this.editingService.precioBase || 0));
 
     formData.append('duracionMinutos', String(this.editingService.duracionMinutos || 30));
+
+    formData.append('tiempoColchonMinutos', String(this.editingService.tiempoColchonMinutos));
 
     formData.append('tipoServicio', this.editingService.tipoServicio || '');
 
@@ -2918,6 +2958,10 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
       biografia: '',
 
+      horaInicio: '',
+
+      horaFin: '',
+
       veterinariaPrincipalId: 0,
 
       roleId: 0
@@ -2934,8 +2978,13 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
     // Validar campos obligatorios
     if (!this.newVeterinario.email || !this.newVeterinario.password ||
       !this.newVeterinario.firstName || !this.newVeterinario.lastName || !this.newVeterinario.especialidad ||
-      !this.newVeterinario.matricula) {
+      !this.newVeterinario.matricula || !this.newVeterinario.horaInicio || !this.newVeterinario.horaFin) {
       this.showToast('Por favor, completa todos los campos obligatorios (*)', 'warning');
+      return;
+    }
+
+    if (this.newVeterinario.horaFin <= this.newVeterinario.horaInicio) {
+      this.showToast('⚠️ La hora de fin debe ser mayor a la hora de inicio');
       return;
     }
 
@@ -3018,6 +3067,10 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
           emailProfesional: this.newVeterinario.emailProfesional || undefined,
 
           biografia: this.newVeterinario.biografia || undefined,
+
+          horaInicio: this.newVeterinario.horaInicio,
+
+          horaFin: this.newVeterinario.horaFin,
 
           veterinariaPrincipalId: this.newVeterinario.veterinariaPrincipalId || null,
 
@@ -3105,6 +3158,10 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
       biografia: '',
 
+      horaInicio: '',
+
+      horaFin: '',
+
       veterinariaPrincipalId: 0,
 
       isActive: true
@@ -3146,6 +3203,16 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
   guardarEdicionVeterinario(): void {
 
     if (!this.editingUsuario.id) return;
+
+    if (!this.editingVeterinario.horaInicio || !this.editingVeterinario.horaFin) {
+      this.showToast('⚠️ Por favor, indica las horas de inicio y fin laborales');
+      return;
+    }
+
+    if (this.editingVeterinario.horaFin <= this.editingVeterinario.horaInicio) {
+      this.showToast('⚠️ La hora de fin debe ser mayor a la hora de inicio');
+      return;
+    }
 
 
 
@@ -3200,6 +3267,10 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
           emailProfesional: this.editingVeterinario.emailProfesional || undefined,
 
           biografia: this.editingVeterinario.biografia || undefined,
+
+          horaInicio: this.editingVeterinario.horaInicio,
+
+          horaFin: this.editingVeterinario.horaFin,
 
           veterinariaPrincipalId: this.editingVeterinario.veterinariaPrincipalId || null,
 

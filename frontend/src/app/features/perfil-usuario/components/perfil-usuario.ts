@@ -153,6 +153,28 @@ export class PerfilUsuario implements OnInit {
   // Password update data
   newPassword: string = '';
 
+  // Citas Médicas
+  misCitas: any[] = [];
+  pageCitas = 1;
+  limitCitas = 5;
+  showNuevaCitaModal = false;
+  veterinariasDisponibles: any[] = [];
+  veterinariosDisponibles: any[] = [];
+  serviciosDisponibles: any[] = [];
+  veterinariosFiltrados: any[] = [];
+  serviciosFiltrados: any[] = [];
+  horasDisponibles: string[] = [];
+  cargandoHoras = false;
+  nuevaCita: any = {
+    veterinariaId: 0,
+    servicioId: 0,
+    motivo: '',
+    fechaSolo: '',
+    horaSolo: '',
+    mascotaId: 0,
+    idVeterinario: null
+  };
+
   // Ticket modal
   showTicketModal: boolean = false;
   showVerMascotaModal: boolean = false;
@@ -274,7 +296,8 @@ export class PerfilUsuario implements OnInit {
           this.loadUserProfile(),
           this.cargarMascotasUsuario(),
           this.cargarPublicacionesUsuario(),
-          this.loadMyTickets()
+          this.loadMyTickets(),
+          this.cargarMisCitas()
         ]);
       } else if (this.authService.isLoggedIn()) {
         // Try to reload user from backend
@@ -484,6 +507,10 @@ export class PerfilUsuario implements OnInit {
     this.seccionActiva = seccion;
     if (seccion === 'tickets') {
       this.loadMyTickets();
+    }
+    if (seccion === 'citas') {
+      this.cargarMisCitas();
+      this.cargarDatosCita();
     }
     if (seccion === 'dashboard') {
       this.cargarHistorialActividades().then(() => {
@@ -1496,5 +1523,301 @@ export class PerfilUsuario implements OnInit {
     if (this.pageActividades < this.getTotalPagesActividades()) {
       this.pageActividades++;
     }
+  }
+
+  // ===== CITAS MÉDICAS =====
+
+  cargarMisCitas(): void {
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) return;
+    const token = localStorage.getItem('access_token');
+    this.http.get<any[]>(`http://localhost:3000/citas/usuario/${currentUser.id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).subscribe({
+      next: (citas) => {
+        const ahora = new Date();
+        const proximas = citas.filter(c => c.estado === 'Programada' && new Date(c.fechaHora) >= ahora);
+        const pasadas = citas.filter(c => c.estado !== 'Programada' || new Date(c.fechaHora) < ahora);
+        proximas.sort((a, b) => new Date(a.fechaHora).getTime() - new Date(b.fechaHora).getTime());
+        pasadas.sort((a, b) => new Date(b.fechaHora).getTime() - new Date(a.fechaHora).getTime());
+        this.misCitas = [...proximas, ...pasadas];
+        this.pageCitas = 1;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error al cargar citas:', err)
+    });
+  }
+
+  cargarDatosCita(): void {
+    const token = localStorage.getItem('access_token');
+    const currentUser = this.authService.getCurrentUser() as any;
+    
+    // Cargar Veterinarias
+    this.http.get<any[]>('http://localhost:3000/veterinarias', {
+      headers: { Authorization: `Bearer ${token}` }
+    }).subscribe({
+      next: (vets) => {
+        let veterinariasActivas = vets.filter(v => v.isActive);
+        
+        // Cargar Veterinarios
+        this.http.get<any[]>('http://localhost:3000/perfiles-veterinarios', {
+          headers: { Authorization: `Bearer ${token}` }
+        }).subscribe({
+          next: (perfiles) => {
+            this.veterinariosDisponibles = perfiles.filter(p => p.isActive && p.usuario);
+            
+            // FILTRAR VETERINARIAS POR EL VETERINARIO QUE REGISTRÓ AL USUARIO
+            if (currentUser && currentUser.createdById) {
+              const perfilCreador = this.veterinariosDisponibles.find(p => p.usuario.id === currentUser.createdById);
+              if (perfilCreador && perfilCreador.veterinariaPrincipal) {
+                veterinariasActivas = veterinariasActivas.filter(v => v.id === perfilCreador.veterinariaPrincipal.id);
+              }
+            }
+            
+            this.veterinariasDisponibles = veterinariasActivas;
+            
+            // Si solo queda 1 veterinaria (por el filtro), seleccionarla automáticamente
+            if (this.veterinariasDisponibles.length === 1) {
+              this.nuevaCita.veterinariaId = this.veterinariasDisponibles[0].id;
+            }
+
+            // Cargar Servicios
+            this.http.get<any[]>('http://localhost:3000/servicios', {
+              headers: { Authorization: `Bearer ${token}` }
+            }).subscribe({
+              next: (servs) => {
+                this.serviciosDisponibles = servs.filter(s => s.isActive);
+                
+                if (this.nuevaCita.veterinariaId) {
+                  this.onVeterinariaChange();
+                } else {
+                  this.veterinariosFiltrados = [];
+                  this.serviciosFiltrados = [];
+                }
+                
+                this.cdr.detectChanges();
+              },
+              error: (err) => console.error('Error al cargar servicios:', err)
+            });
+
+          },
+          error: (err) => console.error('Error al cargar veterinarios:', err)
+        });
+      },
+      error: (err) => console.error('Error al cargar veterinarias:', err)
+    });
+  }
+
+  onVeterinariaChange(): void {
+    const vetId = Number(this.nuevaCita.veterinariaId);
+    
+    // Filtrar Veterinarios por veterinaria
+    this.veterinariosFiltrados = this.veterinariosDisponibles.filter(v =>
+      v.veterinariaPrincipal && v.veterinariaPrincipal.id === vetId
+    );
+    
+    // Filtrar Servicios por veterinaria
+    this.serviciosFiltrados = this.serviciosDisponibles.filter(s =>
+      s.veterinariaId === vetId || (s.veterinaria && s.veterinaria.id === vetId)
+    );
+
+    // Resetear selecciones dependientes
+    this.nuevaCita.idVeterinario = null;
+    this.nuevaCita.servicioId = 0;
+    this.nuevaCita.motivo = '';
+    this.nuevaCita.fechaSolo = '';
+    this.nuevaCita.horaSolo = '';
+    this.horasDisponibles = [];
+  }
+
+  onServicioChange(): void {
+    const servId = Number(this.nuevaCita.servicioId);
+    const servicio = this.serviciosDisponibles.find(s => s.id === servId);
+    if (servicio) {
+      this.nuevaCita.motivo = servicio.nombre;
+    } else {
+      this.nuevaCita.motivo = '';
+    }
+    // Resetear fecha y hora al cambiar servicio
+    this.nuevaCita.fechaSolo = '';
+    this.nuevaCita.horaSolo = '';
+    this.horasDisponibles = [];
+  }
+
+  onFechaChange(): void {
+    this.nuevaCita.horaSolo = '';
+    this.horasDisponibles = [];
+    const fecha = this.nuevaCita.fechaSolo;
+    if (!fecha) return;
+
+    // Si hay veterinario seleccionado, cargar horas de ese veterinario
+    // Si no, tomar el primero filtrado o dejar vacío
+    const vetUserId = this.nuevaCita.idVeterinario
+      ? Number(this.nuevaCita.idVeterinario)
+      : (this.veterinariosFiltrados.length > 0 ? this.veterinariosFiltrados[0].usuario.id : null);
+
+    if (vetUserId) {
+      this.cargarHorasDisponibles(vetUserId, fecha);
+    }
+  }
+
+  onVeterinarioCitaChange(): void {
+    this.nuevaCita.horaSolo = '';
+    this.horasDisponibles = [];
+    const fecha = this.nuevaCita.fechaSolo;
+    const vetUserId = this.nuevaCita.idVeterinario ? Number(this.nuevaCita.idVeterinario) : null;
+    if (vetUserId && fecha) {
+      this.cargarHorasDisponibles(vetUserId, fecha);
+    }
+  }
+
+  cargarHorasDisponibles(veterinarioId: number, fecha: string): void {
+    const token = localStorage.getItem('access_token');
+    const servicioId = this.nuevaCita.servicioId ? Number(this.nuevaCita.servicioId) : undefined;
+    this.cargandoHoras = true;
+    this.horasDisponibles = [];
+    this.cdr.detectChanges();
+
+    let url = `http://localhost:3000/citas/horarios-disponibles?veterinarioId=${veterinarioId}&fecha=${fecha}`;
+    if (servicioId) url += `&servicioId=${servicioId}`;
+
+    this.http.get<string[]>(url, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).subscribe({
+      next: (horas) => {
+        this.horasDisponibles = horas;
+        this.cargandoHoras = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error al cargar horarios:', err);
+        this.cargandoHoras = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  getPaginatedCitas(): any[] {
+    const startIndex = (this.pageCitas - 1) * this.limitCitas;
+    return this.misCitas.slice(startIndex, startIndex + this.limitCitas);
+  }
+
+  getTotalPagesCitas(): number {
+    return Math.ceil(this.misCitas.length / this.limitCitas);
+  }
+
+  nextPageCitas(): void {
+    if (this.pageCitas < this.getTotalPagesCitas()) {
+      this.pageCitas++;
+    }
+  }
+
+  prevPageCitas(): void {
+    if (this.pageCitas > 1) {
+      this.pageCitas--;
+    }
+  }
+
+  openNuevaCitaModal(): void {
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) return;
+    this.nuevaCita = {
+      veterinariaId: 0,
+      servicioId: 0,
+      motivo: '',
+      fechaSolo: '',
+      horaSolo: '',
+      mascotaId: this.mascotas.length > 0 ? this.mascotas[0].id : 0,
+      idVeterinario: null,
+      usuarioId: currentUser.id
+    };
+    this.horasDisponibles = [];
+    this.cargandoHoras = false;
+    if (this.veterinariasDisponibles.length === 0) {
+      this.cargarDatosCita();
+    }
+    this.showNuevaCitaModal = true;
+  }
+
+  closeNuevaCitaModal(): void {
+    this.showNuevaCitaModal = false;
+  }
+
+  guardarNuevaCita(): void {
+    if (!this.nuevaCita.motivo || !this.nuevaCita.fechaSolo || !this.nuevaCita.horaSolo || !this.nuevaCita.mascotaId) {
+      Swal.fire('Atención', 'Por favor completa todos los campos obligatorios', 'warning');
+      return;
+    }
+    const fechaHora = new Date(`${this.nuevaCita.fechaSolo}T${this.nuevaCita.horaSolo}`);
+    if (fechaHora <= new Date()) {
+      Swal.fire('Atención', 'La fecha y hora de la cita deben ser futuras', 'warning');
+      return;
+    }
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) return;
+    const token = localStorage.getItem('access_token');
+    const payload: any = {
+      motivo: this.nuevaCita.motivo,
+      fechaHora: fechaHora.toISOString(),
+      mascotaId: Number(this.nuevaCita.mascotaId),
+      usuarioId: currentUser.id
+    };
+    if (this.nuevaCita.servicioId) {
+      payload.servicioId = Number(this.nuevaCita.servicioId);
+    }
+    if (this.nuevaCita.veterinariaId) {
+      payload.veterinariaId = Number(this.nuevaCita.veterinariaId);
+    }
+    if (this.nuevaCita.idVeterinario) {
+      payload.idVeterinario = Number(this.nuevaCita.idVeterinario);
+    }
+    this.http.post<any>(`http://localhost:3000/citas`, payload, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+    }).subscribe({
+      next: () => {
+        Swal.fire('¡Cita creada!', 'Tu cita ha sido programada exitosamente', 'success');
+        this.closeNuevaCitaModal();
+        this.cargarMisCitas();
+      },
+      error: (err) => {
+        const msg = err.error?.message || 'Error al crear la cita';
+        Swal.fire('Error', Array.isArray(msg) ? msg.join(', ') : msg, 'error');
+      }
+    });
+  }
+
+  cancelarCita(cita: any): void {
+    Swal.fire({
+      title: '¿Cancelar cita?',
+      text: `¿Estás seguro de cancelar la cita del ${new Date(cita.fechaHora).toLocaleDateString('es-ES')}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, cancelar',
+      cancelButtonText: 'No'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const token = localStorage.getItem('access_token');
+        this.http.patch<any>(`http://localhost:3000/citas/${cita.id}`, { estado: 'Cancelada' }, {
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+        }).subscribe({
+          next: () => {
+            Swal.fire('Cancelada', 'La cita ha sido cancelada', 'success');
+            this.cargarMisCitas();
+          },
+          error: (err) => {
+            const msg = err.error?.message || 'Error al cancelar la cita';
+            Swal.fire('Error', Array.isArray(msg) ? msg.join(', ') : msg, 'error');
+          }
+        });
+      }
+    });
+  }
+
+  getVeterinarioNombre(cita: any): string {
+    if (!cita.veterinario) return 'Sin asignar';
+    const v = cita.veterinario;
+    return [v.firstName, v.lastName].filter(Boolean).join(' ') || v.fullName || v.email || 'Veterinario';
   }
 }

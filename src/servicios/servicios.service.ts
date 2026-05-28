@@ -84,7 +84,7 @@ export class ServiciosService {
       .leftJoinAndSelect('servicio.veterinaria', 'veterinaria')
       .where('servicio.isActive = :isActive', { isActive: true })
       .andWhere(
-        '(servicio.nombre ILIKE :query OR servicio.descripcion ILIKE :query OR servicio.etiquetas ILIKE :query)',
+        '(servicio.nombre ILIKE :query OR servicio.descripcion ILIKE :query)',
         { query: `%${query}%` }
       )
       .orderBy('servicio.nombre', 'ASC')
