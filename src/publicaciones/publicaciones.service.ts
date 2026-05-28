@@ -34,12 +34,26 @@ export class PublicacionesService {
       return { ...plainPub, comentarios };
     });
 
+    const shareCounts = await this.publicacionesRepository.createQueryBuilder('pub')
+      .select('pub.sharedFromId', 'sharedFromId')
+      .addSelect('COUNT(pub.id)', 'count')
+      .where('pub.sharedFromId IS NOT NULL')
+      .andWhere('pub.isActive = :isActive', { isActive: true })
+      .groupBy('pub.sharedFromId')
+      .getRawMany();
+
+    const shareCountMap = new Map<number, number>();
+    shareCounts.forEach(item => {
+      shareCountMap.set(Number(item.sharedfromid || item.sharedFromId), Number(item.count));
+    });
+
     if (userIds.size === 0) {
       return parsedPubs.map(pub => {
         const { comentariosRaw, ...rest } = pub;
         return {
           ...rest,
-          comentarios: []
+          comentarios: [],
+          sharesCount: shareCountMap.get(pub.id) || 0
         };
       });
     }
@@ -68,7 +82,8 @@ export class PublicacionesService {
       const { comentariosRaw, ...rest } = pub;
       return {
         ...rest,
-        comentarios: resolvedComentarios
+        comentarios: resolvedComentarios,
+        sharesCount: shareCountMap.get(pub.id) || 0
       };
     });
   }
@@ -105,6 +120,8 @@ export class PublicacionesService {
 
     const pubs = await this.publicacionesRepository.createQueryBuilder('publicacion')
       .leftJoinAndSelect('publicacion.autor', 'autor')
+      .leftJoinAndSelect('publicacion.sharedFrom', 'sharedFrom')
+      .leftJoinAndSelect('sharedFrom.autor', 'sharedFromAutor')
       .where('publicacion.isActive = :isActive', { isActive: true })
       .orderBy('publicacion.createdAt', 'DESC')
       .getMany();
@@ -117,6 +134,8 @@ export class PublicacionesService {
     console.log(`Backend: Buscando publicaciones para el autor ${autorId}...`);
     const pubs = await this.publicacionesRepository.createQueryBuilder('publicacion')
       .leftJoinAndSelect('publicacion.autor', 'autor')
+      .leftJoinAndSelect('publicacion.sharedFrom', 'sharedFrom')
+      .leftJoinAndSelect('sharedFrom.autor', 'sharedFromAutor')
       .where('publicacion.autorId = :autorId', { autorId })
       .andWhere('publicacion.isActive = :isActive', { isActive: true })
       .orderBy('publicacion.createdAt', 'DESC')
@@ -140,7 +159,7 @@ export class PublicacionesService {
   async findOne(id: number): Promise<any> {
     const publicacion = await this.publicacionesRepository.findOne({
       where: { id, isActive: true },
-      relations: ['autor']
+      relations: ['autor', 'sharedFrom', 'sharedFrom.autor']
     });
 
     if (!publicacion) {
@@ -284,5 +303,35 @@ export class PublicacionesService {
       nombre: user.fullName || `${user.firstName} ${user.lastName}`,
       avatar: avatarUrl
     };
+  }
+
+  async compartir(id: number, userId: number): Promise<any> {
+    const originalPub = await this.publicacionesRepository.findOne({
+      where: { id, isActive: true },
+      relations: ['autor']
+    });
+    if (!originalPub) {
+      throw new NotFoundException(`Publicación con ID ${id} no encontrada`);
+    }
+
+    // Validar que el usuario que comparte existe
+    await this.usersService.findOne(userId);
+
+    const nuevaPublicacion = this.publicacionesRepository.create({
+      descripcion: '',
+      autorId: userId,
+      sharedFromId: id,
+      isActive: true
+    });
+
+    const savedPublicacion = await this.publicacionesRepository.save(nuevaPublicacion);
+
+    const dbPub = await this.publicacionesRepository.findOne({
+      where: { id: savedPublicacion.id },
+      relations: ['autor', 'sharedFrom', 'sharedFrom.autor']
+    });
+
+    const resolved = await this.resolvePublicacionesComentarios([dbPub]);
+    return resolved[0];
   }
 }

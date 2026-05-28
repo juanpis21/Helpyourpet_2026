@@ -4,81 +4,98 @@ import { User } from '../../users/entities/user.entity';
 
 @Entity('publicaciones')
 export class Publicacion {
-  @ApiProperty({ 
-    description: 'ID único de la publicación', 
-    example: 1 
+  @ApiProperty({
+    description: 'ID único de la publicación',
+    example: 1
   })
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ApiProperty({ 
-    description: 'Descripción de la publicación', 
-    example: 'Mi mascota necesita un nuevo hogar...' 
+  @ApiProperty({
+    description: 'Descripción de la publicación',
+    example: 'Mi mascota necesita un nuevo hogar...'
   })
   @Column({ type: 'text', nullable: true })
   descripcion: string;
 
-  @ApiProperty({ 
-    description: 'URL de la imagen de la publicación', 
+  @ApiProperty({
+    description: 'URL de la imagen de la publicación',
     example: 'https://example.com/imagen.jpg',
     required: false
   })
   @Column({ type: 'text', nullable: true })
   imagen?: string;
 
-  @ApiProperty({ 
-    description: 'Autor de la publicación', 
-    type: () => User 
+  @ApiProperty({
+    description: 'Autor de la publicación',
+    type: () => User
   })
   @ManyToOne(() => User)
   autor: User;
 
-  @ApiProperty({ 
-    description: 'ID del autor de la publicación', 
-    example: 25 
+  @ApiProperty({
+    description: 'ID del autor de la publicación',
+    example: 25
   })
   @Column()
   autorId: number;
 
-  @ApiProperty({ 
-    description: 'Indica si la publicación está activa en el sistema', 
-    example: true 
+  @ApiProperty({
+    description: 'Indica si la publicación está activa en el sistema',
+    example: true
   })
   @Column({ default: true })
   isActive: boolean;
 
-  @ApiProperty({ 
-    description: 'Fecha de creación del registro', 
-    example: '2026-03-20T20:00:00.000Z' 
+  @ApiProperty({
+    description: 'Fecha de creación del registro',
+    example: '2026-03-20T20:00:00.000Z'
   })
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
-  @ApiProperty({ 
-    description: 'Fecha de última actualización', 
-    example: '2026-03-20T20:00:00.000Z' 
+  @ApiProperty({
+    description: 'Fecha de última actualización',
+    example: '2026-03-20T20:00:00.000Z'
   })
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 
-  @ApiProperty({ 
-    description: 'IDs de los usuarios que han reportado esta publicación', 
-    example: [1, 2, 3] 
+  @ApiProperty({
+    description: 'IDs de los usuarios que han reportado esta publicación',
+    example: [1, 2, 3]
   })
   @Column('int', { array: true, default: [] })
   reportadoresIds: number[];
 
-  @ApiProperty({ 
-    description: 'IDs de los usuarios que han dado like a esta publicación', 
-    example: [1, 2, 3] 
+  @ApiProperty({
+    description: 'IDs de los usuarios que han dado like a esta publicación',
+    example: [1, 2, 3]
   })
   @Column('int', { array: true, default: [] })
   likesUserIds: number[];
 
-  @ApiProperty({ 
-    description: 'Lista de comentarios de la publicación en formato JSON', 
-    example: '[]' 
+  @ApiProperty({
+    description: 'Lista de comentarios de la publicación en formato JSON',
+    example: '[]'
   })
   @Column({ type: 'text', default: '[]' })
   comentariosRaw: string;
+
+  @ApiProperty({
+    description: 'Publicación original compartida',
+    type: () => Publicacion,
+    required: false
+  })
+  @ManyToOne(() => Publicacion, { nullable: true, onDelete: 'SET NULL' })
+  sharedFrom?: Publicacion;
+
+  @ApiProperty({
+    description: 'ID de la publicación original compartida',
+    example: 1,
+    required: false
+  })
+  @Column({ nullable: true })
+  sharedFromId?: number;
 }
+

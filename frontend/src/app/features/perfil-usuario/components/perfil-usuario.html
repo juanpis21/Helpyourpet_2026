@@ -175,12 +175,14 @@
                           act.accion === 'Registro de mascota' ? '#E6F4EA' : 
                           act.accion === 'Nueva publicación' ? '#FFF4E5' : 
                           act.accion === 'Comentario realizado' ? '#FCE8E6' : 
-                          act.accion === 'Actualización de perfil' ? '#E8F0FE' : '#E8EAF0',
+                          act.accion === 'Actualización de perfil' ? '#E8F0FE' : 
+                          act.accion === 'Publicación compartida' ? '#F3E8FF' : '#E8EAF0',
                         'color': 
                           act.accion === 'Registro de mascota' ? '#1E8E3E' : 
                           act.accion === 'Nueva publicación' ? '#B26A00' : 
                           act.accion === 'Comentario realizado' ? '#D93025' : 
-                          act.accion === 'Actualización de perfil' ? '#1A73E8' : '#5A6577'
+                          act.accion === 'Actualización de perfil' ? '#1A73E8' : 
+                          act.accion === 'Publicación compartida' ? '#7E22CE' : '#5A6577'
                       }">
                       {{ act.accion }}
                     </span>
@@ -406,6 +408,7 @@
         <i class="fas fa-shopping-cart"></i>
         <h4>No tienes compras registradas.</h4>
         <p>¡Visita nuestra tienda para encontrar productos para tu mascota!</p>
+        <br>
         <button class="btn-primary btn-premium-tienda" (click)="irATienda()"><i class="fas fa-shopping-bag"></i>
           Explorar Tienda</button>
       </div>
@@ -421,27 +424,64 @@
             <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
           </button>
           <button class="home-btn" (click)="irAInicio()"><i class="fas fa-home"></i></button>
-
         </div>
       </div>
 
-      <div *ngIf="publicaciones.length === 0" class="empty-state large">
-        <i class="fas fa-heart"></i>
-        <h3>No has publicado nada aún</h3>
-        <p>¡Comparte algo con la comunidad! 🐾</p>
-        <button class="btn-primary large" (click)="irAInicio()"><i class="fas fa-plus"></i> Crear Primera
-          Publicación</button>
+      <!-- Tabs superiores para separar Publicaciones y Compartidos -->
+      <div class="profile-pub-tabs">
+        <button class="pub-tab-btn" [class.active]="tabPublicacionesActiva === 'propias'"
+          (click)="setTabPublicaciones('propias')">
+          <i class="fas fa-file-alt"></i> Publicaciones ({{ getPublicacionesPropiasCount() }})
+        </button>
+        <button class="pub-tab-btn" [class.active]="tabPublicacionesActiva === 'compartidas'"
+          (click)="setTabPublicaciones('compartidas')">
+          <i class="fas fa-share-alt"></i> Compartido ({{ getPublicacionesCompartidasCount() }})
+        </button>
       </div>
 
-      <div *ngIf="publicaciones.length > 0" class="publicaciones-grid">
+      <div *ngIf="getPublicacionesFiltradas().length === 0" class="empty-state large">
+        <i class="fas fa-heart" *ngIf="tabPublicacionesActiva === 'propias'"></i>
+        <i class="fas fa-share-alt" *ngIf="tabPublicacionesActiva === 'compartidas'"></i>
+        <h3 *ngIf="tabPublicacionesActiva === 'propias'">No has publicado nada aún</h3>
+        <h3 *ngIf="tabPublicacionesActiva === 'compartidas'">No has compartido nada aún</h3>
+        <p *ngIf="tabPublicacionesActiva === 'propias'">¡Comparte algo con la comunidad! 🐾</p>
+        <p *ngIf="tabPublicacionesActiva === 'compartidas'">¡Encuentra publicaciones geniales en el inicio y
+          compártelas! 🐾</p>
+        <button class="btn-primary large" (click)="irAInicio()"><i class="fas fa-home"></i> Ir al Inicio</button>
+      </div>
+
+      <div *ngIf="getPublicacionesFiltradas().length > 0" class="publicaciones-grid">
         <div *ngFor="let pub of getPaginatedPublicaciones()" class="publicacion-card">
-          <div *ngIf="pub.imagen" class="publicacion-image">
+          <div *ngIf="pub.imagen && !pub.sharedFrom" class="publicacion-image">
             <img
               [src]="pub.imagen && pub.imagen.startsWith('/uploads/') ? 'http://localhost:3000' + pub.imagen : pub.imagen"
               [alt]="pub.descripcion" class="pub-img">
           </div>
           <div class="publicacion-content">
-            <p class="pub-descripcion">{{ pub.descripcion }}</p>
+            <p class="pub-descripcion" *ngIf="pub.descripcion">{{ pub.descripcion }}</p>
+
+            <!-- Tarjeta de publicación compartida (Estilo Facebook) -->
+            <div class="shared-pub-card" *ngIf="pub.sharedFrom">
+              <div class="shared-pub-header">
+                <img
+                  [src]="pub.sharedFrom.autor?.avatar ? (pub.sharedFrom.autor.avatar.startsWith('/uploads/') ? 'http://localhost:3000' + pub.sharedFrom.autor.avatar : pub.sharedFrom.autor.avatar) : 'assets/images/Default.png'"
+                  alt="Avatar" class="shared-avatar">
+                <div class="shared-info-usuario">
+                  <h5 class="shared-nombre-usuario">{{ pub.sharedFrom.autor?.fullName || 'Usuario' }}</h5>
+                  <time class="shared-tiempo-publicacion">{{ pub.sharedFrom.createdAt | date:'medium' }}</time>
+                </div>
+              </div>
+              <div class="shared-pub-body">
+                <p class="shared-texto-publicacion" *ngIf="pub.sharedFrom.descripcion">{{ pub.sharedFrom.descripcion }}
+                </p>
+                <div *ngIf="pub.sharedFrom.imagen" class="shared-imagen-contenedor">
+                  <img
+                    [src]="pub.sharedFrom.imagen.startsWith('/uploads/') ? 'http://localhost:3000' + pub.sharedFrom.imagen : pub.sharedFrom.imagen"
+                    alt="Imagen compartida" class="shared-publicacion-imagen">
+                </div>
+              </div>
+            </div>
+
             <div class="pub-meta">
               <span class="pub-date"><i class="fas fa-calendar"></i> {{ pub.createdAt | date:'medium' }}</span>
               <div class="pub-stats" style="display: flex; gap: 0.8rem; align-items: center;">
@@ -458,7 +498,7 @@
               <i class="fas fa-ellipsis-v"></i>
             </button>
             <div class="pub-dropdown" *ngIf="activePubMenuId === pub.id">
-              <button class="dropdown-item edit" (click)="abrirEditarPublicacionModal(pub)">
+              <button class="dropdown-item edit" *ngIf="!pub.sharedFrom" (click)="abrirEditarPublicacionModal(pub)">
                 <i class="fas fa-edit"></i> Editar
               </button>
               <button class="dropdown-item delete" (click)="eliminarPublicacion(pub.id)">

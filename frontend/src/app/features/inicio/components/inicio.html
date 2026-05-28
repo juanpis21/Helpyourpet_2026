@@ -63,7 +63,10 @@
           <div class="usuario-info">
             <img [src]="pub.usuario.avatar" alt="{{pub.usuario.nombre}}" class="avatar">
             <div class="info-usuario">
-              <h3 class="nombre-usuario">{{pub.usuario.nombre}}</h3>
+              <h3 class="nombre-usuario">
+                {{pub.usuario.nombre}}
+                <span class="accion-compartido" *ngIf="pub.sharedFrom">compartió una publicación</span>
+              </h3>
               <time class="tiempo-publicacion">{{getTiempoTranscurrido(pub.fecha)}}</time>
             </div>
           </div>
@@ -75,7 +78,7 @@
               <button class="dropdown-item report-btn" *ngIf="pub.autorId != usuarioLogueado?.id" (click)="reportarPublicacion(pub)" style="width: 100%; padding: 0.6rem 1rem; border: none; background: none; text-align: left; font-size: 0.9rem; color: #dc3545; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 500; transition: background 0.2s;">
                 <i class="fas fa-flag"></i> Reportar publicación
               </button>
-              <button class="dropdown-item edit-btn" *ngIf="pub.autorId == usuarioLogueado?.id" (click)="abrirEditarPublicacionModal(pub)" style="width: 100%; padding: 0.6rem 1rem; border: none; background: none; text-align: left; font-size: 0.9rem; color: #0284c7; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 500; transition: background 0.2s;">
+              <button class="dropdown-item edit-btn" *ngIf="pub.autorId == usuarioLogueado?.id && !pub.sharedFrom" (click)="abrirEditarPublicacionModal(pub)" style="width: 100%; padding: 0.6rem 1rem; border: none; background: none; text-align: left; font-size: 0.9rem; color: #0284c7; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 500; transition: background 0.2s;">
                 <i class="fas fa-edit"></i> Editar publicación
               </button>
               <button class="dropdown-item delete-btn" *ngIf="pub.autorId == usuarioLogueado?.id" (click)="eliminarPublicacion(pub.id)" style="width: 100%; padding: 0.6rem 1rem; border: none; background: none; text-align: left; font-size: 0.9rem; color: #dc3545; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 500; transition: background 0.2s;">
@@ -87,8 +90,26 @@
 
         <!-- Contenido -->
         <div class="publicacion-contenido">
-          <p class="texto-publicacion">{{pub.contenido}}</p>
-          <div *ngIf="pub.imagen" class="imagen-contenedor">
+          <p class="texto-publicacion" *ngIf="pub.contenido">{{pub.contenido}}</p>
+
+          <!-- Tarjeta de publicación compartida (Estilo Facebook) -->
+          <div class="shared-pub-card" *ngIf="pub.sharedFrom">
+            <div class="shared-pub-header">
+              <img [src]="pub.sharedFrom.usuario.avatar" alt="{{pub.sharedFrom.usuario.nombre}}" class="shared-avatar">
+              <div class="shared-info-usuario">
+                <h4 class="shared-nombre-usuario">{{pub.sharedFrom.usuario.nombre}}</h4>
+                <time class="shared-tiempo-publicacion">{{getTiempoTranscurrido(pub.sharedFrom.fecha)}}</time>
+              </div>
+            </div>
+            <div class="shared-pub-body">
+              <p class="shared-texto-publicacion" *ngIf="pub.sharedFrom.contenido">{{pub.sharedFrom.contenido}}</p>
+              <div *ngIf="pub.sharedFrom.imagen" class="shared-imagen-contenedor">
+                <img [src]="pub.sharedFrom.imagen" alt="Imagen compartida" class="shared-publicacion-imagen">
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="pub.imagen && !pub.sharedFrom" class="imagen-contenedor">
             <img [src]="pub.imagen" alt="Imagen de publicación" class="publicacion-imagen">
           </div>
         </div>

@@ -30,6 +30,17 @@ interface Publicacion {
   shareAnimating?: boolean;
   justPublished?: boolean;
   opcionesAbiertas?: boolean;
+  sharedFrom?: {
+    id: number;
+    autorId?: number;
+    usuario: {
+      nombre: string;
+      avatar: string;
+    };
+    contenido: string;
+    imagen?: string;
+    fecha: Date;
+  };
 }
 
 interface Comentario {
@@ -91,7 +102,7 @@ export class Inicio implements OnInit {
     private ticketsService: TicketsService,
     private cdr: ChangeDetectorRef,
     private ngZone: NgZone
-  ) {}
+  ) { }
 
   getRandomPlaceholder(): string {
     return this.placeholders[Math.floor(Math.random() * this.placeholders.length)];
@@ -114,8 +125,8 @@ export class Inicio implements OnInit {
           id: user.id,
           nombre: user.fullName || 'Usuario',
           email: user.email,
-          avatar: user.avatar 
-            ? (user.avatar.startsWith('/uploads/') ? `http://localhost:3000${user.avatar}` : user.avatar) 
+          avatar: user.avatar
+            ? (user.avatar.startsWith('/uploads/') ? `http://localhost:3000${user.avatar}` : user.avatar)
             : 'assets/images/Default.png'
         };
       } else if (this.authService.isLoggedIn()) {
@@ -127,8 +138,8 @@ export class Inicio implements OnInit {
               id: reloadedUser.id,
               nombre: reloadedUser.fullName || 'Usuario',
               email: reloadedUser.email,
-              avatar: reloadedUser.avatar 
-                ? (reloadedUser.avatar.startsWith('/uploads/') ? `http://localhost:3000${reloadedUser.avatar}` : reloadedUser.avatar) 
+              avatar: reloadedUser.avatar
+                ? (reloadedUser.avatar.startsWith('/uploads/') ? `http://localhost:3000${reloadedUser.avatar}` : reloadedUser.avatar)
                 : 'assets/images/Default.png'
             };
           }
@@ -163,7 +174,7 @@ export class Inicio implements OnInit {
               autorId: pub.autorId || pub.userId || (pub.autor ? pub.autor.id : undefined),
               usuario: {
                 nombre: autor ? (autor.fullName || `${autor.firstName || ''} ${autor.lastName || ''}`.trim() || 'Usuario') : 'Usuario',
-                avatar: autor?.avatar 
+                avatar: autor?.avatar
                   ? (autor.avatar.startsWith('/uploads/') ? `http://localhost:3000${autor.avatar}` : autor.avatar)
                   : 'assets/images/Default.png'
               },
@@ -180,9 +191,22 @@ export class Inicio implements OnInit {
                 contenido: c.contenido,
                 fecha: new Date(c.createdAt)
               })) : [],
-              compartidos: 0,
+              compartidos: pub.sharesCount || 0,
               likedByUser: pub.likesUserIds ? pub.likesUserIds.includes(this.usuarioLogueado?.userId || this.usuarioLogueado?.id) : false,
-              mostrarComentarios: false
+              mostrarComentarios: false,
+              sharedFrom: pub.sharedFrom ? {
+                id: pub.sharedFrom.id,
+                autorId: pub.sharedFrom.autorId,
+                usuario: {
+                  nombre: pub.sharedFrom.autor ? (pub.sharedFrom.autor.fullName || `${pub.sharedFrom.autor.firstName || ''} ${pub.sharedFrom.autor.lastName || ''}`.trim() || 'Usuario') : 'Usuario',
+                  avatar: pub.sharedFrom.autor?.avatar
+                    ? (pub.sharedFrom.autor.avatar.startsWith('/uploads/') ? `http://localhost:3000${pub.sharedFrom.autor.avatar}` : pub.sharedFrom.autor.avatar)
+                    : 'assets/images/Default.png'
+                },
+                contenido: pub.sharedFrom.descripcion,
+                imagen: pub.sharedFrom.imagen && pub.sharedFrom.imagen.startsWith('/uploads/') ? `http://localhost:3000${pub.sharedFrom.imagen}` : pub.sharedFrom.imagen,
+                fecha: new Date(pub.sharedFrom.createdAt)
+              } : undefined
             };
           });
           console.log(`Frontend: ${this.publicaciones.length} publicaciones mapeadas y listas para mostrar.`);
@@ -328,7 +352,7 @@ export class Inicio implements OnInit {
   darLike(publicacion: Publicacion): void {
     publicacion.likeAnimating = true;
     const previousLiked = publicacion.likedByUser;
-    
+
     if (publicacion.likedByUser) {
       publicacion.likes--;
     } else {
@@ -403,12 +427,85 @@ export class Inicio implements OnInit {
   }
 
   compartir(publicacion: Publicacion): void {
-    publicacion.shareAnimating = true;
-    publicacion.compartidos++;
+    Swal.fire({
+      title: '¿Compartir esta publicación?',
+      text: 'Se compartirá en tu perfil y aparecerá en el feed de la comunidad.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, compartir',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#1d3976',
+      cancelButtonColor: '#6b7280'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        publicacion.shareAnimating = true;
+        this.publicacionesService.compartirPublicacion(publicacion.id).subscribe({
+          next: (res) => {
+            publicacion.compartidos++;
+            publicacion.shareAnimating = false;
 
-    setTimeout(() => {
-      publicacion.shareAnimating = false;
-    }, 800);
+            const autor = res.autor;
+            const nuevoCompartido: Publicacion = {
+              id: res.id,
+              autorId: res.autorId,
+              usuario: {
+                nombre: autor ? (autor.fullName || `${autor.firstName || ''} ${autor.lastName || ''}`.trim() || 'Usuario') : 'Usuario',
+                avatar: autor?.avatar
+                  ? (autor.avatar.startsWith('/uploads/') ? `http://localhost:3000${autor.avatar}` : autor.avatar)
+                  : 'assets/images/Default.png'
+              },
+              contenido: res.descripcion,
+              imagen: res.imagen && res.imagen.startsWith('/uploads/') ? `http://localhost:3000${res.imagen}` : res.imagen,
+              fecha: new Date(res.createdAt),
+              likes: 0,
+              comentarios: [],
+              compartidos: 0,
+              likedByUser: false,
+              mostrarComentarios: false,
+              justPublished: true,
+              sharedFrom: res.sharedFrom ? {
+                id: res.sharedFrom.id,
+                autorId: res.sharedFrom.autorId,
+                usuario: {
+                  nombre: res.sharedFrom.autor ? (res.sharedFrom.autor.fullName || `${res.sharedFrom.autor.firstName || ''} ${res.sharedFrom.autor.lastName || ''}`.trim() || 'Usuario') : 'Usuario',
+                  avatar: res.sharedFrom.autor?.avatar
+                    ? (res.sharedFrom.autor.avatar.startsWith('/uploads/') ? `http://localhost:3000${res.sharedFrom.autor.avatar}` : res.sharedFrom.autor.avatar)
+                    : 'assets/images/Default.png'
+                },
+                contenido: res.sharedFrom.descripcion,
+                imagen: res.sharedFrom.imagen && res.sharedFrom.imagen.startsWith('/uploads/') ? `http://localhost:3000${res.sharedFrom.imagen}` : res.sharedFrom.imagen,
+                fecha: new Date(res.sharedFrom.createdAt)
+              } : undefined
+            };
+
+            this.publicaciones.unshift(nuevoCompartido);
+            this.cdr.detectChanges();
+
+            setTimeout(() => {
+              nuevoCompartido.justPublished = false;
+              this.cdr.detectChanges();
+            }, 800);
+
+            Swal.fire({
+              icon: 'success',
+              title: '¡Publicación compartida!',
+              text: 'Se ha compartido exitosamente.',
+              confirmButtonColor: '#1d3976'
+            });
+          },
+          error: (err) => {
+            console.error('Error al compartir publicación:', err);
+            publicacion.shareAnimating = false;
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'No se pudo compartir la publicación en este momento.',
+              confirmButtonColor: '#1d3976'
+            });
+          }
+        });
+      }
+    });
   }
 
   getTiempoTranscurrido(fecha: Date): string {
@@ -442,7 +539,7 @@ export class Inicio implements OnInit {
 
   reportarPublicacion(pub: Publicacion): void {
     pub.opcionesAbiertas = false;
-    
+
     // Check if the user is trying to report their own publication
     const loggedInUserId = this.usuarioLogueado?.id;
     if (pub.autorId === loggedInUserId) {
