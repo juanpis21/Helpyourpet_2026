@@ -905,7 +905,7 @@
 
         <div class="form-group">
           <label>Fecha *</label>
-          <input type="date" [(ngModel)]="nuevaCita.fechaSolo" (change)="onFechaChange()" [disabled]="!nuevaCita.idVeterinario || !nuevaCita.servicioId">
+          <input type="date" [(ngModel)]="nuevaCita.fechaSolo" (change)="onFechaChange()" [disabled]="!nuevaCita.idVeterinario || !nuevaCita.servicioId" [min]="minDate">
         </div>
         <div class="form-group">
           <label>Hora *</label>

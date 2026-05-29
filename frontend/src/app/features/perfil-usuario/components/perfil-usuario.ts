@@ -194,6 +194,7 @@ export class PerfilUsuario implements OnInit {
   serviciosFiltrados: any[] = [];
   horasDisponibles: string[] = [];
   cargandoHoras = false;
+  minDate: string = '';
   nuevaCita: any = {
     veterinariaId: 0,
     servicioId: 0,
@@ -1765,6 +1766,13 @@ export class PerfilUsuario implements OnInit {
   openNuevaCitaModal(): void {
     const currentUser = this.authService.getCurrentUser();
     if (!currentUser) return;
+    
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    this.minDate = `${yyyy}-${mm}-${dd}`;
+
     this.nuevaCita = {
       veterinariaId: 0,
       servicioId: 0,

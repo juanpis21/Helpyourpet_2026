@@ -375,10 +375,16 @@ export class Veterinario implements OnInit {
 
   newCita: any = {
     fecha: '',
+    hora: '',
+    servicioId: null,
     motivo: '',
     userId: null,
     petId: null
   };
+
+  serviciosVeterinaria: any[] = [];
+  horasDisponibles: string[] = [];
+  loadingHoras: boolean = false;
 
   public readonly API_BASE = 'http://localhost:3000';
 
@@ -434,6 +440,7 @@ export class Veterinario implements OnInit {
                 this.cargarPublicacionesUsuario();
                 // Cargar veterinarios de la misma clínica para el filtro
                 this.cargarVeterinariosClinica();
+                this.cargarServiciosVeterinaria();
               }
             },
             error: (err) => console.error('Error al cargar perfil veterinario:', err)
@@ -1325,8 +1332,59 @@ export class Veterinario implements OnInit {
   openProgramarCitaModal(): void {
     const now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-    this.minDateTimeStr = now.toISOString().slice(0, 16);
+    this.minDateTimeStr = now.toISOString().slice(0, 10);
     this.showAddCitaModal = true;
+    this.newCita = { fecha: '', hora: '', servicioId: null, motivo: '', userId: null, petId: null };
+    this.horasDisponibles = [];
+  }
+
+  cargarServiciosVeterinaria(): void {
+    if (this.veterinariaId) {
+      const token = localStorage.getItem('access_token');
+      const headers = { Authorization: `Bearer ${token}` };
+      this.http.get<any[]>(`${this.API_BASE}/servicios`, { headers }).subscribe({
+        next: (servicios) => {
+          this.serviciosVeterinaria = servicios.filter(s => s.veterinariaId === this.veterinariaId && s.isActive);
+        },
+        error: (err) => console.error('Error cargando servicios:', err)
+      });
+    }
+  }
+
+  onFechaOServicioChange(): void {
+    if (!this.newCita.fecha || !this.newCita.servicioId || !this.vetUser?.id) {
+      this.horasDisponibles = [];
+      this.newCita.hora = '';
+      return;
+    }
+    
+    this.loadingHoras = true;
+    this.horasDisponibles = [];
+    this.newCita.hora = '';
+    
+    const token = localStorage.getItem('access_token');
+    const headers = { Authorization: `Bearer ${token}` };
+
+    this.http.get<string[]>(`${this.API_BASE}/citas/horarios-disponibles`, {
+      headers,
+      params: {
+        veterinarioId: this.vetUser.id.toString(),
+        fecha: this.newCita.fecha,
+        servicioId: this.newCita.servicioId.toString()
+      }
+    }).subscribe({
+      next: (horas) => {
+        this.horasDisponibles = horas;
+        this.loadingHoras = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error al obtener horarios', err);
+        this.showToast('Error al obtener horarios disponibles', 'error');
+        this.loadingHoras = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   registrarCita(): void {
@@ -1338,15 +1396,23 @@ export class Veterinario implements OnInit {
       return;
     }
 
-    if (!this.newCita.fecha || !this.newCita.motivo) {
-      this.showToast('Por favor completa la fecha y el motivo', 'warning');
+    if (!this.newCita.fecha || !this.newCita.hora || !this.newCita.servicioId) {
+      this.showToast('Por favor completa el servicio, la fecha y la hora', 'warning');
+      return;
+    }
+
+    const servicioAsociado = this.serviciosVeterinaria.find(s => s.id === this.newCita.servicioId);
+    if (!servicioAsociado) {
+      this.showToast('Servicio inválido', 'warning');
       return;
     }
 
     // 2. Construir el objeto con los nombres que el backend espera (CreateCitaDto)
     const payload = {
-      fechaHora: this.newCita.fecha,
-      motivo: this.newCita.motivo,
+      fechaHora: `${this.newCita.fecha}T${this.newCita.hora}:00`,
+      motivo: servicioAsociado.nombre,
+      servicioId: this.newCita.servicioId,
+      veterinariaId: servicioAsociado.veterinariaId,
       usuarioId: mascotaSeleccionada.ownerId || mascotaSeleccionada.owner?.id,
       mascotaId: this.newCita.petId,
       idVeterinario: this.vetUser?.id, // Asignar automáticamente el veterinario logueado
@@ -1361,7 +1427,7 @@ export class Veterinario implements OnInit {
         this.registrarAccionAuditoria('CREATE', 'Cita', res?.id || 0, `Veterinario programó una cita para la mascota "${mascotaSeleccionada.name}"`);
         this.cargarCitas();
         this.showAddCitaModal = false;
-        this.newCita = { fecha: '', motivo: '', userId: null, petId: null };
+        this.newCita = { fecha: '', hora: '', servicioId: null, motivo: '', userId: null, petId: null };
         this.cdr.detectChanges();
       },
       error: (err) => {
