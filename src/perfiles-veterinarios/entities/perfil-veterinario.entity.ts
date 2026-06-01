@@ -82,6 +82,22 @@ export class PerfilVeterinario {
   veterinariaPrincipal?: Veterinaria;
 
   @ApiProperty({ 
+    description: 'Hora de inicio laboral', 
+    example: '08:00',
+    required: false
+  })
+  @Column({ length: 5, nullable: true })
+  horaInicio?: string;
+
+  @ApiProperty({ 
+    description: 'Hora de fin laboral', 
+    example: '17:00',
+    required: false
+  })
+  @Column({ length: 5, nullable: true })
+  horaFin?: string;
+
+  @ApiProperty({ 
     description: 'Indica si el perfil veterinario está activo', 
     example: true 
   })

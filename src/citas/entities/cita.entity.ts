@@ -4,6 +4,8 @@ import { User } from '../../users/entities/user.entity';
 import { Pet } from '../../pets/entities/pet.entity';
 import { Role } from '../../roles/entities/role.entity';
 import { HistorialCita } from '../../historial-citas/entities/historial-cita.entity';
+import { Servicio } from '../../servicios/entities/servicio.entity';
+import { Veterinaria } from '../../veterinarias/entities/veterinaria.entity';
 
 @Entity('citas')
 export class Cita {
@@ -61,6 +63,22 @@ export class Cita {
   })
   @ManyToOne(() => Pet, pet => pet.citas)
   mascota: Pet;
+
+  @ApiProperty({ 
+    description: 'Servicio asociado a la cita', 
+    type: () => Servicio,
+    required: false
+  })
+  @ManyToOne(() => Servicio, { nullable: true })
+  servicio?: Servicio;
+
+  @ApiProperty({ 
+    description: 'Veterinaria asociada a la cita', 
+    type: () => Veterinaria,
+    required: false
+  })
+  @ManyToOne(() => Veterinaria, { nullable: true })
+  veterinaria?: Veterinaria;
 
   @ApiProperty({ 
     description: 'Historial de cambios de esta cita', 

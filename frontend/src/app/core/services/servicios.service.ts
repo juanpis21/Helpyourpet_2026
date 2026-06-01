@@ -9,6 +9,7 @@ export interface Servicio {
   descripcion: string;
   precioBase: number;
   duracionMinutos?: number;
+  tiempoColchonMinutos?: number;
   tipoServicio: string;
   requiereCita: boolean;
   isActive: boolean;

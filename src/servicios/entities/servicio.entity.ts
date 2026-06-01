@@ -40,6 +40,14 @@ export class Servicio {
   duracionMinutos?: number;
 
   @ApiProperty({ 
+    description: 'Tiempo colchón en minutos entre citas', 
+    example: 15,
+    required: false
+  })
+  @Column({ type: 'int', default: 15 })
+  tiempoColchonMinutos: number;
+
+  @ApiProperty({ 
     description: 'Tipo de servicio', 
     example: 'CONSULTA',
     enum: ['CONSULTA', 'CIRUGIA', 'VACUNACION', 'DESparasitacion', 'ESTETICA', 'LABORATORIO', 'EMERGENCIA', 'CHECKUP']
@@ -86,13 +94,7 @@ export class Servicio {
   @Column({ length: 500, nullable: true })
   imagen?: string;
 
-  @ApiProperty({ 
-    description: 'Etiquetas para búsqueda', 
-    example: 'consulta,general,revision,salud',
-    required: false
-  })
-  @Column({ length: 300, nullable: true })
-  etiquetas?: string;
+
 
   @ApiProperty({ description: 'Fecha de creación del registro', example: '2026-03-20T10:30:00.000Z' })
   @CreateDateColumn()

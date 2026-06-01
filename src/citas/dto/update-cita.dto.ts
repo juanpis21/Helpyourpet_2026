@@ -10,7 +10,7 @@ export class UpdateCitaDto {
   })
   @IsOptional()
   @IsString()
-  @MinLength(5)
+  @MinLength(1)
   @MaxLength(500)
   motivo?: string;
 
@@ -68,6 +68,24 @@ export class UpdateCitaDto {
   @IsOptional()
   @IsNumber()
   idHistoriaClinica?: number;
+
+  @ApiProperty({ 
+    description: 'ID del servicio asociado', 
+    example: 1,
+    required: false
+  })
+  @IsOptional()
+  @IsNumber()
+  servicioId?: number;
+
+  @ApiProperty({ 
+    description: 'ID de la veterinaria asociada', 
+    example: 1,
+    required: false
+  })
+  @IsOptional()
+  @IsNumber()
+  veterinariaId?: number;
 
   @ApiProperty({ 
     description: 'Indica si la cita está activa en el sistema', 

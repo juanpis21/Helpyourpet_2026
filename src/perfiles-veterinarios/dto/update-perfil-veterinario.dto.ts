@@ -92,6 +92,26 @@ export class UpdatePerfilVeterinarioDto {
   veterinariaPrincipalId?: number;
 
   @ApiProperty({ 
+    description: 'Hora de inicio laboral', 
+    example: '08:00',
+    required: false
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(5)
+  horaInicio?: string;
+
+  @ApiProperty({ 
+    description: 'Hora de fin laboral', 
+    example: '17:00',
+    required: false
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(5)
+  horaFin?: string;
+
+  @ApiProperty({ 
     description: 'Indica si el perfil veterinario está activo en el sistema', 
     example: true,
     required: false

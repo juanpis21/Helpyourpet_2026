@@ -50,6 +50,18 @@ export class CreateServicioDto {
   duracionMinutos?: number;
 
   @ApiProperty({ 
+    description: 'Tiempo colchón en minutos entre citas', 
+    example: 15,
+    required: false
+  })
+  @IsOptional()
+  @Transform(({ value }) => value !== undefined && value !== '' ? Number(value) : undefined)
+  @IsNumber()
+  @Min(0)
+  @Max(120)
+  tiempoColchonMinutos?: number;
+
+  @ApiProperty({ 
     description: 'Tipo de servicio', 
     example: TipoServicio.CONSULTA,
     enum: TipoServicio
@@ -94,12 +106,5 @@ export class CreateServicioDto {
   @IsString()
   imagen?: string;
 
-  @ApiProperty({ 
-    description: 'Etiquetas para búsqueda', 
-    example: 'consulta,general,revision,salud',
-    required: false
-  })
-  @IsOptional()
-  @IsString()
-  etiquetas?: string;
+
 }
