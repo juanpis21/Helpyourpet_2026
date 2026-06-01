@@ -691,10 +691,6 @@ export class Veterinario implements OnInit {
 
   formatDateCorrectly(dateStr: string): Date {
     if (!dateStr) return new Date();
-    const hasTimezone = dateStr.includes('Z') || dateStr.includes('+') || (dateStr.includes('-') && dateStr.lastIndexOf('-') > 10);
-    if (!hasTimezone) {
-      return new Date(dateStr + 'Z');
-    }
     return new Date(dateStr);
   }
 

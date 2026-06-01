@@ -1,3 +1,8 @@
+import * as pg from 'pg';
+pg.types.setTypeParser(1114, (stringValue) => {
+  return new Date(stringValue + 'Z');
+});
+
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';

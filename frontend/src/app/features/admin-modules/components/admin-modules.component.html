@@ -323,11 +323,11 @@
             <i class="fas fa-spinner fa-spin" style="font-size: 2rem;"></i>
             <p style="margin-top: 0.5rem;">Cargando historial...</p>
           </div>
-          <div *ngIf="!historialLoading && historialCitas.length === 0" class="empty-state">
+          <div *ngIf="!historialLoading && filteredHistorial.length === 0" class="empty-state">
             <i class="fas fa-history"></i>
             <p>No hay registros de actividad aún</p>
           </div>
-          <div class="table-container" *ngIf="!historialLoading && historialCitas.length > 0">
+          <div class="table-container" *ngIf="!historialLoading && filteredHistorial.length > 0">
             <table class="data-table">
               <thead>
                 <tr>
