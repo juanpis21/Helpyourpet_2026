@@ -1195,6 +1195,8 @@
   input,
   select,
   textarea {
+    width: 100%;
+    box-sizing: border-box;
     padding: 0.65rem 0.9rem;
     font-size: 0.95rem;
     border: 1.5px solid var(--border-color);
@@ -2635,6 +2637,21 @@ textarea {
 /* ===== MODAL DE VER MASCOTA NATIVO ===== */
 .pet-ver-modal-box {
   max-width: 600px !important;
+}
+
+/* ===== MODAL DE CITAS MÉDICAS ===== */
+.cita-modal-box {
+  max-width: 680px !important;
+
+  .form-grid {
+    gap: 1.25rem 1rem !important;
+  }
+
+  input,
+  select {
+    padding: 0.75rem 1rem !important;
+    border-radius: 10px !important;
+  }
 }
 
 .pet-ver-modal-header {

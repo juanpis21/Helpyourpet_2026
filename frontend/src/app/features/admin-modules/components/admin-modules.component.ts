@@ -238,6 +238,13 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
   };
 
+  // Método para verificar si la veterinaria del admin está activa
+  isVeterinariaActiva(): boolean {
+    if (!this.adminUser.veterinariaId) return false;
+    const veterinaria = this.veterinarias.find(v => v.id === this.adminUser.veterinariaId);
+    return veterinaria ? veterinaria.isActive === true : false;
+  }
+
   adminProfilePreview: string | null = null;
 
   selectedAdminFile: File | null = null;
@@ -723,11 +730,17 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
     if (userCtx) {
 
-      const activeUsers = this.usuarios.filter(u => u.isActive !== false).length + this.veterinarios.filter(v => v.isActive !== false).length;
+      // Verificar que los arrays estén definidos y tengan datos
+      const totalUsers = this.usuarios && Array.isArray(this.usuarios) ? this.usuarios.length : 0;
 
-      const inactiveUsers = this.usuarios.filter(u => u.isActive === false).length + this.veterinarios.filter(v => v.isActive === false).length;
+      const activeUsers = this.usuarios?.filter(u => u && u.isActive !== false).length || 0;
 
-      
+      const inactiveUsers = this.usuarios?.filter(u => u && u.isActive === false).length || 0;
+
+      // Si no hay usuarios cargados, mostrar 0
+      const chartData = totalUsers === 0 ? [0, 0] : [activeUsers, inactiveUsers];
+
+      console.log('📊 [DEBUG] Gráfico usuarios - Total:', totalUsers, 'Activos:', activeUsers, 'Inactivos:', inactiveUsers);
 
       this.userChart = new Chart(userCtx, {
 
@@ -739,7 +752,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
           datasets: [{
 
-            data: [activeUsers, inactiveUsers],
+            data: chartData,
 
             backgroundColor: ['#10b981', '#ef4444'],
 
@@ -1087,6 +1100,12 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
           this.usuarios = data;
 
+        }
+
+        console.log('👥 [DEBUG] Usuarios cargados:', this.usuarios.length, this.usuarios);
+
+        if (this.activeSection === 'dashboard') {
+          setTimeout(() => this.initCharts(), 0);
         }
 
       },
@@ -1612,9 +1631,11 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
   // CRUD SERVICIOS
 
   openAddServiceModal(): void {
-
+    if (!this.isVeterinariaActiva()) {
+      this.showToast('No puedes agregar servicios porque tu veterinaria está desactivada', 'warning');
+      return;
+    }
     this.showAddServiceModal = true;
-
   }
 
 
@@ -1699,6 +1720,13 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
       return;
 
+    }
+
+    // Verificar si la veterinaria seleccionada está activa
+    const veterinariaSeleccionada = this.veterinarias.find(v => v.id === this.newService.veterinariaId);
+    if (veterinariaSeleccionada && veterinariaSeleccionada.isActive === false) {
+      this.showToast('No puedes crear servicios para una veterinaria desactivada', 'warning');
+      return;
     }
 
     if (this.newService.tiempoColchonMinutos === undefined || this.newService.tiempoColchonMinutos === null || String(this.newService.tiempoColchonMinutos).trim() === '') {
@@ -1794,6 +1822,13 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
   guardarEdicionServicio(): void {
 
     if (!this.editingService.id) return;
+
+    // Verificar si la veterinaria seleccionada está activa
+    const veterinariaSeleccionada = this.veterinarias.find(v => v.id === this.editingService.veterinariaId);
+    if (veterinariaSeleccionada && veterinariaSeleccionada.isActive === false) {
+      this.showToast('No puedes editar servicios de una veterinaria desactivada', 'warning');
+      return;
+    }
 
     if (this.editingService.tiempoColchonMinutos === undefined || this.editingService.tiempoColchonMinutos === null || String(this.editingService.tiempoColchonMinutos).trim() === '') {
 
@@ -2074,6 +2109,10 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
         }
 
+        if (this.activeSection === 'dashboard') {
+          setTimeout(() => this.initCharts(), 0);
+        }
+
       },
 
       error: (err) => console.error('Error al cargar productos:', err)
@@ -2110,9 +2149,11 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
 
   openAddProductoModal(): void {
-
+    if (!this.isVeterinariaActiva()) {
+      this.showToast('No puedes agregar productos porque tu veterinaria está desactivada', 'warning');
+      return;
+    }
     this.showAddProductoModal = true;
-
   }
 
 
@@ -2167,7 +2208,12 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
     }
 
-
+    // Verificar si la veterinaria seleccionada está activa
+    const veterinariaSeleccionada = this.veterinarias.find(v => v.id === this.newProducto.veterinariaId);
+    if (veterinariaSeleccionada && veterinariaSeleccionada.isActive === false) {
+      this.showToast('No puedes crear productos para una veterinaria desactivada', 'warning');
+      return;
+    }
 
     // Usar FormData para permitir subida de imagen
 
@@ -2271,7 +2317,12 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
     if (!this.editingProducto.id) return;
 
-
+    // Verificar si la veterinaria seleccionada está activa
+    const veterinariaSeleccionada = this.veterinarias.find(v => v.id === this.editingProducto.veterinariaId);
+    if (veterinariaSeleccionada && veterinariaSeleccionada.isActive === false) {
+      this.showToast('No puedes editar productos de una veterinaria desactivada', 'warning');
+      return;
+    }
 
     // Usar FormData
 
@@ -2428,7 +2479,10 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
   // ========== CRUD CATEGORÍAS ==========
 
   openAddCategoriaModal(): void {
-
+    if (!this.isVeterinariaActiva()) {
+      this.showToast('No puedes agregar categorías porque tu veterinaria está desactivada', 'warning');
+      return;
+    }
     this.newCategoria = {
 
       nombre: '',
@@ -2471,7 +2525,12 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
     }
 
-
+    // Verificar si la veterinaria seleccionada está activa
+    const veterinariaSeleccionada = this.veterinarias.find(v => v.id === this.newCategoria.veterinariaId);
+    if (veterinariaSeleccionada && veterinariaSeleccionada.isActive === false) {
+      this.showToast('No puedes crear categorías para una veterinaria desactivada', 'warning');
+      return;
+    }
 
     this.categoriasService.create(this.newCategoria).subscribe({
 
@@ -2516,6 +2575,13 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
   guardarEdicionCategoria(): void {
 
     if (!this.editingCategoria.id) return;
+
+    // Verificar si la veterinaria seleccionada está activa
+    const veterinariaSeleccionada = this.veterinarias.find(v => v.id === this.editingCategoria.veterinariaId);
+    if (veterinariaSeleccionada && veterinariaSeleccionada.isActive === false) {
+      this.showToast('No puedes editar categorías de una veterinaria desactivada', 'warning');
+      return;
+    }
 
     const { id, createdAt, updatedAt, ...updateData } = this.editingCategoria as any;
 
@@ -2893,6 +2959,8 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
         // Recargar usuarios filtrados según los veterinarios de esta veterinaria
 
         this.cargarUsuarios();
+
+        console.log('👨‍⚕️ [DEBUG] Veterinarios finales cargados:', this.veterinarios.length, this.veterinarios);
 
       },
 
