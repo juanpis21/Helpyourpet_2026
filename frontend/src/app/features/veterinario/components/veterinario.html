@@ -143,9 +143,8 @@
           </h5>
           <div style="display: flex; gap: 1rem; align-items: center;">
             <div class="search-box">
-              <i class="fas fa-calendar-alt" style="margin-right: 0.5rem; color: #fff;"></i>
               <input type="date" [(ngModel)]="historialSearchDate" (change)="historialPage = 1"
-                style="padding-left: 2.5rem; color: var(--text-primary);">
+                style="padding: 0.5rem 0.8rem; color: var(--text-primary); border: 1px solid var(--border-color); background: var(--bg-card); border-radius: 8px; font-size: 0.9rem;">
             </div>
             <span class="results-count" style="color: white; font-weight: 600;">Total: {{ filteredHistorial.length
               }}</span>
