@@ -65,6 +65,7 @@ import { AnnouncementsModule } from './announcements/announcements.module';
 import { Announcement } from './announcements/entities/announcement.entity';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { AuditLog } from './audit-logs/entities/audit-log.entity';
+import { StripeModule } from './stripe/stripe.module';
 
 @Module({
   imports: [
@@ -135,6 +136,7 @@ import { AuditLog } from './audit-logs/entities/audit-log.entity';
     TicketsModule,
     AnnouncementsModule,
     AuditLogsModule,
+    StripeModule,
   ],
   providers: [
     {

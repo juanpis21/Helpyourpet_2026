@@ -19,6 +19,9 @@ export default () => ({
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
+  stripe: {
+    secretKey: process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder',
+  },
   cors: {
     origin: true,
     credentials: true,
