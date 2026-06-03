@@ -30,7 +30,9 @@ export class Venta {
   @OneToMany(() => DetalleVenta, detalle => detalle.venta, { cascade: true })
   detalles: DetalleVenta[];
 
-  // Nota: Dejamos el campo 'pago' para el futuro cuando implementemos el módulo de Pagos.
+  @ApiProperty({ description: 'Estado de la venta', example: 'Pendiente' })
+  @Column({ type: 'varchar', length: 50, default: 'Pendiente' })
+  estado: string;
 
   @ApiProperty({ description: 'Fecha en que se registró la venta' })
   @CreateDateColumn()
