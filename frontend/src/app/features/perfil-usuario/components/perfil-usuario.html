@@ -409,23 +409,31 @@
         </div>
       </div>
 
-      <!-- Tabs de estados -->
-      <div class="compras-tabs" *ngIf="misCompras.length > 0">
-        <div class="compras-tabs-list">
-          <button class="compra-tab-btn" [class.active]="tabComprasActiva === 'todas'" (click)="setTabCompras('todas')">
-            <i class="fas fa-list-alt"></i> Todas ({{ getComprasCount('todas') }})
-          </button>
-          <button class="compra-tab-btn" [class.active]="tabComprasActiva === 'pendiente'" (click)="setTabCompras('pendiente')">
-            <i class="fas fa-clock"></i> Pendientes ({{ getComprasCount('pendiente') }})
-          </button>
-          <button class="compra-tab-btn" [class.active]="tabComprasActiva === 'enviado'" (click)="setTabCompras('enviado')">
-            <i class="fas fa-truck"></i> Enviadas ({{ getComprasCount('enviado') }})
-          </button>
-          <button class="compra-tab-btn" [class.active]="tabComprasActiva === 'entregado'" (click)="setTabCompras('entregado')">
-            <i class="fas fa-check-circle"></i> Entregadas ({{ getComprasCount('entregado') }})
-          </button>
-          <button class="compra-tab-btn" [class.active]="tabComprasActiva === 'cancelado'" (click)="setTabCompras('cancelado')">
-            <i class="fas fa-times-circle"></i> Canceladas ({{ getComprasCount('cancelado') }})
+      <!-- Tabs de estados y controles de ordenamiento -->
+      <div class="compras-controls" *ngIf="misCompras.length > 0">
+        <div class="compras-tabs">
+          <div class="compras-tabs-list">
+            <button class="compra-tab-btn" [class.active]="tabComprasActiva === 'todas'" (click)="setTabCompras('todas')">
+              <i class="fas fa-list-alt"></i> Todas ({{ getComprasCount('todas') }})
+            </button>
+            <button class="compra-tab-btn" [class.active]="tabComprasActiva === 'pendiente'" (click)="setTabCompras('pendiente')">
+              <i class="fas fa-clock"></i> Pendientes ({{ getComprasCount('pendiente') }})
+            </button>
+          </div>
+        </div>
+
+        <div class="compras-sort-filter">
+          <div class="sort-selector">
+            <i class="fas fa-sort"></i>
+            <select [(ngModel)]="sortOption" (change)="setSortOption(sortOption)" class="sort-select">
+              <option value="masRecientes">Más recientes</option>
+              <option value="masAntiguas">Más antiguas</option>
+              <option value="mayorTotal">Mayor total</option>
+              <option value="menorTotal">Menor total</option>
+            </select>
+          </div>
+          <button class="filter-icon-btn">
+            <i class="fas fa-filter"></i>
           </button>
         </div>
       </div>
@@ -490,20 +498,6 @@
                   <i class="fas fa-eye"></i> Ver Detalles
                 </button>
               </div>
-            </div>
-          </div>
-
-          <!-- Tarjeta de ayuda / soporte -->
-          <div class="compra-help-card">
-            <div class="help-icon-box">
-              <i class="fas fa-headset"></i>
-            </div>
-            <div class="help-content">
-              <h4>¿Necesitas ayuda con tu compra?</h4>
-              <p>Si tienes algún problema con tu pedido, puedes contactarnos desde soporte.</p>
-              <button class="btn-go-support" (click)="cambiarSeccion('tickets')">
-                <i class="fas fa-headset"></i> Ir a Soporte / Tickets
-              </button>
             </div>
           </div>
         </div>

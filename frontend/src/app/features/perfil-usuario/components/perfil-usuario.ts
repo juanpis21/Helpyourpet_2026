@@ -81,6 +81,7 @@ export class PerfilUsuario implements OnInit, OnDestroy {
   limitCompras = 4;
   showVerCompraModal = false;
   selectedCompraForModal: any = null;
+  sortOption = 'masRecientes'; // 'masRecientes', 'masAntiguas', 'mayorTotal', 'menorTotal'
 
   togglePubMenu(id: number, event: Event): void {
     event.stopPropagation();
@@ -1932,18 +1933,42 @@ export class PerfilUsuario implements OnInit, OnDestroy {
   }
 
   filtrarCompras(): void {
+    let filtered: any[];
     if (this.tabComprasActiva === 'todas') {
-      this.comprasFiltradas = this.misCompras;
+      filtered = [...this.misCompras];
     } else {
-      this.comprasFiltradas = this.misCompras.filter(c => 
+      filtered = this.misCompras.filter(c => 
         (c.estado || 'Pendiente').toLowerCase() === this.tabComprasActiva.toLowerCase()
       );
     }
+
+    // Sorting
+    switch (this.sortOption) {
+      case 'masRecientes':
+        filtered.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+        break;
+      case 'masAntiguas':
+        filtered.sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime());
+        break;
+      case 'mayorTotal':
+        filtered.sort((a, b) => (b.total || 0) - (a.total || 0));
+        break;
+      case 'menorTotal':
+        filtered.sort((a, b) => (a.total || 0) - (b.total || 0));
+        break;
+    }
+
+    this.comprasFiltradas = filtered;
     this.pageCompras = 1;
   }
 
   setTabCompras(tab: string): void {
     this.tabComprasActiva = tab;
+    this.filtrarCompras();
+  }
+
+  setSortOption(option: string): void {
+    this.sortOption = option;
     this.filtrarCompras();
   }
 
