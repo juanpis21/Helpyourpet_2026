@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewEncapsulation, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import Swal from 'sweetalert2';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
@@ -20,6 +20,7 @@ import { PreloaderComponent } from '../../../shared/components/preloader/preload
   templateUrl: './tienda.html',
   styleUrl: './tienda.scss',
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Tienda implements OnInit, OnDestroy {
   // Control de vistas: 'tiendas' | 'productos'
@@ -99,6 +100,7 @@ export class Tienda implements OnInit, OnDestroy {
 
   confirmarVentaStripe(): void {
     this.cargandoProductos = true;
+    this.cdr.detectChanges();
     const token = this.authService.getToken();
     const headers = { 'Authorization': `Bearer ${token}` };
 
@@ -111,6 +113,7 @@ export class Tienda implements OnInit, OnDestroy {
         this.cargandoProductos = false;
         this.carrito = [];
         localStorage.removeItem('checkoutCart');
+        this.cdr.detectChanges();
         this.router.navigate([], { queryParams: {} });
 
         Swal.fire({
@@ -122,6 +125,7 @@ export class Tienda implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.cargandoProductos = false;
+        this.cdr.detectChanges();
         this.router.navigate([], { queryParams: {} });
         console.error('Error al procesar checkout de Stripe:', err);
         Swal.fire({
@@ -169,17 +173,16 @@ export class Tienda implements OnInit, OnDestroy {
 
   seleccionarTienda(tienda: any): void {
     this.tiendaSeleccionada = tienda;
-    // Show preloader while loading products
-    this.cargandoProductos = true;
+    
+    // Defer state change to avoid NG0100
+    setTimeout(() => {
+      this.cargandoProductos = true;
+      this.vista = 'productos';
+      this.cdr.detectChanges();
+    });
+
     this.cargarProductosTienda(tienda.id);
-
-    // Cambiar a vista de productos
-    this.vista = 'productos';
-
-    // Iniciar carrusel automático al entrar a productos
     this.iniciarCarrusel();
-
-    // Scroll al inicio
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -226,14 +229,18 @@ export class Tienda implements OnInit, OnDestroy {
               stockActual: p.stockActual
             };
           });
-        this.cdr.detectChanges();
-        // Loading complete
-        this.cargandoProductos = false;
+        setTimeout(() => {
+          this.cargandoProductos = false;
+          this.cdr.detectChanges();
+        });
       },
       error: (error) => {
         console.error('❌ Error al cargar productos:', error);
         this.productos = [];
-        this.cargandoProductos = false;
+        setTimeout(() => {
+          this.cargandoProductos = false;
+          this.cdr.detectChanges();
+        });
       }
     });
   }
@@ -438,7 +445,11 @@ export class Tienda implements OnInit, OnDestroy {
         )
       );
 
-      this.cargandoProductos = false;
+      setTimeout(() => {
+        this.cargandoProductos = false;
+        this.cdr.detectChanges();
+      });
+      
       if (res && res.url) {
         window.location.href = res.url;
       } else {
@@ -450,7 +461,10 @@ export class Tienda implements OnInit, OnDestroy {
         });
       }
     } catch (err: any) {
-      this.cargandoProductos = false;
+      setTimeout(() => {
+        this.cargandoProductos = false;
+        this.cdr.detectChanges();
+      });
       console.error('Error al procesar pago/checkout:', err);
       Swal.fire({
         icon: 'error',
@@ -475,10 +489,12 @@ export class Tienda implements OnInit, OnDestroy {
 
   siguienteSlide(): void {
     this.slideActual = (this.slideActual + 1) % 3;
+    this.cdr.markForCheck();
   }
 
   anteriorSlide(): void {
     this.slideActual = (this.slideActual - 1 + 3) % 3;
+    this.cdr.markForCheck();
   }
 
   // ===== MODO OSCURO =====

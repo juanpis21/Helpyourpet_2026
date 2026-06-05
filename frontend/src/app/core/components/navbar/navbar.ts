@@ -84,19 +84,20 @@ export class Navbar implements OnInit {
   }
 
   get isInicio(): boolean {
-    return this.router.url === '/inicio';
+    return this.router.url.split('?')[0] === '/inicio';
   }
 
   get isTienda(): boolean {
-    return this.router.url === '/tienda';
+    return this.router.url.split('?')[0] === '/tienda';
   }
 
   get isSobreNosotros(): boolean {
-    return this.router.url === '/sobre-nosotros';
+    return this.router.url.split('?')[0] === '/sobre-nosotros';
   }
 
   get isPerfil(): boolean {
-    return this.router.url === '/perfil-usuario' || this.router.url === '/veterinario';
+    const path = this.router.url.split('?')[0];
+    return path === '/perfil-usuario' || path === '/veterinario';
   }
 
   get isVeterinario(): boolean {

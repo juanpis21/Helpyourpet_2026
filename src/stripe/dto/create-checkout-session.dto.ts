@@ -1,15 +1,50 @@
+import { IsArray, IsNumber, IsString, ValidateNested, IsObject, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
+
+class StripeItemDto {
+  @IsString()
+  name: string;
+
+  @IsNumber()
+  @Type(() => Number)
+  price: number;
+
+  @IsNumber()
+  @Type(() => Number)
+  quantity: number;
+}
+
+class ShippingDto {
+  @IsString()
+  fullName: string;
+
+  @IsString()
+  address: string;
+
+  @IsString()
+  city: string;
+
+  @IsString()
+  phone: string;
+}
+
 export class CreateCheckoutSessionDto {
-  items: Array<{
-    name: string;
-    price: number;
-    quantity: number;
-  }>;
-  shipping: {
-    fullName: string;
-    address: string;
-    city: string;
-    phone: string;
-  };
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => StripeItemDto)
+  items: StripeItemDto[];
+
+  @IsObject()
+  @ValidateNested()
+  @Type(() => ShippingDto)
+  shipping: ShippingDto;
+
+  @IsString()
+  @IsOptional()
   paymentMethod: string;
+
+  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
   total: number;
 }
