@@ -71,6 +71,7 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
   showAddVeterinariaModal: boolean = false;
   showEditVeterinariaModal: boolean = false;
   showNewAdminModal: boolean = false;
+  showEditAdminModal: boolean = false;
   showCreateAnnouncementModal: boolean = false;
   showEditAnnouncementModal: boolean = false;
   showTicketDetailsModal: boolean = false;
@@ -101,6 +102,7 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
     password: '',
     confirmPassword: ''
   };
+  editingAdmin: any = {};
   newAnnouncement: CreateAnnouncementDto = {
     titulo: '',
     mensaje: '',
@@ -528,7 +530,10 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
   // ===== ROLES =====
   loadRoles(): void {
     this.rolesService.getRoles().subscribe({
-      next: (data) => this.roles = data,
+      next: (data) => {
+        this.roles = data;
+        this.cdr.detectChanges();
+      },
       error: (err) => console.error('Error loading roles:', err)
     });
   }
@@ -600,12 +605,29 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
   }
 
   deleteRole(id: number): void {
-    if (confirm('¿Estás seguro de eliminar este rol?')) {
-      this.rolesService.delete(id).subscribe({
-        next: () => this.loadRoles(),
-        error: (err) => console.error('Error deleting role:', err)
-      });
-    }
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'No podrás revertir esta acción',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.rolesService.delete(id).subscribe({
+          next: () => {
+            this.loadRoles();
+            Swal.fire('¡Eliminado!', 'El rol ha sido eliminado correctamente', 'success');
+          },
+          error: (err) => {
+            console.error('Error deleting role:', err);
+            Swal.fire('Error', 'No se pudo eliminar el rol', 'error');
+          }
+        });
+      }
+    });
   }
 
   // ===== MODULES & PERMISSIONS =====
@@ -793,40 +815,123 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
     };
   }
 
-  saveNewAdmin(): void {
+  openEditAdminModal(user: any): void {
+    this.editingAdmin = {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phone: user.phone,
+      age: user.age,
+      documentType: user.documentType,
+      documentNumber: user.documentNumber,
+      address: user.address,
+      roleId: user.roleId // Mantener el rol actual, no se puede editar
+    };
+    this.showEditAdminModal = true;
+  }
+
+  closeEditAdminModal(): void {
+    this.showEditAdminModal = false;
+    this.editingAdmin = {};
+  }
+
+  saveEditedAdmin(): void {
     // Validaciones
-    if (!this.newAdmin.firstName || !this.newAdmin.lastName || !this.newAdmin.email ||
-      !this.newAdmin.documentType || !this.newAdmin.documentNumber ||
-      !this.newAdmin.age || !this.newAdmin.password) {
+    if (!this.editingAdmin.firstName || !this.editingAdmin.lastName || !this.editingAdmin.email ||
+      !this.editingAdmin.documentType || !this.editingAdmin.documentNumber ||
+      !this.editingAdmin.age) {
       alert('Por favor, completa todos los campos obligatorios');
       return;
     }
 
-    if (this.newAdmin.firstName.length < 2 || this.newAdmin.lastName.length < 2) {
+    if (this.editingAdmin.firstName.length < 2 || this.editingAdmin.lastName.length < 2) {
       alert('El nombre y apellido deben tener al menos 2 caracteres');
       return;
     }
 
-    if (this.newAdmin.password.length < 6) {
-      alert('La contraseña debe tener al menos 6 caracteres');
-      return;
-    }
-
-
-    if (this.newAdmin.age < 18) {
+    if (this.editingAdmin.age < 18) {
       alert('El administrador debe ser mayor de 18 años');
       return;
     }
 
-    if (this.newAdmin.documentNumber.length < 5) {
+    if (this.editingAdmin.documentNumber.length < 5) {
       alert('El número de documento debe tener al menos 5 caracteres');
       return;
     }
 
     // Validar formato de email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(this.newAdmin.email)) {
+    if (!emailRegex.test(this.editingAdmin.email)) {
       alert('Por favor, ingresa un correo electrónico válido');
+      return;
+    }
+
+    // Preparar el payload para enviar al backend (solo información privada)
+    const adminPayload = {
+      firstName: this.editingAdmin.firstName.trim(),
+      lastName: this.editingAdmin.lastName.trim(),
+      email: this.editingAdmin.email.trim().toLowerCase(),
+      phone: this.editingAdmin.phone?.trim() || null,
+      documentType: this.editingAdmin.documentType,
+      documentNumber: this.editingAdmin.documentNumber.trim(),
+      address: this.editingAdmin.address?.trim() || null,
+      age: parseInt(this.editingAdmin.age),
+      roleId: this.editingAdmin.roleId // Mantener el rol actual
+    };
+
+    console.log('📦 Enviando datos de edición de administrador:', adminPayload);
+
+    // Llamar al servicio para actualizar el usuario
+    this.usersService.updateUser(this.editingAdmin.id, adminPayload).subscribe({
+      next: (response) => {
+        console.log('✅ Administrador actualizado exitosamente:', response);
+        this.closeEditAdminModal();
+        this.loadGlobalData();
+        Swal.fire('¡Actualizado!', 'Administrador actualizado correctamente', 'success');
+      },
+      error: (err) => {
+        console.error('❌ Error al actualizar administrador:', err);
+        const errorMessage = err.error?.message || err.message || 'Error desconocido';
+        Swal.fire('Error', 'Error al actualizar administrador: ' + errorMessage, 'error');
+      }
+    });
+  }
+
+  saveNewAdmin(): void {
+    // Validaciones
+    if (!this.newAdmin.firstName || !this.newAdmin.lastName || !this.newAdmin.email ||
+      !this.newAdmin.documentType || !this.newAdmin.documentNumber ||
+      !this.newAdmin.age || !this.newAdmin.password) {
+      Swal.fire('Error', 'Por favor, completa todos los campos obligatorios', 'warning');
+      return;
+    }
+
+    if (this.newAdmin.firstName.length < 2 || this.newAdmin.lastName.length < 2) {
+      Swal.fire('Error', 'El nombre y apellido deben tener al menos 2 caracteres', 'warning');
+      return;
+    }
+
+    if (this.newAdmin.password.length < 6) {
+      Swal.fire('Error', 'La contraseña debe tener al menos 6 caracteres', 'warning');
+      return;
+    }
+
+
+    if (this.newAdmin.age < 18) {
+      Swal.fire('Error', 'El administrador debe ser mayor de 18 años', 'warning');
+      return;
+    }
+
+    if (this.newAdmin.documentNumber.length < 5) {
+      Swal.fire('Error', 'El número de documento debe tener al menos 5 caracteres', 'warning');
+      return;
+    }
+
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.newAdmin.email)) {
+      Swal.fire('Error', 'Por favor, ingresa un correo electrónico válido', 'warning');
       return;
     }
 
@@ -865,7 +970,7 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
       error: (err) => {
         console.error('❌ Error al crear administrador:', err);
         const errorMessage = err.error?.message || err.message || 'Error desconocido';
-        alert('Error al crear administrador: ' + errorMessage);
+        Swal.fire('Error', 'Error al crear administrador: ' + errorMessage, 'error');
       }
     });
   }

@@ -279,6 +279,7 @@
                   <th>Email</th>
                   <th>Teléfono</th>
                   <th>Rol</th>
+                  <th>Descripción Rol</th>
                   <th>Estado</th>
                   <th>Acciones</th>
                 </tr>
@@ -294,19 +295,25 @@
                   <td>{{ user.email }}</td>
                   <td>{{ user.phone || 'N/A' }}</td>
                   <td><span class="badge">{{ user.role?.name || 'usuario' }}</span></td>
+                  <td><small>{{ user.role?.description || 'Sin descripción' }}</small></td>
                   <td>
                     <span class="status-pill" [class.active]="user.isActive">
                       {{ user.isActive ? 'Activo' : 'Inactivo' }}
                     </span>
                   </td>
                   <td>
-                    <button class="btn-icon" 
-                            [class.delete]="user.isActive" 
-                            [class.edit]="!user.isActive"
-                            (click)="toggleUserStatus(user)"
-                            [title]="user.isActive ? 'Desactivar Usuario' : 'Activar Usuario'">
-                      <i class="fas" [ngClass]="user.isActive ? 'fa-user-slash' : 'fa-user-check'"></i>
-                    </button>
+                    <div class="actions">
+                      <button class="btn-icon edit" (click)="openEditAdminModal(user)" title="Editar Administrador">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button class="btn-icon" 
+                              [class.delete]="user.isActive" 
+                              [class.edit]="!user.isActive"
+                              (click)="toggleUserStatus(user)"
+                              [title]="user.isActive ? 'Desactivar Usuario' : 'Activar Usuario'">
+                        <i class="fas" [ngClass]="user.isActive ? 'fa-user-slash' : 'fa-user-check'"></i>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -1038,6 +1045,91 @@
       </button>
       <button class="btn-primary" (click)="saveNewAdmin()">
         <i class="fas fa-save"></i> Guardar Administrador
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para Editar Administrador -->
+<div class="modal-overlay" *ngIf="showEditAdminModal" (click)="closeEditAdminModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Editar Información del Administrador</h3>
+      <button class="close-btn" (click)="closeEditAdminModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nombre *</label>
+          <input type="text"
+                 name="firstName"
+                 [(ngModel)]="editingAdmin.firstName"
+                 placeholder="Ej: Juan"
+                 maxlength="100">
+        </div>
+        <div class="form-group">
+          <label>Apellido *</label>
+          <input type="text"
+                 name="lastName"
+                 [(ngModel)]="editingAdmin.lastName"
+                 placeholder="Ej: Pérez"
+                 maxlength="100">
+        </div>
+        <div class="form-group full">
+          <label>Correo Electrónico *</label>
+          <input type="email"
+                 name="email"
+                 [(ngModel)]="editingAdmin.email"
+                 placeholder="Ej: juan.perez@ejemplo.com">
+        </div>
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="tel"
+                 name="phone"
+                 [(ngModel)]="editingAdmin.phone"
+                 placeholder="Ej: +57 300 123 4567">
+        </div>
+        <div class="form-group">
+          <label>Edad *</label>
+          <input type="number"
+                 name="age"
+                 [(ngModel)]="editingAdmin.age"
+                 placeholder="Solo mayores de 18 años"
+                 min="18"
+                 max="120">
+        </div>
+        <div class="form-group">
+          <label>Tipo de Documento *</label>
+          <select name="documentType" [(ngModel)]="editingAdmin.documentType" class="form-control">
+            <option [ngValue]="undefined">-- Selecciona tu tipo de documento --</option>
+            <option value="CC">Cédula de Ciudadanía</option>
+            <option value="CE">Cédula de Extranjería</option>
+            <option value="PASS">Pasaporte</option>
+            <option value="TI">Tarjeta de Identidad</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>N° Documento *</label>
+          <input type="text"
+                 name="documentNumber"
+                 [(ngModel)]="editingAdmin.documentNumber"
+                 placeholder="Número de documento">
+        </div>
+        <div class="form-group full">
+          <label>Dirección</label>
+          <input type="text"
+                 name="address"
+                 [(ngModel)]="editingAdmin.address"
+                 placeholder="Ej: Calle 123 #45-67">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeEditAdminModal()">
+        <i class="fas fa-times"></i> Cancelar
+      </button>
+      <button class="btn-primary" (click)="saveEditedAdmin()">
+        <i class="fas fa-save"></i> Guardar Cambios
       </button>
     </div>
   </div>

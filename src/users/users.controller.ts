@@ -73,7 +73,8 @@ export class UsersController {
     const user = req.user;
     const isOwner = user.userId === +id || user.id === +id;
     const isAdmin = user.role?.name === 'admin' || user.role?.name === 'superadmin' || user.role === 'admin' || user.role === 'superadmin';
-    if (!isOwner && !isAdmin) {
+    const isVeterinario = user.role?.name === 'veterinario' || user.role === 'veterinario';
+    if (!isOwner && !isAdmin && !isVeterinario) {
       throw new ForbiddenException('No tienes permiso para acceder a este recurso.');
     }
     return this.usersService.findOne(+id);
@@ -124,7 +125,8 @@ export class UsersController {
     const user = req.user;
     const isOwner = user.userId === +id || user.id === +id;
     const isAdmin = user.role?.name === 'admin' || user.role?.name === 'superadmin' || user.role === 'admin' || user.role === 'superadmin';
-    if (!isOwner && !isAdmin) {
+    const isVeterinario = user.role?.name === 'veterinario' || user.role === 'veterinario';
+    if (!isOwner && !isAdmin && !isVeterinario) {
       throw new ForbiddenException('No tienes permiso para modificar este recurso.');
     }
     if (file) {

@@ -409,13 +409,110 @@
         </div>
       </div>
 
-      <div class="empty-state large">
+      <!-- Tabs de estados y controles de ordenamiento -->
+      <div class="compras-controls" *ngIf="misCompras.length > 0">
+        <div class="compras-tabs">
+          <div class="compras-tabs-list">
+            <button class="compra-tab-btn" [class.active]="tabComprasActiva === 'todas'" (click)="setTabCompras('todas')">
+              <i class="fas fa-list-alt"></i> Todas ({{ getComprasCount('todas') }})
+            </button>
+            <button class="compra-tab-btn" [class.active]="tabComprasActiva === 'pendiente'" (click)="setTabCompras('pendiente')">
+              <i class="fas fa-clock"></i> Pendientes ({{ getComprasCount('pendiente') }})
+            </button>
+          </div>
+        </div>
+
+        <div class="compras-sort-filter">
+          <div class="sort-selector">
+            <i class="fas fa-sort"></i>
+            <select [(ngModel)]="sortOption" (change)="setSortOption(sortOption)" class="sort-select">
+              <option value="masRecientes">Más recientes</option>
+              <option value="masAntiguas">Más antiguas</option>
+              <option value="mayorTotal">Mayor total</option>
+              <option value="menorTotal">Menor total</option>
+            </select>
+          </div>
+          <button class="filter-icon-btn">
+            <i class="fas fa-filter"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Sin compras generales -->
+      <div *ngIf="misCompras.length === 0" class="empty-state large">
         <i class="fas fa-shopping-cart"></i>
         <h4>No tienes compras registradas.</h4>
         <p>¡Visita nuestra tienda para encontrar productos para tu mascota!</p>
         <br>
         <button class="btn-primary btn-premium-tienda" (click)="irATienda()"><i class="fas fa-shopping-bag"></i>
           Explorar Tienda</button>
+      </div>
+
+      <!-- Sin compras en filtro activo -->
+      <div *ngIf="misCompras.length > 0 && comprasFiltradas.length === 0" class="empty-state">
+        <i class="fas fa-box-open"></i>
+        <h4>No hay compras en esta categoría.</h4>
+        <p>No se encontraron compras con el estado de "{{ tabComprasActiva | titlecase }}".</p>
+      </div>
+
+      <!-- Grid de Compras -->
+      <div *ngIf="comprasFiltradas.length > 0">
+        <div class="compras-grid">
+          <!-- Tarjeta de compra -->
+          <div *ngFor="let compra of getPaginatedCompras()" class="compra-card">
+            <div class="compra-card-left">
+              <div class="product-img-box">
+                <img [src]="compra.detalles[0]?.producto?.imagen || 'assets/images/Default.png'" 
+                     [alt]="compra.detalles[0]?.producto?.nombre" class="compra-prod-img">
+              </div>
+            </div>
+            <div class="compra-card-right">
+              <div class="compra-header-row">
+                <span class="compra-id">Pedido #HP-2026-{{ formatOrderId(compra.id) }}</span>
+                <span class="status-badge" [ngClass]="{
+                  'status-delivered': (compra.estado || 'Pendiente') === 'Entregado',
+                  'status-shipped': (compra.estado || 'Pendiente') === 'Enviado',
+                  'status-pending': (compra.estado || 'Pendiente') === 'Pendiente',
+                  'status-cancelled': (compra.estado || 'Pendiente') === 'Cancelado'
+                }">
+                  <i class="fas" [ngClass]="{
+                    'fa-check-circle': (compra.estado || 'Pendiente') === 'Entregado',
+                    'fa-truck': (compra.estado || 'Pendiente') === 'Enviado',
+                    'fa-clock': (compra.estado || 'Pendiente') === 'Pendiente',
+                    'fa-times-circle': (compra.estado || 'Pendiente') === 'Cancelado'
+                  }"></i>
+                  {{ compra.estado || 'Pendiente' }}
+                </span>
+              </div>
+              <div class="compra-date">{{ compra.fecha | date:'dd MMM, yyyy • h:mm a' }}</div>
+              <div class="compra-product-row">
+                <div class="compra-product-details">
+                  <span class="compra-prod-name">{{ compra.detalles[0]?.producto?.nombre || 'Producto' }}</span>
+                  <span class="compra-prod-qty">x {{ compra.detalles[0]?.cantidad || 1 }}</span>
+                </div>
+                <span class="compra-prod-price">{{ formatPrice(compra.detalles[0]?.precioUnitario) }}</span>
+              </div>
+              <div class="compra-footer-row">
+                <span class="compra-total">Total: {{ formatPrice(compra.total) }}</span>
+                <button class="btn-ver-detalles" (click)="verDetalleCompra(compra)">
+                  <i class="fas fa-eye"></i> Ver Detalles
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paginación de compras -->
+        <div class="pagination-container" *ngIf="getTotalPagesCompras() > 1" style="margin-top: 2rem;">
+          <button class="btn-pagination-prev" (click)="prevPageCompras()" [disabled]="pageCompras === 1">
+            <i class="fas fa-chevron-left"></i> Anterior
+          </button>
+          <span class="pagination-info">Página {{ pageCompras }} de {{ getTotalPagesCompras() }}</span>
+          <button class="btn-pagination-next" (click)="nextPageCompras()"
+            [disabled]="pageCompras === getTotalPagesCompras()">
+            Siguiente <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
       </div>
     </section>
 
@@ -864,7 +961,7 @@
 
 <!-- Modal de Crear Cita -->
 <div class="modal-overlay" *ngIf="showNuevaCitaModal" (click)="closeNuevaCitaModal()">
-  <div class="modal-box" (click)="$event.stopPropagation()">
+  <div class="modal-box cita-modal-box" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h3><i class="fas fa-calendar-plus"></i> Programar Nueva Cita</h3>
       <button class="close-btn" (click)="closeNuevaCitaModal()"><i class="fas fa-times"></i></button>
@@ -1067,6 +1164,62 @@
           {{ selectedMascotaForModal?.description || 'Sin observaciones o descripción.' }}
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Detalle de Compra -->
+<div class="modal-overlay" *ngIf="showVerCompraModal" (click)="closeVerCompraModal()">
+  <div class="modal-box compra-det-modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>
+        <i class="fas fa-receipt"></i> Detalle de Pedido #HP-2026-{{ formatOrderId(selectedCompraForModal?.id) }}
+      </h3>
+      <button class="close-btn" (click)="closeVerCompraModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="compra-modal-info">
+        <div class="compra-modal-meta">
+          <span><strong>Fecha:</strong> {{ selectedCompraForModal?.fecha | date:'dd MMMM, yyyy • h:mm a' }}</span>
+          <span class="status-badge" [ngClass]="{
+            'status-delivered': (selectedCompraForModal?.estado || 'Pendiente') === 'Entregado',
+            'status-shipped': (selectedCompraForModal?.estado || 'Pendiente') === 'Enviado',
+            'status-pending': (selectedCompraForModal?.estado || 'Pendiente') === 'Pendiente',
+            'status-cancelled': (selectedCompraForModal?.estado || 'Pendiente') === 'Cancelado'
+          }">
+            {{ selectedCompraForModal?.estado || 'Pendiente' }}
+          </span>
+        </div>
+      </div>
+      
+      <div class="compra-products-list">
+        <div *ngFor="let item of selectedCompraForModal?.detalles" class="compra-product-item">
+          <img [src]="item.producto?.imagen || 'assets/images/Default.png'" 
+               [alt]="item.producto?.nombre" class="compra-item-img">
+          <div class="compra-item-details">
+            <span class="compra-item-name">{{ item.producto?.nombre }}</span>
+            <span class="compra-item-meta">Precio Unitario: {{ formatPrice(item.precioUnitario) }}</span>
+          </div>
+          <div class="compra-item-qty-total">
+            <span class="compra-item-qty">Cant: {{ item.cantidad }}</span>
+            <span class="compra-item-total">{{ formatPrice(item.precioUnitario * item.cantidad) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="compra-modal-summary">
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span>{{ formatPrice(selectedCompraForModal?.subtotal) }}</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total de la Compra</span>
+          <span>{{ formatPrice(selectedCompraForModal?.total) }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-primary" (click)="closeVerCompraModal()"><i class="fas fa-check"></i> Cerrar Detalle</button>
     </div>
   </div>
 </div>

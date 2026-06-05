@@ -1,4 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, HostListener } from '@angular/core';
+import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -64,12 +65,23 @@ interface HistorialClinico {
   templateUrl: './perfil-usuario.html',
   styleUrl: './perfil-usuario.scss'
 })
-export class PerfilUsuario implements OnInit {
+export class PerfilUsuario implements OnInit, OnDestroy {
   seccionActiva = 'dashboard';
   sidebarAbierto = true;
   darkMode = false;
+  private themeSubscription!: Subscription;
   activePubMenuId: number | null = null;
   tabPublicacionesActiva = 'propias';
+  
+  // Purchases (Mis Compras) properties
+  misCompras: any[] = [];
+  comprasFiltradas: any[] = [];
+  tabComprasActiva = 'todas';
+  pageCompras = 1;
+  limitCompras = 4;
+  showVerCompraModal = false;
+  selectedCompraForModal: any = null;
+  sortOption = 'masRecientes'; // 'masRecientes', 'masAntiguas', 'mayorTotal', 'menorTotal'
 
   togglePubMenu(id: number, event: Event): void {
     event.stopPropagation();
@@ -304,9 +316,18 @@ export class PerfilUsuario implements OnInit {
 
   ngOnInit(): void {
     this.darkMode = this.themeService.isDarkMode;
-    this.themeService.darkMode$.subscribe(dark => this.darkMode = dark);
+    this.themeSubscription = this.themeService.darkMode$.subscribe(dark => {
+      this.darkMode = dark;
+      this.renderCharts();
+    });
 
     this.initializeUserData();
+  }
+
+  ngOnDestroy(): void {
+    if (this.themeSubscription) {
+      this.themeSubscription.unsubscribe();
+    }
   }
 
   @HostListener('window:resize')
@@ -531,9 +552,9 @@ export class PerfilUsuario implements OnInit {
 
     this.publicacionesService.actualizarPublicacion(this.editingPublicacion.id, formData).subscribe({
       next: () => {
-        Swal.fire('¡Éxito!', 'Publicación actualizada correctamente', 'success');
         this.closeEditarPublicacionModal();
         this.cargarPublicacionesUsuario();
+        Swal.fire('¡Éxito!', 'Publicación actualizada correctamente', 'success');
       },
       error: (err) => {
         console.error('Error al actualizar publicación:', err);
@@ -551,6 +572,9 @@ export class PerfilUsuario implements OnInit {
     if (seccion === 'citas') {
       this.cargarMisCitas();
       this.cargarDatosCita();
+    }
+    if (seccion === 'compras') {
+      this.cargarMisCompras();
     }
     if (seccion === 'dashboard') {
       this.cargarHistorialActividades().then(() => {
@@ -1871,5 +1895,126 @@ export class PerfilUsuario implements OnInit {
     if (!cita.veterinario) return 'Sin asignar';
     const v = cita.veterinario;
     return [v.firstName, v.lastName].filter(Boolean).join(' ') || v.fullName || v.email || 'Veterinario';
+  }
+
+  // ===== PURCHASES / MIS COMPRAS METHODS =====
+
+  cargarMisCompras(): void {
+    const token = localStorage.getItem('access_token');
+    this.http.get<any[]>('http://localhost:3000/ventas/mis-compras', {
+      headers: { Authorization: `Bearer ${token}` }
+    }).subscribe({
+      next: (compras) => {
+        this.misCompras = compras.map(c => {
+          c.total = Number(c.total);
+          c.subtotal = Number(c.subtotal);
+          if (c.detalles) {
+            c.detalles = c.detalles.map((d: any) => {
+              if (d.producto && d.producto.imagen && d.producto.imagen.startsWith('/uploads/')) {
+                d.producto.imagen = `http://localhost:3000${d.producto.imagen}`;
+              }
+              return d;
+            });
+          }
+          return c;
+        });
+        this.filtrarCompras();
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error al cargar compras:', err)
+    });
+  }
+
+  getComprasCount(estado: string): number {
+    if (estado === 'todas') {
+      return this.misCompras.length;
+    }
+    return this.misCompras.filter(c => (c.estado || 'Pendiente').toLowerCase() === estado.toLowerCase()).length;
+  }
+
+  filtrarCompras(): void {
+    let filtered: any[];
+    if (this.tabComprasActiva === 'todas') {
+      filtered = [...this.misCompras];
+    } else {
+      filtered = this.misCompras.filter(c => 
+        (c.estado || 'Pendiente').toLowerCase() === this.tabComprasActiva.toLowerCase()
+      );
+    }
+
+    // Sorting
+    switch (this.sortOption) {
+      case 'masRecientes':
+        filtered.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+        break;
+      case 'masAntiguas':
+        filtered.sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime());
+        break;
+      case 'mayorTotal':
+        filtered.sort((a, b) => (b.total || 0) - (a.total || 0));
+        break;
+      case 'menorTotal':
+        filtered.sort((a, b) => (a.total || 0) - (b.total || 0));
+        break;
+    }
+
+    this.comprasFiltradas = filtered;
+    this.pageCompras = 1;
+  }
+
+  setTabCompras(tab: string): void {
+    this.tabComprasActiva = tab;
+    this.filtrarCompras();
+  }
+
+  setSortOption(option: string): void {
+    this.sortOption = option;
+    this.filtrarCompras();
+  }
+
+  getPaginatedCompras(): any[] {
+    const maxPages = this.getTotalPagesCompras();
+    if (this.pageCompras > maxPages && maxPages > 0) {
+      this.pageCompras = maxPages;
+    }
+    const startIndex = (this.pageCompras - 1) * this.limitCompras;
+    return this.comprasFiltradas.slice(startIndex, startIndex + this.limitCompras);
+  }
+
+  getTotalPagesCompras(): number {
+    return Math.ceil(this.comprasFiltradas.length / this.limitCompras);
+  }
+
+  nextPageCompras(): void {
+    if (this.pageCompras < this.getTotalPagesCompras()) {
+      this.pageCompras++;
+    }
+  }
+
+  prevPageCompras(): void {
+    if (this.pageCompras > 1) {
+      this.pageCompras--;
+    }
+  }
+
+  verDetalleCompra(compra: any): void {
+    this.selectedCompraForModal = compra;
+    this.showVerCompraModal = true;
+  }
+
+  closeVerCompraModal(): void {
+    this.showVerCompraModal = false;
+    this.selectedCompraForModal = null;
+  }
+
+  formatPrice(price: any): string {
+    const num = Number(price);
+    if (isNaN(num)) return '$0';
+    return '$' + num.toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  }
+
+  formatOrderId(id: any): string {
+    if (!id) return '00000';
+    return String(id).padStart(5, '0');
   }
 }

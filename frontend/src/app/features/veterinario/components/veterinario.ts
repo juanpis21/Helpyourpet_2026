@@ -25,6 +25,7 @@ interface Mascota {
   weight: number;
   description?: string;
   ownerId?: number;
+  owner?: any;
   foto?: string;
 }
 
@@ -55,6 +56,8 @@ interface Usuario {
   matricula?: string;
   aniosExperiencia?: number;
   nombreVeterinaria?: string;
+  horaInicio?: string;
+  horaFin?: string;
 }
 
 @Component({
@@ -98,6 +101,10 @@ export class Veterinario implements OnInit {
   usuarios: any[] = [];
   publicaciones: any[] = [];
   citas: any[] = [];
+  
+  get citasProgramadasCount(): number {
+    return this.citas.filter(c => c.estado === 'Programada').length;
+  }
   veterinariaId: number | null = null;
 
   usuario: Usuario = {
@@ -149,6 +156,78 @@ export class Veterinario implements OnInit {
   hcMascotasFiltradas: any[] = [];
   hcLoading: boolean = false;
 
+  // Autocompletado Dueño (Historias Clínicas)
+  hcOwnerSearchQuery: string = '';
+  hcOwnerSearchResults: any[] = [];
+  showHcOwnerDropdown: boolean = false;
+
+  // Autocompletado Dueño (Programar Cita)
+  citaOwnerSearchQuery: string = '';
+  citaOwnerSearchResults: any[] = [];
+  showCitaOwnerDropdown: boolean = false;
+  citaMascotasFiltradas: any[] = [];
+
+  onCitaOwnerSearchInput(): void {
+    const q = this.citaOwnerSearchQuery.toLowerCase().trim();
+    if (!q) {
+      this.citaOwnerSearchResults = [];
+      this.showCitaOwnerDropdown = false;
+      this.citaMascotasFiltradas = [];
+      this.newCita.petId = null;
+      return;
+    }
+    this.citaOwnerSearchResults = this.usuarios.filter(u =>
+      (u.firstName + ' ' + u.lastName).toLowerCase().includes(q) ||
+      (u.documentNumber || '').toLowerCase().includes(q)
+    ).slice(0, 10);
+    this.showCitaOwnerDropdown = this.citaOwnerSearchResults.length > 0;
+  }
+
+  selectCitaOwner(user: any): void {
+    this.citaOwnerSearchQuery = user.firstName + ' ' + user.lastName;
+    this.citaOwnerSearchResults = [];
+    this.showCitaOwnerDropdown = false;
+    this.newCita.petId = null;
+    // Filtrar mascotas de este dueño
+    this.citaMascotasFiltradas = this.mascotas.filter(m =>
+      m.ownerId === user.id || m.owner?.id === user.id
+    );
+  }
+
+  // Autocompletado Dueño (Registrar Mascota)
+  ownerSearchQuery: string = '';
+  ownerSearchResults: any[] = [];
+  showOwnerDropdown: boolean = false;
+
+  onOwnerSearchInput(): void {
+    const q = this.ownerSearchQuery.toLowerCase().trim();
+    if (!q) {
+      this.ownerSearchResults = [];
+      this.showOwnerDropdown = false;
+      this.newPet.ownerId = undefined;
+      return;
+    }
+    this.ownerSearchResults = this.usuarios.filter(u =>
+      (u.firstName + ' ' + u.lastName).toLowerCase().includes(q) ||
+      (u.documentNumber || '').toLowerCase().includes(q)
+    ).slice(0, 10);
+    this.showOwnerDropdown = this.ownerSearchResults.length > 0;
+  }
+
+  selectOwner(user: any): void {
+    this.newPet.ownerId = user.id;
+    this.ownerSearchQuery = user.firstName + ' ' + user.lastName;
+    this.ownerSearchResults = [];
+    this.showOwnerDropdown = false;
+  }
+
+  clearOwnerSearch(): void {
+    this.ownerSearchQuery = '';
+    this.ownerSearchResults = [];
+    this.showOwnerDropdown = false;
+    this.newPet.ownerId = undefined;
+  }
+
   // Paginación Mascotas
   petsCurrentPage: number = 1;
   petsPageSize: number = 10;
@@ -156,6 +235,68 @@ export class Veterinario implements OnInit {
   // Paginación Usuarios
   usersCurrentPage: number = 1;
   usersPageSize: number = 10;
+
+  // Paginación Tickets
+  ticketsCurrentPage: number = 1;
+  ticketsPageSize: number = 10;
+
+  get paginatedTickets() {
+    const totalPages = Math.ceil(this.misTickets.length / this.ticketsPageSize);
+    if (this.ticketsCurrentPage > totalPages && totalPages > 0) {
+      this.ticketsCurrentPage = 1;
+    }
+    const startIndex = (this.ticketsCurrentPage - 1) * this.ticketsPageSize;
+    return this.misTickets.slice(startIndex, startIndex + this.ticketsPageSize);
+  }
+
+  get totalTicketsPages() {
+    return Math.ceil(this.misTickets.length / this.ticketsPageSize) || 1;
+  }
+
+  nextTicketsPage() {
+    if (this.ticketsCurrentPage < this.totalTicketsPages) {
+      this.ticketsCurrentPage++;
+      this.cdr.detectChanges();
+    }
+  }
+
+  prevTicketsPage() {
+    if (this.ticketsCurrentPage > 1) {
+      this.ticketsCurrentPage--;
+      this.cdr.detectChanges();
+    }
+  }
+
+  // Paginación Citas Médicas
+  citasCurrentPage: number = 1;
+  citasPageSize: number = 10;
+
+  get paginatedCitas() {
+    const totalPages = Math.ceil(this.citas.length / this.citasPageSize);
+    if (this.citasCurrentPage > totalPages && totalPages > 0) {
+      this.citasCurrentPage = 1;
+    }
+    const startIndex = (this.citasCurrentPage - 1) * this.citasPageSize;
+    return this.citas.slice(startIndex, startIndex + this.citasPageSize);
+  }
+
+  get totalCitasPages() {
+    return Math.ceil(this.citas.length / this.citasPageSize) || 1;
+  }
+
+  nextCitasPage() {
+    if (this.citasCurrentPage < this.totalCitasPages) {
+      this.citasCurrentPage++;
+      this.cdr.detectChanges();
+    }
+  }
+
+  prevCitasPage() {
+    if (this.citasCurrentPage > 1) {
+      this.citasCurrentPage--;
+      this.cdr.detectChanges();
+    }
+  }
 
   // Paginación Consultas Médicas
   consultasCurrentPage: number = 1;
@@ -432,6 +573,8 @@ export class Veterinario implements OnInit {
                 this.usuario.matricula = perfil.matricula;
                 this.usuario.aniosExperiencia = perfil.aniosExperiencia;
                 this.usuario.nombreVeterinaria = perfil.veterinariaPrincipal?.nombre || 'No asignada';
+                this.usuario.horaInicio = perfil.horaInicio || perfil.horainicio || '';
+                this.usuario.horaFin = perfil.horaFin || perfil.horafin || '';
                 if (perfil.veterinariaPrincipal?.id) {
                   this.veterinariaId = perfil.veterinariaPrincipal.id;
                 }
@@ -1071,6 +1214,9 @@ export class Veterinario implements OnInit {
   }
 
   openAddPetModal(): void {
+    this.ownerSearchQuery = '';
+    this.ownerSearchResults = [];
+    this.showOwnerDropdown = false;
     this.showAddPetModal = true;
   }
 
@@ -1332,6 +1478,10 @@ export class Veterinario implements OnInit {
     this.showAddCitaModal = true;
     this.newCita = { fecha: '', hora: '', servicioId: null, motivo: '', userId: null, petId: null };
     this.horasDisponibles = [];
+    this.citaOwnerSearchQuery = '';
+    this.citaOwnerSearchResults = [];
+    this.showCitaOwnerDropdown = false;
+    this.citaMascotasFiltradas = [];
   }
 
   cargarServiciosVeterinaria(): void {
@@ -1518,6 +1668,38 @@ export class Veterinario implements OnInit {
     );
   }
 
+  onHcOwnerSearchInput(): void {
+    const q = this.hcOwnerSearchQuery.toLowerCase().trim();
+    if (!q) {
+      this.hcOwnerSearchResults = [];
+      this.showHcOwnerDropdown = false;
+      this.hcSelectedOwnerId = null;
+      this.hcMascotasFiltradas = [];
+      this.hcSelectedPetId = null;
+      return;
+    }
+    this.hcOwnerSearchResults = this.usuarios.filter((u: any) =>
+      (u.firstName + ' ' + u.lastName).toLowerCase().includes(q) ||
+      (u.documentNumber || '').toLowerCase().includes(q)
+    ).slice(0, 10);
+    this.showHcOwnerDropdown = this.hcOwnerSearchResults.length > 0;
+  }
+
+  selectHcOwner(user: any): void {
+    this.hcOwnerSearchQuery = user.firstName + ' ' + user.lastName;
+    this.hcOwnerSearchResults = [];
+    this.showHcOwnerDropdown = false;
+    this.hcSelectedOwnerId = user.id;
+    this.hcSelectedPetId = null;
+    this.hcMascotasFiltradas = this.mascotas.filter(
+      (m: any) => m.ownerId === user.id || m.owner?.id === user.id
+    );
+  }
+
+  hideHcOwnerDropdownDelayed(): void {
+    setTimeout(() => { this.showHcOwnerDropdown = false; }, 200);
+  }
+
   abrirHistoriaClinica(): void {
     if (!this.hcSelectedPetId) return;
     this.hcLoading = true;
@@ -1550,6 +1732,10 @@ export class Veterinario implements OnInit {
     this.hcSelectedPetId = null;
     this.hcMascotasFiltradas = [];
     this.hcEditando = false;
+    // Resetear buscador de dueño
+    this.hcOwnerSearchQuery = '';
+    this.hcOwnerSearchResults = [];
+    this.showHcOwnerDropdown = false;
   }
 
   iniciarEdicionHistoria(): void {

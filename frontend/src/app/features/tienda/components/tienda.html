@@ -174,13 +174,17 @@
 				<img [src]="producto.imagen || 'assets/IMG/default.jpg'" [alt]="producto.nombre">
 			</div>
 			<div class="product-info">
-				<div class="product-category">{{ producto.categoria || 'General' }}</div>
+				<div class="product-category">
+					{{ producto.categoria || 'General' }}
+					<span *ngIf="producto.stockActual <= 0" class="badge bg-danger" style="margin-left: 5px; font-size: 0.75rem;">Agotado</span>
+				</div>
 				<h3 class="product-name">{{ producto.nombre }}</h3>
 				<p class="product-description">{{ producto.descripcion }}</p>
 				<div class="product-bottom">
 					<span class="product-price">{{ formatPrice(producto.precio) }}</span>
-					<button class="add-to-cart" (click)="agregarAlCarrito(producto)">
-						<i class="fas fa-cart-plus"></i> Agregar
+					<button class="add-to-cart" [disabled]="producto.stockActual <= 0" [style.opacity]="producto.stockActual <= 0 ? 0.6 : 1" (click)="agregarAlCarrito(producto)">
+						<i class="fas" [class.fa-cart-plus]="producto.stockActual > 0" [class.fa-ban]="producto.stockActual <= 0"></i>
+						{{ producto.stockActual > 0 ? 'Agregar' : 'Agotado' }}
 					</button>
 				</div>
 			</div>
@@ -200,13 +204,17 @@
 				<img [src]="producto.imagen || 'assets/IMG/default.jpg'" [alt]="producto.nombre">
 			</div>
 			<div class="product-info">
-				<div class="product-category">{{ producto.categoria || 'General' }}</div>
+				<div class="product-category">
+					{{ producto.categoria || 'General' }}
+					<span *ngIf="producto.stockActual <= 0" class="badge bg-danger" style="margin-left: 5px; font-size: 0.75rem;">Agotado</span>
+				</div>
 				<h3 class="product-name">{{ producto.nombre }}</h3>
 				<p class="product-description">{{ producto.descripcion }}</p>
 				<div class="product-bottom">
 					<span class="product-price">{{ formatPrice(producto.precio) }}</span>
-					<button class="add-to-cart" (click)="agregarAlCarrito(producto)">
-						<i class="fas fa-cart-plus"></i> Agregar
+					<button class="add-to-cart" [disabled]="producto.stockActual <= 0" [style.opacity]="producto.stockActual <= 0 ? 0.6 : 1" (click)="agregarAlCarrito(producto)">
+						<i class="fas" [class.fa-cart-plus]="producto.stockActual > 0" [class.fa-ban]="producto.stockActual <= 0"></i>
+						{{ producto.stockActual > 0 ? 'Agregar' : 'Agotado' }}
 					</button>
 				</div>
 			</div>

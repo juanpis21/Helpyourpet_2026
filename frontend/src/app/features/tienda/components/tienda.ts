@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
 import Swal from 'sweetalert2';
 import { HttpClient } from '@angular/common/http';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ThemeService } from '../../../core/services/theme.service';
@@ -64,6 +64,7 @@ export class Tienda implements OnInit, OnDestroy {
     private productosService: ProductosService,
     private categoriasService: CategoriasService,
     private router: Router,
+    private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -78,6 +79,58 @@ export class Tienda implements OnInit, OnDestroy {
     // Sincronizar modo oscuro con ThemeService
     this.themeSub = this.themeService.darkMode$.subscribe(isDark => {
       this.modoOscuro = isDark;
+    });
+
+    // Escuchar respuestas de pago desde Stripe
+    this.route.queryParams.subscribe(params => {
+      if (params['payment'] === 'success') {
+        this.confirmarVentaStripe();
+      } else if (params['payment'] === 'cancelled') {
+        Swal.fire({
+          icon: 'error',
+          title: 'Pago Cancelado',
+          text: 'El proceso de pago con Stripe fue cancelado.',
+          confirmButtonColor: '#1d3976'
+        });
+        this.router.navigate([], { queryParams: {} });
+      }
+    });
+  }
+
+  confirmarVentaStripe(): void {
+    this.cargandoProductos = true;
+    const token = this.authService.getToken();
+    const headers = { 'Authorization': `Bearer ${token}` };
+
+    this.http.post<any>(
+      `${this.baseUrl}/ventas/checkout`,
+      {},
+      { headers }
+    ).subscribe({
+      next: (venta) => {
+        this.cargandoProductos = false;
+        this.carrito = [];
+        localStorage.removeItem('checkoutCart');
+        this.router.navigate([], { queryParams: {} });
+
+        Swal.fire({
+          icon: 'success',
+          title: '¡Pago Exitoso!',
+          text: `Tu compra se ha procesado con éxito. Orden de venta #${venta.id}`,
+          confirmButtonColor: '#1d3976'
+        });
+      },
+      error: (err) => {
+        this.cargandoProductos = false;
+        this.router.navigate([], { queryParams: {} });
+        console.error('Error al procesar checkout de Stripe:', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error de Procesamiento',
+          text: err.error?.message || 'No se pudo registrar la venta en la base de datos.',
+          confirmButtonColor: '#1d3976'
+        });
+      }
     });
   }
 
@@ -169,7 +222,8 @@ export class Tienda implements OnInit, OnDestroy {
               precio: p.precioVenta,
               categoria: cat ? cat.nombre : 'General',
               categoriaId: p.categoriaId,
-              imagen: p.imagen ? this.baseUrl + p.imagen : 'assets/IMG/default.jpg'
+              imagen: p.imagen ? this.baseUrl + p.imagen : 'assets/IMG/default.jpg',
+              stockActual: p.stockActual
             };
           });
         this.cdr.detectChanges();
@@ -207,8 +261,26 @@ export class Tienda implements OnInit, OnDestroy {
     const existente = this.carrito.find(item => item.id === producto.id);
 
     if (existente) {
+      if (existente.quantity >= (producto.stockActual || 0)) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Stock Límite Alcanzado',
+          text: `No hay más stock disponible para "${producto.nombre}".`,
+          confirmButtonColor: '#1d3976'
+        });
+        return;
+      }
       existente.quantity++;
     } else {
+      if ((producto.stockActual || 0) <= 0) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Producto Agotado',
+          text: `El producto "${producto.nombre}" no tiene stock disponible.`,
+          confirmButtonColor: '#1d3976'
+        });
+        return;
+      }
       this.carrito.push({ ...producto, quantity: 1 });
     }
 
@@ -222,6 +294,15 @@ export class Tienda implements OnInit, OnDestroy {
   actualizarCantidad(productId: number, cambio: number): void {
     const item = this.carrito.find(i => i.id === productId);
     if (item) {
+      if (cambio > 0 && item.quantity >= (item.stockActual || 0)) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Stock Límite Alcanzado',
+          text: `No puedes agregar más de ${item.stockActual} unidades para "${item.nombre}".`,
+          confirmButtonColor: '#1d3976'
+        });
+        return;
+      }
       item.quantity += cambio;
       if (item.quantity <= 0) {
         this.eliminarDelCarrito(productId);

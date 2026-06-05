@@ -27,7 +27,18 @@ export class Cita {
     description: 'Fecha y hora de la cita', 
     example: '2026-03-20T10:30:00.000Z' 
   })
-  @Column({ type: 'timestamp' })
+  @Column({
+    type: 'timestamp',
+    transformer: {
+      to: (value: Date) => {
+        if (!value) return value;
+        // Postgres expects 'YYYY-MM-DD HH:mm:ss'
+        // By passing the UTC string representation, we avoid the pg driver formatting it in local time
+        return value.toISOString().replace('T', ' ').substring(0, 19);
+      },
+      from: (value: any) => value
+    }
+  })
   fechaHora: Date;
 
   @ApiProperty({ 

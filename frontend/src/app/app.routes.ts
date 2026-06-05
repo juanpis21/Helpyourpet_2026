@@ -60,7 +60,7 @@ export const routes: Routes = [
     path: 'pasarela-pagos', 
     component: PasarelaPagos,
     canActivate: [permissionGuard],
-    data: { module: 'pasarela-pagos' }
+    data: { module: 'tienda' }
   },
   { 
     path: 'perfil-usuario', 
