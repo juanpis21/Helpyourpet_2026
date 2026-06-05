@@ -10,7 +10,6 @@ import { Veterinario } from './features/veterinario/components/veterinario';
 import { PerfilUsuario } from './features/perfil-usuario/components/perfil-usuario';
 import { AdminModulesComponent } from './features/admin-modules/components/admin-modules.component';
 import { SuperAdminComponent } from './features/super-admin/components/super-admin.component';
-import { PasarelaPagos } from './features/pasarela-pagos/components/pasarela-pagos';
 import { Servicios } from './features/servicios/components/servicios';
 import { permissionGuard } from './core/guards/permission.guard';
 
@@ -55,12 +54,6 @@ export const routes: Routes = [
     component: Servicios,
     canActivate: [permissionGuard],
     data: { module: 'servicios' }
-  },
-  { 
-    path: 'pasarela-pagos', 
-    component: PasarelaPagos,
-    canActivate: [permissionGuard],
-    data: { module: 'tienda' }
   },
   { 
     path: 'perfil-usuario', 

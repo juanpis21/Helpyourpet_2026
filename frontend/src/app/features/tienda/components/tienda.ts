@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
 import Swal from 'sweetalert2';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -9,7 +9,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { VeterinariasService } from '../../../core/services/veterinarias.service';
 import { ProductosService } from '../../../core/services/productos.service';
 import { CategoriasService } from '../../../core/services/categorias.service';
-import { Subscription } from 'rxjs';
+import { Subscription, lastValueFrom } from 'rxjs';
 
 import { PreloaderComponent } from '../../../shared/components/preloader/preloader';
 
@@ -319,7 +319,14 @@ export class Tienda implements OnInit, OnDestroy {
   }
 
   // ===== CHECKOUT =====
-  procederPago(): void {
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.authService.getToken();
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+  }
+
+  async procederPago(): Promise<void> {
     if (this.carrito.length === 0) {
       Swal.fire({
         icon: 'warning',
@@ -330,11 +337,128 @@ export class Tienda implements OnInit, OnDestroy {
       return;
     }
 
-    // Guardar en localStorage para la pasarela de pagos
-    localStorage.setItem('checkoutCart', JSON.stringify(this.carrito));
+    // Obtener información del usuario actual para pre-completar el formulario
+    const fullName = this.currentUser?.fullName || `${this.currentUser?.firstName || ''} ${this.currentUser?.lastName || ''}`.trim() || '';
+    const phone = this.currentUser?.phone || '';
+    const address = this.currentUser?.address || '';
+    const city = this.currentUser?.city || 'Duitama';
 
-    // Redirigir a pasarela de pagos
-    this.router.navigate(['/pasarela-pagos']);
+    const result = await Swal.fire({
+      title: 'Información de Envío',
+      html: `
+        <div style="text-align: left; font-family: inherit;">
+          <div style="margin-bottom: 12px;">
+            <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 0.9rem; color: #333;">Nombre Completo:</label>
+            <input id="swal-input-name" class="swal2-input" style="margin: 0; width: 100%; height: 38px; font-size: 0.9rem; border-radius: 6px; box-sizing: border-box;" value="${fullName}">
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 0.9rem; color: #333;">Teléfono:</label>
+            <input id="swal-input-phone" class="swal2-input" style="margin: 0; width: 100%; height: 38px; font-size: 0.9rem; border-radius: 6px; box-sizing: border-box;" value="${phone}">
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 0.9rem; color: #333;">Dirección de Envío:</label>
+            <input id="swal-input-address" class="swal2-input" style="margin: 0; width: 100%; height: 38px; font-size: 0.9rem; border-radius: 6px; box-sizing: border-box;" value="${address}">
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 0.9rem; color: #333;">Ciudad:</label>
+            <input id="swal-input-city" class="swal2-input" style="margin: 0; width: 100%; height: 38px; font-size: 0.9rem; border-radius: 6px; box-sizing: border-box;" value="${city}">
+          </div>
+        </div>
+      `,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: 'Proceder al Pago con Stripe',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#1d3976',
+      cancelButtonColor: '#d33',
+      preConfirm: () => {
+        const name = (document.getElementById('swal-input-name') as HTMLInputElement).value;
+        const phoneVal = (document.getElementById('swal-input-phone') as HTMLInputElement).value;
+        const addr = (document.getElementById('swal-input-address') as HTMLInputElement).value;
+        const cty = (document.getElementById('swal-input-city') as HTMLInputElement).value;
+
+        if (!name.trim() || !phoneVal.trim() || !addr.trim() || !cty.trim()) {
+          Swal.showValidationMessage('Por favor completa todos los campos de envío.');
+          return false;
+        }
+        return { fullName: name, phone: phoneVal, address: addr, city: cty };
+      }
+    });
+
+    if (!result.isConfirmed || !result.value) {
+      return;
+    }
+
+    this.cargandoProductos = true;
+    const headers = this.getAuthHeaders();
+
+    try {
+      // Guardar el carrito local en checkoutCart de localStorage por compatibilidad
+      localStorage.setItem('checkoutCart', JSON.stringify(this.carrito));
+
+      // 1. Vaciar el carrito en la base de datos
+      try {
+        await lastValueFrom(
+          this.http.delete(`${this.baseUrl}/carrito-productos/vaciar`, { headers })
+        );
+      } catch (err: any) {
+        if (err.status !== 404) {
+          throw err;
+        }
+      }
+
+      // 2. Sincronizar productos locales con la base de datos
+      for (const item of this.carrito) {
+        const body = {
+          productoId: item.id,
+          cantidad: item.quantity
+        };
+        await lastValueFrom(
+          this.http.post(`${this.baseUrl}/carrito-productos/agregar`, body, { headers })
+        );
+      }
+
+      // 3. Crear sesión de checkout de Stripe
+      const stripePayload = {
+        items: this.carrito.map(item => ({
+          name: item.nombre,
+          price: item.precio,
+          quantity: item.quantity
+        })),
+        shipping: result.value,
+        paymentMethod: 'card',
+        total: this.obtenerTotal()
+      };
+
+      const res = await lastValueFrom(
+        this.http.post<any>(
+          `${this.baseUrl}/stripe/create-checkout-session`, 
+          stripePayload,
+          { headers }
+        )
+      );
+
+      this.cargandoProductos = false;
+      if (res && res.url) {
+        window.location.href = res.url;
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error de pasarela',
+          text: 'No se pudo generar la sesión de pago con Stripe.',
+          confirmButtonColor: '#1d3976'
+        });
+      }
+    } catch (err: any) {
+      this.cargandoProductos = false;
+      console.error('Error al procesar pago/checkout:', err);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error de Procesamiento',
+        text: err.error?.message || 'No se pudo validar el stock o procesar el pago en el servidor.',
+        confirmButtonColor: '#1d3976'
+      });
+    }
   }
 
   // ===== CARRUSEL =====
