@@ -148,20 +148,39 @@ export class Recovery implements OnInit {
     this.isLoading = true;
     this.message = '';
 
+    // Verificar que el token esté presente antes de enviar la solicitud
+    if (!this.token) {
+      this.message = 'Token de recuperación no encontrado o expirado.';
+      this.messageType = 'error';
+      return;
+    }
+
     this.recoveryService.resetPassword({ 
       token: this.token, 
       nuevaContrasena 
     }).subscribe({
       next: () => {
         this.isLoading = false;
-        this.message = 'Contraseña restablecida con éxito. Redirigiendo al login...';
-        this.messageType = 'success';
+        Swal.fire({
+          icon: 'success',
+          title: 'Contraseña restablecida',
+          text: 'La contraseña se ha actualizado correctamente. Serás redirigido al login.',
+          confirmButtonColor: '#272c8b',
+          confirmButtonText: 'Entendido'
+        });
         setTimeout(() => this.router.navigate(['/login']), 3000);
       },
       error: (error) => {
         this.isLoading = false;
-        this.message = 'Error: ' + (error.error?.message || 'Token inválido o expirado');
-        this.messageType = 'error';
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al restablecer',
+          text: error.error?.message || 'Token inválido o expirado',
+          confirmButtonColor: '#d33',
+          confirmButtonText: 'Cerrar'
+        });
+        this.message = '';
+        this.messageType = '';
       }
     });
   }

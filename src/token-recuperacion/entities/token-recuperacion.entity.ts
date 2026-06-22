@@ -13,7 +13,7 @@ export class TokenRecuperacion {
   token: string;
 
   @ApiProperty({ description: 'Fecha de fallecimiento/expiración física del token' })
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'timestamptz' })
   fechaExpiracion: Date;
 
   @ApiProperty({ description: 'ID del Usuario' })

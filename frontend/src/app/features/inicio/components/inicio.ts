@@ -144,7 +144,6 @@ export class Inicio implements OnInit {
             };
           }
         } catch (error) {
-          console.error('Error al recargar usuario:', error);
         }
       }
 
@@ -153,21 +152,17 @@ export class Inicio implements OnInit {
       // Load real publications
       await this.cargarPublicaciones();
     } catch (error) {
-      console.error('Error al inicializar inicio:', error);
     }
   }
 
 
   private async cargarPublicaciones(): Promise<void> {
     return new Promise((resolve) => {
-      console.log('Frontend: Solicitando todas las publicaciones...');
       this.publicacionesService.getPublicaciones().subscribe({
         next: (publicaciones) => {
-          console.log('Frontend: Publicaciones recibidas del backend:', publicaciones);
           this.publicaciones = publicaciones.map(pub => {
             const autor = pub.autor;
             if (!autor) {
-              console.warn(`Publicación ID ${pub.id} no tiene autor asociado.`);
             }
             return {
               id: pub.id,
@@ -209,10 +204,8 @@ export class Inicio implements OnInit {
               } : undefined
             };
           });
-          console.log(`Frontend: ${this.publicaciones.length} publicaciones mapeadas y listas para mostrar.`);
         },
         error: (err) => {
-          console.error('Frontend: ❌ Error al cargar todas las publicaciones:', err);
           this.publicaciones = [];
         }
       }).add(() => {
@@ -253,7 +246,6 @@ export class Inicio implements OnInit {
         alert('Ticket creado correctamente. Te responderemos pronto.');
       },
       error: (err) => {
-        console.error('Error creating ticket:', err);
         alert('Error al crear ticket. Por favor intenta nuevamente.');
       }
     });
@@ -337,7 +329,6 @@ export class Inicio implements OnInit {
           }, 800);
         },
         error: (err) => {
-          console.error('Error al crear publicación:', err);
           Swal.fire({
             icon: 'error',
             title: 'Error',
@@ -366,7 +357,6 @@ export class Inicio implements OnInit {
         publicacion.likedByUser = res.likedByUser;
       },
       error: (err) => {
-        console.error('Error al dar like:', err);
         // Revertir
         if (publicacion.likedByUser) {
           publicacion.likes--;
@@ -413,7 +403,6 @@ export class Inicio implements OnInit {
           }, 600);
         },
         error: (err) => {
-          console.error('Error al agregar comentario:', err);
           this.nuevoComentario[publicacion.id] = comentarioTexto;
           Swal.fire({
             icon: 'error',
@@ -494,7 +483,6 @@ export class Inicio implements OnInit {
             });
           },
           error: (err) => {
-            console.error('Error al compartir publicación:', err);
             publicacion.shareAnimating = false;
             Swal.fire({
               icon: 'error',
@@ -573,7 +561,6 @@ export class Inicio implements OnInit {
             });
           },
           error: (err) => {
-            console.error('Error al reportar publicación:', err);
             Swal.fire({
               icon: 'error',
               title: 'Error',
@@ -613,7 +600,6 @@ export class Inicio implements OnInit {
             this.cargarPublicaciones();
           },
           error: (err) => {
-            console.error('Error al actualizar publicación:', err);
             Swal.fire('Error', 'Error al actualizar la publicación', 'error');
           }
         });
@@ -639,7 +625,6 @@ export class Inicio implements OnInit {
             this.cargarPublicaciones();
           },
           error: (err) => {
-            console.error('❌ Error al eliminar publicación:', err);
             Swal.fire('Error', 'Error al eliminar la publicación: ' + (err.error?.message || 'Error desconocido'), 'error');
           }
         });

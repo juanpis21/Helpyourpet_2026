@@ -30,8 +30,7 @@ export class TokenRecuperacionService {
     await this.tokenRepository.delete({ usuarioId: usuario.id });
 
     const nuevoToken = crypto.randomBytes(32).toString('hex');
-    const fechaExpiracion = new Date();
-    fechaExpiracion.setMinutes(fechaExpiracion.getMinutes() + 10);
+        const fechaExpiracion = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes expiration
 
     const ticket = this.tokenRepository.create({
       token: nuevoToken,
@@ -42,7 +41,7 @@ export class TokenRecuperacionService {
     await this.tokenRepository.save(ticket);
 
     try {
-      const urlRecuperacion = `http://localhost:4200/recovery?token=${nuevoToken}`;
+      const urlRecuperacion = `http://localhost:4200/recovery?token=${encodeURIComponent(nuevoToken)}`;
       await this.mailerService.sendMail({
         to: usuario.email,
         subject: 'Recuperación de Contraseña - HelpyourPet',
@@ -57,7 +56,7 @@ export class TokenRecuperacionService {
                 Restablecer mi contraseña
               </a>
             </div>
-            <p style="font-size: 14px; color: #666;">Este enlace expirará en 10 minutos por tu seguridad.</p>
+            <p style="font-size: 14px; color: #666;">Este enlace expirará en 30 minutos por tu seguridad.</p>
             <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
             <p style="font-size: 12px; color: #999;">Si no solicitaste este cambio, puedes ignorar este correo.</p>
           </div>
@@ -74,16 +73,19 @@ export class TokenRecuperacionService {
   }
 
   async resetPassword(dto: ResetPasswordDto): Promise<{ mensaje: string }> {
+    console.log('resetPassword called with DTO:', dto);
     const ticket = await this.tokenRepository.findOne({ where: { token: dto.token } });
 
     if (!ticket) {
       throw new BadRequestException('El Token de Recuperación es inválido o nunca fue creado.');
     }
 
-    const hoy = new Date();
-    if (hoy > ticket.fechaExpiracion) {
+    // Verificar expiración usando timestamps para evitar problemas de zona horaria
+    const ahora = Date.now();
+    const expiracion = ticket.fechaExpiracion.getTime();
+    if (ahora > expiracion) {
       await this.tokenRepository.delete(ticket.id);
-      throw new BadRequestException('El Token ha superado sus 10 minutos de vida. Debe solicitar uno nuevo.');
+      throw new BadRequestException('El Token ha expirado. Solicita uno nuevo.');
     }
 
     const usuario = await this.usersService.findOne(ticket.usuarioId);
