@@ -19,6 +19,14 @@ export class RolesSeeder implements OnApplicationBootstrap {
   ) { }
 
   async onApplicationBootstrap(): Promise<void> {
+    try {
+      await this.seed();
+    } catch (error) {
+      this.logger.error(`❌ Error en RolesSeeder (¿DB_SYNCHRONIZE=true en Render?): ${error.message}`);
+    }
+  }
+
+  private async seed(): Promise<void> {
     // 1. Crear módulos si no existen
     const modulesData = [
       { name: 'inicio', description: 'Módulo de inicio' },
