@@ -34,7 +34,7 @@ export class AuthService {
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (isPasswordValid) {
       console.log(`✅ [AuthService] Usuario validado con éxito: ${email}`);
-      const { password, ...result } = user;
+      const { password: _password, ...result } = user;
       return result;
     }
 
