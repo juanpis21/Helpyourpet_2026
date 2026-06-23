@@ -2981,6 +2981,10 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
   openAddVeterinarioModal(): void {
 
     this.showAddVeterinarioModal = true;
+    
+    if (this.adminUser?.veterinariaId) {
+      this.newVeterinario.veterinariaPrincipalId = this.adminUser.veterinariaId;
+    }
 
   }
 
@@ -3050,6 +3054,15 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
     if (this.newVeterinario.horaFin <= this.newVeterinario.horaInicio) {
       this.showToast('⚠️ La hora de fin debe ser mayor a la hora de inicio');
       return;
+    }
+
+    if (!this.newVeterinario.veterinariaPrincipalId || this.newVeterinario.veterinariaPrincipalId === 0) {
+      if (this.adminUser?.veterinariaId) {
+        this.newVeterinario.veterinariaPrincipalId = this.adminUser.veterinariaId;
+      } else {
+        this.showToast('⚠️ Por favor, selecciona una Veterinaria Principal', 'warning');
+        return;
+      }
     }
 
 
@@ -3276,6 +3289,15 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
     if (this.editingVeterinario.horaFin <= this.editingVeterinario.horaInicio) {
       this.showToast('⚠️ La hora de fin debe ser mayor a la hora de inicio');
       return;
+    }
+
+    if (!this.editingVeterinario.veterinariaPrincipalId || this.editingVeterinario.veterinariaPrincipalId === 0) {
+      if (this.adminUser?.veterinariaId) {
+        this.editingVeterinario.veterinariaPrincipalId = this.adminUser.veterinariaId;
+      } else {
+        this.showToast('⚠️ Por favor, selecciona una Veterinaria Principal', 'warning');
+        return;
+      }
     }
 
 

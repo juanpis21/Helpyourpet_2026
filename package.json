@@ -1,7 +1,7 @@
 {
   "name": "clinic-pet-nestjs",
   "version": "0.0.1",
-  "description": "Clinic Pet API with NestJS",
+  "description": "Helpyourpet API with NestJS",
   "author": "juanp",
   "private": true,
   "license": "UNLICENSED",
