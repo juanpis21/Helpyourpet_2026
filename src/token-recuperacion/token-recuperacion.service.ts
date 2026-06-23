@@ -41,7 +41,8 @@ export class TokenRecuperacionService {
     await this.tokenRepository.save(ticket);
 
     try {
-      const urlRecuperacion = `http://localhost:4200/recovery?token=${encodeURIComponent(nuevoToken)}`;
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
+      const urlRecuperacion = `${frontendUrl}/recovery?token=${encodeURIComponent(nuevoToken)}`;
       await this.mailerService.sendMail({
         to: usuario.email,
         subject: 'Recuperación de Contraseña - HelpyourPet',

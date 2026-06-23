@@ -94,12 +94,15 @@ import { StripeModule } from './stripe/stripe.module';
       useFactory: (configService: ConfigService) => ({
         transport: {
           host: 'smtp.gmail.com',
-          port: 587,
-          secure: false, 
+          port: 465,
+          secure: true,
           auth: {
             user: configService.get<string>('smtp.user'),
             pass: configService.get<string>('smtp.pass'),
           },
+          connectionTimeout: 10000,
+          greetingTimeout: 10000,
+          socketTimeout: 15000,
         },
         defaults: {
           from: `"Soporte ClinicPet" <${configService.get('smtp.user')}>`,
