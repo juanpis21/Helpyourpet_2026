@@ -18,7 +18,12 @@ export class ModulesService implements OnModuleInit {
 
   async onModuleInit() {
     console.log('🚀 [ModulesService] Inicializando módulos y roles del sistema...');
-    await this.createInitialModules();
+    try {
+      await this.createInitialModules();
+    } catch (error) {
+      console.error('❌ [ModulesService] Error al inicializar módulos (¿tablas no creadas aún?):', error.message);
+      console.error('💡 Asegúrate de tener DB_SYNCHRONIZE=true en las variables de entorno de Render.');
+    }
   }
 
   async findAll(): Promise<Module[]> {
