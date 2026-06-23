@@ -33,6 +33,7 @@ import { TicketsService } from '../../../core/services/tickets.service';
 import type { CreateTicketDto } from '../../../core/services/tickets.service';
 import { PublicacionesService } from '../../inicio/services/publicaciones.service';
 import Swal from 'sweetalert2';
+import { environment } from '../../../../environments/environment';
 
 
 
@@ -507,7 +508,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
 
 
-  baseUrl: string = 'http://localhost:3000';
+  baseUrl: string = environment.apiUrl;
 
 
 
@@ -1027,7 +1028,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
   getFullImageUrl(path: string | null | undefined): string {
     if (!path) return 'assets/images/Default.png';
     if (path.startsWith('http')) return path;
-    return `http://localhost:3000${path}`;
+    return `${this.baseUrl}${path}`;
   }
 
 
