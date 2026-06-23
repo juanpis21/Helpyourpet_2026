@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException, InternalServerError
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as crypto from 'crypto';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { TokenRecuperacion } from './entities/token-recuperacion.entity';
 import { SolicitarRecuperacionDto } from './dto/solicitar-recuperacion.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';

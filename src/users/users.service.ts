@@ -10,7 +10,7 @@ import { PerfilVeterinario } from '../perfiles-veterinarios/entities/perfil-vete
 import { PermissionsService } from '../permissions/permissions.service';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
 import { AuditAction } from '../audit-logs/entities/audit-log.entity';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UsersService {
