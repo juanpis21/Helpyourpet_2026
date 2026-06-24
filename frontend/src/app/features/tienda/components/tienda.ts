@@ -10,6 +10,7 @@ import { VeterinariasService } from '../../../core/services/veterinarias.service
 import { ProductosService } from '../../../core/services/productos.service';
 import { CategoriasService } from '../../../core/services/categorias.service';
 import { Subscription, lastValueFrom } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 import { PreloaderComponent } from '../../../shared/components/preloader/preloader';
 
@@ -25,7 +26,7 @@ import { PreloaderComponent } from '../../../shared/components/preloader/preload
 export class Tienda implements OnInit, OnDestroy {
   // Control de vistas: 'tiendas' | 'productos'
   vista: string = 'tiendas';
-  baseUrl: string = 'http://localhost:3000';
+  baseUrl: string = environment.apiUrl;
 
   // Modo oscuro
   modoOscuro: boolean = false;

@@ -14,6 +14,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { TicketsService, Ticket, CreateTicketDto, UpdateTicketDto } from '../../../core/services/tickets.service';
 import { AnnouncementsService, Announcement, CreateAnnouncementDto, UpdateAnnouncementDto } from '../../../core/services/announcements.service';
 import { PreloaderComponent } from '../../../shared/components/preloader/preloader';
+import { environment } from '../../../../environments/environment';
 import { Chart, registerables } from 'chart.js';
 import { Subscription } from 'rxjs';
 
@@ -51,7 +52,7 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
   dashboardChart1: any;
   dashboardChart2: any;
 
-  readonly API_BASE = 'http://localhost:3000';
+  readonly API_BASE = environment.apiUrl;
 
   get minFecha(): string {
     const now = new Date();
@@ -445,7 +446,7 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
   getFullImageUrl(path: string | null | undefined): string {
     if (!path) return 'assets/images/Default.png';
     if (path.startsWith('http')) return path;
-    return `http://localhost:3000${path}`;
+    return `${this.API_BASE}${path}`;
   }
 
   toggleUserStatus(user: any): void {

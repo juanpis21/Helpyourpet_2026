@@ -25,7 +25,7 @@ export interface Mascota {
   providedIn: 'root'
 })
 export class MascotasService {
-  private apiUrl = 'http://localhost:3000/pets';
+  private apiUrl = `${environment.apiUrl}/pets`;
 
   constructor(private http: HttpClient) {}
 
@@ -62,7 +62,7 @@ export class MascotasService {
   }
 
   getHistorialByMascota(mascotaId: number): Observable<any> {
-    return this.http.get<any>(`http://localhost:3000/historias-clinicas/mascota/${mascotaId}`, {
+    return this.http.get<any>(`${environment.apiUrl}/historias-clinicas/mascota/${mascotaId}`, {
       headers: this.getAuthHeaders()
     });
   }

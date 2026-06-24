@@ -13,6 +13,7 @@ import { PublicacionesService } from '../../inicio/services/publicaciones.servic
 import { TicketsService } from '../../../core/services/tickets.service';
 import type { CreateTicketDto } from '../../../core/services/tickets.service';
 import { PreloaderComponent } from '../../../shared/components/preloader/preloader';
+import { environment } from '../../../../environments/environment';
 
 interface Mascota {
   id?: number;
@@ -527,7 +528,7 @@ export class Veterinario implements OnInit {
   horasDisponibles: string[] = [];
   loadingHoras: boolean = false;
 
-  public readonly API_BASE = 'http://localhost:3000';
+  public readonly API_BASE = environment.apiUrl;
 
   ngOnInit(): void {
     this.vetUser = this.authService.getCurrentUser();
@@ -557,7 +558,7 @@ export class Veterinario implements OnInit {
         direccion: currentUser.address || '',
         tipoDocumento: currentUser.documentType || '',
         numDocumento: currentUser.documentNumber || '',
-        imagen: avatar && avatar.startsWith('/uploads/') ? `http://localhost:3000${avatar}` : avatar,
+        imagen: avatar && avatar.startsWith('/uploads/') ? `${this.API_BASE}${avatar}` : avatar,
         roleId: currentUser.roleId,
         role: currentUser.role
       };
@@ -597,7 +598,7 @@ export class Veterinario implements OnInit {
 
     const mapImagen = (publicaciones: any[]) => publicaciones.map(pub => ({
       ...pub,
-      imagen: pub.imagen && pub.imagen.startsWith('/uploads/') ? `http://localhost:3000${pub.imagen}` : pub.imagen
+      imagen: pub.imagen && pub.imagen.startsWith('/uploads/') ? `${this.API_BASE}${pub.imagen}` : pub.imagen
     }));
 
     if (this.veterinariaId) {
@@ -898,7 +899,7 @@ export class Veterinario implements OnInit {
   getFullImageUrl(path: string | null | undefined): string {
     if (!path) return 'assets/images/Default.png';
     if (path.startsWith('http')) return path;
-    return `http://localhost:3000${path}`;
+    return `${this.API_BASE}${path}`;
   }
 
   loadMyTickets(): void {
