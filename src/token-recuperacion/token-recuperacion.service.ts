@@ -7,7 +7,7 @@ import { TokenRecuperacion } from './entities/token-recuperacion.entity';
 import { SolicitarRecuperacionDto } from './dto/solicitar-recuperacion.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UsersService } from '../users/users.service';
-import { Resend } from 'resend';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class TokenRecuperacionService {
@@ -15,6 +15,7 @@ export class TokenRecuperacionService {
     @InjectRepository(TokenRecuperacion)
     private tokenRepository: Repository<TokenRecuperacion>,
     private usersService: UsersService,
+    private mailerService: MailerService,
   ) { }
 
   async solicitarRecuperacion(dto: SolicitarRecuperacionDto): Promise<{ mensaje: string }> {
@@ -42,12 +43,11 @@ export class TokenRecuperacionService {
     try {
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
       const urlRecuperacion = `${frontendUrl}/recovery?token=${encodeURIComponent(nuevoToken)}`;
-      const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
-      const resend = new Resend(process.env.RESEND_API_KEY);
+      const fromEmail = process.env.SMTP_FROM || process.env.SMTP_USER;
 
-      const { error } = await resend.emails.send({
-        from: `HelpyourPet <${fromEmail}>`,
-        to: [usuario.email],
+      await this.mailerService.sendMail({
+        to: usuario.email,
+        from: `"HelpyourPet" <${fromEmail}>`,
         subject: 'Recuperación de Contraseña - HelpyourPet',
         html: `
           <div style="font-family: Arial, sans-serif; text-align: center; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
@@ -66,12 +66,7 @@ export class TokenRecuperacionService {
           </div>
         `,
       });
-
-      if (error) {
-        console.error('⚠️ Error enviando correo con Resend: ', error);
-      } else {
-        console.log(`✅ Correo de recuperación enviado a: ${usuario.email}`);
-      }
+      console.log(`✅ Correo de recuperación enviado a: ${usuario.email}`);
     } catch (e) {
       console.error('⚠️ Error enviando correo (no crítico): ', e.message);
     }

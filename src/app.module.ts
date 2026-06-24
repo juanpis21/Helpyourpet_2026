@@ -93,19 +93,16 @@ import { StripeModule } from './stripe/stripe.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         transport: {
-          host: 'smtp.gmail.com',
-          port: 465,
-          secure: true,
+          host: 'smtp-relay.brevo.com',
+          port: 587,
+          secure: false,
           auth: {
             user: configService.get<string>('smtp.user'),
             pass: configService.get<string>('smtp.pass'),
           },
-          connectionTimeout: 10000,
-          greetingTimeout: 10000,
-          socketTimeout: 15000,
         },
         defaults: {
-          from: `"Soporte ClinicPet" <${configService.get('smtp.user')}>`,
+          from: `"HelpyourPet" <${configService.get('smtp.user')}>`,
         },
       }),
     }),
