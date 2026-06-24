@@ -11,8 +11,6 @@ import { Resend } from 'resend';
 
 @Injectable()
 export class TokenRecuperacionService {
-  private resend = new Resend(process.env.RESEND_API_KEY);
-
   constructor(
     @InjectRepository(TokenRecuperacion)
     private tokenRepository: Repository<TokenRecuperacion>,
@@ -45,8 +43,9 @@ export class TokenRecuperacionService {
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
       const urlRecuperacion = `${frontendUrl}/recovery?token=${encodeURIComponent(nuevoToken)}`;
       const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+      const resend = new Resend(process.env.RESEND_API_KEY);
 
-      const { error } = await this.resend.emails.send({
+      const { error } = await resend.emails.send({
         from: `HelpyourPet <${fromEmail}>`,
         to: [usuario.email],
         subject: 'Recuperación de Contraseña - HelpyourPet',
