@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as crypto from 'crypto';
@@ -43,11 +43,8 @@ export class TokenRecuperacionService {
     try {
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
       const urlRecuperacion = `${frontendUrl}/recovery?token=${encodeURIComponent(nuevoToken)}`;
-      const fromEmail = process.env.SMTP_FROM || process.env.SMTP_USER;
-
       await this.mailerService.sendMail({
         to: usuario.email,
-        from: `"HelpyourPet" <${fromEmail}>`,
         subject: 'Recuperación de Contraseña - HelpyourPet',
         html: `
           <div style="font-family: Arial, sans-serif; text-align: center; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
@@ -68,7 +65,8 @@ export class TokenRecuperacionService {
       });
       console.log(`✅ Correo de recuperación enviado a: ${usuario.email}`);
     } catch (e) {
-      console.error('⚠️ Error enviando correo (no crítico): ', e.message);
+      console.error('⚠️ Error enviando correo:', e);
+      throw new InternalServerErrorException('Error enviando correo SMTP: ' + e.message);
     }
 
     return {
