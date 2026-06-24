@@ -93,9 +93,9 @@ import { StripeModule } from './stripe/stripe.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         transport: {
-          host: 'smtp-relay.brevo.com',
-          port: 587,
-          secure: false,
+          host: 'smtp.gmail.com',
+          port: 465,
+          secure: true,
           auth: {
             user: configService.get<string>('smtp.user'),
             pass: configService.get<string>('smtp.pass'),
