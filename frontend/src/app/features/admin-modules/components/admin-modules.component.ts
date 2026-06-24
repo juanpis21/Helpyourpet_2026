@@ -1109,6 +1109,8 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
           setTimeout(() => this.initCharts(), 0);
         }
 
+        this.cdr.detectChanges();
+
       },
 
       error: (err) => console.error('Error al cargar usuarios:', err)
@@ -1151,6 +1153,8 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
         }
 
         this.isLoading = false;
+
+        this.cdr.detectChanges();
 
       },
 
@@ -1927,6 +1931,8 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
         } else {
           this.veterinarias = data;
         }
+
+        this.cdr.detectChanges();
       },
 
       error: (err) => console.error('Error al cargar veterinarias:', err)
@@ -2114,6 +2120,8 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
           setTimeout(() => this.initCharts(), 0);
         }
 
+        this.cdr.detectChanges();
+
       },
 
       error: (err) => console.error('Error al cargar productos:', err)
@@ -2138,6 +2146,8 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
           this.categorias = data;
 
         }
+
+        this.cdr.detectChanges();
 
       },
 
@@ -2626,23 +2636,36 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
   eliminarCategoria(cat: Categoria): void {
 
-    if (confirm(`¿Estás seguro de que quieres eliminar la categoría "${cat.nombre}"?`)) {
+    Swal.fire({
+      title: '¿Eliminar categoría?',
+      text: `¿Estás seguro de que quieres eliminar "${cat.nombre}"? Esta acción no se puede deshacer.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
 
-      this.categoriasService.delete(cat.id).subscribe({
+      if (result.isConfirmed) {
 
-        next: () => {
+        this.categoriasService.delete(cat.id).subscribe({
 
-          this.cargarCategorias();
+          next: () => {
 
-          this.showToast('Categoría eliminada correctamente');
+            this.cargarCategorias();
 
-        },
+            this.showToast('Categoría eliminada correctamente');
 
-        error: (err) => this.showToast('Error al eliminar categoría: ' + (err.error?.message || err.message))
+          },
 
-      });
+          error: (err) => this.showToast('Error al eliminar categoría: ' + (err.error?.message || err.message))
 
-    }
+        });
+
+      }
+
+    });
 
   }
 
