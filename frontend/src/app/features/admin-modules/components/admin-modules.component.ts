@@ -1083,7 +1083,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
 
 
-  cargarUsuarios(): void {
+  cargarUsuarios(onComplete?: () => void): void {
 
     this.usersService.getUsersByRoles(['usuario']).subscribe({
 
@@ -1111,6 +1111,8 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
         this.cdr.detectChanges();
 
+        if (onComplete) onComplete();
+
       },
 
       error: (err) => console.error('Error al cargar usuarios:', err)
@@ -1135,7 +1137,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
 
 
-  cargarServicios(): void {
+  cargarServicios(onComplete?: () => void): void {
 
     this.isLoading = true;
 
@@ -1155,6 +1157,8 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
         this.isLoading = false;
 
         this.cdr.detectChanges();
+
+        if (onComplete) onComplete();
 
       },
 
@@ -1535,9 +1539,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
         this.closeAddUserModal();
 
-        this.cargarUsuarios();
-
-        this.showToast('Usuario creado correctamente');
+        this.cargarUsuarios(() => this.showToast('Usuario creado correctamente'));
 
       },
 
@@ -1603,9 +1605,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
         this.closeEditUserModal();
 
-        this.cargarUsuarios();
-
-        this.showToast('Usuario actualizado correctamente');
+        this.cargarUsuarios(() => this.showToast('Usuario actualizado correctamente'));
 
       },
 
@@ -1786,9 +1786,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
         this.closeAddServiceModal();
 
-        this.cargarServicios();
-
-        this.showToast('Servicio creado correctamente');
+        this.cargarServicios(() => this.showToast('Servicio creado correctamente'));
 
       },
 
@@ -1889,9 +1887,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
         this.closeEditServiceModal();
 
-        this.cargarServicios();
-
-        this.showToast('Servicio actualizado correctamente');
+        this.cargarServicios(() => this.showToast('Servicio actualizado correctamente'));
 
       },
 
@@ -1923,7 +1919,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
   // ========== CRUD VETERINARIAS ==========
 
-  cargarVeterinarias(): void {
+  cargarVeterinarias(onComplete?: () => void): void {
     this.veterinariasService.getAll().subscribe({
       next: (data) => {
         if (this.adminUser && this.adminUser.id) {
@@ -1933,6 +1929,8 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
         }
 
         this.cdr.detectChanges();
+
+        if (onComplete) onComplete();
       },
 
       error: (err) => console.error('Error al cargar veterinarias:', err)
@@ -1995,9 +1993,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
         this.closeAddVeterinariaModal();
 
-        this.cargarVeterinarias();
-
-        this.showToast('Veterinaria registrada correctamente');
+        this.cargarVeterinarias(() => this.showToast('Veterinaria registrada correctamente'));
 
       },
 
@@ -2044,10 +2040,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
       next: () => {
 
         this.closeEditVeterinariaModal();
-
-        this.cargarVeterinarias();
-
-        this.showToast('Veterinaria actualizada correctamente');
+        this.cargarVeterinarias(() => this.showToast('Veterinaria actualizada correctamente'));
 
       },
 
@@ -2077,23 +2070,34 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
   eliminarVeterinaria(vet: Veterinaria): void {
 
-    if (confirm(`¿Estás seguro de que quieres eliminar la veterinaria "${vet.nombre}"?`)) {
+    Swal.fire({
+      title: '¿Eliminar veterinaria?',
+      text: `¿Estás seguro de que quieres eliminar la veterinaria "${vet.nombre}"? Esta acción no se puede deshacer.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
 
-      this.veterinariasService.delete(vet.id).subscribe({
+      if (result.isConfirmed) {
 
-        next: () => {
+        this.veterinariasService.delete(vet.id).subscribe({
 
-          this.cargarVeterinarias();
+          next: () => {
 
-          this.showToast('Veterinaria eliminada correctamente');
+            this.cargarVeterinarias(() => this.showToast('Veterinaria eliminada correctamente'));
 
-        },
+          },
 
-        error: (err) => this.showToast('Error al eliminar veterinaria: ' + (err.error?.message || err.message))
+          error: (err) => this.showToast('Error al eliminar veterinaria: ' + (err.error?.message || err.message))
 
-      });
+        });
 
-    }
+      }
+
+    });
 
   }
 
@@ -2101,7 +2105,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
   // ========== CRUD PRODUCTOS ==========
 
-  cargarProductos(): void {
+  cargarProductos(onComplete?: () => void): void {
 
     this.productosService.getAll().subscribe({
 
@@ -2122,6 +2126,8 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
         this.cdr.detectChanges();
 
+        if (onComplete) onComplete();
+
       },
 
       error: (err) => console.error('Error al cargar productos:', err)
@@ -2132,7 +2138,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
 
 
-  cargarCategorias(): void {
+  cargarCategorias(onComplete?: () => void): void {
 
     this.categoriasService.getAll().subscribe({
 
@@ -2148,6 +2154,8 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
         }
 
         this.cdr.detectChanges();
+
+        if (onComplete) onComplete();
 
       },
 
@@ -2276,9 +2284,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
         this.closeAddProductoModal();
 
-        this.cargarProductos();
-
-        this.showToast('Producto registrado correctamente');
+        this.cargarProductos(() => this.showToast('Producto registrado correctamente'));
 
       },
 
@@ -2389,9 +2395,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
         this.closeEditProductoModal();
 
-        this.cargarProductos();
-
-        this.showToast('Producto actualizado correctamente');
+        this.cargarProductos(() => this.showToast('Producto actualizado correctamente'));
 
       },
 
@@ -2431,23 +2435,34 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
   eliminarProducto(prod: Producto): void {
 
-    if (confirm(`¿Estás seguro de que quieres eliminar el producto "${prod.nombre}"?`)) {
+    Swal.fire({
+      title: '¿Eliminar producto?',
+      text: `¿Estás seguro de que quieres eliminar el producto "${prod.nombre}"? Esta acción no se puede deshacer.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
 
-      this.productosService.delete(prod.id).subscribe({
+      if (result.isConfirmed) {
 
-        next: () => {
+        this.productosService.delete(prod.id).subscribe({
 
-          this.cargarProductos();
+          next: () => {
 
-          this.showToast('Producto eliminado correctamente');
+            this.cargarProductos(() => this.showToast('Producto eliminado correctamente'));
 
-        },
+          },
 
-        error: (err) => this.showToast('Error al eliminar producto: ' + (err.error?.message || err.message))
+          error: (err) => this.showToast('Error al eliminar producto: ' + (err.error?.message || err.message))
 
-      });
+        });
 
-    }
+      }
+
+    });
 
   }
 
@@ -2549,9 +2564,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
         this.closeAddCategoriaModal();
 
-        this.cargarCategorias();
-
-        this.showToast('Categoría registrada correctamente');
+        this.cargarCategorias(() => this.showToast('Categoría registrada correctamente'));
 
       },
 
@@ -2604,9 +2617,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
         this.closeEditCategoriaModal();
 
-        this.cargarCategorias();
-
-        this.showToast('Categoría actualizada correctamente');
+        this.cargarCategorias(() => this.showToast('Categoría actualizada correctamente'));
 
       },
 
@@ -2653,9 +2664,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
           next: () => {
 
-            this.cargarCategorias();
-
-            this.showToast('Categoría eliminada correctamente');
+            this.cargarCategorias(() => this.showToast('Categoría eliminada correctamente'));
 
           },
 
@@ -2913,37 +2922,48 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
   eliminarCuentaAdmin(): void {
 
-    if (confirm('¿Estás seguro de que deseas desactivar tu cuenta de administrador?')) {
+    Swal.fire({
+      title: '¿Desactivar tu cuenta?',
+      text: '¿Estás seguro de que deseas desactivar tu cuenta de administrador? Esta acción cerrará tu sesión.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Sí, desactivar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
 
-      const currentUser = this.authService.getCurrentUser();
+      if (result.isConfirmed) {
 
-      if (currentUser) {
+        const currentUser = this.authService.getCurrentUser();
 
-        this.usersService.deleteUser(currentUser.id).subscribe({
+        if (currentUser) {
 
-          next: () => {
+          this.usersService.deleteUser(currentUser.id).subscribe({
 
-            this.showToast('✅ Cuenta desactivada exitosamente.');
+            next: () => {
 
-            this.logout();
+              this.showToast('✅ Cuenta desactivada exitosamente.');
 
-          },
+              this.logout();
 
-          error: (err) => this.showToast('❌ Error al desactivar cuenta: ' + (err.error?.message || err.message))
+            },
 
-        });
+            error: (err) => this.showToast('❌ Error al desactivar cuenta: ' + (err.error?.message || err.message))
+
+          });
+
+        }
 
       }
 
-    }
+    });
 
   }
 
 
 
-  // ========== CRUD VETERINARIOS ==========
-
-  cargarVeterinarios(): void {
+  cargarVeterinarios(onComplete?: () => void): void {
 
     console.log('🔍 [DEBUG] Admin veterinariaId:', this.adminUser.veterinariaId);
 
@@ -2982,7 +3002,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
         // Recargar usuarios filtrados según los veterinarios de esta veterinaria
 
-        this.cargarUsuarios();
+        this.cargarUsuarios(onComplete);
 
         console.log('👨‍⚕️ [DEBUG] Veterinarios finales cargados:', this.veterinarios.length, this.veterinarios);
 
@@ -3195,9 +3215,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
             this.currentPageVeterinarios = 1; // Resetear a la primera página
 
-            this.cargarVeterinarios();
-
-            this.showToast('✅ Veterinario registrado y perfil profesional creado correctamente');
+            this.cargarVeterinarios(() => this.showToast('✅ Veterinario registrado y perfil profesional creado correctamente'));
 
           },
 
@@ -3406,9 +3424,7 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
             this.closeEditVeterinarioModal();
 
-            this.cargarVeterinarios();
-
-            this.showToast('✅ Datos del veterinario actualizados correctamente');
+            this.cargarVeterinarios(() => this.showToast('✅ Datos del veterinario actualizados correctamente'));
 
           },
 
