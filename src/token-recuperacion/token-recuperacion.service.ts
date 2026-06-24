@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as crypto from 'crypto';
@@ -7,15 +7,16 @@ import { TokenRecuperacion } from './entities/token-recuperacion.entity';
 import { SolicitarRecuperacionDto } from './dto/solicitar-recuperacion.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UsersService } from '../users/users.service';
-import { MailerService } from '@nestjs-modules/mailer';
+import { Resend } from 'resend';
 
 @Injectable()
 export class TokenRecuperacionService {
+  private resend = new Resend(process.env.RESEND_API_KEY);
+
   constructor(
     @InjectRepository(TokenRecuperacion)
     private tokenRepository: Repository<TokenRecuperacion>,
     private usersService: UsersService,
-    private mailerService: MailerService,
   ) { }
 
   async solicitarRecuperacion(dto: SolicitarRecuperacionDto): Promise<{ mensaje: string }> {
@@ -43,8 +44,11 @@ export class TokenRecuperacionService {
     try {
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
       const urlRecuperacion = `${frontendUrl}/recovery?token=${encodeURIComponent(nuevoToken)}`;
-      await this.mailerService.sendMail({
-        to: usuario.email,
+      const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+
+      const { error } = await this.resend.emails.send({
+        from: `HelpyourPet <${fromEmail}>`,
+        to: [usuario.email],
         subject: 'Recuperación de Contraseña - HelpyourPet',
         html: `
           <div style="font-family: Arial, sans-serif; text-align: center; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
@@ -52,7 +56,7 @@ export class TokenRecuperacionService {
             <p style="font-size: 16px;">Hola <b>${usuario.fullName || usuario.email}</b>,</p>
             <p>Has solicitado restablecer tu contraseña. Haz clic en el botón de abajo para continuar:</p>
             <div style="margin: 30px 0;">
-              <a href="${urlRecuperacion}" 
+              <a href="${urlRecuperacion}"
                 style="background-color: #2e9e44; color: white; padding: 14px 25px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
                 Restablecer mi contraseña
               </a>
@@ -63,9 +67,14 @@ export class TokenRecuperacionService {
           </div>
         `,
       });
+
+      if (error) {
+        console.error('⚠️ Error enviando correo con Resend: ', error);
+      } else {
+        console.log(`✅ Correo de recuperación enviado a: ${usuario.email}`);
+      }
     } catch (e) {
-      console.log('Error enviando correo SMTP: ', e.message);
-      throw new InternalServerErrorException('Error enviando correo SMTP: ' + e.message);
+      console.error('⚠️ Error enviando correo (no crítico): ', e.message);
     }
 
     return {
