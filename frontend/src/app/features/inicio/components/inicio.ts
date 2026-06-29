@@ -162,9 +162,12 @@ export class Inicio implements OnInit {
     return new Promise((resolve) => {
       this.publicacionesService.getPublicaciones().subscribe({
         next: (publicaciones) => {
+          console.log('📝 [DEBUG] Publicaciones recibidas:', publicaciones);
           this.publicaciones = publicaciones.map(pub => {
             const autor = pub.autor;
+            console.log('👤 [DEBUG] Autor de publicación:', autor);
             if (!autor) {
+              console.warn('⚠️ [DEBUG] Autor es null para publicación:', pub.id);
             }
             return {
               id: pub.id,
