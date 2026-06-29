@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ThemeService } from '../../services/theme.service';
 import { AuthService } from '../../services/auth.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-navbar',
@@ -54,7 +55,7 @@ export class Navbar implements OnInit {
     if (!avatarPath) return 'assets/images/Default.png';
     if (avatarPath.startsWith('http') || avatarPath.startsWith('data:')) return avatarPath;
     const cleanPath = avatarPath.startsWith('/') ? avatarPath : `/${avatarPath}`;
-    return `http://localhost:3000${cleanPath}`;
+    return `${environment.apiUrl}${cleanPath}`;
   }
 
   hasAccess(module: string): boolean {

@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PublicacionesService {
-  private apiUrl = 'http://localhost:3000/publicaciones';
+  private apiUrl = `${environment.apiUrl}/publicaciones`;
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 

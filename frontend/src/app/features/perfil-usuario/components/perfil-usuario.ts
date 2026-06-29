@@ -15,6 +15,7 @@ import { PublicacionesService } from '../../inicio/services/publicaciones.servic
 import { PreloaderComponent } from '../../../shared/components/preloader/preloader';
 import { TicketsService } from '../../../core/services/tickets.service';
 import type { CreateTicketDto } from '../../../core/services/tickets.service';
+import { environment } from '../../../environments/environment';
 
 interface Mascota {
   id: number;
@@ -66,6 +67,7 @@ interface HistorialClinico {
   styleUrl: './perfil-usuario.scss'
 })
 export class PerfilUsuario implements OnInit, OnDestroy {
+  apiUrl = environment.apiUrl;
   seccionActiva = 'dashboard';
   sidebarAbierto = true;
   darkMode = false;
@@ -399,7 +401,7 @@ export class PerfilUsuario implements OnInit, OnDestroy {
           direccion: currentUser.address || '',
           tipoDocumento: currentUser.documentType || '',
           numDocumento: currentUser.documentNumber || '',
-          imagen: avatar && avatar.startsWith('/uploads/') ? `http://localhost:3000${avatar}` : avatar,
+          imagen: avatar && avatar.startsWith('/uploads/') ? `${this.apiUrl}${avatar}` : avatar,
           roleId: currentUser.roleId,
           role: currentUser.role
         };
@@ -417,7 +419,7 @@ export class PerfilUsuario implements OnInit, OnDestroy {
           next: (mascotas) => {
             this.mascotas = mascotas.map(m => ({
               ...m,
-              foto: m.foto && m.foto.startsWith('/uploads/') ? `http://localhost:3000${m.foto}` : m.foto
+              foto: m.foto && m.foto.startsWith('/uploads/') ? `${this.apiUrl}${m.foto}` : m.foto
             }));
             console.log('✅ Mascotas del usuario cargadas:', mascotas.length);
           },
@@ -443,15 +445,15 @@ export class PerfilUsuario implements OnInit, OnDestroy {
             this.publicaciones = publicaciones.map(pub => {
               return {
                 ...pub,
-                imagen: pub.imagen && pub.imagen.startsWith('/uploads/') ? `http://localhost:3000${pub.imagen}` : pub.imagen,
+                imagen: pub.imagen && pub.imagen.startsWith('/uploads/') ? `${this.apiUrl}${pub.imagen}` : pub.imagen,
                 likes: pub.likesUserIds ? pub.likesUserIds.length : 0,
                 comentariosCount: pub.comentarios ? pub.comentarios.length : 0,
                 sharedFrom: pub.sharedFrom ? {
                   ...pub.sharedFrom,
-                  imagen: pub.sharedFrom.imagen && pub.sharedFrom.imagen.startsWith('/uploads/') ? `http://localhost:3000${pub.sharedFrom.imagen}` : pub.sharedFrom.imagen,
+                  imagen: pub.sharedFrom.imagen && pub.sharedFrom.imagen.startsWith('/uploads/') ? `${this.apiUrl}${pub.sharedFrom.imagen}` : pub.sharedFrom.imagen,
                   autor: pub.sharedFrom.autor ? {
                     ...pub.sharedFrom.autor,
-                    avatar: pub.sharedFrom.autor.avatar && pub.sharedFrom.autor.avatar.startsWith('/uploads/') ? `http://localhost:3000${pub.sharedFrom.autor.avatar}` : pub.sharedFrom.autor.avatar
+                    avatar: pub.sharedFrom.autor.avatar && pub.sharedFrom.autor.avatar.startsWith('/uploads/') ? `${this.apiUrl}${pub.sharedFrom.autor.avatar}` : pub.sharedFrom.autor.avatar
                   } : undefined
                 } : undefined
               };
@@ -510,7 +512,7 @@ export class PerfilUsuario implements OnInit, OnDestroy {
     this.closeAllMenus();
     this.editingPublicacion = { ...pub };
     this.editingPublicacionImage = null;
-    this.editingPublicacionImagePreview = pub.imagen && pub.imagen.startsWith('/uploads/') ? 'http://localhost:3000' + pub.imagen : pub.imagen;
+    this.editingPublicacionImagePreview = pub.imagen && pub.imagen.startsWith('/uploads/') ? this.apiUrl + pub.imagen : pub.imagen;
     this.showEditarPublicacionModal = true;
   }
 
@@ -1547,7 +1549,7 @@ export class PerfilUsuario implements OnInit, OnDestroy {
 
     // 4. Auditorías desde el Backend
     try {
-      const logs = await this.http.get<any[]>(`http://localhost:3000/audit-logs/user/${currentUser.id}`, {
+      const logs = await this.http.get<any[]>(`${this.apiUrl}/audit-logs/user/${currentUser.id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('access_token')}`
         }
@@ -1600,7 +1602,7 @@ export class PerfilUsuario implements OnInit, OnDestroy {
     const currentUser = this.authService.getCurrentUser();
     if (!currentUser) return;
     const token = localStorage.getItem('access_token');
-    this.http.get<any[]>(`http://localhost:3000/citas/usuario/${currentUser.id}`, {
+    this.http.get<any[]>(`${this.apiUrl}/citas/usuario/${currentUser.id}`, {
       headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
       next: (citas) => {
@@ -1622,14 +1624,14 @@ export class PerfilUsuario implements OnInit, OnDestroy {
     const currentUser = this.authService.getCurrentUser() as any;
     
     // Cargar Veterinarias
-    this.http.get<any[]>('http://localhost:3000/veterinarias', {
+    this.http.get<any[]>(`${this.apiUrl}/veterinarias`, {
       headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
       next: (vets) => {
         let veterinariasActivas = vets.filter(v => v.isActive);
         
         // Cargar Veterinarios
-        this.http.get<any[]>('http://localhost:3000/perfiles-veterinarios', {
+        this.http.get<any[]>(`${this.apiUrl}/perfiles-veterinarios`, {
           headers: { Authorization: `Bearer ${token}` }
         }).subscribe({
           next: (perfiles) => {
@@ -1651,7 +1653,7 @@ export class PerfilUsuario implements OnInit, OnDestroy {
             }
 
             // Cargar Servicios
-            this.http.get<any[]>('http://localhost:3000/servicios', {
+            this.http.get<any[]>(`${this.apiUrl}/servicios`, {
               headers: { Authorization: `Bearer ${token}` }
             }).subscribe({
               next: (servs) => {
@@ -1747,7 +1749,7 @@ export class PerfilUsuario implements OnInit, OnDestroy {
     this.horasDisponibles = [];
     this.cdr.detectChanges();
 
-    let url = `http://localhost:3000/citas/horarios-disponibles?veterinarioId=${veterinarioId}&fecha=${fecha}`;
+    let url = `${this.apiUrl}/citas/horarios-disponibles?veterinarioId=${veterinarioId}&fecha=${fecha}`;
     if (servicioId) url += `&servicioId=${servicioId}`;
 
     this.http.get<string[]>(url, {
@@ -1847,7 +1849,7 @@ export class PerfilUsuario implements OnInit, OnDestroy {
     if (this.nuevaCita.idVeterinario) {
       payload.idVeterinario = Number(this.nuevaCita.idVeterinario);
     }
-    this.http.post<any>(`http://localhost:3000/citas`, payload, {
+    this.http.post<any>(`${this.apiUrl}/citas`, payload, {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
     }).subscribe({
       next: () => {
@@ -1875,7 +1877,7 @@ export class PerfilUsuario implements OnInit, OnDestroy {
     }).then((result) => {
       if (result.isConfirmed) {
         const token = localStorage.getItem('access_token');
-        this.http.patch<any>(`http://localhost:3000/citas/${cita.id}`, { estado: 'Cancelada' }, {
+        this.http.patch<any>(`${this.apiUrl}/citas/${cita.id}`, { estado: 'Cancelada' }, {
           headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
         }).subscribe({
           next: () => {
@@ -1906,7 +1908,7 @@ export class PerfilUsuario implements OnInit, OnDestroy {
 
   cargarMisCompras(): void {
     const token = localStorage.getItem('access_token');
-    this.http.get<any[]>('http://localhost:3000/ventas/mis-compras', {
+    this.http.get<any[]>(`${this.apiUrl}/ventas/mis-compras`, {
       headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
       next: (compras) => {
@@ -1916,7 +1918,7 @@ export class PerfilUsuario implements OnInit, OnDestroy {
           if (c.detalles) {
             c.detalles = c.detalles.map((d: any) => {
               if (d.producto && d.producto.imagen && d.producto.imagen.startsWith('/uploads/')) {
-                d.producto.imagen = `http://localhost:3000${d.producto.imagen}`;
+                d.producto.imagen = `${this.apiUrl}${d.producto.imagen}`;
               }
               return d;
             });

@@ -8,7 +8,7 @@
       <h3>HelpYourPet</h3>
       <div class="user-profile">
         <img
-          [src]="profileImagePreview || (usuario.imagen && usuario.imagen.startsWith('/uploads/') ? 'http://localhost:3000' + usuario.imagen : (usuario.imagen || 'assets/images/Default.png'))"
+          [src]="profileImagePreview || (usuario.imagen && usuario.imagen.startsWith('/uploads/') ? apiUrl + usuario.imagen : (usuario.imagen || 'assets/images/Default.png'))"
           alt="Foto de perfil" class="profile-avatar">
         <h5>{{ usuario.nombres }} {{ usuario.apellidos }}</h5>
         <p>{{ getRoleName() | titlecase }}</p>
@@ -556,7 +556,7 @@
         <div *ngFor="let pub of getPaginatedPublicaciones()" class="publicacion-card">
           <div *ngIf="pub.imagen && !pub.sharedFrom" class="publicacion-image">
             <img
-              [src]="pub.imagen && pub.imagen.startsWith('/uploads/') ? 'http://localhost:3000' + pub.imagen : pub.imagen"
+              [src]="pub.imagen && pub.imagen.startsWith('/uploads/') ? apiUrl + pub.imagen : pub.imagen"
               [alt]="pub.descripcion" class="pub-img">
           </div>
           <div class="publicacion-content">
@@ -566,7 +566,7 @@
             <div class="shared-pub-card" *ngIf="pub.sharedFrom">
               <div class="shared-pub-header">
                 <img
-                  [src]="pub.sharedFrom.autor?.avatar ? (pub.sharedFrom.autor.avatar.startsWith('/uploads/') ? 'http://localhost:3000' + pub.sharedFrom.autor.avatar : pub.sharedFrom.autor.avatar) : 'assets/images/Default.png'"
+                  [src]="pub.sharedFrom.autor?.avatar ? (pub.sharedFrom.autor.avatar.startsWith('/uploads/') ? apiUrl + pub.sharedFrom.autor.avatar : pub.sharedFrom.autor.avatar) : 'assets/images/Default.png'"
                   alt="Avatar" class="shared-avatar">
                 <div class="shared-info-usuario">
                   <h5 class="shared-nombre-usuario">{{ pub.sharedFrom.autor?.fullName || 'Usuario' }}</h5>
@@ -578,7 +578,7 @@
                 </p>
                 <div *ngIf="pub.sharedFrom.imagen" class="shared-imagen-contenedor">
                   <img
-                    [src]="pub.sharedFrom.imagen.startsWith('/uploads/') ? 'http://localhost:3000' + pub.sharedFrom.imagen : pub.sharedFrom.imagen"
+                    [src]="pub.sharedFrom.imagen.startsWith('/uploads/') ? apiUrl + pub.sharedFrom.imagen : pub.sharedFrom.imagen"
                     alt="Imagen compartida" class="shared-publicacion-imagen">
                 </div>
               </div>
@@ -811,7 +811,7 @@
             <!-- Foto de perfil -->
             <div class="config-photo">
               <img
-                [src]="profileImagePreview || (usuario.imagen && usuario.imagen.startsWith('/uploads/') ? 'http://localhost:3000' + usuario.imagen : (usuario.imagen || 'assets/images/Default.png'))"
+                [src]="profileImagePreview || (usuario.imagen && usuario.imagen.startsWith('/uploads/') ? apiUrl + usuario.imagen : (usuario.imagen || 'assets/images/Default.png'))"
                 alt="Foto de perfil" class="config-avatar">
               <p class="photo-hint">JPG, PNG</p>
               <label class="btn-outline small">

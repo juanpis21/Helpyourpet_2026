@@ -9,6 +9,7 @@ import { PublicacionesService } from '../services/publicaciones.service';
 import { AnnouncementsService, Announcement } from '../../../core/services/announcements.service';
 import { TicketsService, CreateTicketDto } from '../../../core/services/tickets.service';
 import { PreloaderComponent } from '../../../shared/components/preloader/preloader';
+import { environment } from '../../../environments/environment';
 
 interface Publicacion {
   id: number;
@@ -62,6 +63,7 @@ interface Comentario {
   styleUrls: ['./inicio.scss']
 })
 export class Inicio implements OnInit {
+  apiUrl = environment.apiUrl;
   usuarioLogueado: any = null;
   publicaciones: Publicacion[] = [];
   nuevaPublicacion: string = '';
@@ -126,7 +128,7 @@ export class Inicio implements OnInit {
           nombre: user.fullName || 'Usuario',
           email: user.email,
           avatar: user.avatar
-            ? (user.avatar.startsWith('/uploads/') ? `http://localhost:3000${user.avatar}` : user.avatar)
+            ? (user.avatar.startsWith('/uploads/') ? `${this.apiUrl}${user.avatar}` : user.avatar)
             : 'assets/images/Default.png'
         };
       } else if (this.authService.isLoggedIn()) {
@@ -139,7 +141,7 @@ export class Inicio implements OnInit {
               nombre: reloadedUser.fullName || 'Usuario',
               email: reloadedUser.email,
               avatar: reloadedUser.avatar
-                ? (reloadedUser.avatar.startsWith('/uploads/') ? `http://localhost:3000${reloadedUser.avatar}` : reloadedUser.avatar)
+                ? (reloadedUser.avatar.startsWith('/uploads/') ? `${this.apiUrl}${reloadedUser.avatar}` : reloadedUser.avatar)
                 : 'assets/images/Default.png'
             };
           }
@@ -170,11 +172,11 @@ export class Inicio implements OnInit {
               usuario: {
                 nombre: autor ? (autor.fullName || `${autor.firstName || ''} ${autor.lastName || ''}`.trim() || 'Usuario') : 'Usuario',
                 avatar: autor?.avatar
-                  ? (autor.avatar.startsWith('/uploads/') ? `http://localhost:3000${autor.avatar}` : autor.avatar)
+                  ? (autor.avatar.startsWith('/uploads/') ? `${this.apiUrl}${autor.avatar}` : autor.avatar)
                   : 'assets/images/Default.png'
               },
               contenido: pub.descripcion,
-              imagen: pub.imagen && pub.imagen.startsWith('/uploads/') ? `http://localhost:3000${pub.imagen}` : pub.imagen,
+              imagen: pub.imagen && pub.imagen.startsWith('/uploads/') ? `${this.apiUrl}${pub.imagen}` : pub.imagen,
               fecha: new Date(pub.createdAt),
               likes: pub.likesUserIds ? pub.likesUserIds.length : 0,
               comentarios: Array.isArray(pub.comentarios) ? pub.comentarios.map((c: any) => ({
@@ -195,11 +197,11 @@ export class Inicio implements OnInit {
                 usuario: {
                   nombre: pub.sharedFrom.autor ? (pub.sharedFrom.autor.fullName || `${pub.sharedFrom.autor.firstName || ''} ${pub.sharedFrom.autor.lastName || ''}`.trim() || 'Usuario') : 'Usuario',
                   avatar: pub.sharedFrom.autor?.avatar
-                    ? (pub.sharedFrom.autor.avatar.startsWith('/uploads/') ? `http://localhost:3000${pub.sharedFrom.autor.avatar}` : pub.sharedFrom.autor.avatar)
+                    ? (pub.sharedFrom.autor.avatar.startsWith('/uploads/') ? `${this.apiUrl}${pub.sharedFrom.autor.avatar}` : pub.sharedFrom.autor.avatar)
                     : 'assets/images/Default.png'
                 },
                 contenido: pub.sharedFrom.descripcion,
-                imagen: pub.sharedFrom.imagen && pub.sharedFrom.imagen.startsWith('/uploads/') ? `http://localhost:3000${pub.sharedFrom.imagen}` : pub.sharedFrom.imagen,
+                imagen: pub.sharedFrom.imagen && pub.sharedFrom.imagen.startsWith('/uploads/') ? `${this.apiUrl}${pub.sharedFrom.imagen}` : pub.sharedFrom.imagen,
                 fecha: new Date(pub.sharedFrom.createdAt)
               } : undefined
             };
@@ -307,7 +309,7 @@ export class Inicio implements OnInit {
               avatar: this.usuarioLogueado?.avatar || 'assets/images/Default.png'
             },
             contenido: publicacionCreada.descripcion,
-            imagen: publicacionCreada.imagen ? `http://localhost:3000${publicacionCreada.imagen}` : undefined,
+            imagen: publicacionCreada.imagen ? `${this.apiUrl}${publicacionCreada.imagen}` : undefined,
             fecha: new Date(publicacionCreada.createdAt),
             likes: 0,
             comentarios: [],
@@ -440,11 +442,11 @@ export class Inicio implements OnInit {
               usuario: {
                 nombre: autor ? (autor.fullName || `${autor.firstName || ''} ${autor.lastName || ''}`.trim() || 'Usuario') : 'Usuario',
                 avatar: autor?.avatar
-                  ? (autor.avatar.startsWith('/uploads/') ? `http://localhost:3000${autor.avatar}` : autor.avatar)
+                  ? (autor.avatar.startsWith('/uploads/') ? `${this.apiUrl}${autor.avatar}` : autor.avatar)
                   : 'assets/images/Default.png'
               },
               contenido: res.descripcion,
-              imagen: res.imagen && res.imagen.startsWith('/uploads/') ? `http://localhost:3000${res.imagen}` : res.imagen,
+              imagen: res.imagen && res.imagen.startsWith('/uploads/') ? `${this.apiUrl}${res.imagen}` : res.imagen,
               fecha: new Date(res.createdAt),
               likes: 0,
               comentarios: [],
@@ -458,11 +460,11 @@ export class Inicio implements OnInit {
                 usuario: {
                   nombre: res.sharedFrom.autor ? (res.sharedFrom.autor.fullName || `${res.sharedFrom.autor.firstName || ''} ${res.sharedFrom.autor.lastName || ''}`.trim() || 'Usuario') : 'Usuario',
                   avatar: res.sharedFrom.autor?.avatar
-                    ? (res.sharedFrom.autor.avatar.startsWith('/uploads/') ? `http://localhost:3000${res.sharedFrom.autor.avatar}` : res.sharedFrom.autor.avatar)
+                    ? (res.sharedFrom.autor.avatar.startsWith('/uploads/') ? `${this.apiUrl}${res.sharedFrom.autor.avatar}` : res.sharedFrom.autor.avatar)
                     : 'assets/images/Default.png'
                 },
                 contenido: res.sharedFrom.descripcion,
-                imagen: res.sharedFrom.imagen && res.sharedFrom.imagen.startsWith('/uploads/') ? `http://localhost:3000${res.sharedFrom.imagen}` : res.sharedFrom.imagen,
+                imagen: res.sharedFrom.imagen && res.sharedFrom.imagen.startsWith('/uploads/') ? `${this.apiUrl}${res.sharedFrom.imagen}` : res.sharedFrom.imagen,
                 fecha: new Date(res.sharedFrom.createdAt)
               } : undefined
             };
