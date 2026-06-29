@@ -112,6 +112,8 @@
   border: 3px solid rgba(255, 255, 255, 0.6);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease;
+  display: block;
+  margin: 0 auto;
 
   &:hover {
     transform: scale(1.08);
@@ -417,7 +419,7 @@
 .form-actions-center,
 .danger-action {
   display: flex;
-  
+  justify-content: center;
   margin-top: 1rem;
 }
 
@@ -498,7 +500,7 @@
 
   .danger-action {
     display: flex;
-    
+    justify-content: center;
     margin-top: 1rem;
   }
 }
@@ -640,9 +642,28 @@
 /* ===== TABLE ===== */
 .table-container {
   border-radius: 12px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--border-color);
+
+  &::-webkit-scrollbar {
+    height: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--bg-body);
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 10px;
+
+    &:hover {
+      background: #2c5aa0;
+    }
+  }
 }
 
 .data-table {
@@ -962,6 +983,8 @@
   border: 3px solid var(--pastel-blue);
   box-shadow: var(--shadow-sm);
   margin-bottom: 0.5rem;
+  display: block;
+  margin: 0 auto 0.5rem;
 }
 
 .photo-hint {
@@ -3743,6 +3766,7 @@ textarea {
   border-radius: 50%;
   object-fit: cover;
   border: 1.5px solid var(--primary-color);
+  display: block;
 }
 
 .shared-info-usuario {
