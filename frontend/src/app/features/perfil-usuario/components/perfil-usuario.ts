@@ -533,10 +533,12 @@ export class PerfilUsuario implements OnInit, OnDestroy {
   }
 
   closeEditarPublicacionModal(): void {
+    console.log('🔒 Cerrando modal de edición de publicación');
     this.showEditarPublicacionModal = false;
     this.editingPublicacion = null;
     this.editingPublicacionImage = null;
     this.editingPublicacionImagePreview = null;
+    this.cdr.detectChanges();
   }
 
   onPublicacionImageSelected(event: any): void {
@@ -569,7 +571,8 @@ export class PerfilUsuario implements OnInit, OnDestroy {
     }
 
     this.publicacionesService.actualizarPublicacion(this.editingPublicacion.id, formData).subscribe({
-      next: () => {
+      next: (response) => {
+        console.log('✅ Publicación actualizada:', response);
         this.closeEditarPublicacionModal();
         this.cargarPublicacionesUsuario();
         Swal.fire('¡Éxito!', 'Publicación actualizada correctamente', 'success');
