@@ -3,7 +3,7 @@ import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Chart, registerables } from 'chart.js';
 Chart.register(...registerables);
@@ -287,6 +287,7 @@ export class PerfilUsuario implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private themeService: ThemeService,
     private authService: AuthService,
     private usersService: UsersService,
@@ -321,6 +322,15 @@ export class PerfilUsuario implements OnInit, OnDestroy {
     this.themeSubscription = this.themeService.darkMode$.subscribe(dark => {
       this.darkMode = dark;
       this.renderCharts();
+    });
+
+    // Leer query param 'seccion' para navegar directamente (ej. desde Stripe redirect)
+    this.route.queryParams.subscribe(params => {
+      if (params['seccion']) {
+        this.cambiarSeccion(params['seccion']);
+        // Limpiar query params de la URL
+        this.router.navigate([], { queryParams: {}, replaceUrl: true });
+      }
     });
 
     this.initializeUserData();
