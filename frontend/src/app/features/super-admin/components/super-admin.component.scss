@@ -988,6 +988,149 @@
   .top-bar-btn.mobile-toggle {
     display: flex !important;
   }
+
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+
+    &::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: var(--bg-body);
+      border-radius: 8px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--primary-color);
+      border-radius: 8px;
+
+      &:hover {
+        background: #2c5aa0;
+      }
+    }
+  }
+
+  .data-table {
+    min-width: 800px;
+
+    thead th {
+      padding: 0.8rem 0.6rem;
+      font-size: 0.7rem;
+      white-space: nowrap;
+    }
+
+    tbody td {
+      padding: 0.8rem 0.6rem;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+
+    h1 {
+      font-size: 1.3rem;
+    }
+
+    .header-actions {
+      width: 100%;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+  }
+
+  .table-header-actions {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 1rem !important;
+
+    > div {
+      width: 100%;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      width: 100%;
+      max-width: 100%;
+
+      input {
+        width: 100%;
+      }
+    }
+  }
+
+  .pagination-controls {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+
+    .pagination-buttons {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+
+      button {
+        flex: 1;
+        font-size: 0.85rem;
+        padding: 0.5rem 1rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .data-table {
+    min-width: 600px;
+
+    thead th {
+      padding: 0.6rem 0.4rem;
+      font-size: 0.65rem;
+    }
+
+    tbody td {
+      padding: 0.6rem 0.4rem;
+      font-size: 0.8rem;
+    }
+  }
+
+  .user-info {
+    gap: 0.5rem;
+
+    .avatar-sm {
+      width: 32px;
+      height: 32px;
+    }
+
+    .fullname {
+      font-size: 0.8rem;
+    }
+  }
+
+  .actions {
+    gap: 0.3rem;
+
+    .btn-icon {
+      width: 28px;
+      height: 28px;
+      font-size: 0.75rem;
+    }
+  }
+
+  .badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+  }
+
+  .status-pill {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+  }
 }
 
 @media (min-width: 993px) {
