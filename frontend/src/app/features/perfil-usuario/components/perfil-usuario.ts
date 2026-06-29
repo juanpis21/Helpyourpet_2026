@@ -324,6 +324,12 @@ export class PerfilUsuario implements OnInit, OnDestroy {
       this.renderCharts();
     });
 
+    // Verificar si viene de un pago exitoso de Stripe
+    if (sessionStorage.getItem('stripePaymentSuccess') === 'true') {
+      this.cambiarSeccion('compras');
+      sessionStorage.removeItem('stripePaymentSuccess');
+    }
+
     // Leer query param 'seccion' para navegar directamente (ej. desde Stripe redirect)
     this.route.queryParams.subscribe(params => {
       if (params['seccion']) {

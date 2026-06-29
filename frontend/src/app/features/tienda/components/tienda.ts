@@ -400,6 +400,8 @@ export class Tienda implements OnInit, OnDestroy {
       });
 
       if (res && res.url) {
+        // Guardar indicador de pago exitoso en sessionStorage
+        sessionStorage.setItem('stripePaymentSuccess', 'true');
         window.location.href = res.url;
       } else {
         Swal.fire({

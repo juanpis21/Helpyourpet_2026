@@ -43,7 +43,7 @@ export class StripeService {
         payment_method_types: ['card'],
         line_items: lineItems,
         mode: 'payment',
-        success_url: 'https://helpyourpet-2026-1.onrender.com/perfil-usuario?seccion=compras',
+        success_url: 'https://helpyourpet-2026-1.onrender.com/perfil-usuario',
         cancel_url: 'https://helpyourpet-2026-1.onrender.com/tienda',
         metadata: {
           shipping_name: shipping?.fullName || '',
