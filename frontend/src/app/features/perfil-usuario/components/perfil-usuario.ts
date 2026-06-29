@@ -250,23 +250,39 @@ export class PerfilUsuario implements OnInit, OnDestroy {
 
   createTicket(): void {
     if (!this.newTicket.asunto || !this.newTicket.descripcion) {
-      alert('Por favor, completa los campos obligatorios');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos incompletos',
+        text: 'Por favor, completa los campos obligatorios'
+      });
       return;
     }
 
     if (this.newTicket.asunto.length < 5) {
-      alert('El asunto debe tener al menos 5 caracteres');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Asunto muy corto',
+        text: 'El asunto debe tener al menos 5 caracteres'
+      });
       return;
     }
 
     if (this.newTicket.descripcion.length < 10) {
-      alert('La descripción debe tener al menos 10 caracteres');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Descripción muy corta',
+        text: 'La descripción debe tener al menos 10 caracteres'
+      });
       return;
     }
 
     const user = this.authService.getCurrentUser();
     if (!user) {
-      alert('Debes estar logueado para crear un ticket');
+      Swal.fire({
+        icon: 'error',
+        title: 'No autenticado',
+        text: 'Debes estar logueado para crear un ticket'
+      });
       return;
     }
 
@@ -274,11 +290,19 @@ export class PerfilUsuario implements OnInit, OnDestroy {
       next: () => {
         this.closeTicketModal();
         this.loadMyTickets();
-        alert('Ticket creado correctamente. Te responderemos pronto.');
+        Swal.fire({
+          icon: 'success',
+          title: '¡Ticket enviado!',
+          text: 'Ticket creado correctamente. Te responderemos pronto.'
+        });
       },
       error: (err) => {
         console.error('Error creating ticket:', err);
-        alert('Error al crear ticket. Por favor intenta nuevamente.');
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Error al crear ticket. Por favor intenta nuevamente.'
+        });
       }
     });
   }
@@ -1140,7 +1164,11 @@ export class PerfilUsuario implements OnInit, OnDestroy {
 
   guardarHistorial(): void {
     if (!this.newHistorial.fecha || !this.newHistorial.tipo) {
-      alert('Completa la fecha y el tipo de registro.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos incompletos',
+        text: 'Completa la fecha y el tipo de registro.'
+      });
       return;
     }
 
