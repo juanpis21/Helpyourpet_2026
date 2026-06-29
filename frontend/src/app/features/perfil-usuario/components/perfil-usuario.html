@@ -654,6 +654,7 @@
               <th>Fecha</th>
               <th>Hora</th>
               <th>Mascota</th>
+              <th>Veterinaria</th>
               <th>Veterinario</th>
               <th>Motivo</th>
               <th>Estado</th>
@@ -669,6 +670,7 @@
                   <i class="fas fa-paw"></i> {{ cita.mascota.name }}
                 </span>
               </td>
+              <td>{{ getVeterinariaNombre(cita) }}</td>
               <td>{{ getVeterinarioNombre(cita) }}</td>
               <td>{{ cita.motivo }}</td>
               <td>

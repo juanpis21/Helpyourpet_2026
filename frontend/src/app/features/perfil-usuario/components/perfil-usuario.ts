@@ -1897,6 +1897,11 @@ export class PerfilUsuario implements OnInit, OnDestroy {
     return [v.firstName, v.lastName].filter(Boolean).join(' ') || v.fullName || v.email || 'Veterinario';
   }
 
+  getVeterinariaNombre(cita: any): string {
+    if (!cita.veterinaria) return 'Sin asignar';
+    return cita.veterinaria.nombre || 'Veterinaria';
+  }
+
   // ===== PURCHASES / MIS COMPRAS METHODS =====
 
   cargarMisCompras(): void {

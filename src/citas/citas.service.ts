@@ -105,7 +105,7 @@ export class CitasService {
     return this.citasRepository.find({
       where: { isActive: true },
       relations: ['usuario', 'mascota', 'veterinario', 'servicio', 'veterinaria'],
-      select: ['id', 'motivo', 'fechaHora', 'estado', 'isActive', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario']
+      select: ['id', 'motivo', 'fechaHora', 'estado', 'isActive', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario', 'servicio', 'veterinaria']
     });
   }
 
@@ -113,7 +113,7 @@ export class CitasService {
     const cita = await this.citasRepository.findOne({
       where: { id, isActive: true },
       relations: ['usuario', 'mascota', 'veterinario', 'servicio', 'veterinaria'],
-      select: ['id', 'motivo', 'fechaHora', 'estado', 'isActive', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario']
+      select: ['id', 'motivo', 'fechaHora', 'estado', 'isActive', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario', 'servicio', 'veterinaria']
     });
 
     if (!cita) {
@@ -130,7 +130,7 @@ export class CitasService {
         isActive: true 
       },
       relations: ['usuario', 'mascota', 'veterinario', 'servicio', 'veterinaria'],
-      select: ['id', 'motivo', 'fechaHora', 'estado', 'isActive', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario']
+      select: ['id', 'motivo', 'fechaHora', 'estado', 'isActive', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario', 'servicio', 'veterinaria']
     });
   }
 
@@ -138,7 +138,7 @@ export class CitasService {
     return this.citasRepository.find({
       where: { usuario: { id: usuarioId } },
       relations: ['usuario', 'mascota', 'veterinario', 'servicio', 'veterinaria'],
-      select: ['id', 'motivo', 'fechaHora', 'estado', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario'],
+      select: ['id', 'motivo', 'fechaHora', 'estado', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario', 'servicio', 'veterinaria'],
       order: { fechaHora: 'ASC' }
     });
   }
@@ -147,7 +147,7 @@ export class CitasService {
     return this.citasRepository.find({
       where: { mascota: { id: mascotaId } },
       relations: ['usuario', 'mascota', 'veterinario', 'servicio', 'veterinaria'],
-      select: ['id', 'motivo', 'fechaHora', 'estado', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario'],
+      select: ['id', 'motivo', 'fechaHora', 'estado', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario', 'servicio', 'veterinaria'],
       order: { fechaHora: 'ASC' }
     });
   }
@@ -156,7 +156,7 @@ export class CitasService {
     return this.citasRepository.find({
       where: { estado, isActive: true },
       relations: ['usuario', 'mascota', 'veterinario', 'servicio', 'veterinaria'],
-      select: ['id', 'motivo', 'fechaHora', 'estado', 'isActive', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario'],
+      select: ['id', 'motivo', 'fechaHora', 'estado', 'isActive', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario', 'servicio', 'veterinaria'],
       order: { fechaHora: 'ASC' }
     });
   }
@@ -317,7 +317,7 @@ export class CitasService {
     const updatedCita = await this.citasRepository.findOne({
       where: { id: cita.id },
       relations: ['usuario', 'mascota', 'veterinario', 'servicio', 'veterinaria'],
-      select: ['id', 'motivo', 'fechaHora', 'estado', 'isActive', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario']
+      select: ['id', 'motivo', 'fechaHora', 'estado', 'isActive', 'createdAt', 'updatedAt', 'usuario', 'mascota', 'veterinario', 'servicio', 'veterinaria']
     });
 
     return updatedCita;
