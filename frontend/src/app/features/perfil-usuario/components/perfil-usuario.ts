@@ -288,12 +288,13 @@ export class PerfilUsuario implements OnInit, OnDestroy {
 
     this.ticketsService.create(this.newTicket).subscribe({
       next: () => {
-        this.closeTicketModal();
         this.loadMyTickets();
         Swal.fire({
           icon: 'success',
           title: '¡Ticket enviado!',
           text: 'Ticket creado correctamente. Te responderemos pronto.'
+        }).then(() => {
+          this.closeTicketModal();
         });
       },
       error: (err) => {
