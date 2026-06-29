@@ -345,59 +345,8 @@ export class Tienda implements OnInit, OnDestroy {
       return;
     }
 
-    // Obtener información del usuario actual para pre-completar el formulario
-    const fullName = this.currentUser?.fullName || `${this.currentUser?.firstName || ''} ${this.currentUser?.lastName || ''}`.trim() || '';
-    const phone = this.currentUser?.phone || '';
-    const address = this.currentUser?.address || '';
-    const city = this.currentUser?.city || 'Duitama';
-
-    const result = await Swal.fire({
-      title: 'Información de Envío',
-      html: `
-        <div style="text-align: left; font-family: inherit;">
-          <div style="margin-bottom: 12px;">
-            <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 0.9rem; color: #333;">Nombre Completo:</label>
-            <input id="swal-input-name" class="swal2-input" style="margin: 0; width: 100%; height: 38px; font-size: 0.9rem; border-radius: 6px; box-sizing: border-box;" value="${fullName}">
-          </div>
-          <div style="margin-bottom: 12px;">
-            <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 0.9rem; color: #333;">Teléfono:</label>
-            <input id="swal-input-phone" class="swal2-input" style="margin: 0; width: 100%; height: 38px; font-size: 0.9rem; border-radius: 6px; box-sizing: border-box;" value="${phone}">
-          </div>
-          <div style="margin-bottom: 12px;">
-            <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 0.9rem; color: #333;">Dirección de Envío:</label>
-            <input id="swal-input-address" class="swal2-input" style="margin: 0; width: 100%; height: 38px; font-size: 0.9rem; border-radius: 6px; box-sizing: border-box;" value="${address}">
-          </div>
-          <div style="margin-bottom: 12px;">
-            <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 0.9rem; color: #333;">Ciudad:</label>
-            <input id="swal-input-city" class="swal2-input" style="margin: 0; width: 100%; height: 38px; font-size: 0.9rem; border-radius: 6px; box-sizing: border-box;" value="${city}">
-          </div>
-        </div>
-      `,
-      focusConfirm: false,
-      showCancelButton: true,
-      confirmButtonText: 'Proceder al Pago con Stripe',
-      cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#1d3976',
-      cancelButtonColor: '#d33',
-      preConfirm: () => {
-        const name = (document.getElementById('swal-input-name') as HTMLInputElement).value;
-        const phoneVal = (document.getElementById('swal-input-phone') as HTMLInputElement).value;
-        const addr = (document.getElementById('swal-input-address') as HTMLInputElement).value;
-        const cty = (document.getElementById('swal-input-city') as HTMLInputElement).value;
-
-        if (!name.trim() || !phoneVal.trim() || !addr.trim() || !cty.trim()) {
-          Swal.showValidationMessage('Por favor completa todos los campos de envío.');
-          return false;
-        }
-        return { fullName: name, phone: phoneVal, address: addr, city: cty };
-      }
-    });
-
-    if (!result.isConfirmed || !result.value) {
-      return;
-    }
-
     this.cargandoProductos = true;
+    this.cdr.detectChanges();
     const headers = this.getAuthHeaders();
 
     try {
@@ -426,21 +375,20 @@ export class Tienda implements OnInit, OnDestroy {
         );
       }
 
-      // 3. Crear sesión de checkout de Stripe
+      // 3. Crear sesión de checkout de Stripe (sin datos de envío)
       const stripePayload = {
         items: this.carrito.map(item => ({
           name: item.nombre,
           price: item.precio,
           quantity: item.quantity
         })),
-        shipping: result.value,
         paymentMethod: 'card',
         total: this.obtenerTotal()
       };
 
       const res = await lastValueFrom(
         this.http.post<any>(
-          `${this.baseUrl}/stripe/create-checkout-session`, 
+          `${this.baseUrl}/stripe/create-checkout-session`,
           stripePayload,
           { headers }
         )
@@ -450,7 +398,7 @@ export class Tienda implements OnInit, OnDestroy {
         this.cargandoProductos = false;
         this.cdr.detectChanges();
       });
-      
+
       if (res && res.url) {
         window.location.href = res.url;
       } else {
