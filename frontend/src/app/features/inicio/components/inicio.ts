@@ -166,14 +166,17 @@ export class Inicio implements OnInit {
           this.publicaciones = publicaciones.map(pub => {
             const autor = pub.autor;
             console.log('👤 [DEBUG] Autor de publicación:', autor);
+            console.log('🔍 [DEBUG] Propiedades del autor:', JSON.stringify(autor, null, 2));
             if (!autor) {
               console.warn('⚠️ [DEBUG] Autor es null para publicación:', pub.id);
             }
+            const nombre = autor ? (autor.fullName || `${autor.firstName || ''} ${autor.lastName || ''}`.trim() || 'Usuario') : 'Usuario';
+            console.log('📛 [DEBUG] Nombre calculado:', nombre);
             return {
               id: pub.id,
               autorId: pub.autorId || pub.userId || (pub.autor ? pub.autor.id : undefined),
               usuario: {
-                nombre: autor ? (autor.fullName || `${autor.firstName || ''} ${autor.lastName || ''}`.trim() || 'Usuario') : 'Usuario',
+                nombre: nombre,
                 avatar: autor?.avatar
                   ? (autor.avatar.startsWith('/uploads/') ? `${this.apiUrl}${autor.avatar}` : autor.avatar)
                   : 'assets/images/Default.png'
