@@ -136,14 +136,20 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @UseGuards(RolesGuard)
-  @Roles('superadmin', 'admin')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Desactivar un usuario (soft delete)' })
+  @ApiOperation({ summary: 'Desactivar una cuenta (soft delete) - admin o el propio usuario' })
   @ApiParam({ name: 'id', description: 'ID del usuario' })
-  @ApiResponse({ status: 204, description: 'Usuario desactivado' })
+  @ApiResponse({ status: 204, description: 'Cuenta desactivada' })
+  @ApiResponse({ status: 403, description: 'No tienes permiso para desactivar esta cuenta' })
   @ApiResponse({ status: 404, description: 'Usuario no encontrado' })
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: string, @Request() req: any) {
+    const requestingUser = req.user;
+    const isOwner = requestingUser.userId === +id || requestingUser.id === +id;
+    const isAdmin = requestingUser.role?.name === 'admin' || requestingUser.role?.name === 'superadmin'
+      || requestingUser.role === 'admin' || requestingUser.role === 'superadmin';
+    if (!isOwner && !isAdmin) {
+      throw new ForbiddenException('No tienes permiso para desactivar esta cuenta.');
+    }
     return this.usersService.deactivate(+id);
   }
 }
