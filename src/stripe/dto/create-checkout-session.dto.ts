@@ -35,9 +35,10 @@ export class CreateCheckoutSessionDto {
   items: StripeItemDto[];
 
   @IsObject()
+  @IsOptional()
   @ValidateNested()
   @Type(() => ShippingDto)
-  shipping: ShippingDto;
+  shipping?: ShippingDto;
 
   @IsString()
   @IsOptional()
