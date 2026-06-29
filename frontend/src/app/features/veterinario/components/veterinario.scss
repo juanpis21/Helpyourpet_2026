@@ -731,11 +731,15 @@
     .pub-meta { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.85rem;
       .pub-date, .pub-likes { display: flex; align-items: center; gap: 0.3rem; } } }
   &:not(:has(.publicacion-image)) .publicacion-content { padding: 1.5rem; }
+  &:not(:has(.publicacion-image)) .publicacion-actions { position: relative; top: 0; right: 0; margin-bottom: 0.5rem; }
   .publicacion-actions {
     position: absolute;
     top: 0.5rem;
     right: 0.5rem;
     z-index: 10;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
 
     .btn-menu-dots {
       width: 36px;
@@ -1600,11 +1604,15 @@
     .pub-meta { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.85rem;
       .pub-date, .pub-likes { display: flex; align-items: center; gap: 0.3rem; } } }
   &:not(:has(.publicacion-image)) .publicacion-content { padding: 1.5rem; }
+  &:not(:has(.publicacion-image)) .publicacion-actions { position: relative; top: 0; right: 0; margin-bottom: 0.5rem; }
   .publicacion-actions {
     position: absolute;
     top: 0.5rem;
     right: 0.5rem;
     z-index: 10;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
 
     .btn-menu-dots {
       width: 36px;
