@@ -15,7 +15,7 @@ import { PublicacionesService } from '../../inicio/services/publicaciones.servic
 import { PreloaderComponent } from '../../../shared/components/preloader/preloader';
 import { TicketsService } from '../../../core/services/tickets.service';
 import type { CreateTicketDto } from '../../../core/services/tickets.service';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 
 interface Mascota {
   id: number;

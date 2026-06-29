@@ -9,7 +9,7 @@ import { PublicacionesService } from '../services/publicaciones.service';
 import { AnnouncementsService, Announcement } from '../../../core/services/announcements.service';
 import { TicketsService, CreateTicketDto } from '../../../core/services/tickets.service';
 import { PreloaderComponent } from '../../../shared/components/preloader/preloader';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 
 interface Publicacion {
   id: number;
