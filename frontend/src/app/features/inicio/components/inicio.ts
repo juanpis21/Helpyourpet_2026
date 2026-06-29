@@ -125,7 +125,7 @@ export class Inicio implements OnInit {
       if (user) {
         this.usuarioLogueado = {
           id: user.id,
-          nombre: user.fullName || 'Usuario',
+          nombre: user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Usuario',
           email: user.email,
           avatar: user.avatar
             ? (user.avatar.startsWith('/uploads/') ? `${this.apiUrl}${user.avatar}` : user.avatar)
@@ -138,7 +138,7 @@ export class Inicio implements OnInit {
           if (reloadedUser) {
             this.usuarioLogueado = {
               id: reloadedUser.id,
-              nombre: reloadedUser.fullName || 'Usuario',
+              nombre: reloadedUser.fullName || `${reloadedUser.firstName || ''} ${reloadedUser.lastName || ''}`.trim() || 'Usuario',
               email: reloadedUser.email,
               avatar: reloadedUser.avatar
                 ? (reloadedUser.avatar.startsWith('/uploads/') ? `${this.apiUrl}${reloadedUser.avatar}` : reloadedUser.avatar)
@@ -162,21 +162,13 @@ export class Inicio implements OnInit {
     return new Promise((resolve) => {
       this.publicacionesService.getPublicaciones().subscribe({
         next: (publicaciones) => {
-          console.log('📝 [DEBUG] Publicaciones recibidas:', publicaciones);
           this.publicaciones = publicaciones.map(pub => {
             const autor = pub.autor;
-            console.log('👤 [DEBUG] Autor de publicación:', autor);
-            console.log('🔍 [DEBUG] Propiedades del autor:', JSON.stringify(autor, null, 2));
-            if (!autor) {
-              console.warn('⚠️ [DEBUG] Autor es null para publicación:', pub.id);
-            }
-            const nombre = autor ? (autor.fullName || `${autor.firstName || ''} ${autor.lastName || ''}`.trim() || 'Usuario') : 'Usuario';
-            console.log('📛 [DEBUG] Nombre calculado:', nombre);
             return {
               id: pub.id,
               autorId: pub.autorId || pub.userId || (pub.autor ? pub.autor.id : undefined),
               usuario: {
-                nombre: nombre,
+                nombre: autor ? (autor.fullName || `${autor.firstName || ''} ${autor.lastName || ''}`.trim() || 'Usuario') : 'Usuario',
                 avatar: autor?.avatar
                   ? (autor.avatar.startsWith('/uploads/') ? `${this.apiUrl}${autor.avatar}` : autor.avatar)
                   : 'assets/images/Default.png'

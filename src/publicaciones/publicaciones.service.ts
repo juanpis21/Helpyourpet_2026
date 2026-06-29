@@ -105,8 +105,6 @@ export class PublicacionesService {
       relations: ['autor']
     });
 
-    console.log('📝 [DEBUG] Publicación creada con autor:', dbPub.autor);
-
     const resolved = await this.resolvePublicacionesComentarios([dbPub]);
     return resolved[0];
   }
