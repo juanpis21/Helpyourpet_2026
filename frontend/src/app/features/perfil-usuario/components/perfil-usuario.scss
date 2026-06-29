@@ -1077,8 +1077,7 @@
   backdrop-filter: blur(5px);
   display: flex;
   align-items: center;
-  
-  
+  justify-content: center;
   z-index: 1050;
   animation: fadeInBackdrop 0.2s ease-out;
 }
@@ -1103,7 +1102,7 @@
   display: flex;
   flex-direction: column;
   border-radius: 12px;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   animation: modalIn 0.3s ease-out;
   border: 1px solid var(--border-color);
@@ -2594,11 +2593,13 @@ textarea {
 /* ===== MODAL DE VER MASCOTA NATIVO ===== */
 .pet-ver-modal-box {
   max-width: 600px !important;
+  overflow: visible !important;
 }
 
 /* ===== MODAL DE CITAS MÉDICAS ===== */
 .cita-modal-box {
   max-width: 680px !important;
+  overflow: visible !important;
 
   .form-grid {
     gap: 1.25rem 1rem !important;
@@ -3433,6 +3434,7 @@ textarea {
 .compra-det-modal-box {
   max-width: 700px !important;
   width: 95% !important;
+  overflow: visible !important;
 }
 
 .compra-modal-info {
