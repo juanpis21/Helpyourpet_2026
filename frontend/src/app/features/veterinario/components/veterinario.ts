@@ -1639,7 +1639,7 @@ export class Veterinario implements OnInit {
       formData.append('imagen', this.selectedPublicacionFile);
     }
 
-    this.http.patch(`${this.API_BASE}/publicaciones/${this.editingPublicacion.id}`, formData, this.getHeaders()).subscribe({
+    this.publicacionesService.actualizarPublicacion(this.editingPublicacion.id, formData).subscribe({
       next: () => {
         this.showToast('Publicación actualizada con éxito', 'success');
         this.registrarAccionAuditoria('UPDATE', 'Publicacion', this.editingPublicacion.id, `Veterinario actualizó la publicación #${this.editingPublicacion.id}`);

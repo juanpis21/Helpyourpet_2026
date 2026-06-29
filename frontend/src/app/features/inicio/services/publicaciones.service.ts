@@ -54,8 +54,15 @@ export class PublicacionesService {
     });
   }
 
-  // Actualizar una publicación
+  // Actualizar una publicación (soporta FormData para subida de imágenes)
   actualizarPublicacion(id: number, publicacion: any): Observable<any> {
+    if (publicacion instanceof FormData) {
+      return this.http.patch<any>(`${this.apiUrl}/${id}`, publicacion, {
+        headers: new HttpHeaders({
+          'Authorization': `Bearer ${this.authService.getToken()}`
+        })
+      });
+    }
     return this.http.patch<any>(`${this.apiUrl}/${id}`, publicacion, {
       headers: this.getAuthHeaders()
     });

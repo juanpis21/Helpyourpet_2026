@@ -731,7 +731,7 @@
     .pub-meta { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.85rem;
       .pub-date, .pub-likes { display: flex; align-items: center; gap: 0.3rem; } } }
   &:not(:has(.publicacion-image)) .publicacion-content { padding: 1.5rem; }
-  &:not(:has(.publicacion-image)) .publicacion-actions { position: relative; top: 0; right: 0; margin-bottom: 0.5rem; }
+  &:not(:has(.publicacion-image)) .publicacion-actions { position: relative; top: 0; right: 0; margin-bottom: 0.5rem; align-self: flex-end; }
   .publicacion-actions {
     position: absolute;
     top: 0.5rem;
@@ -1604,7 +1604,7 @@
     .pub-meta { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.85rem;
       .pub-date, .pub-likes { display: flex; align-items: center; gap: 0.3rem; } } }
   &:not(:has(.publicacion-image)) .publicacion-content { padding: 1.5rem; }
-  &:not(:has(.publicacion-image)) .publicacion-actions { position: relative; top: 0; right: 0; margin-bottom: 0.5rem; }
+  &:not(:has(.publicacion-image)) .publicacion-actions { position: relative; top: 0; right: 0; margin-bottom: 0.5rem; align-self: flex-end; }
   .publicacion-actions {
     position: absolute;
     top: 0.5rem;
