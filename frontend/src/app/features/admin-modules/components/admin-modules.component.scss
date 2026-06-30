@@ -642,6 +642,34 @@
       cursor: not-allowed;
     }
   }
+
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    padding-right: 2rem;
+    cursor: pointer;
+
+    &:focus {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236366f1' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    }
+
+    option {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      padding: 0.5rem;
+
+      &:checked {
+        background: var(--primary-color);
+        color: white;
+      }
+
+      &:hover {
+        background: rgba(99, 102, 241, 0.1);
+      }
+    }
+  }
 }
 
 .modal-footer {
@@ -1629,6 +1657,41 @@
 .photo-hint { font-size: 0.75rem; color: var(--text-secondary); margin: 0.3rem 0; }
 .config-form { flex: 1; padding-left: 0.5rem; }
 .form-actions { margin-top: 1.5rem; text-align: center; }
+
+@media (max-width: 768px) {
+  .config-layout {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .config-photo {
+    min-width: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    padding-right: 0;
+    padding-bottom: 1rem;
+  }
+
+  .config-avatar {
+    width: 100px;
+    height: 100px;
+  }
+
+  .config-form {
+    padding-left: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .config-avatar {
+    width: 80px;
+    height: 80px;
+  }
+
+  .photo-hint {
+    font-size: 0.7rem;
+  }
+}
 
 /* ===== DANGER ZONE ===== */
 .card-danger-alt {

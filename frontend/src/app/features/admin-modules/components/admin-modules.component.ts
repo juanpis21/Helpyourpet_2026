@@ -770,15 +770,20 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
           responsive: true,
 
           maintainAspectRatio: false,
-
+          aspectRatio: 1,
           plugins: {
-
-            legend: { position: 'bottom' }
-
+            legend: {
+              position: 'bottom',
+              labels: {
+                padding: 20,
+                font: {
+                  size: 12
+                },
+                boxWidth: 12
+              }
+            }
           },
-
           cutout: '70%'
-
         }
 
       });
@@ -834,21 +839,39 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
           responsive: true,
 
           maintainAspectRatio: false,
-
+          aspectRatio: 1,
           plugins: {
-
-            legend: { display: false }
-
+            legend: { display: false },
+            tooltip: {
+              bodyFont: {
+                size: 12
+              },
+              titleFont: {
+                size: 14
+              }
+            }
           },
-
           scales: {
-
-            y: { beginAtZero: true, grid: { display: false } },
-
-            x: { grid: { display: false } }
-
+            y: {
+              beginAtZero: true,
+              grid: { display: false },
+              ticks: {
+                font: {
+                  size: 11
+                }
+              }
+            },
+            x: {
+              grid: { display: false },
+              ticks: {
+                font: {
+                  size: 10
+                },
+                maxRotation: 45,
+                minRotation: 45
+              }
+            }
           }
-
         }
 
       });
