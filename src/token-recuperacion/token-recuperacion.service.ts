@@ -65,8 +65,8 @@ export class TokenRecuperacionService {
       });
       console.log(`✅ Correo de recuperación enviado a: ${usuario.email}`);
     } catch (e) {
-      console.error('⚠️ Error enviando correo:', e);
-      throw new InternalServerErrorException('Error enviando correo SMTP: ' + e.message);
+      console.error('⚠️ Error enviando correo de recuperación:', e);
+      throw new InternalServerErrorException('No se pudo enviar el correo de recuperación. Verifica la configuración SMTP en producción o usa un proveedor compatible con Render.');
     }
 
     return {

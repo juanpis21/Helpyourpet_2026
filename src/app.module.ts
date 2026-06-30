@@ -60,6 +60,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { MonitoringModule } from './monitoring/monitoring.module';
 import { TicketsModule } from './tickets/tickets.module';
+import { buildMailerConfig } from './config/mailer.config';
 import { Ticket } from './tickets/entities/ticket.entity';
 import { AnnouncementsModule } from './announcements/announcements.module';
 import { Announcement } from './announcements/entities/announcement.entity';
@@ -91,20 +92,7 @@ import { StripeModule } from './stripe/stripe.module';
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        transport: {
-          host: 'smtp.gmail.com',
-          port: 465,
-          secure: true,
-          auth: {
-            user: configService.get<string>('smtp.user'),
-            pass: configService.get<string>('smtp.pass'),
-          },
-        },
-        defaults: {
-          from: `"HelpyourPet" <${configService.get('smtp.user')}>`,
-        },
-      }),
+      useFactory: (configService: ConfigService) => buildMailerConfig(configService),
     }),
     AuthModule,
     UsersModule,
