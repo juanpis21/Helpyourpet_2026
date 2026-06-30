@@ -1262,7 +1262,7 @@
 /* ===== CHARTS ===== */
 .charts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 1.5rem;
   margin-top: 1.5rem;
 }
@@ -1359,16 +1359,93 @@
   .charts-grid {
     grid-template-columns: 1fr;
   }
-  
+
+  .chart-card {
+    padding: 1rem;
+
+    .chart-body {
+      height: 250px;
+    }
+  }
+
   .section-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
-    
+
     .header-actions {
       width: 100%;
       justify-content: flex-end;
     }
+  }
+
+  .modal-box {
+    width: 95%;
+    max-width: none;
+    margin: 1rem;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal-body {
+    padding: 1rem;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+    gap: 0.5rem;
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+
+    .full {
+      grid-column: span 1;
+    }
+  }
+
+  .form-group {
+    label {
+      font-size: 0.9rem;
+    }
+
+    input,
+    select,
+    textarea {
+      font-size: 0.95rem;
+      padding: 0.6rem;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .charts-grid {
+    gap: 1rem;
+  }
+
+  .chart-card {
+    padding: 0.75rem;
+    border-radius: 12px;
+
+    .chart-header h4 {
+      font-size: 0.95rem;
+    }
+
+    .chart-body {
+      height: 200px;
+    }
+  }
+
+  .modal-box {
+    width: 100%;
+    margin: 0;
+    border-radius: 0;
+    max-height: 100vh;
   }
 }
 
