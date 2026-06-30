@@ -2436,4 +2436,14 @@
       }
     }
   }
+
+  .owner-autocomplete-item {
+    background: #374151;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #f3f4f6;
+
+    &:hover {
+      background: #4b5563;
+    }
+  }
 }
