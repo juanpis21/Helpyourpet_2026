@@ -71,15 +71,27 @@
                 (keydown.enter)="onSubmit()"
                 required
             >
-            <input 
-                type="password" 
-                placeholder="Contraseña" 
-                [(ngModel)]="credentials.password"
-                name="password"
-                [disabled]="isLoading"
-                (keydown.enter)="onSubmit()"
-                required
-            >
+            <div class="password-container">
+                <input 
+                    [type]="showPassword ? 'text' : 'password'" 
+                    placeholder="Contraseña" 
+                    [(ngModel)]="credentials.password"
+                    name="password"
+                    [disabled]="isLoading"
+                    (keydown.enter)="onSubmit()"
+                    required
+                >
+                <i 
+                    class="fas" 
+                    [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'" 
+                    (click)="togglePasswordVisibility()"
+                    role="button"
+                    tabindex="0"
+                    (keydown.enter)="togglePasswordVisibility()"
+                    aria-label="Mostrar/ocultar contraseña"
+                ></i>
+            </div>
+
 
             <button 
                 type="button"

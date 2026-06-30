@@ -21,7 +21,12 @@ export class Login {
   errorMessage = '';
   showPreloader = false;
   preloaderFadingOut = false;
+  showPassword = false;
   @ViewChild('usernameInput') usernameInput!: ElementRef;
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
 
   constructor(
     private router: Router,

@@ -275,8 +275,10 @@
   height: 40px;
   border-radius: 8px;
   align-items: center;
-  
-  
+  justify-content: center;
+  display: flex;
+
+
   cursor: pointer;
   color: var(--text-primary);
   font-size: 1.1rem;
@@ -296,8 +298,9 @@
   border-radius: 50%;
   display: flex;
   align-items: center;
-  
-  
+  justify-content: center;
+
+
   cursor: pointer;
   color: var(--text-primary);
   transition: var(--transition);
