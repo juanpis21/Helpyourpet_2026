@@ -26,6 +26,9 @@ export class UsersService {
   ) { }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
+    const normalizedEmail = createUserDto.email?.trim().toLowerCase();
+    const normalizedDto = { ...createUserDto, email: normalizedEmail };
+
     // 0. Verificar si el documento ya está en uso por una cuenta activa
     if (createUserDto.documentNumber) {
       const existingDoc = await this.usersRepository.findOne({
@@ -38,7 +41,7 @@ export class UsersService {
 
     // 1. Verificar si ya existe un usuario con el mismo email
     const existingByEmail = await this.usersRepository.findOne({
-      where: { email: createUserDto.email },
+      where: { email: normalizedEmail },
     });
 
     if (existingByEmail) {
@@ -61,7 +64,7 @@ export class UsersService {
         
         // Actualizamos los campos necesarios del registro existente
         const updatedUser = Object.assign(existingPreRegistered, {
-          ...createUserDto,
+          ...normalizedDto,
           password: hashedPassword,
           tieneCuenta: true,
           isActive: true
@@ -90,7 +93,7 @@ export class UsersService {
     }
 
     const user = this.usersRepository.create({
-      ...createUserDto,
+      ...normalizedDto,
       password: hashedPassword,
       roleId,
       tieneCuenta: true // Al registrarse por sí mismo, ya tiene cuenta activa
@@ -254,8 +257,9 @@ export class UsersService {
   }
 
   async findByEmail(email: string): Promise<User> {
+    const normalizedEmail = email?.trim().toLowerCase();
     return this.usersRepository.findOne({
-      where: { email },
+      where: { email: normalizedEmail },
       relations: ['pets', 'role'],
       select: ['id', 'email', 'password', 'fullName', 'firstName', 'lastName', 'phone', 'documentType', 'documentNumber', 'age', 'address', 'avatar', 'roleId', 'isActive', 'createdAt', 'updatedAt'],
     });

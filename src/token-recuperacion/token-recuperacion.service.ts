@@ -19,8 +19,11 @@ export class TokenRecuperacionService {
   ) { }
 
   async solicitarRecuperacion(dto: SolicitarRecuperacionDto): Promise<{ mensaje: string }> {
-    const usuario = await this.usersService.findByEmail(dto.email);
+    const email = dto.email?.trim().toLowerCase();
+    console.log(`[Recuperacion] Intentando recuperar contraseña para: ${email}`);
+    const usuario = await this.usersService.findByEmail(email);
     if (!usuario) {
+      console.log(`[Recuperacion] No se encontró usuario para: ${email}`);
       // Retornamos el mismo mensaje de éxito por seguridad (evita enumeración de usuarios)
       return {
         mensaje: 'Recuperación inicializada con éxito. Revisa tu correo electrónico para continuar.'
