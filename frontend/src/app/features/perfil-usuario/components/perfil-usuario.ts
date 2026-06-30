@@ -246,6 +246,7 @@ export class PerfilUsuario implements OnInit, OnDestroy {
       descripcion: '',
       prioridad: 'Media'
     };
+    this.cdr.detectChanges();
   }
 
   createTicket(): void {
