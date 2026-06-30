@@ -2635,6 +2635,37 @@ textarea {
   }
 }
 
+:host-context([data-theme="dark"]) {
+  .cita-modal-box {
+    input,
+    select {
+      background: #374151;
+      border-color: rgba(255, 255, 255, 0.1);
+      color: #f3f4f6;
+
+      &:focus {
+        border-color: #60a5fa;
+        background: #4b5563;
+      }
+
+      &:disabled {
+        background: #1f2937;
+        color: #6b7280;
+        cursor: not-allowed;
+      }
+
+      option {
+        background: #374151;
+        color: #f3f4f6;
+      }
+    }
+
+    label {
+      color: #e5e7eb;
+    }
+  }
+}
+
 .pet-ver-modal-header {
   background: linear-gradient(135deg, #1d3976 0%, #3b82f6 100%) !important;
 
