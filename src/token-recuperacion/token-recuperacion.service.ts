@@ -100,4 +100,21 @@ export class TokenRecuperacionService {
 
     return { mensaje: 'Contraseña actualizada con éxito!' };
   }
+
+  async sendTestEmail(to: string, subject = 'Prueba de correo - HelpyourPet'): Promise<{ mensaje: string }> {
+    try {
+      await this.mailerService.sendMail({
+        to,
+        subject,
+        html: `<div style="font-family: Arial, sans-serif;">` +
+          `<p>Este es un correo de prueba enviado desde HelpyourPet para verificar la configuración SMTP.</p>` +
+          `</div>`,
+      });
+      console.log(`✅ Correo de prueba enviado a: ${to}`);
+      return { mensaje: 'Correo de prueba enviado con éxito.' };
+    } catch (e) {
+      console.error('⚠️ Error enviando correo de prueba:', e);
+      throw new InternalServerErrorException('No se pudo enviar el correo de prueba. Revisa los logs y la configuración SMTP.');
+    }
+  }
 }
