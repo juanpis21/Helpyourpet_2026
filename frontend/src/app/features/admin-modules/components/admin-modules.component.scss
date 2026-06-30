@@ -1447,6 +1447,13 @@
     textarea {
       font-size: 0.95rem;
       padding: 0.6rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    select {
+      background-position: right 0.5rem center;
+      padding-right: 1.8rem;
     }
   }
 }

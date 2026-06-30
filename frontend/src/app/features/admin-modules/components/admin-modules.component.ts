@@ -804,7 +804,10 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
         
 
-      const labels = lowestStockProducts.length > 0 ? lowestStockProducts.map(p => p.nombre) : ['Sin datos'];
+      const labels = lowestStockProducts.length > 0 ? lowestStockProducts.map(p => {
+        const nombre = p.nombre;
+        return nombre.length > 15 ? nombre.substring(0, 15) + '...' : nombre;
+      }) : ['Sin datos'];
 
       const stockData = lowestStockProducts.length > 0 ? lowestStockProducts.map(p => p.stockActual) : [0];
 
