@@ -45,9 +45,8 @@ export class AuthService {
   private _authStatus = signal<LoginResponse | null>(null);
   
   public currentUser = computed(() => this._authStatus()?.user);
-  public isAuthenticated = computed(() => !!this._authStatus());
-
-  public userModules = computed(() => {
+  private readonly _isAuthenticated = computed(() => !!this._authStatus());
+  private readonly _userModules = computed(() => {
     const user = this._authStatus()?.user;
     if (!user || !user.role) return [];
 
@@ -57,6 +56,14 @@ export class AuthService {
     const modules = role.modules.map((m: any) => m.name.toLowerCase().trim());
     return modules;
   });
+
+  isAuthenticated(): boolean {
+    return this._isAuthenticated();
+  }
+
+  userModules(): string[] {
+    return this._userModules();
+  }
 
   constructor(private http: HttpClient) {
     this.loadUserFromStorage();
