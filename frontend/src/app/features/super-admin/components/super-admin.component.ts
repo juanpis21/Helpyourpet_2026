@@ -997,21 +997,35 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
       next: () => this.loadTickets(),
       error: (err) => {
         console.error('Error updating ticket status:', err);
-        alert('Error al actualizar estado del ticket');
+        Swal.fire('Error', 'Error al actualizar estado del ticket', 'error');
       }
     });
   }
 
   deleteTicket(ticketId: number): void {
-    if (confirm('¿Estás seguro de eliminar este ticket?')) {
-      this.ticketsService.delete(ticketId).subscribe({
-        next: () => this.loadTickets(),
-        error: (err) => {
-          console.error('Error deleting ticket:', err);
-          alert('Error al eliminar ticket');
-        }
-      });
-    }
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: '¿Estás seguro de eliminar este ticket?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.ticketsService.delete(ticketId).subscribe({
+          next: () => {
+            this.loadTickets();
+            Swal.fire('¡Eliminado!', 'El ticket ha sido eliminado', 'success');
+          },
+          error: (err) => {
+            console.error('Error deleting ticket:', err);
+            Swal.fire('Error', 'Error al eliminar ticket', 'error');
+          }
+        });
+      }
+    });
   }
 
   openTicketDetails(ticket: Ticket): void {
