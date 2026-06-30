@@ -22,7 +22,7 @@ import { Pet } from './entities/pet.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Public } from '../auth/decorators/public.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
+import { diskStorage, memoryStorage } from 'multer';
 import { extname } from 'path';
 
 @ApiTags('pets')
@@ -55,14 +55,7 @@ export class PetsController {
   @ApiResponse({ status: 201, description: 'Mascota creada exitosamente', type: Pet })
   @ApiResponse({ status: 409, description: 'La mascota ya existe' })
   @UseInterceptors(FileInterceptor('foto', {
-    storage: diskStorage({
-      destination: './uploads/pets',
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '_' + Math.round(Math.random() * 1E9);
-        const ext = extname(file.originalname);
-        cb(null, `pet_${uniqueSuffix}${ext}`);
-      },
-    }),
+    storage: memoryStorage(),
     fileFilter: (req, file, cb) => {
       if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
         cb(new BadRequestException('Solo se permiten imágenes'), false);
@@ -92,7 +85,7 @@ export class PetsController {
     }
 
     if (file) {
-      createPetDto.foto = `/uploads/pets/${file.filename}`;
+      createPetDto.foto = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
     }
 
     return await this.petsService.create(createPetDto);
@@ -155,14 +148,7 @@ export class PetsController {
   @ApiResponse({ status: 200, description: 'Mascota actualizada', type: Pet })
   @ApiResponse({ status: 404, description: 'Mascota no encontrada' })
   @UseInterceptors(FileInterceptor('foto', {
-    storage: diskStorage({
-      destination: './uploads/pets',
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '_' + Math.round(Math.random() * 1E9);
-        const ext = extname(file.originalname);
-        cb(null, `pet_${uniqueSuffix}${ext}`);
-      },
-    }),
+    storage: memoryStorage(),
     fileFilter: (req, file, cb) => {
       if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
         cb(new BadRequestException('Solo se permiten imágenes'), false);
@@ -174,7 +160,7 @@ export class PetsController {
   }))
   update(@Param('id') id: string, @Body() updatePetDto: UpdatePetDto, @UploadedFile() file?: Express.Multer.File) {
     if (file) {
-      updatePetDto.foto = `/uploads/pets/${file.filename}`;
+      updatePetDto.foto = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
     }
     return this.petsService.update(+id, updatePetDto);
   }

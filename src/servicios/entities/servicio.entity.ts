@@ -91,7 +91,7 @@ export class Servicio {
     example: 'https://example.com/images/consulta-general.jpg',
     required: false
   })
-  @Column({ length: 500, nullable: true })
+  @Column({ type: 'text', nullable: true })
   imagen?: string;
 
 

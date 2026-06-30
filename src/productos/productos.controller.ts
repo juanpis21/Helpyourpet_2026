@@ -20,7 +20,7 @@ import { UpdateProductoDto } from './dto/update-producto.dto';
 import { Producto } from './entities/producto.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
+import { diskStorage, memoryStorage } from 'multer';
 import { extname } from 'path';
 
 @ApiTags('productos')
@@ -32,13 +32,7 @@ export class ProductosController {
 
   @Post()
   @UseInterceptors(FileInterceptor('imagen', {
-    storage: diskStorage({
-      destination: './uploads/productos',
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '_' + Math.round(Math.random() * 1E9);
-        cb(null, `producto_${uniqueSuffix}${extname(file.originalname)}`);
-      },
-    }),
+    storage: memoryStorage(),
     fileFilter: (req, file, cb) => {
       if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
         cb(new BadRequestException('Solo se permiten imágenes'), false);
@@ -53,7 +47,7 @@ export class ProductosController {
   @ApiResponse({ status: 409, description: 'El producto con este código de barras ya existe' })
   create(@Body() createProductoDto: CreateProductoDto, @UploadedFile() file?: Express.Multer.File) {
     if (file) {
-      createProductoDto.imagen = `/uploads/productos/${file.filename}`;
+      createProductoDto.imagen = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
     }
     return this.productosService.create(createProductoDto);
   }
@@ -76,13 +70,7 @@ export class ProductosController {
 
   @Patch(':id')
   @UseInterceptors(FileInterceptor('imagen', {
-    storage: diskStorage({
-      destination: './uploads/productos',
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '_' + Math.round(Math.random() * 1E9);
-        cb(null, `producto_${uniqueSuffix}${extname(file.originalname)}`);
-      },
-    }),
+    storage: memoryStorage(),
     fileFilter: (req, file, cb) => {
       if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
         cb(new BadRequestException('Solo se permiten imágenes'), false);
@@ -102,7 +90,7 @@ export class ProductosController {
     @UploadedFile() file?: Express.Multer.File
   ) {
     if (file) {
-      updateProductoDto.imagen = `/uploads/productos/${file.filename}`;
+      updateProductoDto.imagen = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
     }
     return this.productosService.update(+id, updateProductoDto);
   }

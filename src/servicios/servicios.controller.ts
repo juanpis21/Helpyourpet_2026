@@ -19,7 +19,7 @@ import { UpdateServicioDto } from './dto/update-servicio.dto';
 import { Servicio } from './entities/servicio.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
+import { diskStorage, memoryStorage } from 'multer';
 import { extname } from 'path';
 
 @ApiTags('servicios')
@@ -31,13 +31,7 @@ export class ServiciosController {
 
   @Post()
   @UseInterceptors(FileInterceptor('imagen', {
-    storage: diskStorage({
-      destination: './uploads/servicios',
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '_' + Math.round(Math.random() * 1E9);
-        cb(null, `servicio_${uniqueSuffix}${extname(file.originalname)}`);
-      },
-    }),
+    storage: memoryStorage(),
     fileFilter: (req, file, cb) => {
       if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
         cb(new BadRequestException('Solo se permiten imágenes'), false);
@@ -51,7 +45,7 @@ export class ServiciosController {
   @ApiResponse({ status: 201, description: 'Servicio creado exitosamente', type: Servicio })
   create(@Body() createServicioDto: CreateServicioDto, @UploadedFile() file?: Express.Multer.File) {
     if (file) {
-      createServicioDto.imagen = `/uploads/servicios/${file.filename}`;
+      createServicioDto.imagen = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
     }
     return this.serviciosService.create(createServicioDto);
   }
@@ -74,13 +68,7 @@ export class ServiciosController {
 
   @Patch(':id')
   @UseInterceptors(FileInterceptor('imagen', {
-    storage: diskStorage({
-      destination: './uploads/servicios',
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '_' + Math.round(Math.random() * 1E9);
-        cb(null, `servicio_${uniqueSuffix}${extname(file.originalname)}`);
-      },
-    }),
+    storage: memoryStorage(),
   }))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Actualizar un servicio' })
@@ -93,7 +81,7 @@ export class ServiciosController {
     @UploadedFile() file?: Express.Multer.File
   ) {
     if (file) {
-      updateServicioDto.imagen = `/uploads/servicios/${file.filename}`;
+      updateServicioDto.imagen = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
     }
     return this.serviciosService.update(+id, updateServicioDto);
   }

@@ -26,7 +26,7 @@ import { Public } from '../auth/decorators/public.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
+import { diskStorage, memoryStorage } from 'multer';
 import { extname } from 'path';
 
 @ApiTags('users')
@@ -104,14 +104,7 @@ export class UsersController {
   @ApiResponse({ status: 404, description: 'Usuario no encontrado' })
   @ApiResponse({ status: 409, description: 'El nombre de usuario o email ya existe' })
   @UseInterceptors(FileInterceptor('avatar', {
-    storage: diskStorage({
-      destination: './uploads/profiles',
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '_' + Math.round(Math.random() * 1E9);
-        const ext = extname(file.originalname);
-        cb(null, `profile_${uniqueSuffix}${ext}`);
-      },
-    }),
+    storage: memoryStorage(),
     fileFilter: (req, file, cb) => {
       if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
         cb(new BadRequestException('Solo se permiten imágenes'), false);
@@ -130,7 +123,7 @@ export class UsersController {
       throw new ForbiddenException('No tienes permiso para modificar este recurso.');
     }
     if (file) {
-      updateUserDto.avatar = `/uploads/profiles/${file.filename}`;
+      updateUserDto.avatar = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
     }
     return this.usersService.update(+id, updateUserDto);
   }

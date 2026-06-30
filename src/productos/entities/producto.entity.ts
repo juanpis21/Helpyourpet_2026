@@ -111,7 +111,7 @@ export class Producto {
     example: '/uploads/productos/producto_123.jpg',
     required: false
   })
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   imagen?: string;
 
   @ApiProperty({ 

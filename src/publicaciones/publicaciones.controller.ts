@@ -6,7 +6,7 @@ import { UpdatePublicacionDto } from './dto/update-publicacion.dto';
 import { Publicacion } from './entities/publicacion.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
+import { diskStorage, memoryStorage } from 'multer';
 import { extname } from 'path';
 
 @ApiTags('publicaciones')
@@ -32,14 +32,7 @@ export class PublicacionesController {
   @ApiResponse({ status: 201, description: 'Publicación creada exitosamente', type: Publicacion })
   @ApiResponse({ status: 409, description: 'La publicación ya existe' })
   @UseInterceptors(FileInterceptor('imagen', {
-    storage: diskStorage({
-      destination: './uploads/publicaciones',
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '_' + Math.round(Math.random() * 1E9);
-        const ext = extname(file.originalname);
-        cb(null, `pub_${uniqueSuffix}${ext}`);
-      },
-    }),
+    storage: memoryStorage(),
     fileFilter: (req, file, cb) => {
       if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
         cb(new BadRequestException('Solo se permiten imágenes (jpg, jpeg, png, gif, webp)'), false);
@@ -57,9 +50,9 @@ export class PublicacionesController {
       createPublicacionDto.autorId = userId;
     }
 
-    // Si se subió una imagen, guardar la ruta relativa
+    // Si se subió una imagen, guardar en Base64
     if (file) {
-      createPublicacionDto.imagen = `/uploads/publicaciones/${file.filename}`;
+      createPublicacionDto.imagen = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
     }
 
     return await this.publicacionesService.create(createPublicacionDto);
@@ -113,14 +106,7 @@ export class PublicacionesController {
   @ApiOperation({ summary: 'Actualizar una publicación' })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('imagen', {
-    storage: diskStorage({
-      destination: './uploads/publicaciones',
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '_' + Math.round(Math.random() * 1E9);
-        const ext = extname(file.originalname);
-        cb(null, `pub_${uniqueSuffix}${ext}`);
-      },
-    }),
+    storage: memoryStorage(),
     fileFilter: (req, file, cb) => {
       if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
         cb(new BadRequestException('Solo se permiten imágenes (jpg, jpeg, png, gif, webp)'), false);
@@ -134,7 +120,7 @@ export class PublicacionesController {
   @ApiResponse({ status: 404, description: 'Publicación no encontrada' })
   async update(@Param('id') id: string, @Body() updatePublicacionDto: UpdatePublicacionDto, @UploadedFile() file?: Express.Multer.File) {
     if (file) {
-      updatePublicacionDto.imagen = `/uploads/publicaciones/${file.filename}`;
+      updatePublicacionDto.imagen = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
     }
     return await this.publicacionesService.update(+id, updatePublicacionDto);
   }
