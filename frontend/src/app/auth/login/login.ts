@@ -124,7 +124,7 @@ export class Login {
 
     // 3. Veterinario
     if (roleName === 'veterinario') {
-      this.router.navigate(['/veterinario']);
+      this.router.navigate(['/inicio']);
       return;
     }
 
