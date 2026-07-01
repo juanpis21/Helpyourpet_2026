@@ -1,5 +1,5 @@
 import { Component, HostListener, OnInit, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ThemeService } from '../../services/theme.service';
 import { AuthService } from '../../services/auth.service';
@@ -8,7 +8,7 @@ import { environment } from '../../../../environments/environment';
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './navbar.html',
   styleUrl: './navbar.scss'
 })
@@ -118,8 +118,6 @@ export class Navbar implements OnInit {
       this.router.navigate(['/veterinario']);
     } else if (this.isUsuario || this.hasAccess('perfil-usuario')) {
       this.router.navigate(['/perfil-usuario']);
-    } else if (this.hasAccess('inicio')) {
-      this.router.navigate(['/inicio']);
     } else {
       this.router.navigate(['/inicio']);
     }
