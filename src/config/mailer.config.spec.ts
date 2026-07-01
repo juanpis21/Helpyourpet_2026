@@ -41,4 +41,26 @@ describe('buildMailerConfig', () => {
     expect(config.transport.auth).toBeUndefined();
     expect(config.defaults.from).toContain('HelpyourPet');
   });
+
+  it('should build custom Brevo API transport when pass starts with xkeysib-', () => {
+    const configService = {
+      get: jest.fn((key: string) => {
+        const values: Record<string, string> = {
+          'smtp.host': 'smtp-relay.brevo.com',
+          'smtp.port': '587',
+          'smtp.secure': 'false',
+          'smtp.user': 'demo@helpyourpet.com',
+          'smtp.pass': 'xkeysib-demo-key-123456',
+          'smtp.from': 'no-reply@helpyourpet.com',
+        };
+        return values[key];
+      }),
+    } as any;
+
+    const config = buildMailerConfig(configService);
+
+    expect(config.transport.name).toBe('brevo-api-transport');
+    expect(config.transport.send).toBeDefined();
+    expect(config.transport.host).toBeUndefined();
+  });
 });
