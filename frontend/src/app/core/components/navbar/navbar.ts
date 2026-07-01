@@ -105,6 +105,10 @@ export class Navbar implements OnInit {
     return this.usuarioLogueado?.roleName?.toLowerCase() === 'veterinario';
   }
 
+  get isUsuario(): boolean {
+    return this.usuarioLogueado?.roleName?.toLowerCase() === 'usuario';
+  }
+
   irAInicio() {
     this.router.navigate(['/inicio']);
   }
@@ -112,8 +116,10 @@ export class Navbar implements OnInit {
   irAPerfil() {
     if (this.isVeterinario || this.hasAccess('veterinario')) {
       this.router.navigate(['/veterinario']);
-    } else {
+    } else if (this.isUsuario || this.hasAccess('perfil-usuario')) {
       this.router.navigate(['/perfil-usuario']);
+    } else {
+      this.router.navigate(['/inicio']);
     }
   }
 

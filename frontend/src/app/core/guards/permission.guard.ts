@@ -19,9 +19,10 @@ export const permissionGuard: CanActivateFn = (route, state) => {
   const isDashboardAccess = requiredModule.toLowerCase() === 'dashboard';
   const isAdmin = roleName === 'admin';
   const isVeterinario = roleName === 'veterinario' && requiredModule.toLowerCase() === 'veterinario';
+  const isUsuario = roleName === 'usuario' && requiredModule.toLowerCase() === 'perfil-usuario';
   const hasAccess = userModules.includes(requiredModule.toLowerCase());
 
-  if (hasAccess || isVeterinario || (isDashboardAccess && isAdmin) || roleName === 'superadmin') {
+  if (hasAccess || isVeterinario || isUsuario || (isDashboardAccess && isAdmin) || roleName === 'superadmin') {
     return true;
   }
 
