@@ -19,8 +19,6 @@ export class Navbar implements OnInit {
   usuarioLogueado: any = null;
   showScrollTop = false;
 
-  public userModules = inject(AuthService).userModules;
-
   constructor(
     private themeService: ThemeService,
     private authService: AuthService,
@@ -59,7 +57,7 @@ export class Navbar implements OnInit {
   }
 
   hasAccess(module: string): boolean {
-    return this.userModules().includes(module.toLowerCase());
+    return this.authService.userModules().includes(module.toLowerCase());
   }
 
   toggleMenu(event: Event) {
