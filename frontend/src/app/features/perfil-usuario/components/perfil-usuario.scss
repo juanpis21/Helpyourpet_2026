@@ -1072,10 +1072,7 @@
   margin-top: 1rem;
   
   display: flex;
-}
-
-.config-bottom-row {
-  display: grid;
+  justify-content: center;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
@@ -2380,8 +2377,9 @@ textarea {
   border-radius: 20px;
   display: flex;
   align-items: center;
-  
-  
+  justify-content: center;
+  text-align: center;
+
   font-size: 2rem;
   /* Larger icon */
 
