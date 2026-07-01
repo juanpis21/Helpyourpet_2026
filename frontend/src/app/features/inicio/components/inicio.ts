@@ -110,6 +110,22 @@ export class Inicio implements OnInit {
     return this.placeholders[Math.floor(Math.random() * this.placeholders.length)];
   }
 
+  private normalizeImageUrl(image?: string | null): string | undefined {
+    if (!image) {
+      return undefined;
+    }
+
+    if (image.startsWith('data:') || image.startsWith('http://') || image.startsWith('https://')) {
+      return image;
+    }
+
+    if (image.startsWith('/uploads/')) {
+      return `${this.apiUrl}${image}`;
+    }
+
+    return image;
+  }
+
   ngOnInit(): void {
     this.initializeInicio();
   }
@@ -169,12 +185,10 @@ export class Inicio implements OnInit {
               autorId: pub.autorId || pub.userId || (pub.autor ? pub.autor.id : undefined),
               usuario: {
                 nombre: autor ? (autor.fullName || `${autor.firstName || ''} ${autor.lastName || ''}`.trim() || 'Usuario') : 'Usuario',
-                avatar: autor?.avatar
-                  ? (autor.avatar.startsWith('/uploads/') ? `${this.apiUrl}${autor.avatar}` : autor.avatar)
-                  : 'assets/images/Default.png'
+                avatar: this.normalizeImageUrl(autor?.avatar) || 'assets/images/Default.png'
               },
               contenido: pub.descripcion,
-              imagen: pub.imagen && pub.imagen.startsWith('/uploads/') ? `${this.apiUrl}${pub.imagen}` : pub.imagen,
+              imagen: this.normalizeImageUrl(pub.imagen),
               fecha: new Date(pub.createdAt),
               likes: pub.likesUserIds ? pub.likesUserIds.length : 0,
               comentarios: Array.isArray(pub.comentarios) ? pub.comentarios.map((c: any) => ({
@@ -194,12 +208,10 @@ export class Inicio implements OnInit {
                 autorId: pub.sharedFrom.autorId,
                 usuario: {
                   nombre: pub.sharedFrom.autor ? (pub.sharedFrom.autor.fullName || `${pub.sharedFrom.autor.firstName || ''} ${pub.sharedFrom.autor.lastName || ''}`.trim() || 'Usuario') : 'Usuario',
-                  avatar: pub.sharedFrom.autor?.avatar
-                    ? (pub.sharedFrom.autor.avatar.startsWith('/uploads/') ? `${this.apiUrl}${pub.sharedFrom.autor.avatar}` : pub.sharedFrom.autor.avatar)
-                    : 'assets/images/Default.png'
+                  avatar: this.normalizeImageUrl(pub.sharedFrom.autor?.avatar) || 'assets/images/Default.png'
                 },
                 contenido: pub.sharedFrom.descripcion,
-                imagen: pub.sharedFrom.imagen && pub.sharedFrom.imagen.startsWith('/uploads/') ? `${this.apiUrl}${pub.sharedFrom.imagen}` : pub.sharedFrom.imagen,
+                imagen: this.normalizeImageUrl(pub.sharedFrom.imagen),
                 fecha: new Date(pub.sharedFrom.createdAt)
               } : undefined
             };
@@ -304,10 +316,10 @@ export class Inicio implements OnInit {
             autorId: publicacionCreada.autorId,
             usuario: {
               nombre: this.usuarioLogueado?.nombre || 'Usuario',
-              avatar: this.usuarioLogueado?.avatar || 'assets/images/Default.png'
+              avatar: this.normalizeImageUrl(this.usuarioLogueado?.avatar) || 'assets/images/Default.png'
             },
             contenido: publicacionCreada.descripcion,
-            imagen: publicacionCreada.imagen ? `${this.apiUrl}${publicacionCreada.imagen}` : undefined,
+            imagen: this.normalizeImageUrl(publicacionCreada.imagen),
             fecha: new Date(publicacionCreada.createdAt),
             likes: 0,
             comentarios: [],
@@ -321,6 +333,7 @@ export class Inicio implements OnInit {
           this.currentPlaceholder = this.getRandomPlaceholder();
           this.eliminarImagen();
           this.cdr.detectChanges();
+          this.cargarPublicaciones().catch(() => undefined);
 
           // Remove animation class after animation ends
           setTimeout(() => {
@@ -439,12 +452,10 @@ export class Inicio implements OnInit {
               autorId: res.autorId,
               usuario: {
                 nombre: autor ? (autor.fullName || `${autor.firstName || ''} ${autor.lastName || ''}`.trim() || 'Usuario') : 'Usuario',
-                avatar: autor?.avatar
-                  ? (autor.avatar.startsWith('/uploads/') ? `${this.apiUrl}${autor.avatar}` : autor.avatar)
-                  : 'assets/images/Default.png'
+                avatar: this.normalizeImageUrl(autor?.avatar) || 'assets/images/Default.png'
               },
               contenido: res.descripcion,
-              imagen: res.imagen && res.imagen.startsWith('/uploads/') ? `${this.apiUrl}${res.imagen}` : res.imagen,
+              imagen: this.normalizeImageUrl(res.imagen),
               fecha: new Date(res.createdAt),
               likes: 0,
               comentarios: [],
@@ -457,18 +468,17 @@ export class Inicio implements OnInit {
                 autorId: res.sharedFrom.autorId,
                 usuario: {
                   nombre: res.sharedFrom.autor ? (res.sharedFrom.autor.fullName || `${res.sharedFrom.autor.firstName || ''} ${res.sharedFrom.autor.lastName || ''}`.trim() || 'Usuario') : 'Usuario',
-                  avatar: res.sharedFrom.autor?.avatar
-                    ? (res.sharedFrom.autor.avatar.startsWith('/uploads/') ? `${this.apiUrl}${res.sharedFrom.autor.avatar}` : res.sharedFrom.autor.avatar)
-                    : 'assets/images/Default.png'
+                  avatar: this.normalizeImageUrl(res.sharedFrom.autor?.avatar) || 'assets/images/Default.png'
                 },
                 contenido: res.sharedFrom.descripcion,
-                imagen: res.sharedFrom.imagen && res.sharedFrom.imagen.startsWith('/uploads/') ? `${this.apiUrl}${res.sharedFrom.imagen}` : res.sharedFrom.imagen,
+                imagen: this.normalizeImageUrl(res.sharedFrom.imagen),
                 fecha: new Date(res.sharedFrom.createdAt)
               } : undefined
             };
 
             this.publicaciones.unshift(nuevoCompartido);
             this.cdr.detectChanges();
+            this.cargarPublicaciones().catch(() => undefined);
 
             setTimeout(() => {
               nuevoCompartido.justPublished = false;
