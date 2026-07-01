@@ -14,7 +14,8 @@ export function buildMailerConfig(configService: ConfigService) {
   const pass = configService.get<string>('smtp.pass');
   const from = configService.get<string>('smtp.from') || user || 'no-reply@helpyourpet.com';
 
-  // Check if we should use Brevo HTTP API to bypass Render's outbound SMTP port blocking
+  // If the key is a Brevo API key (xkeysib-), use the HTTP API to bypass Render's SMTP port blocking.
+  // If the key is a Brevo SMTP key (xsmtpsib-), fall back to normal SMTP (works only outside Render free tier).
   const useBrevoApi = pass && pass.trim().startsWith('xkeysib-');
 
   let transport: any;

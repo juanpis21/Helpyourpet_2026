@@ -122,8 +122,14 @@ export class Login {
       return;
     }
 
-    // 3. Usuarios estándar / Veterinarios / Otros con acceso a inicio
-    if (userModules.includes('inicio') || roleName === 'veterinario' || roleName === 'usuario') {
+    // 3. Veterinario
+    if (roleName === 'veterinario') {
+      this.router.navigate(['/veterinario']);
+      return;
+    }
+
+    // 4. Usuarios estándar / otros con acceso a inicio
+    if (userModules.includes('inicio') || roleName === 'usuario') {
       this.router.navigate(['/inicio']);
       return;
     }

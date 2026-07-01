@@ -110,7 +110,7 @@ export class Navbar implements OnInit {
   }
 
   irAPerfil() {
-    if (this.hasAccess('veterinario')) {
+    if (this.isVeterinario || this.hasAccess('veterinario')) {
       this.router.navigate(['/veterinario']);
     } else {
       this.router.navigate(['/perfil-usuario']);
