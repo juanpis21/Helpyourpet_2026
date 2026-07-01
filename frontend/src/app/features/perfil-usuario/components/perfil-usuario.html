@@ -69,6 +69,10 @@
 
   <!-- ===== CONTENIDO PRINCIPAL ===== -->
   <main class="main-content" (click)="closeAllMenus()">
+    <!-- Botón móvil para abrir/cerrar el sidebar -->
+    <button class="menu-toggle" (click)="toggleSidebar()" aria-label="Abrir menú">
+      <i class="fas fa-bars"></i>
+    </button>
     <!-- ===== DASHBOARD ===== -->
     <section *ngIf="seccionActiva === 'dashboard'" class="content-section animate-in">
       <div class="section-header">
