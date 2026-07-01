@@ -118,6 +118,8 @@ export class Navbar implements OnInit {
       this.router.navigate(['/veterinario']);
     } else if (this.isUsuario || this.hasAccess('perfil-usuario')) {
       this.router.navigate(['/perfil-usuario']);
+    } else if (this.hasAccess('inicio')) {
+      this.router.navigate(['/inicio']);
     } else {
       this.router.navigate(['/inicio']);
     }

@@ -24,7 +24,7 @@
           </div>
         </div>
         <nav class="dropdown-nav">
-          <a *ngIf="!isInicio && hasAccess('inicio') && !isVeterinario" (click)="irAInicio(); toggleProfileMenu()"
+          <a *ngIf="!isInicio && (hasAccess('inicio') || isUsuario) && !isVeterinario" (click)="irAInicio(); toggleProfileMenu()"
             class="dropdown-item">
             <i class="fas fa-home"></i>
             <span>Inicio</span>
@@ -33,12 +33,12 @@
             <i class="fas fa-user"></i>
             <span>Mi Perfil</span>
           </a>
-          <a *ngIf="!isTienda && hasAccess('tienda') && !isVeterinario" (click)="irATienda(); toggleProfileMenu()"
+          <a *ngIf="!isTienda && (hasAccess('tienda') || isUsuario) && !isVeterinario" (click)="irATienda(); toggleProfileMenu()"
             class="dropdown-item">
             <i class="fas fa-shopping-cart"></i>
             <span>PetShop</span>
           </a>
-          <a *ngIf="!isSobreNosotros && hasAccess('sobre-nosotros') && !isVeterinario"
+          <a *ngIf="!isSobreNosotros && (hasAccess('sobre-nosotros') || isUsuario) && !isVeterinario"
             (click)="irASobreNosotros(); toggleProfileMenu()" class="dropdown-item">
             <i class="fas fa-users"></i>
             <span>Sobre Nosotros</span>
