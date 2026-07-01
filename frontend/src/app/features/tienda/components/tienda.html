@@ -7,6 +7,11 @@
 	<span class="cart-badge" *ngIf="carrito.length > 0">{{ carrito.length }}</span>
 </button>
 
+<!-- Botón flotante para ir al dashboard (visible solo en mobile) -->
+<button class="store-home-btn" aria-label="Ir al inicio" (click)="irAInicio()">
+  <i class="fas fa-home"></i>
+</button>
+
 <!-- Sección de Selección de Tienda -->
 <section class="store-selection-section" id="storeSelection" *ngIf="vista === 'tiendas'">
 	<div class="store-selection-container">

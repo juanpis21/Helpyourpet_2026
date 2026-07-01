@@ -158,6 +158,40 @@ body {
 	color: white;
 }
 
+/* Botón flotante para ir al dashboard (visible solo en móvil) */
+.store-home-btn {
+	position: fixed;
+	top: 130px;
+	left: 110px;
+	z-index: 1000;
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+	background: linear-gradient(135deg, #272c8b, #43699f);
+	color: white;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.1rem;
+	cursor: pointer;
+	box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.store-home-btn:hover {
+	transform: translateY(-3px);
+}
+
+@media (max-width: 768px) {
+	.store-home-btn {
+		display: flex;
+	}
+	/* mover el botón de volver a tiendas si es necesario para evitar solapamiento */
+	.btn-back-to-stores {
+		left: 80px;
+	}
+}
+
 /* Navbar local eliminada en favor del navbar global */
 
 

@@ -201,6 +201,10 @@ export class Tienda implements OnInit, OnDestroy {
     console.log('🔙 Volviendo a la selección de tiendas');
   }
 
+  irAInicio(): void {
+    this.router.navigate(['/inicio']);
+  }
+
   cargarCategorias(): void {
     this.categoriasService.getAll().subscribe({
       next: (data) => {
