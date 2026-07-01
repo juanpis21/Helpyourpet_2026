@@ -9,7 +9,7 @@ export function buildMailerConfig(configService: ConfigService) {
     : secureValue === false || secureValue === 'false' || secureValue === '0' || secureValue === 0
       ? false
       : port === 465;
-  const user = configService.get<string>('smtp.user');
+  const user = configService.get<string>('smtp.user') || configService.get<string>('smtp.from');
   const pass = configService.get<string>('smtp.pass');
   const from = configService.get<string>('smtp.from') || user || 'no-reply@helpyourpet.com';
 
@@ -17,6 +17,10 @@ export function buildMailerConfig(configService: ConfigService) {
     host,
     port,
     secure,
+    tls: {
+      // Avoid issues with self-signed certificates or hostname altname mismatches (e.g. smtp-relay.brevo.com vs sendinblue.com)
+      rejectUnauthorized: false,
+    },
   };
 
   if (user && pass) {

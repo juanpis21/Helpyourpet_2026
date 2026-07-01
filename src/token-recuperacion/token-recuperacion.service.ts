@@ -46,6 +46,8 @@ export class TokenRecuperacionService {
     try {
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
       const urlRecuperacion = `${frontendUrl}/recovery?token=${encodeURIComponent(nuevoToken)}`;
+      console.log(`[Recuperacion] enviar correo a: ${usuario.email} usando URL: ${urlRecuperacion}`);
+      const start = Date.now();
       await this.mailerService.sendMail({
         to: usuario.email,
         subject: 'Recuperación de Contraseña - HelpyourPet',
@@ -66,7 +68,8 @@ export class TokenRecuperacionService {
           </div>
         `,
       });
-      console.log(`✅ Correo de recuperación enviado a: ${usuario.email}`);
+      const duration = Date.now() - start;
+      console.log(`✅ Correo de recuperación enviado a: ${usuario.email} (took ${duration}ms)`);
     } catch (e) {
       console.error('⚠️ Error enviando correo de recuperación:', e);
       throw new InternalServerErrorException('No se pudo enviar el correo de recuperación. Verifica la configuración SMTP en producción o usa un proveedor compatible con Render.');

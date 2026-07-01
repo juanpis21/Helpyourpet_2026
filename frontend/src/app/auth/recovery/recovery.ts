@@ -121,7 +121,6 @@ export class Recovery implements OnInit {
 
     this.recoveryService.solicitarRecuperacion({ email })
       .pipe(
-        timeout(15000),
         finalize(() => this.isLoading = false)
       )
       .subscribe({
