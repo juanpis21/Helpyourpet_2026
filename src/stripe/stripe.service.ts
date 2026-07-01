@@ -17,6 +17,15 @@ export class StripeService {
     this.stripe = new Stripe(stripeSecretKey);
   }
 
+  buildRedirectUrl(path: string, params: Record<string, string> = {}) {
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:4200';
+    const url = new URL(path.startsWith('http') ? path : `${frontendUrl}${path}`);
+    Object.entries(params).forEach(([key, value]) => {
+      url.searchParams.set(key, value);
+    });
+    return url.toString();
+  }
+
   async createCheckoutSession(items: any[], shipping: any, paymentMethod: string, total: number) {
     try {
       // Tasa de cambio aproximada COP -> USD (1 USD ≈ 4100 COP)
@@ -38,13 +47,21 @@ export class StripeService {
 
       console.log('📦 Stripe line_items:', JSON.stringify(lineItems, null, 2));
 
+      const successUrl = this.buildRedirectUrl('/perfil-usuario', {
+        payment: 'success',
+        session_id: '{CHECKOUT_SESSION_ID}',
+      });
+      const cancelUrl = this.buildRedirectUrl('/tienda', {
+        payment: 'cancelled',
+      });
+
       // Crear sesión de checkout
       const session = await this.stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: lineItems,
         mode: 'payment',
-        success_url: 'https://helpyourpet-2026-frontend.onrender.com/perfil-usuario',
-        cancel_url: 'https://helpyourpet-2026-frontend.onrender.com/tienda',
+        success_url: successUrl,
+        cancel_url: cancelUrl,
         metadata: {
           shipping_name: shipping?.fullName || '',
           shipping_address: shipping?.address || '',

@@ -4,7 +4,7 @@ import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Chart, registerables } from 'chart.js';
 Chart.register(...registerables);
 import { ThemeService } from '../../../core/services/theme.service';
@@ -358,7 +358,10 @@ export class PerfilUsuario implements OnInit, OnDestroy {
 
     // Leer query param 'seccion' para navegar directamente (ej. desde Stripe redirect)
     this.route.queryParams.subscribe(params => {
-      if (params['seccion']) {
+      if (params['payment'] === 'success') {
+        this.cambiarSeccion('compras');
+        this.confirmarVentaStripe();
+      } else if (params['seccion']) {
         this.cambiarSeccion(params['seccion']);
         // Limpiar query params de la URL
         this.router.navigate([], { queryParams: {}, replaceUrl: true });
@@ -379,6 +382,45 @@ export class PerfilUsuario implements OnInit, OnDestroy {
     if (window.innerWidth >= 992) {
       this.sidebarAbierto = true;
     }
+  }
+
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.authService.getToken();
+    return new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+  }
+
+  private confirmarVentaStripe(): void {
+    const headers = this.getAuthHeaders();
+
+    this.http.post<any>(`${this.apiUrl}/ventas/checkout`, {}, { headers }).subscribe({
+      next: (venta) => {
+        sessionStorage.removeItem('stripePaymentSuccess');
+        this.cargarMisCompras();
+        this.router.navigate([], {
+          queryParams: { payment: null, session_id: null },
+          queryParamsHandling: 'merge',
+          replaceUrl: true
+        });
+
+        Swal.fire({
+          icon: 'success',
+          title: '¡Pago Exitoso!',
+          text: `Tu compra se ha procesado con éxito. Orden de venta #${venta.id}`,
+          confirmButtonColor: '#1d3976'
+        });
+      },
+      error: (err) => {
+        console.error('Error al confirmar la venta después del pago:', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al procesar la compra',
+          text: err.error?.message || 'No se pudo registrar tu compra. Intenta nuevamente.',
+          confirmButtonColor: '#1d3976'
+        });
+      }
+    });
   }
 
   private async initializeUserData(): Promise<void> {

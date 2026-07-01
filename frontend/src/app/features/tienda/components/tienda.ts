@@ -115,7 +115,7 @@ export class Tienda implements OnInit, OnDestroy {
         this.carrito = [];
         localStorage.removeItem('checkoutCart');
         this.cdr.detectChanges();
-        this.router.navigate([], { queryParams: {} });
+        this.router.navigate([], { queryParams: { payment: null, session_id: null }, queryParamsHandling: 'merge' });
 
         Swal.fire({
           icon: 'success',
@@ -127,7 +127,7 @@ export class Tienda implements OnInit, OnDestroy {
       error: (err) => {
         this.cargandoProductos = false;
         this.cdr.detectChanges();
-        this.router.navigate([], { queryParams: {} });
+        this.router.navigate([], { queryParams: { payment: null, session_id: null }, queryParamsHandling: 'merge' });
         console.error('Error al procesar checkout de Stripe:', err);
         Swal.fire({
           icon: 'error',
