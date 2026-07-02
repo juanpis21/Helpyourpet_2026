@@ -216,9 +216,12 @@ export class Inicio implements OnInit {
               } : undefined
             };
           });
+          // Forzar la detección de cambios para que las publicaciones se muestren inmediatamente
+          this.cdr.detectChanges();
         },
         error: (err) => {
           this.publicaciones = [];
+          this.cdr.detectChanges();
         }
       }).add(() => {
         resolve();
