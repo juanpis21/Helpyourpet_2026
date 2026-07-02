@@ -44,20 +44,36 @@
         <!-- Campos de Contraseña (Modo reset o change) -->
         <div class="input-wrapper" *ngIf="isResetOrChange">
           <input
-            type="password"
+            [type]="showPassword ? 'text' : 'password'"
             placeholder="Nueva contraseña"
             formControlName="nuevaContrasena"
           />
-          <i class="fas fa-lock"></i>
+          <i
+            class="fas password-toggle"
+            [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"
+            (click)="togglePasswordVisibility('password')"
+            role="button"
+            tabindex="0"
+            (keydown.enter)="togglePasswordVisibility('password')"
+            aria-label="Mostrar/ocultar contraseña"
+          ></i>
         </div>
 
         <div class="input-wrapper" *ngIf="isResetOrChange">
           <input
-            type="password"
+            [type]="showConfirmPassword ? 'text' : 'password'"
             placeholder="Confirmar nueva contraseña"
             formControlName="confirmarContrasena"
           />
-          <i class="fas fa-check-circle"></i>
+          <i
+            class="fas password-toggle"
+            [ngClass]="showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'"
+            (click)="togglePasswordVisibility('confirm')"
+            role="button"
+            tabindex="0"
+            (keydown.enter)="togglePasswordVisibility('confirm')"
+            aria-label="Mostrar/ocultar contraseña de confirmación"
+          ></i>
         </div>
 
         <button type="submit" [disabled]="isLoading || (recoveryForm.invalid && recoveryForm.touched)">

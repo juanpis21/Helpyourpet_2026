@@ -24,6 +24,8 @@ export class Recovery implements OnInit {
   messageType = ''; // 'success' or 'error'
   solicitudExitosa = false;
   token = '';
+  showPassword = false;
+  showConfirmPassword = false;
 
   constructor(
     private fb: FormBuilder,
@@ -218,5 +220,13 @@ export class Recovery implements OnInit {
 
   goToProfile(): void {
     this.router.navigate(['/perfil-usuario']);
+  }
+
+  togglePasswordVisibility(field: 'password' | 'confirm'): void {
+    if (field === 'password') {
+      this.showPassword = !this.showPassword;
+    } else {
+      this.showConfirmPassword = !this.showConfirmPassword;
+    }
   }
 }

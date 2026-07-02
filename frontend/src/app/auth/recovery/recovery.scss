@@ -147,6 +147,23 @@
   font-size: 18px;
 }
 
+.input-wrapper .password-toggle {
+  cursor: pointer;
+  color: #777;
+  user-select: none;
+  z-index: 10;
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.input-wrapper .password-toggle:hover {
+  color: #2e9e44;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.input-wrapper .password-toggle:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
 /* BOTÓN */
 button {
   width: 100%;
