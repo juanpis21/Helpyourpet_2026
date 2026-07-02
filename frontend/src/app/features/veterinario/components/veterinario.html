@@ -502,7 +502,7 @@
       <div *ngIf="filteredPublicaciones.length > 0" class="publicaciones-grid">
         <div *ngFor="let pub of filteredPublicaciones" class="publicacion-card">
           <div *ngIf="pub.imagen" class="publicacion-image">
-            <img [src]="pub.imagen" [alt]="pub.descripcion" class="pub-img">
+            <img [src]="pub.imagen && pub.imagen.startsWith('/uploads/') ? API_BASE + pub.imagen : pub.imagen" [alt]="pub.descripcion" class="pub-img">
           </div>
           <div class="publicacion-content">
             <p class="pub-descripcion">{{ pub.descripcion }}</p>

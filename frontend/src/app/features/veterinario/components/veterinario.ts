@@ -593,12 +593,28 @@ export class Veterinario implements OnInit {
     }
   }
 
+  private normalizeImageUrl(image?: string | null): string | undefined {
+    if (!image) return undefined;
+    if (
+      image.startsWith('data:') ||
+      image.startsWith('http://') ||
+      image.startsWith('https://') ||
+      image.startsWith('assets/')
+    ) {
+      return image;
+    }
+    if (image.startsWith('/uploads/')) {
+      return `${this.API_BASE}${image}`;
+    }
+    return image;
+  }
+
   cargarPublicacionesUsuario(): void {
     if (!this.vetUser || !this.vetUser.id) return;
 
     const mapImagen = (publicaciones: any[]) => publicaciones.map(pub => ({
       ...pub,
-      imagen: pub.imagen && pub.imagen.startsWith('/uploads/') ? `${this.API_BASE}${pub.imagen}` : pub.imagen
+      imagen: this.normalizeImageUrl(pub.imagen)
     }));
 
     if (this.veterinariaId) {
@@ -1598,10 +1614,16 @@ export class Veterinario implements OnInit {
     this.editingPublicacion = { ...pub };
     this.showEditPublicacionModal = true;
     if (pub.imagen) {
-      if (pub.imagen.startsWith('http') || pub.imagen.startsWith('assets/')) {
+      if (
+        pub.imagen.startsWith('http') ||
+        pub.imagen.startsWith('assets/') ||
+        pub.imagen.startsWith('data:')
+      ) {
         this.publicacionImagePreview = pub.imagen;
-      } else {
+      } else if (pub.imagen.startsWith('/uploads/')) {
         this.publicacionImagePreview = `${this.API_BASE}${pub.imagen}`;
+      } else {
+        this.publicacionImagePreview = pub.imagen;
       }
     } else {
       this.publicacionImagePreview = null;
