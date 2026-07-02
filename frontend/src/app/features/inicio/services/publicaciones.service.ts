@@ -20,8 +20,12 @@ export class PublicacionesService {
   }
 
   // Obtener todas las publicaciones
-  getPublicaciones(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiUrl, {
+  getPublicaciones(limit?: number, offset?: number): Observable<any[]> {
+    let url = this.apiUrl;
+    if (limit !== undefined && offset !== undefined) {
+      url += `?limit=${limit}&offset=${offset}`;
+    }
+    return this.http.get<any[]>(url, {
       headers: this.getAuthHeaders()
     });
   }

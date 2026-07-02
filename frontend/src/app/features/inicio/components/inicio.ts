@@ -82,6 +82,11 @@ export class Inicio implements OnInit {
     prioridad: 'Media'
   };
 
+  limitePublicaciones: number = 10;
+  offsetPublicaciones: number = 0;
+  cargandoMasPublicaciones: boolean = false;
+  masPublicacionesDisponibles: boolean = true;
+
   // Preloader is now self-managed by PreloaderComponent
 
   private placeholders = [
@@ -174,11 +179,20 @@ export class Inicio implements OnInit {
   }
 
 
-  private async cargarPublicaciones(): Promise<void> {
+  private async cargarPublicaciones(cargarMas: boolean = false): Promise<void> {
+    if (this.cargandoMasPublicaciones) return;
+
+    if (!cargarMas) {
+      this.offsetPublicaciones = 0;
+      this.masPublicacionesDisponibles = true;
+    } else {
+      this.cargandoMasPublicaciones = true;
+    }
+
     return new Promise((resolve) => {
-      this.publicacionesService.getPublicaciones().subscribe({
+      this.publicacionesService.getPublicaciones(this.limitePublicaciones, this.offsetPublicaciones).subscribe({
         next: (publicaciones) => {
-          this.publicaciones = publicaciones.map(pub => {
+          const nuevasPublicacionesMapped = publicaciones.map(pub => {
             const autor = pub.autor;
             return {
               id: pub.id,
@@ -216,17 +230,35 @@ export class Inicio implements OnInit {
               } : undefined
             };
           });
-          // Forzar la detección de cambios para que las publicaciones se muestren inmediatamente
+
+          if (cargarMas) {
+            this.publicaciones = [...this.publicaciones, ...nuevasPublicacionesMapped];
+          } else {
+            this.publicaciones = nuevasPublicacionesMapped;
+          }
+
+          if (publicaciones.length < this.limitePublicaciones) {
+            this.masPublicacionesDisponibles = false;
+          }
           this.cdr.detectChanges();
         },
         error: (err) => {
-          this.publicaciones = [];
+          if (!cargarMas) {
+            this.publicaciones = [];
+          }
           this.cdr.detectChanges();
         }
       }).add(() => {
+        this.cargandoMasPublicaciones = false;
         resolve();
       });
     });
+  }
+
+  async cargarMasPublicaciones(): Promise<void> {
+    if (!this.masPublicacionesDisponibles || this.cargandoMasPublicaciones) return;
+    this.offsetPublicaciones += this.limitePublicaciones;
+    await this.cargarPublicaciones(true);
   }
 
   // ===== TICKETS =====

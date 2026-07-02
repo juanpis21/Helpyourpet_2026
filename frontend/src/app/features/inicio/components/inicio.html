@@ -178,6 +178,18 @@
         </section>
 
       </div>
+
+      <!-- CARGAR MÁS PUBLICACIONES -->
+      <div class="cargar-mas-container" *ngIf="masPublicacionesDisponibles" style="text-align: center; margin: 2rem 0;">
+        <button class="btn-primary" (click)="cargarMasPublicaciones()" [disabled]="cargandoMasPublicaciones" style="padding: 0.8rem 2rem; font-size: 1rem; border-radius: 50px; display: inline-flex; align-items: center; gap: 0.5rem; justify-content: center; cursor: pointer; border: none; font-weight: 600; transition: all 0.3s ease; margin: 0 auto;">
+          <span *ngIf="!cargandoMasPublicaciones"><i class="fas fa-redo"></i> Cargar más publicaciones</span>
+          <span *ngIf="cargandoMasPublicaciones"><i class="fas fa-spinner fa-spin"></i> Cargando...</span>
+        </button>
+      </div>
+
+      <div *ngIf="!masPublicacionesDisponibles && publicaciones.length > 0" class="no-more-publications" style="text-align: center; color: var(--text-secondary); margin: 2rem 0; font-size: 0.9rem;">
+        <span>✨ Has llegado al final del feed community ✨</span>
+      </div>
     </section>
 
   </section>

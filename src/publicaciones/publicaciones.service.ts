@@ -58,7 +58,8 @@ export class PublicacionesService {
       });
     }
 
-    const users = await this.usersService.findAll();
+    const uniqueUserIds = Array.from(userIds);
+    const users = await this.usersService.findByIds(uniqueUserIds);
     const userMap = new Map<number, any>();
     users.forEach(u => userMap.set(u.id, u));
 
@@ -109,7 +110,7 @@ export class PublicacionesService {
     return resolved[0];
   }
 
-  async findAll(): Promise<any[]> {
+  async findAll(limit?: number, offset?: number): Promise<any[]> {
     console.log('Backend: Buscando todas las publicaciones activas...');
 
     // Log para depuración: contar inactivas
@@ -118,15 +119,23 @@ export class PublicacionesService {
       console.log(`Backend: Hay ${inactiveCount} publicaciones inactivas que no se mostrarán.`);
     }
 
-    const pubs = await this.publicacionesRepository.createQueryBuilder('publicacion')
+    const queryBuilder = this.publicacionesRepository.createQueryBuilder('publicacion')
       .leftJoinAndSelect('publicacion.autor', 'autor')
       .leftJoinAndSelect('publicacion.sharedFrom', 'sharedFrom')
       .leftJoinAndSelect('sharedFrom.autor', 'sharedFromAutor')
       .where('publicacion.isActive = :isActive', { isActive: true })
-      .orderBy('publicacion.createdAt', 'DESC')
-      .getMany();
+      .orderBy('publicacion.createdAt', 'DESC');
 
-    console.log(`Backend: Se encontraron ${pubs.length} publicaciones activas en total.`);
+    if (limit !== undefined) {
+      queryBuilder.take(limit);
+    }
+    if (offset !== undefined) {
+      queryBuilder.skip(offset);
+    }
+
+    const pubs = await queryBuilder.getMany();
+
+    console.log(`Backend: Se encontraron ${pubs.length} publicaciones activas en total (con paginación).`);
     return await this.resolvePublicacionesComentarios(pubs);
   }
 

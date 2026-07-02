@@ -361,4 +361,12 @@ export class UsersService {
       });
     } catch (e) { console.error('Error logging audit:', e); }
   }
+
+  async findByIds(ids: number[]): Promise<User[]> {
+    if (!ids || ids.length === 0) return [];
+    return this.usersRepository.find({
+      where: { id: In(ids) },
+      select: ['id', 'email', 'fullName', 'firstName', 'lastName', 'avatar']
+    });
+  }
 }
