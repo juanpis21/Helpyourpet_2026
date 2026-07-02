@@ -66,21 +66,135 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
   historialPage: number = 1;
   historialPageSize: number = 10;
 
-  usuarios: any[] = [];
+  private _usuarios: any[] = [];
+  get usuarios(): any[] { return this._usuarios; }
+  set usuarios(v: any[]) { this._usuarios = v; this._recomputeUsuarios(); }
 
-  servicios: Servicio[] = [];
+  private _servicios: Servicio[] = [];
+  get servicios(): Servicio[] { return this._servicios; }
+  set servicios(v: Servicio[]) { this._servicios = v; this._recomputeServicios(); }
 
-  veterinarias: Veterinaria[] = [];
+  private _veterinarias: Veterinaria[] = [];
+  get veterinarias(): Veterinaria[] { return this._veterinarias; }
+  set veterinarias(v: Veterinaria[]) { this._veterinarias = v; this._recomputeVeterinarias(); }
 
-  productos: Producto[] = [];
+  private _productos: Producto[] = [];
+  get productos(): Producto[] { return this._productos; }
+  set productos(v: Producto[]) { this._productos = v; this._recomputeProductos(); }
 
   categorias: Categoria[] = [];
 
   roles: Role[] = [];
 
-  veterinarios: any[] = [];
+  private _veterinarios: any[] = [];
+  get veterinarios(): any[] { return this._veterinarios; }
+  set veterinarios(v: any[]) { this._veterinarios = v; this._recomputeVeterinarios(); }
 
   isLoading: boolean = false;
+
+  // ===== LISTAS CACHEADAS (reemplaza getters no memoizados) =====
+  filteredUsuariosList: any[] = [];
+  filteredVeterinariasList: Veterinaria[] = [];
+  filteredProductosList: Producto[] = [];
+  filteredVeterinariosList: any[] = [];
+  filteredServiciosList: Servicio[] = [];
+
+  paginatedUsuariosList: any[] = [];
+  paginatedVeterinariasList: Veterinaria[] = [];
+  paginatedProductosList: Producto[] = [];
+  paginatedVeterinariosList: any[] = [];
+  paginatedServiciosList: Servicio[] = [];
+
+  private _recomputeUsuarios(): void {
+    let base = this._usuarios.filter(u => this.getRolesString(u).toLowerCase() === 'usuario');
+    if (this._filterEstadoUsuarios === 'activos') base = base.filter(u => u.isActive !== false);
+    if (this._filterEstadoUsuarios === 'inactivos') base = base.filter(u => u.isActive === false);
+    if (this._searchTermUsuarios) {
+      const t = this._searchTermUsuarios.toLowerCase();
+      base = base.filter(u =>
+        (u.firstName || '').toLowerCase().includes(t) ||
+        (u.lastName || '').toLowerCase().includes(t) ||
+        (u.email || '').toLowerCase().includes(t)
+      );
+    }
+    this.filteredUsuariosList = base;
+    const s = (this.currentPageUsuarios - 1) * this.itemsPerPage;
+    this.paginatedUsuariosList = base.slice(s, s + this.itemsPerPage);
+  }
+
+  private _recomputeVeterinarias(): void {
+    let base = this._veterinarias;
+    if (this._searchTermVeterinarias) {
+      const t = this._searchTermVeterinarias.toLowerCase();
+      base = base.filter(v =>
+        (v.nombre || '').toLowerCase().includes(t) ||
+        (v.email || '').toLowerCase().includes(t) ||
+        (v.rut || '').toLowerCase().includes(t)
+      );
+    }
+    this.filteredVeterinariasList = base;
+    const s = (this.currentPageVeterinarias - 1) * this.itemsPerPage;
+    this.paginatedVeterinariasList = base.slice(s, s + this.itemsPerPage);
+  }
+
+  private _recomputeProductos(): void {
+    let base = this._productos;
+    if (this._filterEstadoProductos === 'activos') base = base.filter(p => p.isActive !== false);
+    if (this._filterEstadoProductos === 'inactivos') base = base.filter(p => p.isActive === false);
+    if (this._filterEstadoProductos === 'stock_bajo') base = base.filter(p => p.stockActual <= p.stockMinimo);
+    if (this._filterVeterinariaProductos !== 'todas') base = base.filter(p => p.veterinariaId === Number(this._filterVeterinariaProductos));
+    if (this._searchTermProductos) {
+      const t = this._searchTermProductos.toLowerCase();
+      base = base.filter(p =>
+        (p.nombre || '').toLowerCase().includes(t) ||
+        (p.codigoBarras || '').toLowerCase().includes(t) ||
+        (p.lote || '').toLowerCase().includes(t) ||
+        this.getCategoriaNombre(p.categoriaId).toLowerCase().includes(t)
+      );
+    }
+    this.filteredProductosList = base;
+    const s = (this.currentPageProductos - 1) * this.itemsPerPage;
+    this.paginatedProductosList = base.slice(s, s + this.itemsPerPage);
+  }
+
+  private _recomputeVeterinarios(): void {
+    let base = this._veterinarios;
+    if (this._filterEstadoVeterinarios === 'activos') base = base.filter(v => v.isActive !== false);
+    if (this._filterEstadoVeterinarios === 'inactivos') base = base.filter(v => v.isActive === false);
+    if (this._filterVeterinariaVeterinarios !== 'todas') {
+      base = base.filter(v => v.perfilVeterinario?.veterinariaPrincipalId === Number(this._filterVeterinariaVeterinarios));
+    }
+    if (this._searchTermVeterinarios) {
+      const t = this._searchTermVeterinarios.toLowerCase();
+      base = base.filter(v =>
+        (v.firstName || '').toLowerCase().includes(t) ||
+        (v.lastName || '').toLowerCase().includes(t) ||
+        (v.perfilVeterinario?.especialidad || '').toLowerCase().includes(t) ||
+        (v.perfilVeterinario?.matricula || '').toLowerCase().includes(t)
+      );
+    }
+    this.filteredVeterinariosList = base;
+    const s = (this.currentPageVeterinarios - 1) * this.itemsPerPage;
+    this.paginatedVeterinariosList = base.slice(s, s + this.itemsPerPage);
+  }
+
+  private _recomputeServicios(): void {
+    let base = this._servicios;
+    if (this._filterVeterinariaServicios !== 'todas') {
+      base = base.filter(s => s.veterinariaId === Number(this._filterVeterinariaServicios));
+    }
+    if (this._searchTermServicios) {
+      const t = this._searchTermServicios.toLowerCase();
+      base = base.filter(s =>
+        (s.nombre || '').toLowerCase().includes(t) ||
+        (s.tipoServicio || '').toLowerCase().includes(t) ||
+        (s.descripcion || '').toLowerCase().includes(t)
+      );
+    }
+    this.filteredServiciosList = base;
+    const s = (this.currentPageServicios - 1) * this.itemsPerPage;
+    this.paginatedServiciosList = base.slice(s, s + this.itemsPerPage);
+  }
 
 
 
@@ -92,37 +206,51 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
 
 
-  // Variables de Búsqueda y Filtros
+  // Variables de Búsqueda y Filtros (con setters que invalidan caché)
 
-  searchTermUsuarios: string = '';
+  private _searchTermUsuarios: string = '';
+  get searchTermUsuarios() { return this._searchTermUsuarios; }
+  set searchTermUsuarios(v: string) { this._searchTermUsuarios = v; this._recomputeUsuarios(); }
 
-  filterEstadoUsuarios: string = 'todos';
+  private _filterEstadoUsuarios: string = 'todos';
+  get filterEstadoUsuarios() { return this._filterEstadoUsuarios; }
+  set filterEstadoUsuarios(v: string) { this._filterEstadoUsuarios = v; this._recomputeUsuarios(); }
 
+  private _searchTermVeterinarias: string = '';
+  get searchTermVeterinarias() { return this._searchTermVeterinarias; }
+  set searchTermVeterinarias(v: string) { this._searchTermVeterinarias = v; this._recomputeVeterinarias(); }
 
+  private _searchTermProductos: string = '';
+  get searchTermProductos() { return this._searchTermProductos; }
+  set searchTermProductos(v: string) { this._searchTermProductos = v; this._recomputeProductos(); }
 
-  searchTermVeterinarias: string = '';
+  private _filterEstadoProductos: string = 'todos';
+  get filterEstadoProductos() { return this._filterEstadoProductos; }
+  set filterEstadoProductos(v: string) { this._filterEstadoProductos = v; this._recomputeProductos(); }
 
+  private _filterVeterinariaProductos: string | number = 'todas';
+  get filterVeterinariaProductos() { return this._filterVeterinariaProductos; }
+  set filterVeterinariaProductos(v: string | number) { this._filterVeterinariaProductos = v; this._recomputeProductos(); }
 
+  private _searchTermVeterinarios: string = '';
+  get searchTermVeterinarios() { return this._searchTermVeterinarios; }
+  set searchTermVeterinarios(v: string) { this._searchTermVeterinarios = v; this._recomputeVeterinarios(); }
 
-  searchTermProductos: string = '';
+  private _filterEstadoVeterinarios: string = 'todos';
+  get filterEstadoVeterinarios() { return this._filterEstadoVeterinarios; }
+  set filterEstadoVeterinarios(v: string) { this._filterEstadoVeterinarios = v; this._recomputeVeterinarios(); }
 
-  filterEstadoProductos: string = 'todos';
+  private _filterVeterinariaVeterinarios: string | number = 'todas';
+  get filterVeterinariaVeterinarios() { return this._filterVeterinariaVeterinarios; }
+  set filterVeterinariaVeterinarios(v: string | number) { this._filterVeterinariaVeterinarios = v; this._recomputeVeterinarios(); }
 
-  filterVeterinariaProductos: string | number = 'todas';
+  private _searchTermServicios: string = '';
+  get searchTermServicios() { return this._searchTermServicios; }
+  set searchTermServicios(v: string) { this._searchTermServicios = v; this._recomputeServicios(); }
 
-
-
-  searchTermVeterinarios: string = '';
-
-  filterEstadoVeterinarios: string = 'todos';
-
-  filterVeterinariaVeterinarios: string | number = 'todas';
-
-
-
-  searchTermServicios: string = '';
-
-  filterVeterinariaServicios: string | number = 'todas';
+  private _filterVeterinariaServicios: string | number = 'todas';
+  get filterVeterinariaServicios() { return this._filterVeterinariaServicios; }
+  set filterVeterinariaServicios(v: string | number) { this._filterVeterinariaServicios = v; this._recomputeServicios(); }
 
 
 
@@ -1256,220 +1384,9 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
 
 
-  // Getters para listas filtradas con búsqueda
 
-  get filteredUsuariosList(): any[] {
 
-    let baseList = this.usuarios.filter(u => this.getRolesString(u).toLowerCase() === 'usuario');
-
-    
-
-    // Filtro por estado
-
-    if (this.filterEstadoUsuarios === 'activos') baseList = baseList.filter(u => u.isActive !== false);
-
-    if (this.filterEstadoUsuarios === 'inactivos') baseList = baseList.filter(u => u.isActive === false);
-
-
-
-    if (!this.searchTermUsuarios) return baseList;
-
-    const term = this.searchTermUsuarios.toLowerCase();
-
-    return baseList.filter(u =>
-
-      (u.firstName || '').toLowerCase().includes(term) ||
-
-      (u.lastName || '').toLowerCase().includes(term) ||
-
-      (u.email || '').toLowerCase().includes(term)
-
-    );
-
-  }
-
-
-
-  get filteredVeterinariasList(): Veterinaria[] {
-
-    if (!this.searchTermVeterinarias) return this.veterinarias;
-
-    const term = this.searchTermVeterinarias.toLowerCase();
-
-    return this.veterinarias.filter(v =>
-
-      (v.nombre || '').toLowerCase().includes(term) ||
-
-      (v.email || '').toLowerCase().includes(term) ||
-
-      (v.rut || '').toLowerCase().includes(term)
-
-    );
-
-  }
-
-
-
-  get filteredProductosList(): Producto[] {
-
-    let baseList = this.productos;
-
-
-
-    // Filtros avanzados
-
-    if (this.filterEstadoProductos === 'activos') baseList = baseList.filter(p => p.isActive !== false);
-
-    if (this.filterEstadoProductos === 'inactivos') baseList = baseList.filter(p => p.isActive === false);
-
-    if (this.filterEstadoProductos === 'stock_bajo') baseList = baseList.filter(p => p.stockActual <= p.stockMinimo);
-
-    if (this.filterVeterinariaProductos !== 'todas') baseList = baseList.filter(p => p.veterinariaId === Number(this.filterVeterinariaProductos));
-
-
-
-    if (!this.searchTermProductos) return baseList;
-
-    const term = this.searchTermProductos.toLowerCase();
-
-    return baseList.filter(p =>
-
-      (p.nombre || '').toLowerCase().includes(term) ||
-
-      (p.codigoBarras || '').toLowerCase().includes(term) ||
-
-      (p.lote || '').toLowerCase().includes(term) ||
-
-      this.getCategoriaNombre(p.categoriaId).toLowerCase().includes(term)
-
-    );
-
-  }
-
-
-
-  get filteredVeterinariosList(): any[] {
-
-    let baseList = this.veterinarios;
-
-
-
-    // Filtros avanzados
-
-    if (this.filterEstadoVeterinarios === 'activos') baseList = baseList.filter(v => v.isActive !== false);
-
-    if (this.filterEstadoVeterinarios === 'inactivos') baseList = baseList.filter(v => v.isActive === false);
-
-    if (this.filterVeterinariaVeterinarios !== 'todas') {
-
-      baseList = baseList.filter(v => v.perfilVeterinario?.veterinariaPrincipalId === Number(this.filterVeterinariaVeterinarios));
-
-    }
-
-
-
-    if (!this.searchTermVeterinarios) return baseList;
-
-    const term = this.searchTermVeterinarios.toLowerCase();
-
-    return baseList.filter(v =>
-
-      (v.firstName || '').toLowerCase().includes(term) ||
-
-      (v.lastName || '').toLowerCase().includes(term) ||
-
-      (v.perfilVeterinario?.especialidad || '').toLowerCase().includes(term) ||
-
-      (v.perfilVeterinario?.matricula || '').toLowerCase().includes(term)
-
-    );
-
-  }
-
-
-
-  get filteredServiciosList(): Servicio[] {
-
-    let baseList = this.servicios;
-
-
-
-    if (this.filterVeterinariaServicios !== 'todas') {
-
-      baseList = baseList.filter(s => s.veterinariaId === Number(this.filterVeterinariaServicios));
-
-    }
-
-
-
-    if (!this.searchTermServicios) return baseList;
-
-    const term = this.searchTermServicios.toLowerCase();
-
-    return baseList.filter(s =>
-
-      (s.nombre || '').toLowerCase().includes(term) ||
-
-      (s.tipoServicio || '').toLowerCase().includes(term) ||
-
-      (s.descripcion || '').toLowerCase().includes(term)
-
-    );
-
-  }
-
-
-
-  // Getters para listas paginadas
-
-  get paginatedUsuariosList(): any[] {
-
-    const start = (this.currentPageUsuarios - 1) * this.itemsPerPage;
-
-    return this.filteredUsuariosList.slice(start, start + this.itemsPerPage);
-
-  }
-
-
-
-  get paginatedVeterinariasList(): Veterinaria[] {
-
-    const start = (this.currentPageVeterinarias - 1) * this.itemsPerPage;
-
-    return this.filteredVeterinariasList.slice(start, start + this.itemsPerPage);
-
-  }
-
-
-
-  get paginatedProductosList(): Producto[] {
-
-    const start = (this.currentPageProductos - 1) * this.itemsPerPage;
-
-    return this.filteredProductosList.slice(start, start + this.itemsPerPage);
-
-  }
-
-
-
-  get paginatedVeterinariosList(): any[] {
-
-    const start = (this.currentPageVeterinarios - 1) * this.itemsPerPage;
-
-    return this.filteredVeterinariosList.slice(start, start + this.itemsPerPage);
-
-  }
-
-
-
-  get paginatedServiciosList(): Servicio[] {
-
-    const start = (this.currentPageServicios - 1) * this.itemsPerPage;
-
-    return this.filteredServiciosList.slice(start, start + this.itemsPerPage);
-
-  }
-
+  // Getters para listas paginadas — ahora son propiedades cacheadas; métodos de paginación las actualizan
 
 
   // Métodos de navegación
@@ -1490,15 +1407,15 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
     const total = this.getTotalPages(list);
 
-    if (type === 'usuarios' && this.currentPageUsuarios < total) this.currentPageUsuarios++;
+    if (type === 'usuarios' && this.currentPageUsuarios < total) { this.currentPageUsuarios++; this._recomputeUsuarios(); }
 
-    if (type === 'veterinarias' && this.currentPageVeterinarias < total) this.currentPageVeterinarias++;
+    if (type === 'veterinarias' && this.currentPageVeterinarias < total) { this.currentPageVeterinarias++; this._recomputeVeterinarias(); }
 
-    if (type === 'productos' && this.currentPageProductos < total) this.currentPageProductos++;
+    if (type === 'productos' && this.currentPageProductos < total) { this.currentPageProductos++; this._recomputeProductos(); }
 
-    if (type === 'veterinarios' && this.currentPageVeterinarios < total) this.currentPageVeterinarios++;
+    if (type === 'veterinarios' && this.currentPageVeterinarios < total) { this.currentPageVeterinarios++; this._recomputeVeterinarios(); }
 
-    if (type === 'servicios' && this.currentPageServicios < total) this.currentPageServicios++;
+    if (type === 'servicios' && this.currentPageServicios < total) { this.currentPageServicios++; this._recomputeServicios(); }
 
   }
 
@@ -1506,15 +1423,15 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
   prevPage(type: string): void {
 
-    if (type === 'usuarios' && this.currentPageUsuarios > 1) this.currentPageUsuarios--;
+    if (type === 'usuarios' && this.currentPageUsuarios > 1) { this.currentPageUsuarios--; this._recomputeUsuarios(); }
 
-    if (type === 'veterinarias' && this.currentPageVeterinarias > 1) this.currentPageVeterinarias--;
+    if (type === 'veterinarias' && this.currentPageVeterinarias > 1) { this.currentPageVeterinarias--; this._recomputeVeterinarias(); }
 
-    if (type === 'productos' && this.currentPageProductos > 1) this.currentPageProductos--;
+    if (type === 'productos' && this.currentPageProductos > 1) { this.currentPageProductos--; this._recomputeProductos(); }
 
-    if (type === 'veterinarios' && this.currentPageVeterinarios > 1) this.currentPageVeterinarios--;
+    if (type === 'veterinarios' && this.currentPageVeterinarios > 1) { this.currentPageVeterinarios--; this._recomputeVeterinarios(); }
 
-    if (type === 'servicios' && this.currentPageServicios > 1) this.currentPageServicios--;
+    if (type === 'servicios' && this.currentPageServicios > 1) { this.currentPageServicios--; this._recomputeServicios(); }
 
   }
 
