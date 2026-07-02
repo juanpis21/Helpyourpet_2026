@@ -472,7 +472,7 @@ export class PerfilUsuario implements OnInit, OnDestroy {
   private async loadUserProfile(): Promise<void> {
     return new Promise((resolve) => {
       const currentUser = this.authService.getCurrentUser();
-      console.log('[PerfilUsuario] Usuario cargado desde auth:', currentUser);
+
       if (currentUser) {
         const avatar = currentUser.avatar || '';
         this.usuario = {
@@ -505,7 +505,7 @@ export class PerfilUsuario implements OnInit, OnDestroy {
               ...m,
               foto: m.foto && m.foto.startsWith('/uploads/') ? `${this.apiUrl}${m.foto}` : m.foto
             }));
-            console.log('✅ Mascotas del usuario cargadas:', mascotas.length);
+
           },
           error: (err) => {
             console.error('❌ Error al cargar mascotas del usuario:', err);
@@ -542,7 +542,7 @@ export class PerfilUsuario implements OnInit, OnDestroy {
                 } : undefined
               };
             });
-            console.log('✅ Publicaciones del usuario cargadas:', publicaciones.length);
+
           },
           error: (err) => {
             console.error('❌ Error al cargar publicaciones del usuario:', err);
@@ -572,7 +572,7 @@ export class PerfilUsuario implements OnInit, OnDestroy {
 
         this.publicacionesService.eliminarPublicacion(id).subscribe({
           next: () => {
-            console.log('✅ Publicación eliminada exitosamente');
+
             this.cargarPublicacionesUsuario();
             Swal.fire('Eliminada', 'Publicación eliminada exitosamente', 'success');
           },
@@ -601,7 +601,7 @@ export class PerfilUsuario implements OnInit, OnDestroy {
   }
 
   closeEditarPublicacionModal(): void {
-    console.log('🔒 Cerrando modal de edición de publicación');
+
     this.showEditarPublicacionModal = false;
     this.editingPublicacion = null;
     this.editingPublicacionImage = null;
@@ -640,7 +640,7 @@ export class PerfilUsuario implements OnInit, OnDestroy {
 
     this.publicacionesService.actualizarPublicacion(this.editingPublicacion.id, formData).subscribe({
       next: (response) => {
-        console.log('✅ Publicación actualizada:', response);
+
         this.closeEditarPublicacionModal();
         this.cargarPublicacionesUsuario();
         Swal.fire('¡Éxito!', 'Publicación actualizada correctamente', 'success');
@@ -775,12 +775,12 @@ export class PerfilUsuario implements OnInit, OnDestroy {
       formData.append('foto', this.selectedPetFile, this.selectedPetFile.name);
     }
 
-    console.log('🔍 Datos enviados al backend:', formData);
+
 
     // Enviar al backend
     this.mascotasService.createMascota(formData).subscribe({
       next: (mascotaCreada) => {
-        console.log('✅ Mascota creada exitosamente:', mascotaCreada);
+
         // Recargar las mascotas del usuario
         this.cargarMascotasUsuario();
         // Cerrar modal y limpiar formulario
@@ -854,7 +854,7 @@ export class PerfilUsuario implements OnInit, OnDestroy {
 
     this.mascotasService.updateMascota(this.editingPet.id, formData).subscribe({
       next: (mascotaActualizada) => {
-        console.log('✅ Mascota actualizada exitosamente:', mascotaActualizada);
+
         this.cargarMascotasUsuario();
         Swal.fire('¡Actualizada!', 'Mascota actualizada exitosamente', 'success');
         this.closeEditPetModal();
@@ -883,7 +883,7 @@ export class PerfilUsuario implements OnInit, OnDestroy {
 
         this.mascotasService.updateMascota(id, { isActive: false }).subscribe({
           next: () => {
-            console.log('✅ Mascota desactivada exitosamente');
+
             this.cargarMascotasUsuario();
             Swal.fire('Desactivada', 'Mascota desactivada exitosamente', 'success');
           },

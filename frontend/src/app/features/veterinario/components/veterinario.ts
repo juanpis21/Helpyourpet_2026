@@ -905,7 +905,7 @@ export class Veterinario implements OnInit {
       description
     }, this.getHeaders()).subscribe({
       next: () => {
-        console.log('✅ Acción de auditoría registrada:', description);
+
         this.loadHistorial();
       },
       error: (err) => console.error('❌ Error registrando acción de auditoría:', err)
@@ -1114,7 +1114,7 @@ export class Veterinario implements OnInit {
 
   private getHeaders() {
     const token = localStorage.getItem('access_token');
-    console.log('🔑 [Veterinario] Token recuperado:', token ? 'Token presente ✅' : 'Token ausente ❌');
+
     return {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -1137,7 +1137,7 @@ export class Veterinario implements OnInit {
   cargarUsuarios(): void {
     this.userService.getUsersByVeterinaria().subscribe({
       next: (data) => {
-        console.log('👥 Clientes de la veterinaria cargados:', data);
+
         this.usuarios = data;
         this.cdr.detectChanges();
       },
@@ -1149,7 +1149,7 @@ export class Veterinario implements OnInit {
     this.userService.getUsersByVeterinaria().subscribe({
       next: (data) => {
         this.usuariosSinCuenta = data;
-        console.log('👥 Usuarios de la veterinaria cargados:', data.length);
+
         if (this.activeSection === 'dashboard') this.renderCharts();
         this.cdr.detectChanges();
       },
@@ -1582,7 +1582,7 @@ export class Veterinario implements OnInit {
       estado: 'Programada'
     };
 
-    console.log('📤 Enviando cita:', payload);
+
 
     this.http.post(`${this.API_BASE}/citas`, payload, this.getHeaders()).subscribe({
       next: (res: any) => {
@@ -1905,7 +1905,7 @@ export class Veterinario implements OnInit {
     this.http.patch(`${this.API_BASE}/pets/${mascotaId}`, { weight: Number(peso) }, { headers })
       .subscribe({
         next: () => {
-          console.log('⚖️ [Historia Clínica] Peso de la mascota actualizado en la tabla pets.');
+
           this.cargarMascotas();
         },
         error: (err) => console.error('Error al actualizar peso de la mascota:', err)

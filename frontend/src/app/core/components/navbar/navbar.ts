@@ -1,5 +1,5 @@
 import { Component, HostListener, OnInit, inject } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ThemeService } from '../../services/theme.service';
 import { AuthService } from '../../services/auth.service';
@@ -8,7 +8,7 @@ import { environment } from '../../../../environments/environment';
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './navbar.html',
   styleUrl: './navbar.scss'
 })

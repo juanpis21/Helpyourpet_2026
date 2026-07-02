@@ -270,7 +270,7 @@ export class Adopcion implements OnInit {
 
   filtrarMascotas(): void {
     // Lógica de filtrado (aquí se conectaría con backend)
-    console.log('Filtrando por:', this.filtroTipo, this.filtroTamano);
+
   }
 
   limpiarFiltros(): void {
