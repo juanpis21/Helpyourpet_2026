@@ -1203,18 +1203,25 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
   loadAllTickets(): void {
 
+    const currentUser = this.authService.getCurrentUser();
+    const roleName = currentUser?.role?.name || currentUser?.role;
+    if (!roleName || roleName !== 'superadmin') {
+      console.warn('Usuario sin permiso para listar todos los tickets — se omite la petición.');
+      return;
+    }
+
     this.ticketsService.getAll().subscribe({
-
       next: (tickets) => {
-
         this.allTickets = tickets;
-
         this.cdr.detectChanges();
-
       },
-
-      error: (err) => console.error('Error loading all tickets:', err)
-
+      error: (err) => {
+        if (err?.status === 403) {
+          console.warn('No autorizado para obtener todos los tickets (403).');
+        } else {
+          console.error('Error loading all tickets:', err);
+        }
+      }
     });
 
   }
