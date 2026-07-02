@@ -1068,10 +1068,12 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
       next: (announcements) => {
         console.log('Announcements cargados:', announcements);
         this.allAnnouncements = announcements;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error loading announcements:', err);
         this.allAnnouncements = [];
+        this.cdr.detectChanges();
       }
     });
   }
