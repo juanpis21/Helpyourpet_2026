@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewEncapsulation, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewEncapsulation, ChangeDetectorRef, ChangeDetectionStrategy, HostListener } from '@angular/core';
 import Swal from 'sweetalert2';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
@@ -56,6 +56,9 @@ export class Tienda implements OnInit, OnDestroy {
 
   // Carrito
   carritoVisible: boolean = false;
+
+  // Botones flotantes visibles solo tras hacer scroll
+  botonesFlotantesVisibles: boolean = false;
 
 
   constructor(
@@ -137,6 +140,17 @@ export class Tienda implements OnInit, OnDestroy {
         });
       }
     });
+  }
+
+  @HostListener('window:scroll')
+  onScroll(): void {
+    // Mostrar botones flotantes solo cuando el usuario ha bajado
+    // lo suficiente para no tapar el menú del navbar (>100px)
+    const visible = window.scrollY > 100;
+    if (visible !== this.botonesFlotantesVisibles) {
+      this.botonesFlotantesVisibles = visible;
+      this.cdr.markForCheck();
+    }
   }
 
   ngOnDestroy(): void {

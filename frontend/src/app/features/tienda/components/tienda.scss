@@ -78,7 +78,17 @@ body {
 	cursor: pointer;
 	z-index: 1000;
 	box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-	transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+	transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease, background 0.3s ease;
+	/* Oculto por defecto - aparece tras hacer scroll */
+	opacity: 0;
+	transform: translateY(-12px) scale(0.85);
+	pointer-events: none;
+}
+
+.cart-bubble.visible {
+	opacity: 1;
+	transform: translateY(0) scale(1);
+	pointer-events: all;
 }
 
 .cart-bubble:hover {
@@ -144,11 +154,21 @@ body {
 	font-size: 1.1rem;
 	cursor: pointer;
 	box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-	transition: transform 0.2s ease, box-shadow 0.2s ease;
+	/* Invisible por defecto, clase .visible lo muestra */
+	opacity: 0;
+	transform: translateY(-12px) scale(0.85);
+	pointer-events: none;
+	transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.store-home-btn.visible {
+	opacity: 1;
+	transform: translateY(0) scale(1);
+	pointer-events: all;
 }
 
 .store-home-btn:hover {
-	transform: translateY(-3px);
+	transform: translateY(-3px) scale(1.05);
 }
 
 /* Navbar local eliminada en favor del navbar global */
@@ -1907,16 +1927,26 @@ body {
 	font-size: 1rem;
 	font-weight: 600;
 	cursor: pointer;
-	transition: all 0.3s ease;
+	transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
 	display: flex;
 	align-items: center;
 	gap: 10px;
 	z-index: 999;
 	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+	/* Oculto por defecto, aparece tras scroll */
+	opacity: 0;
+	transform: translateY(-12px) scale(0.9);
+	pointer-events: none;
+}
+
+.btn-back-to-stores.visible {
+	opacity: 1;
+	transform: translateY(0) scale(1);
+	pointer-events: all;
 }
 
 .btn-back-to-stores:hover {
-	transform: translateY(-3px);
+	transform: translateY(-3px) scale(1.02);
 	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 

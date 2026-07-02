@@ -2,13 +2,13 @@
 <app-preloader *ngIf="cargandoProductos"></app-preloader>
 
 <!-- Botón de Carrito (Burbuja Flotante) -->
-<button class="cart-bubble" (click)="toggleCarrito()" aria-label="Ver Carrito">
+<button class="cart-bubble" [class.visible]="botonesFlotantesVisibles" (click)="toggleCarrito()" aria-label="Ver Carrito">
 	<i class="fas fa-shopping-cart"></i>
 	<span class="cart-badge" *ngIf="carrito.length > 0">{{ carrito.length }}</span>
 </button>
 
 <!-- Botón flotante para ir al dashboard (visible solo en mobile) -->
-<button class="store-home-btn" aria-label="Ir al inicio" (click)="irAInicio()">
+<button class="store-home-btn" [class.visible]="botonesFlotantesVisibles" aria-label="Ir al inicio" (click)="irAInicio()">
   <i class="fas fa-home"></i>
 </button>
 
@@ -59,7 +59,7 @@
 </section>
 
 <!-- Botón para volver a selección de tiendas -->
-<button class="btn-back-to-stores" id="btnBackToStores" *ngIf="vista === 'productos'" (click)="volverATiendas()">
+<button class="btn-back-to-stores" [class.visible]="botonesFlotantesVisibles" id="btnBackToStores" *ngIf="vista === 'productos'" (click)="volverATiendas()">
 	<i class="fas fa-store"></i>
 	<span>Ver Tiendas</span>
 </button>
