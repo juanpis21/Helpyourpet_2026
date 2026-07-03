@@ -14,24 +14,17 @@ export const permissionGuard: CanActivateFn = (route, state) => {
 
   const requiredModule = (route.data['module'] as string) || '';
   const user = authService.getCurrentUser();
-  const roleName = user?.role?.name?.toLowerCase().trim() || '';
   const userModules = authService.userModules();
 
-  // Check if the user has access to the required module
+  // Validación ESTRICTA: El módulo DEBE estar explícitamente en la lista de módulos del usuario
   const hasModuleAccess = userModules.includes(requiredModule.toLowerCase());
-  
-  // Special handling for specific roles with specific modules
-  const isVeterinario = roleName === 'veterinario' && requiredModule.toLowerCase() === 'veterinario';
-  const isUsuario = roleName === 'usuario' && requiredModule.toLowerCase() === 'perfil-usuario';
-  const isDashboardAccess = requiredModule.toLowerCase() === 'dashboard' && roleName === 'admin';
 
-  // Access is granted only if the module is explicitly in the user's modules list
-  if (hasModuleAccess || isVeterinario || isUsuario || isDashboardAccess) {
+  if (hasModuleAccess) {
     return true;
   }
 
   // Si intenta acceder a una ruta sin permiso - CIERRA SESIÓN POR SEGURIDAD
-  console.warn(`🚨 [PermissionGuard] Intento no autorizado de acceso a: ${state.url}`);
+  console.warn(`🚨 [PermissionGuard] Intento no autorizado de acceso a: ${state.url} - Módulo requerido: ${requiredModule}`);
   
   authService.logout();
   
