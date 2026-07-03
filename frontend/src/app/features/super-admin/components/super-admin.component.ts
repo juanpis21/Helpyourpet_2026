@@ -127,6 +127,10 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
     );
   }
 
+  get activeAdmins() {
+    return this.allUsers.filter(u => u.isActive);
+  }
+
   get paginatedAdmins() {
     const start = (this.adminPage - 1) * this.adminPageSize;
     return this.filteredAdmins.slice(start, start + this.adminPageSize);
@@ -729,6 +733,14 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
       return;
     }
 
+    if (this.newVeterinaria.adminId) {
+      const selectedAdmin = this.allUsers.find(u => u.id === this.newVeterinaria.adminId);
+      if (selectedAdmin && !selectedAdmin.isActive) {
+        alert('El administrador seleccionado está desactivado. Por favor, selecciona uno activo.');
+        return;
+      }
+    }
+
     // Eliminar el campo verificado antes de enviar al backend
     const veterinariaData = { ...this.newVeterinaria };
     delete veterinariaData.verificado;
@@ -769,6 +781,14 @@ export class SuperAdminComponent implements OnInit, AfterViewInit {
     if (!this.editingVeterinaria.id || !this.editingVeterinaria.nombre || !this.editingVeterinaria.direccion) {
       alert('Por favor, completa los campos obligatorios');
       return;
+    }
+
+    if (this.editingVeterinaria.adminId) {
+      const selectedAdmin = this.allUsers.find(u => u.id === this.editingVeterinaria.adminId);
+      if (selectedAdmin && !selectedAdmin.isActive) {
+        alert('El administrador seleccionado está desactivado. Por favor, selecciona uno activo.');
+        return;
+      }
     }
 
     this.veterinariasService.update(this.editingVeterinaria.id, this.editingVeterinaria).subscribe({

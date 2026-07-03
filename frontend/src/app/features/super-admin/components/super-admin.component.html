@@ -874,7 +874,7 @@
           <label>Administrador Responsable</label>
           <select [(ngModel)]="newVeterinaria.adminId" class="form-control">
             <option [ngValue]="undefined">-- Seleccionar Administrador --</option>
-            <option *ngFor="let admin of allUsers" [ngValue]="admin.id">
+            <option *ngFor="let admin of activeAdmins" [ngValue]="admin.id">
               {{ admin.email }} ({{ admin.fullName || admin.firstName }})
             </option>
           </select>
@@ -944,7 +944,7 @@
           <label>Administrador Responsable</label>
           <select [(ngModel)]="editingVeterinaria.adminId" class="form-control">
             <option [ngValue]="undefined">-- Seleccionar Administrador --</option>
-            <option *ngFor="let admin of allUsers" [ngValue]="admin.id">
+            <option *ngFor="let admin of activeAdmins" [ngValue]="admin.id">
               {{ admin.email }} ({{ admin.fullName || admin.firstName }})
             </option>
           </select>
