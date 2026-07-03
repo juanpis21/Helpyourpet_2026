@@ -65,7 +65,7 @@ export const routes: Routes = [
     path: 'admin', 
     component: AdminModulesComponent,
     canActivate: [permissionGuard],
-    data: { module: 'dashboard' }
+    data: { module: 'panel-admin' }
   },
   { 
     path: 'super-admin', 
