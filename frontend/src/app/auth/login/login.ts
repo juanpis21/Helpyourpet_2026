@@ -105,17 +105,14 @@ export class Login {
     // Extraer Nombre del rol de forma robusta
     const roleName = user?.role?.name?.toLowerCase().trim() || '';
     
-    // 1. SuperAdministrador - REQUIERE módulo 'super-admin'
-    if ((roleName === 'superadmin' || roleName === 'super-admin') && userModules.includes('super-admin')) {
+    // 1. SuperAdministrador
+    if (roleName === 'superadmin' || roleName === 'super-admin') {
       this.router.navigate(['/super-admin']);
       return;
     }
 
-    // 2. Administrador - REQUIERE módulo 'admin' o 'dashboard'
-    const hasAdminModules = userModules.includes('admin') || 
-                            userModules.includes('dashboard');
-                            
-    if ((roleName === 'admin' || roleName === 'administrador') && hasAdminModules) {
+    // 2. Administrador
+    if (roleName === 'admin' || roleName === 'administrador') {
       this.router.navigate(['/admin']);
       return;
     }

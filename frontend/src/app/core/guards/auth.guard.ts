@@ -36,25 +36,12 @@ export class AuthGuard implements CanActivate {
   }
 
   private redirectByRole(roleName: string | undefined): void {
-    const authService = this.authService as any;
-    const userModules = authService.userModules?.() || [];
-    
     switch (roleName) {
       case 'superadmin':
-        // Solo redirigir a super-admin si tiene el módulo correspondiente
-        if (userModules.includes('super-admin')) {
-          this.router.navigate(['/super-admin']);
-        } else {
-          this.router.navigate(['/inicio']);
-        }
+        this.router.navigate(['/super-admin']);
         break;
       case 'admin':
-        // Solo redirigir a admin si tiene los módulos correspondientes
-        if (userModules.includes('admin') || userModules.includes('dashboard')) {
-          this.router.navigate(['/admin']);
-        } else {
-          this.router.navigate(['/inicio']);
-        }
+        this.router.navigate(['/admin']);
         break;
       case 'veterinario':
         this.router.navigate(['/inicio']);
