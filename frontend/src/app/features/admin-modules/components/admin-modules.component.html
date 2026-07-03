@@ -1780,7 +1780,7 @@
         </div>
 
         <!-- Tarjeta de Desactivación -->
-        <div class="card card-danger-alt">
+        <div class="card card-danger-alt" style="height: 100%;">
           <div class="card-header danger-light">
             <h6><i class="fas fa-exclamation-triangle"></i> Desactivación de cuenta</h6>
           </div>
@@ -2246,7 +2246,7 @@
 
           <label>Veterinaria *</label>
 
-          <select [(ngModel)]="editingService.veterinariaId">
+          <select name="veterinariaId" [(ngModel)]="editingService.veterinariaId">
 
             <option *ngFor="let vet of veterinarias" [ngValue]="vet.id">{{ vet.nombre }}</option>
 

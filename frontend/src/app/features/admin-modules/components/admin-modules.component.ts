@@ -1750,7 +1750,10 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
   openEditServiceModal(servicio: Servicio): void {
 
-    this.editingService = { ...servicio };
+    this.editingService = { 
+      ...servicio,
+      veterinariaId: servicio.veterinariaId ?? (servicio as any)?.veterinaria?.id
+    };
 
     this.showEditServiceModal = true;
 
@@ -1815,11 +1818,13 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
     formData.append('tipoServicio', this.editingService.tipoServicio || '');
 
-    formData.append('requiereCita', String(this.editingService.requiereCita || true));
+    formData.append('requiereCita', String(this.editingService.requiereCita ?? true));
 
-    formData.append('isActive', String(this.editingService.isActive || true));
+    formData.append('isActive', String(this.editingService.isActive ?? true));
 
-    formData.append('veterinariaId', String(this.editingService.veterinariaId || 1));
+    if (this.editingService.veterinariaId !== undefined && this.editingService.veterinariaId !== null) {
+      formData.append('veterinariaId', String(this.editingService.veterinariaId));
+    }
 
 
 

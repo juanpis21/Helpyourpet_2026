@@ -1783,13 +1783,16 @@
 }
 
 .btn-danger-light {
-  padding: 1rem 2rem;
+  width: 100%;
+  max-width: 100%;
+  padding: 1rem 1.25rem;
   border-radius: 12px;
   background: #fff7ed;
   border: 1px solid #ffedd5;
   color: #ea580c;
   font-weight: 700;
-  display: flex;
+  display: inline-flex;
+  justify-content: center;
   align-items: center;
   gap: 0.8rem;
   cursor: pointer;
