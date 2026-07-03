@@ -96,7 +96,7 @@ export class Navbar implements OnInit {
 
   get isPerfil(): boolean {
     const path = this.router.url.split('?')[0];
-    return path === '/perfil-usuario' || path === '/veterinario';
+    return path === '/perfil-usuario' || path === '/veterinario' || path === '/super-admin' || path === '/admin';
   }
 
   get isVeterinario(): boolean {
@@ -112,7 +112,12 @@ export class Navbar implements OnInit {
   }
 
   irAPerfil() {
-    if (this.isVeterinario || this.hasAccess('veterinario')) {
+    const role = this.usuarioLogueado?.roleName?.toLowerCase();
+    if (role === 'superadmin' || role === 'super-admin') {
+      this.router.navigate(['/super-admin']);
+    } else if (role === 'admin' || role === 'administrador') {
+      this.router.navigate(['/admin']);
+    } else if (this.isVeterinario || this.hasAccess('veterinario')) {
       this.router.navigate(['/veterinario']);
     } else if (this.isUsuario || this.hasAccess('perfil-usuario')) {
       this.router.navigate(['/perfil-usuario']);
