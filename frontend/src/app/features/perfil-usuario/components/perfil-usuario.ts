@@ -436,6 +436,7 @@ export class PerfilUsuario implements OnInit, OnDestroy {
           this.loadMyTickets(),
           this.cargarMisCitas()
         ]);
+        this.cargarMisCompras();
       } else if (this.authService.isLoggedIn()) {
         // Try to reload user from backend
         try {
