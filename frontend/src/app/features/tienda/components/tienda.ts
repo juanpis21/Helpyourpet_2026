@@ -244,7 +244,7 @@ export class Tienda implements OnInit, OnDestroy {
               precio: p.precioVenta,
               categoria: cat ? cat.nombre : 'General',
               categoriaId: p.categoriaId,
-              imagen: p.imagen ? this.baseUrl + p.imagen : 'assets/IMG/default.jpg',
+              imagen: p.imagen ? (p.imagen.startsWith('data:') ? p.imagen : this.baseUrl + p.imagen) : 'assets/IMG/default.jpg',
               stockActual: p.stockActual
             };
           });

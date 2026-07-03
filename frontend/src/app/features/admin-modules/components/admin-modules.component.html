@@ -648,7 +648,7 @@
 
                     <div class="service-img-container">
 
-                      <img [src]="s.imagen ? baseUrl + s.imagen : 'assets/IMG/default.jpg'" [alt]="s.nombre"
+                      <img [src]="s.imagen ? (s.imagen.startsWith('data:') ? s.imagen : (s.imagen.startsWith('/uploads/') ? baseUrl + s.imagen : s.imagen)) : 'assets/IMG/default.jpg'" [alt]="s.nombre"
 
                         class="service-thumb">
 
@@ -1270,7 +1270,7 @@
 
                     <div class="product-img-container">
 
-                      <img [src]="prod.imagen ? baseUrl + prod.imagen : 'assets/images/Default.png'" [alt]="prod.nombre"
+                      <img [src]="prod.imagen ? (prod.imagen.startsWith('data:') ? prod.imagen : (prod.imagen.startsWith('/uploads/') ? baseUrl + prod.imagen : prod.imagen)) : 'assets/images/Default.png'" [alt]="prod.nombre"
 
                         class="product-thumb">
 
@@ -2027,7 +2027,7 @@
       </div>
       <p style="white-space: pre-line; margin-bottom: 1rem;">{{ selectedPublicacionReportada.descripcion }}</p>
       <div *ngIf="selectedPublicacionReportada.imagen" style="text-align: center;">
-        <img [src]="selectedPublicacionReportada.imagen.startsWith('/uploads/') ? baseUrl + selectedPublicacionReportada.imagen : selectedPublicacionReportada.imagen" style="max-width: 100%; border-radius: 8px;">
+        <img [src]="selectedPublicacionReportada.imagen.startsWith('data:') ? selectedPublicacionReportada.imagen : (selectedPublicacionReportada.imagen.startsWith('/uploads/') ? baseUrl + selectedPublicacionReportada.imagen : selectedPublicacionReportada.imagen)" style="max-width: 100%; border-radius: 8px;">
       </div>
       
       <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
@@ -2270,7 +2270,7 @@
 
             <div *ngIf="imagePreview || editingService.imagen" class="preview-container">
 
-              <img [src]="imagePreview || (baseUrl + editingService.imagen)" class="img-preview">
+              <img [src]="imagePreview || (editingService.imagen ? (editingService.imagen.startsWith('data:') ? editingService.imagen : baseUrl + editingService.imagen) : 'assets/IMG/default.jpg')" class="img-preview">
 
             </div>
 
@@ -3080,7 +3080,7 @@
 
             <div *ngIf="productoImagePreview || editingProducto.imagen" class="preview-container">
 
-              <img [src]="productoImagePreview || (baseUrl + editingProducto.imagen)" class="img-preview">
+              <img [src]="productoImagePreview || (editingProducto.imagen ? (editingProducto.imagen.startsWith('data:') ? editingProducto.imagen : baseUrl + editingProducto.imagen) : 'assets/images/Default.png')" class="img-preview">
 
             </div>
 
