@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import Swal from 'sweetalert2';
 
 export const permissionGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
@@ -29,13 +30,24 @@ export const permissionGuard: CanActivateFn = (route, state) => {
     return true;
   }
 
-  // If no access, redirect to available route
-  if (userModules.length > 0) {
-    const defaultRoute = userModules.includes('inicio') ? 'inicio' :
-      (userModules.includes('dashboard') || userModules.includes('admin') ? 'admin' : userModules[0]);
-    router.navigate([`/${defaultRoute}`]);
-  } else {
-    router.navigate(['/login']);
-  }
+  // Si intenta acceder a una ruta sin permiso - CIERRA SESIÓN POR SEGURIDAD
+  console.warn(`🚨 [PermissionGuard] Intento no autorizado de acceso a: ${state.url}`);
+  
+  authService.logout();
+  
+  Swal.fire({
+    icon: 'warning',
+    title: 'Acceso Denegado',
+    text: 'No tienes permiso para acceder a esta sección. Tu sesión ha sido cerrada por seguridad.',
+    confirmButtonText: 'Entendido',
+    confirmButtonColor: '#258e48',
+    background: '#fff',
+    customClass: {
+      popup: 'swal-rounded'
+    }
+  });
+  
+  router.navigate(['/login']);
   return false;
+};
 };
