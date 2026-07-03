@@ -2263,7 +2263,10 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
   openEditProductoModal(prod: Producto): void {
 
-    this.editingProducto = { ...prod };
+    this.editingProducto = {
+      ...prod,
+      veterinariaId: prod.veterinariaId ?? (prod as any)?.veterinaria?.id
+    };
 
     this.showEditProductoModal = true;
 
@@ -2310,7 +2313,9 @@ export class AdminModulesComponent implements OnInit, AfterViewInit {
 
     formData.append('categoriaId', String(raw.categoriaId));
 
-    formData.append('veterinariaId', String(raw.veterinariaId));
+    if (raw.veterinariaId !== undefined && raw.veterinariaId !== null) {
+      formData.append('veterinariaId', String(raw.veterinariaId));
+    }
 
     formData.append('stockActual', String(raw.stockActual));
 

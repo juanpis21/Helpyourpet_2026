@@ -2973,7 +2973,7 @@
 
           <label><i class="fas fa-hospital"></i> Sede Veterinaria</label>
 
-          <select [(ngModel)]="editingProducto.veterinariaId">
+          <select name="veterinariaId" [(ngModel)]="editingProducto.veterinariaId">
 
             <option *ngFor="let vet of veterinarias" [ngValue]="vet.id">{{ vet.nombre }}</option>
 
