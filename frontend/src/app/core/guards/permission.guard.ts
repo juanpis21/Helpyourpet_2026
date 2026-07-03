@@ -50,4 +50,3 @@ export const permissionGuard: CanActivateFn = (route, state) => {
   router.navigate(['/login']);
   return false;
 };
-};
